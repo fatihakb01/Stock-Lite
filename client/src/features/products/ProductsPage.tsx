@@ -1,62 +1,23 @@
-// import { useProducts, useCreateProduct } from "../../hooks/useProducts";
-
-
-// export default function ProductsPage() {
-//   const { data: products, isLoading } = useProducts();
-//   const { mutate: createProduct } = useCreateProduct();
-
-//   if (isLoading) return <p>Loading...</p>;
-
-//   console.log(`Products data = ${products}`);
-
-//   return (
-//     <div className="p-6">
-//       <h1 className="text-2xl font-bold mb-4">Products</h1>
-//       <button
-//         onClick={() => (console.log("Button does not work yet"))}
-//         // createProduct({ 
-//         //   id: '',
-//         //   name: "New Product", 
-//         //   price: 10,
-//         //   isActive: true
-//         // })}
-//         className="bg-blue-600 text-white px-4 py-2 rounded"
-//       >
-//         Add Product
-//       </button>
-//       <ul className="mt-4 space-y-2">
-//         {products?.map((p) => (
-//           <li key={p.id} className="border p-2 rounded">
-//             {p.name} — ${p.price}
-//           </li>
-//         ))}
-//       </ul>
-//     </div>
-//   );
-// }
-
 import { useState } from "react";
 import { Box, Drawer, Typography, Divider } from "@mui/material";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import { useProducts, useCreateProduct } from "../../hooks/useProducts";
+import { useProducts } from "../../hooks/useProducts";
 import type { Product } from "../products/productTypes";
 
 export default function ProductsPage() {
   const { data: products, isLoading, isError } = useProducts();
-  const { mutate: createProduct } = useCreateProduct();
 
   const [selected, setSelected] = useState<Product | null>(null);
 
   // Define the columns for the DataGrid
   const columns: GridColDef<Product>[] = [
-    { field: "name", headerName: "Name", flex: 1, minWidth: 150 },
+    { field: "name", headerName: "Name", flex: 1, width: 120 },
     { field: "description", headerName: "Description", flex: 2, minWidth: 200 },
     { field: "sku", headerName: "SKU", width: 120 },
     {
       field: "price",
       headerName: "Price",
-      width: 120/*,
-      valueFormatter: (params) => `$${params.value?.toFixed(2)}`,*/
+      width: 120
     },
     {
       field: "isActive",
@@ -70,14 +31,24 @@ export default function ProductsPage() {
   if (isError) return <Typography color="error">Failed to load products.</Typography>;
 
   return (
-    <Box display="flex" height="100%" p={3}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        flexGrow: 1,
+        width: "100vw",      
+        maxWidth: "100vw",   
+        overflowX: "hidden", 
+        p: 3,
+      }}
+    >
       {/* DataGrid Table */}
       <Box flex={1}>
         <Typography variant="h5" mb={2}>
           Products
         </Typography>
 
-        <Box height={600} width="100%">
+        <Box flex={1} sx={{ width: "100%"}}>
           <DataGrid
             rows={products ?? []}
             columns={columns}
@@ -87,21 +58,22 @@ export default function ProductsPage() {
             pageSizeOptions={[10, 25, 50]}
             initialState={{
               pagination: { paginationModel: { pageSize: 10, page: 0 } },
-            }}
+            }} 
           />
         </Box>
       </Box>
 
       {/* Detail Drawer */}
       <Drawer
-        variant="persistent"
+        variant="temporary"
         anchor="right"
         open={!!selected}
+        onClose={() => setSelected(null)}
         sx={{
-          width: 400,
+          width: "40%",
           flexShrink: 0,
           "& .MuiDrawer-paper": {
-            width: 400,
+            width: "40%",
             p: 3,
             boxSizing: "border-box",
           },

@@ -73,7 +73,7 @@ export default function Sidebar() {
               textAlign: "center",
             }}
           >
-            BI Lite
+            Stock Lite
           </Box>
           <Divider />
           
