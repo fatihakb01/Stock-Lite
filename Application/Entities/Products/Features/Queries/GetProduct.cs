@@ -1,7 +1,6 @@
 using Application.Core;
 using Application.Entities.Products.DTOs;
 using AutoMapper;
-using Domain.Entities;
 using Domain.Interfaces;
 using MediatR;
 
@@ -14,12 +13,12 @@ public class GetProduct
         public required Guid Id { get; set; }
     }
 
-    public class Handler(IRepository<Product> repository, IMapper mapper)
+    public class Handler(IProductRepository repository, IMapper mapper)
         : IRequestHandler<Query, Result<ProductDto>>
     {
         public async Task<Result<ProductDto>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var product = await repository.GetByIdAsync(request.Id, cancellationToken);
+            var product = await repository.GetWithStockAsync(request.Id);
 
             if (product == null)
                 return Result<ProductDto>.Failure("Product not found", 404);

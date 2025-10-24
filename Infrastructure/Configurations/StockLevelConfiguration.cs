@@ -1,0 +1,29 @@
+using Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace Infrastructure.Configurations;
+
+public class StockLevelConfiguration : IEntityTypeConfiguration<StockLevel>
+{
+    public void Configure(EntityTypeBuilder<StockLevel> builder)
+    {
+        builder.HasKey(p => p.Id);
+
+        builder.Property(s => s.Quantity)
+            .IsRequired()
+            .HasDefaultValue(0);
+
+        builder.Property(s => s.ReorderPoint)
+            .IsRequired()
+            .HasDefaultValue(0);
+
+        builder.ToTable(p =>
+            p.HasCheckConstraint("CK_StockLevel_Quantity", "[Quantity] >= 0")
+        );
+
+        builder.ToTable(p =>
+            p.HasCheckConstraint("CK_StockLevel_ReorderPoint", "[ReorderPoint] >= 0")
+        );
+    }
+}

@@ -9,6 +9,7 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<Company> Companies { get; set; }
     public DbSet<Customer> Customers { get; set; }
     public DbSet<Product> Products { get; set; }
+    public DbSet<StockLevel> StockLevels { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<TransactionLineItem> TransactionLineItems { get; set; }
     public DbSet<User> Users { get; set; }

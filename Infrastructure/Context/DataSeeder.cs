@@ -42,6 +42,15 @@ public static class DataSeeder
                 new Product { Name = "Chocolate", Price = 0.99m, Company = company }
             };
 
+            // Add random stock levels for each product
+            var random = new Random();
+            var stockLevels = products.Select(p => new StockLevel
+            {
+                Product = p,
+                Quantity = random.Next(10, 500),       
+                ReorderPoint = random.Next(5, 50)      
+            }).ToList();
+
             // Customers
             var customers = new List<Customer>
             {
@@ -57,12 +66,30 @@ public static class DataSeeder
                 new Customer { DisplayName = "Gamma", LegalName = "Gamma Nederland B.V.", Email = "info@gamma.nl", Company = company }
             };
 
+            // Create random stock levels & re-order points
+            // var stockLevels = new List<StockLevel>();
+            // var random = new Random();
+
+            // foreach (var product in products)
+            // {
+            //     var quantity = random.Next(0, 500);       
+            //     var reorderPoint = random.Next(20, 100);  
+
+            //     var stock = new StockLevel
+            //     {
+            //         Product = product,   
+            //         Quantity = quantity,
+            //         ReorderPoint = reorderPoint
+            //     };
+
+            //     stockLevels.Add(stock);
+            // }
+
             // Transactions
             var transactions = new List<Transaction>();
             var lineItems = new List<TransactionLineItem>();
 
             // Create random transactions
-            var random = new Random();
             int numberOfRandomTransactions = 100;
 
             for (int i = 0; i < numberOfRandomTransactions; i++)
@@ -108,6 +135,7 @@ public static class DataSeeder
             context.Companies.Add(company);
             context.Users.AddRange(users);
             context.Products.AddRange(products);
+            context.StockLevels.AddRange(stockLevels);
             context.Customers.AddRange(customers);
             context.Transactions.AddRange(transactions);
             context.TransactionLineItems.AddRange(lineItems);

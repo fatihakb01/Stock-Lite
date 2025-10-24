@@ -41,4 +41,9 @@ public class Repository<T>(DataContext context)
     {
         return await context.SaveChangesAsync(cancellationToken) > 0;
     }
+
+    // public IQueryable<T> GetQueryable()
+    // {
+    //     return context.Set<T>().AsQueryable();
+    // }
 }

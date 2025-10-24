@@ -32,9 +32,11 @@ public class MappingProfiles : Profile
         CreateMap<EditTransactionDto, Transaction>();
 
         // Product entity
-        CreateMap<Product, ProductDto>();
         CreateMap<CreateProductDto, Product>();
         CreateMap<EditProductDto, Product>();
+        CreateMap<Product, ProductDto>()
+            .ForMember(dest => dest.Stock, opt => opt.MapFrom(src => src.StockLevel));
+        CreateMap<StockLevel, ProductStockDto>();
 
         // TransactionLineItem entity
         CreateMap<TransactionLineItem, TransactionLineItemDto>();

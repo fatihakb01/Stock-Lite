@@ -121,8 +121,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -136,21 +135,49 @@ namespace Infrastructure.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("SKU")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CompanyId", "Name")
-                        .IsUnique();
-
-                    b.HasIndex("CompanyId", "SKU")
-                        .IsUnique()
-                        .HasFilter("[SKU] IS NOT NULL");
+                    b.HasIndex("CompanyId");
 
                     b.ToTable("Products", t =>
                         {
                             t.HasCheckConstraint("CK_Product_Price", "[Price] >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("Domain.Entities.StockLevel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("ReorderPoint")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId")
+                        .IsUnique();
+
+                    b.ToTable("StockLevels", t =>
+                        {
+                            t.HasCheckConstraint("CK_StockLevel_Quantity", "[Quantity] >= 0");
+
+                            t.HasCheckConstraint("CK_StockLevel_ReorderPoint", "[ReorderPoint] >= 0");
                         });
                 });
 
@@ -291,6 +318,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("Company");
                 });
 
+            modelBuilder.Entity("Domain.Entities.StockLevel", b =>
+                {
+                    b.HasOne("Domain.Entities.Product", "Product")
+                        .WithOne("StockLevel")
+                        .HasForeignKey("Domain.Entities.StockLevel", "ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Domain.Entities.Transaction", b =>
                 {
                     b.HasOne("Domain.Entities.Customer", "Customer")
@@ -348,6 +386,8 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Product", b =>
                 {
+                    b.Navigation("StockLevel");
+
                     b.Navigation("TransactionLineItems");
                 });
 

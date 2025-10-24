@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using Domain.Entities;
 
 namespace Domain.Interfaces;
 
@@ -12,4 +11,5 @@ public interface IRepository<T> where T : class
     Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken);
     void Remove(T entity);
     Task<bool> SaveChangesAsync(CancellationToken cancellationToken);
+    // IQueryable<T> GetQueryable();
 }

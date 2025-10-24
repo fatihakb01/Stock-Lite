@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { Box, Drawer, Typography, Divider } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { useProducts } from "../../hooks/useProducts";
-import type { Product } from "../products/productTypes";
+import type { Product } from "./productTypes";
+import ProductDetailDrawer from "./components/ProductDetailDrawer";
 
 export default function ProductsPage() {
   const { data: products, isLoading, isError } = useProducts();
-
-  const [selected, setSelected] = useState<Product | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // Define the columns for the DataGrid
   const columns: GridColDef<Product>[] = [
@@ -52,8 +52,9 @@ export default function ProductsPage() {
           <DataGrid
             rows={products ?? []}
             columns={columns}
+            
             getRowId={(row) => row.id}
-            onRowClick={(params) => setSelected(params.row)}
+            onRowClick={(params) => setSelectedId(params.row.id)}
             disableRowSelectionOnClick
             pageSizeOptions={[10, 25, 50]}
             initialState={{
@@ -64,52 +65,7 @@ export default function ProductsPage() {
       </Box>
 
       {/* Detail Drawer */}
-      <Drawer
-        variant="temporary"
-        anchor="right"
-        open={!!selected}
-        onClose={() => setSelected(null)}
-        sx={{
-          width: "40%",
-          flexShrink: 0,
-          "& .MuiDrawer-paper": {
-            width: "40%",
-            p: 3,
-            boxSizing: "border-box",
-          },
-        }}
-      >
-        {selected && (
-          <Box>
-            <Typography variant="h6" gutterBottom>
-              {selected.name}
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-            <Typography variant="body1" gutterBottom>
-              <strong>Description:</strong> {selected.description || "—"}
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              <strong>SKU:</strong> {selected.sku || "—"}
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              <strong>Price:</strong> ${selected.price.toFixed(2)}
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              <strong>Status:</strong> {selected.isActive ? "Active" : "Inactive"}
-            </Typography>
-
-            <Box mt={3}>
-              <Typography
-                color="primary"
-                sx={{ cursor: "pointer" }}
-                onClick={() => setSelected(null)}
-              >
-                Close
-              </Typography>
-            </Box>
-          </Box>
-        )}
-      </Drawer>
+      <ProductDetailDrawer productId={selectedId} onClose={() => setSelectedId(null)} />
     </Box>
   );
 }
