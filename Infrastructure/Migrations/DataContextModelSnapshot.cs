@@ -149,6 +149,44 @@ namespace Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Domain.Entities.SalesAggregate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("PeriodEndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("PeriodStartDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("PeriodType")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("TotalQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalRevenue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("SalesAggregates", t =>
+                        {
+                            t.HasCheckConstraint("CK_Period_Start_End_Date", "[PeriodStartDate] <= [PeriodEndDate]");
+
+                            t.HasCheckConstraint("CK_Total_Quantity", "[TotalQuantity] >= 0");
+                        });
+                });
+
             modelBuilder.Entity("Domain.Entities.StockLevel", b =>
                 {
                     b.Property<Guid>("Id")
@@ -318,6 +356,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("Company");
                 });
 
+            modelBuilder.Entity("Domain.Entities.SalesAggregate", b =>
+                {
+                    b.HasOne("Domain.Entities.Product", "Product")
+                        .WithMany("SalesAggregates")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Domain.Entities.StockLevel", b =>
                 {
                     b.HasOne("Domain.Entities.Product", "Product")
@@ -386,6 +435,8 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Product", b =>
                 {
+                    b.Navigation("SalesAggregates");
+
                     b.Navigation("StockLevel");
 
                     b.Navigation("TransactionLineItems");

@@ -13,10 +13,10 @@ public class Repository<T>(DataContext context)
         await context.Set<T>().AddAsync(entity, cancellationToken);
     }
 
-    public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken)
-    {
-        return await context.Set<T>().Where(predicate).ToListAsync(cancellationToken);
-    }
+    // public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken)
+    // {
+    //     return await context.Set<T>().Where(predicate).ToListAsync(cancellationToken);
+    // }
     public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken)
     {
         return await context.Set<T>().AnyAsync(predicate, cancellationToken);
@@ -42,8 +42,24 @@ public class Repository<T>(DataContext context)
         return await context.SaveChangesAsync(cancellationToken) > 0;
     }
 
-    // public IQueryable<T> GetQueryable()
-    // {
-    //     return context.Set<T>().AsQueryable();
-    // }
+    public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken, params Expression<Func<T, object>>[]? includes)
+    {
+        IQueryable<T> query = context.Set<T>().Where(predicate);
+
+        // Apply includes if provided
+        foreach (var include in includes!)
+        {
+            query = query.Include(include);
+        }
+
+        return await query.ToListAsync(cancellationToken);
+    }
+
+    public async Task<IEnumerable<TResult>> FindSelectAsync<TResult>(Expression<Func<T, bool>> predicate, Expression<Func<T, TResult>> selector, CancellationToken cancellationToken)
+    {
+        return await context.Set<T>()
+            .Where(predicate)
+            .Select(selector)
+            .ToListAsync(cancellationToken);
+    }
 }

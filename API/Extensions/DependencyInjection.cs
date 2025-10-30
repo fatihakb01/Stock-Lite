@@ -21,6 +21,7 @@ public static class DependencyInjection
 
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<ISalesAggregateRepository, SalesAggregateRepository>();
         services.AddScoped(typeof(IUniquenessChecker<>), typeof(UniquenessChecker<>));
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));

@@ -16,5 +16,6 @@ public class Product
     // Navigation
     public required Company Company { get; set; }
     public StockLevel? StockLevel { get; set; }
+    public ICollection<SalesAggregate> SalesAggregates { get; set; } = new List<SalesAggregate>();
     public ICollection<TransactionLineItem> TransactionLineItems { get; set; } = new List<TransactionLineItem>();
 }

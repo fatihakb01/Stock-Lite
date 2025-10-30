@@ -13,6 +13,7 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<TransactionLineItem> TransactionLineItems { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<SalesAggregate> SalesAggregates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
