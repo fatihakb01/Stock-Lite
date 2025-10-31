@@ -34,32 +34,6 @@ public class SalesAggregateRepository
             .ToListAsync();
     }
 
-    // public async Task UpsertSalesAggregatesAsync(IEnumerable<SalesAggregate> aggregates)
-    // {
-    //     foreach (var aggregate in aggregates)
-    //     {
-    //         var existing = await _context.SalesAggregates.FirstOrDefaultAsync(sa =>
-    //             sa.ProductId == aggregate.ProductId &&
-    //             sa.PeriodType == aggregate.PeriodType &&
-    //             sa.PeriodStartDate == aggregate.PeriodStartDate);
-
-    //         if (existing != null)
-    //         {
-    //             // Update existing record
-    //             existing.TotalQuantity = aggregate.TotalQuantity;
-    //             existing.TotalRevenue = aggregate.TotalRevenue;
-    //             _context.SalesAggregates.Update(existing);
-    //         }
-    //         else
-    //         {
-    //             // Insert new record
-    //             await _context.SalesAggregates.AddAsync(aggregate);
-    //         }
-    //     }
-
-    //     await _context.SaveChangesAsync();
-    // }
-
     public async Task UpsertSalesAggregatesAsync(IEnumerable<SalesAggregate> newAggregates)
     {
         if (!newAggregates.Any()) return;
@@ -93,5 +67,4 @@ public class SalesAggregateRepository
 
         await _context.SaveChangesAsync();
     }
-
 }

@@ -49,7 +49,7 @@ INNER JOIN Transactions T
     ON L.TransactionId = T.Id
 INNER JOIN Products P
     ON P.Id = L.ProductId
-WHERE ProductId = '653fc39b-1cb5-4fae-9a10-0456ffd6d3e3'
+WHERE ProductId = '14e1b108-e334-4b8f-a2e7-00365fc5d7eb'
 GROUP BY DATEPART(MONTH, TransactionDate)
 ORDER BY [MONTH]
 

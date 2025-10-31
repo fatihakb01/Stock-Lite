@@ -1,4 +1,3 @@
-using System.Globalization;
 using Application.Core;
 using Domain.Entities;
 using Domain.Enums;
@@ -18,7 +17,8 @@ public class UpdateSalesAggregates
     public class Handler(
         IRepository<TransactionLineItem> transactionLineItemRepo,
         IRepository<Product> productRepo,
-        ISalesAggregateRepository aggregateRepo)
+        ISalesAggregateRepository aggregateRepo,
+        IDateTimeProvider dateTimeProvider)
         : IRequestHandler<Command, Result<Unit>>
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
@@ -82,105 +82,99 @@ public class UpdateSalesAggregates
 
             return Result<Unit>.Success(Unit.Value);
         }
-    }
 
 
-    private static IEnumerable<SalesAggregate> AggregateDaily
-        (IEnumerable<TransactionLineItem> transactions, Guid ProductId)
-    {
-        IEnumerable<IGrouping<object, TransactionLineItem>> grouped = transactions
-            .GroupBy(t => (object)t.Transaction!.TransactionDate.Date);
-
-        var aggregates = new List<SalesAggregate>();
-
-        foreach (var g in grouped)
+        private IEnumerable<SalesAggregate> AggregateDaily
+            (IEnumerable<TransactionLineItem> transactions, Guid ProductId)
         {
-            DateTime start, end;
-            start = g.First().Transaction!.TransactionDate.Date;
-            end = start;
+            var grouped = transactions
+                .GroupBy(t => (object)t.Transaction!.TransactionDate.Date);
 
-            aggregates.Add(new SalesAggregate
+            var aggregates = new List<SalesAggregate>();
+
+            foreach (var g in grouped)
             {
-                ProductId = ProductId,
-                PeriodType = Period.Daily,
-                PeriodStartDate = start,
-                PeriodEndDate = end,
-                TotalQuantity = g.Sum(x => x.Quantity),
-                TotalRevenue = g.Sum(x => x.Quantity * x.UnitPrice),
-                Product = g.First().Product
-            });
+                DateTime start, end;
+                start = g.First().Transaction!.TransactionDate.Date;
+                end = start;
+
+                aggregates.Add(new SalesAggregate
+                {
+                    ProductId = ProductId,
+                    PeriodType = Period.Daily,
+                    PeriodStartDate = start,
+                    PeriodEndDate = end,
+                    TotalQuantity = g.Sum(x => x.Quantity),
+                    TotalRevenue = g.Sum(x => x.Quantity * x.UnitPrice),
+                    Product = g.First().Product
+                });
+            }
+
+            return aggregates;
         }
 
-        return aggregates;
-    }
-
-    private static IEnumerable<SalesAggregate> AggregateWeekly
-        (IEnumerable<TransactionLineItem> transactions, Guid ProductId)
-    {
-        IEnumerable<IGrouping<object, TransactionLineItem>> grouped = transactions
-            .GroupBy(t =>
-            {
-                var d = t.Transaction!.TransactionDate;
-                return (object)new { Year = ISOWeek.GetYear(d), Week = ISOWeek.GetWeekOfYear(d) };
-            });
-
-        var aggregates = new List<SalesAggregate>();
-
-        foreach (var g in grouped)
+        private IEnumerable<SalesAggregate> AggregateWeekly
+            (IEnumerable<TransactionLineItem> transactions, Guid ProductId)
         {
-            DateTime start, end;
-            var first = g.First().Transaction!.TransactionDate;
-            var year = ISOWeek.GetYear(first);
-            var week = ISOWeek.GetWeekOfYear(first);
-            start = ISOWeek.ToDateTime(year, week, DayOfWeek.Monday);
-            end = start.AddDays(6);
+            var grouped = transactions
+                .GroupBy(t =>
+                {
+                    var d = t.Transaction!.TransactionDate;
+                    return (object)new { Year = dateTimeProvider.GetIsoYear(d), Week = dateTimeProvider.GetIsoWeekOfYear(d) };
+                });
 
-            aggregates.Add(new SalesAggregate
+            var aggregates = new List<SalesAggregate>();
+
+            foreach (var g in grouped)
             {
-                ProductId = ProductId,
-                PeriodType = Period.Weekly,
-                PeriodStartDate = start,
-                PeriodEndDate = end,
-                TotalQuantity = g.Sum(x => x.Quantity),
-                TotalRevenue = g.Sum(x => x.Quantity * x.UnitPrice),
-                Product = g.First().Product
-            });
+                var first = g.First().Transaction!.TransactionDate;
+                var (start, end) = dateTimeProvider.GetWeekRange(first);
+
+                aggregates.Add(new SalesAggregate
+                {
+                    ProductId = ProductId,
+                    PeriodType = Period.Weekly,
+                    PeriodStartDate = start,
+                    PeriodEndDate = end,
+                    TotalQuantity = g.Sum(x => x.Quantity),
+                    TotalRevenue = g.Sum(x => x.Quantity * x.UnitPrice),
+                    Product = g.First().Product
+                });
+            }
+
+            return aggregates;
         }
 
-        return aggregates;
-    }
-
-    private static IEnumerable<SalesAggregate> AggregateMonthly
-        (IEnumerable<TransactionLineItem> transactions, Guid ProductId)
-    {
-        IEnumerable<IGrouping<object, TransactionLineItem>> grouped = transactions
-            .GroupBy(t =>
-            {
-                var d = t.Transaction!.TransactionDate;
-                return (object)new { d.Year, d.Month };
-            });
-
-        var aggregates = new List<SalesAggregate>();
-
-        foreach (var g in grouped)
+        private IEnumerable<SalesAggregate> AggregateMonthly
+            (IEnumerable<TransactionLineItem> transactions, Guid ProductId)
         {
-            DateTime start, end;
-            var first = g.First().Transaction!.TransactionDate;
-            start = new DateTime(first.Year, first.Month, 1);
-            end = start.AddMonths(1).AddDays(-1);
+            var grouped = transactions
+                .GroupBy(t =>
+                {
+                    var d = t.Transaction!.TransactionDate;
+                    return (object)new { d.Year, d.Month };
+                });
 
-            aggregates.Add(new SalesAggregate
+            var aggregates = new List<SalesAggregate>();
+
+            foreach (var g in grouped)
             {
-                ProductId = ProductId,
-                PeriodType = Period.Monthly,
-                PeriodStartDate = start,
-                PeriodEndDate = end,
-                TotalQuantity = g.Sum(x => x.Quantity),
-                TotalRevenue = g.Sum(x => x.Quantity * x.UnitPrice),
-                Product = g.First().Product
-            });
-        }
+                var first = g.First().Transaction!.TransactionDate;
+                var (start, end) = dateTimeProvider.GetMonthRange(first);
 
-        return aggregates;
+                aggregates.Add(new SalesAggregate
+                {
+                    ProductId = ProductId,
+                    PeriodType = Period.Monthly,
+                    PeriodStartDate = start,
+                    PeriodEndDate = end,
+                    TotalQuantity = g.Sum(x => x.Quantity),
+                    TotalRevenue = g.Sum(x => x.Quantity * x.UnitPrice),
+                    Product = g.First().Product
+                });
+            }
+
+            return aggregates;
+        }
     }
 }
