@@ -25,12 +25,12 @@ export function buildTheme(mode: "light" | "dark" = "light") {
       ...(mode === "light"
         ? {
             background: {
-              default: "#A8CBE1", // app background
-              paper: "#CADFED",   // cards, drawers, modals
+              default: "#A8CBE1", 
+              paper: "#CADFED",   
             },
             text: {
-              primary: "#1A273A",    // slightly softer than pure black
-              secondary: "#4B5563",  // gray for subtext
+              primary: "#1A273A",    
+              secondary: "#4B5563",  
             },
           }
         : {

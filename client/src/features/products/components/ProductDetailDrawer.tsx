@@ -9,14 +9,53 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { useProduct } from "../../../hooks/useProducts";
+import { useSalesAggregates } from "../../../hooks/useSalesAggregates";
+import SalesAggregateChart from "../../../components/charts/SalesAggregateChart"
+import { useState } from "react";
+
+// Small reusable section wrapper for consistent layout
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Box>
+      <Typography
+        variant="h6"
+        sx={{ mb: 1, borderBottom: "1px solid rgba(0,0,0,0.1)", pb: 0.5 }}
+      >
+        {title}
+      </Typography>
+      {children}
+    </Box>
+  );
+}
 
 interface ProductDetailDrawerProps {
+  /*periodType: string | null;*/
   productId: string | null;
   onClose: () => void;
 }
 
-export default function ProductDetailDrawer({ productId, onClose }: ProductDetailDrawerProps) {
-  const { data: product, isLoading, isError } = useProduct(productId);
+export default function ProductDetailDrawer({
+  /*periodType,*/
+  productId,
+  onClose,
+}: ProductDetailDrawerProps) {
+  const [periodType, setPeriodType] = useState<"Daily" | "Weekly" | "Monthly">("Monthly");
+  const { 
+    data: product, 
+    isLoading: isLoadingProduct, 
+    isError: isErrorProduct 
+  } = useProduct(productId);
+  const {
+    data: salesaggregate,
+    isLoading: isLoadingSales,
+    isError: isErrorSales,
+  } = useSalesAggregates(periodType, productId);
 
   return (
     <Drawer
@@ -34,8 +73,17 @@ export default function ProductDetailDrawer({ productId, onClose }: ProductDetai
         },
       }}
     >
-      <Box>
-        {isLoading && (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          overflowY: "auto",
+          gap: 3,
+        }}
+      >
+        {/* Loading State */}
+        {isLoadingProduct && (
           <Stack alignItems="center" justifyContent="center" height="100%">
             <CircularProgress />
             <Typography variant="body2" mt={2}>
@@ -44,68 +92,69 @@ export default function ProductDetailDrawer({ productId, onClose }: ProductDetai
           </Stack>
         )}
 
-        {isError && (
+        {/* Error State */}
+        {isErrorProduct && (
           <Typography color="error">Failed to load product details.</Typography>
         )}
 
+        {/* Product Details */}
         {product && (
           <>
-            <Box mb={2}>
+            {/* --- General Section --- */}
+            <Section title="General">
               <Typography variant="h5" fontWeight="bold">
                 {product.name}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {product.sku ? `SKU: ${product.sku}` : "No SKU"}
               </Typography>
-            </Box>
+              <Typography variant="body1" mt={1}>
+                Price: ${product.price.toFixed(2)}
+              </Typography>
+              <Typography variant="body1" mt={1}>
+                {product.description || "No description provided"}
+              </Typography>
+            </Section>
 
-            <Divider sx={{ mb: 2 }} />
+            {/* --- Forecast Section --- */}
+            <Section title="Forecast">
+              {isLoadingSales && <Typography>Loading chart...</Typography>}
+              {isErrorSales && <Typography color="error">Failed to load sales data.</Typography>}
+              {salesaggregate && salesaggregate.length > 0 ? (
+                <SalesAggregateChart
+                  data={salesaggregate}
+                  periodType={periodType}
+                  onPeriodTypeChange={setPeriodType}
+                />
+              ) : (
+                !isLoadingSales && <Typography>No sales data available.</Typography>
+              )}
+            </Section>
 
-            <Stack spacing={2}>
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Description
+            {/* --- Stock Section --- */}
+            {product.stock && (
+              <Section title="Stock">
+                <Typography variant="body1">
+                  Quantity: <strong>{product.stock.quantity}</strong>
                 </Typography>
                 <Typography variant="body1">
-                  {product.description || "No description provided"}
+                  Reorder Point: <strong>{product.stock.reorderPoint}</strong>
                 </Typography>
-              </Box>
+              </Section>
+            )}
 
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Price
-                </Typography>
-                <Typography variant="body1">${product.price.toFixed(2)}</Typography>
-              </Box>
+            {/* --- Status Section --- */}
+            <Section title="Status">
+              <Chip
+                label={product.isActive ? "Active" : "Inactive"}
+                color={product.isActive ? "success" : "default"}
+                variant="outlined"
+              />
+            </Section>
 
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Status
-                </Typography>
-                <Chip
-                  label={product.isActive ? "Active" : "Inactive"}
-                  color={product.isActive ? "success" : "default"}
-                  variant="outlined"
-                />
-              </Box>
+            <Divider />
 
-              {product.stock && (
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Stock Information
-                  </Typography>
-                  <Typography variant="body1">
-                    Quantity: <strong>{product.stock.quantity}</strong>
-                  </Typography>
-                  <Typography variant="body1">
-                    Reorder Point: <strong>{product.stock.reorderPoint}</strong>
-                  </Typography>
-                </Box>
-              )}
-            </Stack>
-
-            <Divider sx={{ my: 3 }} />
-
+            {/* --- Actions --- */}
             <Stack direction="row" spacing={2}>
               <Button variant="outlined" color="primary" onClick={onClose}>
                 Close
