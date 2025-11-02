@@ -63,8 +63,11 @@ public class UpdateSalesAggregates
                 var productTransactions = transactions.Where(t => t.ProductId == productId);
                 if (!productTransactions.Any()) continue;
 
+                // Aggregate based on transactions
                 foreach (var period in new[] { Period.Daily, Period.Weekly, Period.Monthly })
                 {
+                    await aggregateRepo.EnsureMissingPeriodsAsync(productId, period);
+
                     var aggregates = period switch
                     {
                         Period.Daily => AggregateDaily(productTransactions, productId),

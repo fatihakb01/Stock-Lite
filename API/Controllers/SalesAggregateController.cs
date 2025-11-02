@@ -18,17 +18,6 @@ public class SalesAggregateController(IMediator mediator) : BaseApiController(me
         }));
     }
 
-    // [HttpPost("{periodType}/{productId}")]
-    // public async Task<ActionResult<SalesAggregate>> UpdateSalesAggregates(string periodType, Guid productId)
-    // {
-
-    //     return HandleResult(await Mediator.Send(new UpdateSalesAggregates.Command
-    //     {
-    //         ProductId = productId,
-    //         PeriodType = periodType
-    //     }));
-    // }
-
     [HttpPost("{companyId}")]
     public async Task<ActionResult<SalesAggregate>> UpdateSalesAggregates
         (Guid companyId, [FromBody] IEnumerable<Guid>? productIds)
