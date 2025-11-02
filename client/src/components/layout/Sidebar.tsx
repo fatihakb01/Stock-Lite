@@ -20,14 +20,14 @@ import {
   Divider,
   useTheme
 } from "@mui/material";
-import { useColorMode } from "./ThemeContext"; 
-import { Brightness4, Brightness7 } from "@mui/icons-material";
+/*import { useColorMode } from "./themes/ThemeContext"; 
+import { Brightness4, Brightness7 } from "@mui/icons-material";*/
 
 
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
   const theme = useTheme();
-  const { mode, toggleMode } = useColorMode();
+  /*const { mode, toggleMode } = useColorMode();*/
 
   const toggleDrawer = (newOpen: boolean) => () => setOpen(newOpen);
 
@@ -104,7 +104,7 @@ export default function Sidebar() {
           <Divider />
 
           {/* Enabling/disabling dark mode */}
-          <ListItem disablePadding>
+          {/*<ListItem disablePadding>
             <ListItemButton onClick={toggleMode}>
               <ListItemIcon>
                 {mode === "light" ? <Brightness4 /> : <Brightness7 />}
@@ -113,7 +113,7 @@ export default function Sidebar() {
                 primary={mode === "light" ? "Dark Mode" : "Light Mode"}
               />
             </ListItemButton>
-          </ListItem>
+          </ListItem>*/}
         </Box>
       </Drawer>
     </Box>

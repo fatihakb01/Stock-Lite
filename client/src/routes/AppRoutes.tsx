@@ -10,6 +10,7 @@ const router = createBrowserRouter([
     path: "/",
     element: <Layout />,
     children: [
+      /* Right now, I only actively use the products page */
       { index: true, element: <HomePage /> },
       { path: "products", element: <ProductsPage /> },
       { path: "customers", element: <CustomersPage /> },

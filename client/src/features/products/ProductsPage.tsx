@@ -51,8 +51,7 @@ export default function ProductsPage() {
         <Box flex={1} sx={{ width: "100%"}}>
           <DataGrid
             rows={products ?? []}
-            columns={columns}
-            
+            columns={columns}     
             getRowId={(row) => row.id}
             onRowClick={(params) => setSelectedId(params.row.id)}
             disableRowSelectionOnClick
