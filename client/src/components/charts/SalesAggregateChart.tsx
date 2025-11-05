@@ -31,13 +31,30 @@ export default function SalesAggregateChart({
     if (periodType === "Weekly") count = 13;
     else if (periodType === "Monthly") count = 12;
 
-    return data.slice(-count).map((d) => ({
-      ...d,
-      label: new Date(d.periodStartDate).toLocaleDateString("en-US", {
-        month: periodType === "Monthly" ? "short" : undefined,
-        day: periodType !== "Monthly" ? "numeric" : undefined,
-      }),
-    }));
+    return data.slice(-count).map((d) => {
+      const start = new Date(d.periodStartDate);
+
+      // Define label depending on periodType
+      let label: string;
+      if (periodType === "Daily") {
+        label = start.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      } else if (periodType === "Weekly") {
+        const end = new Date(start);
+        end.setDate(start.getDate() + 6); // end of week
+        label = `${start.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        })}–${end.toLocaleDateString("en-US", {
+          month: end.getMonth() === start.getMonth() ? undefined : "short",
+          day: "numeric",
+        })}`;
+      } else {
+        label = start.toLocaleDateString("en-US", { month: "short" });
+      }
+
+      return { ...d, label };
+    });
+
   }, [data, periodType]);
 
   // Select which key and color to display
