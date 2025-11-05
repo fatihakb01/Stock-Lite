@@ -35,13 +35,13 @@ function Section({
 }
 
 interface ProductDetailDrawerProps {
-  /*periodType: string | null;*/
+  companyId: string | null;
   productId: string | null;
   onClose: () => void;
 }
 
 export default function ProductDetailDrawer({
-  /*periodType,*/
+  companyId,
   productId,
   onClose,
 }: ProductDetailDrawerProps) {
@@ -50,7 +50,7 @@ export default function ProductDetailDrawer({
     data: product, 
     isLoading: isLoadingProduct, 
     isError: isErrorProduct 
-  } = useProduct(productId);
+  } = useProduct(productId, companyId);
   const {
     data: salesaggregate,
     isLoading: isLoadingSales,

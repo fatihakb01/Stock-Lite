@@ -10,6 +10,7 @@ public class DeleteProduct
     public class Command : IRequest<Result<Unit>>
     {
         public Guid Id { get; set; }
+        // public Guid CompanyId { get; set; } // not yet implemented
     }
 
     public class Handler(IRepository<Product> repository)

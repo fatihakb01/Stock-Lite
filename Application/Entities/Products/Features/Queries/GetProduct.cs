@@ -11,6 +11,7 @@ public class GetProduct
     public class Query : IRequest<Result<ProductDto>>
     {
         public required Guid Id { get; set; }
+        public required Guid CompanyId { get; set; }
     }
 
     public class Handler(IProductRepository repository, IMapper mapper)
@@ -18,7 +19,7 @@ public class GetProduct
     {
         public async Task<Result<ProductDto>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var product = await repository.GetWithStockAsync(request.Id);
+            var product = await repository.GetWithStockAsync(request.Id, request.CompanyId);
 
             if (product == null)
                 return Result<ProductDto>.Failure("Product not found", 404);

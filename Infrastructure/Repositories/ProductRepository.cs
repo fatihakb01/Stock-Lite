@@ -14,10 +14,10 @@ public class ProductRepository : Repository<Product>, IProductRepository
         _context = context;
     }
 
-    public async Task<Product?> GetWithStockAsync(Guid productId)
+    public async Task<Product?> GetWithStockAsync(Guid productId, Guid companyId)
     {
         return await _context.Products
             .Include(p => p.StockLevel)
-            .FirstOrDefaultAsync(p => p.Id == productId);
+            .FirstOrDefaultAsync(p => p.Id == productId & p.CompanyId == companyId);
     }
 }

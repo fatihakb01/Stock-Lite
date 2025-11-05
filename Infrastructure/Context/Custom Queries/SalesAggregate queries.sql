@@ -7,7 +7,6 @@ SELECT *
 FROM SalesAggregates
 ORDER BY ProductId, PeriodType
 
-
 -- Retrieve total quantity and total revenue for a particular product 
 -- grouped by day
 SELECT 

@@ -6,7 +6,11 @@ import type { Product } from "./productTypes";
 import ProductDetailDrawer from "./components/ProductDetailDrawer";
 
 export default function ProductsPage() {
-  const { data: products, isLoading, isError } = useProducts();
+  // Since we have one company now, this is a temporary solution 
+  // until we fixed authentication & authorisation
+  const companyId = "828b55f7-c643-4b8a-ab95-180e655cce44"; 
+
+  const { data: products, isLoading, isError } = useProducts(companyId);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // Define the columns for the DataGrid
@@ -64,7 +68,7 @@ export default function ProductsPage() {
       </Box>
 
       {/* Detail Drawer */}
-      <ProductDetailDrawer productId={selectedId} onClose={() => setSelectedId(null)} />
+      <ProductDetailDrawer productId={selectedId} companyId={companyId} onClose={() => setSelectedId(null)} />
     </Box>
   );
 }
