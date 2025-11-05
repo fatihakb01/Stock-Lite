@@ -4,12 +4,15 @@ import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { useProducts } from "../../hooks/useProducts";
 import type { Product } from "./productTypes";
 import ProductDetailDrawer from "./components/ProductDetailDrawer";
+import { useCompanies } from "../../hooks/useCompanies";
 
 export default function ProductsPage() {
   // Since we have one company now, this is a temporary solution 
   // until we fixed authentication & authorisation
-  const companyId = "828b55f7-c643-4b8a-ab95-180e655cce44"; 
+  const {data: companies} = useCompanies();
+  const companyId = companies?.[0]?.id ?? null;
 
+  // Retrieve products data
   const { data: products, isLoading, isError } = useProducts(companyId);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
