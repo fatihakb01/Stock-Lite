@@ -1,4 +1,4 @@
-USE [BILite]
+USE [StockLite]
 GO
 
 TRUNCATE TABLE SalesAggregates
@@ -6,6 +6,8 @@ TRUNCATE TABLE SalesAggregates
 SELECT *
 FROM SalesAggregates
 ORDER BY ProductId, PeriodType
+
+SELECT * FROM Products
 
 -- Retrieve total quantity and total revenue for a particular product 
 -- grouped by day
