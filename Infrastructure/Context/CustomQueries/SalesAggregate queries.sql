@@ -7,7 +7,11 @@ SELECT *
 FROM SalesAggregates
 ORDER BY ProductId, PeriodType
 
-SELECT * FROM Products
+SELECT * FROM Products WHERE Id IS NULL
+
+SELECT *
+FROM SalesAggregates
+WHERE ProductId = '51440746-19b8-4d4f-99cb-d49dbf93800e'
 
 -- Retrieve total quantity and total revenue for a particular product 
 -- grouped by day
@@ -63,3 +67,4 @@ INNER JOIN Products P
     ON P.Id = L.ProductId
 WHERE T.Id = 'd8f355fb-ac23-4108-95e2-00d98fb317f7'
 GROUP BY T.Id
+GO

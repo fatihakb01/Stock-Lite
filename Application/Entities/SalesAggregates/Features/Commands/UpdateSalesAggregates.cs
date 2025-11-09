@@ -23,6 +23,9 @@ public class UpdateSalesAggregates
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
+            // Initialize table for sales aggregates
+            await aggregateRepo.EnsureAllMissingPeriodsAsync(request.CompanyId);
+
             // Get products to process
             IEnumerable<Guid> productIds;
 
@@ -58,6 +61,9 @@ public class UpdateSalesAggregates
             // Aggregate per product
             var allAggregates = new List<SalesAggregate>();
 
+            int productNr = 0;
+            int totalProducts = productIds.Count();
+
             foreach (var productId in productIds)
             {
                 var productTransactions = transactions.Where(t => t.ProductId == productId);
@@ -66,8 +72,6 @@ public class UpdateSalesAggregates
                 // Aggregate based on transactions
                 foreach (var period in new[] { Period.Daily, Period.Weekly, Period.Monthly })
                 {
-                    await aggregateRepo.EnsureMissingPeriodsAsync(productId, period);
-
                     var aggregates = period switch
                     {
                         Period.Daily => AggregateDaily(productTransactions, productId),
@@ -78,6 +82,8 @@ public class UpdateSalesAggregates
 
                     allAggregates.AddRange(aggregates);
                 }
+
+                Console.WriteLine($"Product {++productNr}/{totalProducts} completed.");
             }
 
             // Persist all updated aggregates in one go
@@ -85,7 +91,6 @@ public class UpdateSalesAggregates
 
             return Result<Unit>.Success(Unit.Value);
         }
-
 
         private IEnumerable<SalesAggregate> AggregateDaily
             (IEnumerable<TransactionLineItem> transactions, Guid ProductId)

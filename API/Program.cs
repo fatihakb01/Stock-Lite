@@ -34,8 +34,20 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<DataContext>();
 
+    // Initialize database
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    try
+    {
+        await DatabaseInitializer.InitializeAsync(context, logger);
+        logger.LogInformation("Database initialized successfully.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "An error occurred while initializing the database.");
+    }
+
     // Apply any pending migrations
-    await context.Database.MigrateAsync();
+    //await context.Database.MigrateAsync();
 
     // Seed data into the database for development environment
     if (app.Environment.IsDevelopment())

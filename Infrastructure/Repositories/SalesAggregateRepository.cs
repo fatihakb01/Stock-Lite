@@ -1,7 +1,9 @@
+using System.Data;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Interfaces;
 using Infrastructure.Context;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
@@ -16,82 +18,41 @@ public class SalesAggregateRepository
         _context = context;
     }
 
-    public async Task EnsureMissingPeriodsAsync(Guid productId, Period periodType)
+    public async Task EnsureAllMissingPeriodsAsync(Guid companyId)
     {
-        DateTime now = DateTime.UtcNow.Date;
+        string sql = """
+            WITH Periods AS (
+                SELECT 'Daily' AS PeriodType, DATEADD(DAY, -v.number, CAST(GETUTCDATE() AS DATE)) AS PeriodStartDate
+                FROM master.dbo.spt_values v
+                WHERE v.type = 'P' AND v.number < 30
+                UNION ALL
+                SELECT 'Weekly', DATEADD(WEEK, -v.number, DATEADD(DAY, 1 - DATEPART(WEEKDAY, CAST(GETUTCDATE() AS DATE)), CAST(GETUTCDATE() AS DATE)))
+                FROM master.dbo.spt_values v
+                WHERE v.type = 'P' AND v.number < 13
+                UNION ALL
+                SELECT 'Monthly', DATEFROMPARTS(YEAR(DATEADD(MONTH, -v.number, GETUTCDATE())), MONTH(DATEADD(MONTH, -v.number, GETUTCDATE())), 1)
+                FROM master.dbo.spt_values v
+                WHERE v.type = 'P' AND v.number < 12
+            )
+            INSERT INTO SalesAggregates (Id, ProductId, PeriodType, PeriodStartDate, PeriodEndDate, TotalQuantity, TotalRevenue)
+            SELECT NEWID(), p.Id, pr.PeriodType, pr.PeriodStartDate,
+                CASE pr.PeriodType
+                    WHEN 'Daily' THEN pr.PeriodStartDate
+                    WHEN 'Weekly' THEN DATEADD(DAY, 6, pr.PeriodStartDate)
+                    WHEN 'Monthly' THEN EOMONTH(pr.PeriodStartDate)
+                END,
+                0, 0
+            FROM Products p
+            CROSS JOIN Periods pr
+            LEFT JOIN SalesAggregates sa
+            ON sa.ProductId = p.Id
+            AND sa.PeriodType = pr.PeriodType
+            AND sa.PeriodStartDate = pr.PeriodStartDate
+            WHERE p.CompanyId = {0}
+            AND sa.ProductId IS NULL;
+            """;
 
-        // Determine the lookback range
-        int count = periodType switch
-        {
-            Period.Daily => 30,
-            Period.Weekly => 13,
-            Period.Monthly => 12,
-            _ => 30
-        };
-
-        // Find Product based on productId
-        var product = await _context.Products.FindAsync(productId);
-        if (product == null)
-            throw new InvalidOperationException($"Product with ID {productId} not found.");
-
-        // Build list of expected period start dates
-        List<DateTime> expectedStartDates = new();
-        for (int i = count - 1; i >= 0; i--)
-        {
-            DateTime start = periodType switch
-            {
-                Period.Daily => now.AddDays(-i),
-                Period.Weekly => now.AddDays(-7 * i),
-                Period.Monthly => now.AddMonths(-i),
-                _ => now.AddDays(-i)
-            };
-
-            // Normalize start to beginning of the period
-            if (periodType == Period.Weekly)
-            {
-                int diff = (7 + (start.DayOfWeek - DayOfWeek.Monday)) % 7;
-                start = start.AddDays(-diff);
-            }
-            else if (periodType == Period.Monthly)
-            {
-                start = new DateTime(start.Year, start.Month, 1);
-            }
-
-            expectedStartDates.Add(start);
-        }        
-
-        // Load existing start dates
-        var existingDates = await _context.SalesAggregates
-            .Where(sa => sa.ProductId == productId && sa.PeriodType == periodType)
-            .Select(sa => sa.PeriodStartDate.Date)
-            .ToListAsync();
-
-        // Create missing ones
-        var missing = expectedStartDates
-            .Where(d => !existingDates.Contains(d))
-            .Select(d => new SalesAggregate
-            {
-                ProductId = productId,
-                Product = product,
-                PeriodType = periodType,
-                PeriodStartDate = d,
-                PeriodEndDate = periodType switch
-                {
-                    Period.Daily => d,
-                    Period.Weekly => d.AddDays(6),
-                    Period.Monthly => new DateTime(d.Year, d.Month, DateTime.DaysInMonth(d.Year, d.Month)),
-                    _ => d
-                },
-                TotalQuantity = 0,
-                TotalRevenue = 0
-            })
-            .ToList();
-
-        if (missing.Any())
-        {
-            await _context.SalesAggregates.AddRangeAsync(missing);
-            await _context.SaveChangesAsync();
-        }
+        await _context.Database.ExecuteSqlRawAsync(sql, companyId);
     }
 
     public async Task<IEnumerable<SalesAggregate>> GetByProductIdAsync(Guid productId, Period periodType)
@@ -145,4 +106,25 @@ public class SalesAggregateRepository
 
         await _context.SaveChangesAsync();
     }
+
+    public async Task UpdateSalesAggregatesStoredProcAsync(Guid companyId, IEnumerable<Guid>? productIds = null)
+    {
+        var productIdsTable = new DataTable();
+        productIdsTable.Columns.Add("Id", typeof(Guid));
+        if (productIds != null)
+            foreach (var id in productIds)
+                productIdsTable.Rows.Add(id);
+
+        var paramCompany = new SqlParameter("@CompanyId", companyId);
+        var paramProductIds = new SqlParameter("@ProductIds", productIdsTable)
+        {
+            TypeName = "dbo.GuidList",
+            SqlDbType = SqlDbType.Structured
+        };
+
+        await _context.Database.ExecuteSqlRawAsync(
+            "EXEC dbo.UpdateSalesAggregates @CompanyId, @ProductIds",
+            paramCompany, paramProductIds);
+    }
+
 }

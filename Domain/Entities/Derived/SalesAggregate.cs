@@ -11,6 +11,7 @@ public class SalesAggregate
     public DateTime PeriodEndDate { get; set; }
     public int TotalQuantity { get; set; }
     public decimal TotalRevenue { get; set; } 
+    
 
     // Navigation
     public required Product Product { get; set; }
