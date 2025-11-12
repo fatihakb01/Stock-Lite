@@ -16,7 +16,7 @@ public static class DependencyInjection
     )
     {
         services.AddDbContext<DataContext>(options =>
-            options.UseSqlServer(config.GetConnectionString("DefaultConnection"))
+            options.UseSqlServer(config.GetConnectionString("DefaultConnection"), opt => opt.CommandTimeout(300))
         );
 
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

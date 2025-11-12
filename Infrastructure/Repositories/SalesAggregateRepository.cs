@@ -18,43 +18,6 @@ public class SalesAggregateRepository
         _context = context;
     }
 
-    public async Task EnsureAllMissingPeriodsAsync(Guid companyId)
-    {
-        string sql = """
-            WITH Periods AS (
-                SELECT 'Daily' AS PeriodType, DATEADD(DAY, -v.number, CAST(GETUTCDATE() AS DATE)) AS PeriodStartDate
-                FROM master.dbo.spt_values v
-                WHERE v.type = 'P' AND v.number < 30
-                UNION ALL
-                SELECT 'Weekly', DATEADD(WEEK, -v.number, DATEADD(DAY, 1 - DATEPART(WEEKDAY, CAST(GETUTCDATE() AS DATE)), CAST(GETUTCDATE() AS DATE)))
-                FROM master.dbo.spt_values v
-                WHERE v.type = 'P' AND v.number < 13
-                UNION ALL
-                SELECT 'Monthly', DATEFROMPARTS(YEAR(DATEADD(MONTH, -v.number, GETUTCDATE())), MONTH(DATEADD(MONTH, -v.number, GETUTCDATE())), 1)
-                FROM master.dbo.spt_values v
-                WHERE v.type = 'P' AND v.number < 12
-            )
-            INSERT INTO SalesAggregates (Id, ProductId, PeriodType, PeriodStartDate, PeriodEndDate, TotalQuantity, TotalRevenue)
-            SELECT NEWID(), p.Id, pr.PeriodType, pr.PeriodStartDate,
-                CASE pr.PeriodType
-                    WHEN 'Daily' THEN pr.PeriodStartDate
-                    WHEN 'Weekly' THEN DATEADD(DAY, 6, pr.PeriodStartDate)
-                    WHEN 'Monthly' THEN EOMONTH(pr.PeriodStartDate)
-                END,
-                0, 0
-            FROM Products p
-            CROSS JOIN Periods pr
-            LEFT JOIN SalesAggregates sa
-            ON sa.ProductId = p.Id
-            AND sa.PeriodType = pr.PeriodType
-            AND sa.PeriodStartDate = pr.PeriodStartDate
-            WHERE p.CompanyId = {0}
-            AND sa.ProductId IS NULL;
-            """;
-
-        await _context.Database.ExecuteSqlRawAsync(sql, companyId);
-    }
-
     public async Task<IEnumerable<SalesAggregate>> GetByProductIdAsync(Guid productId, Period periodType)
     {
         DateTime startDate = periodType switch
@@ -73,41 +36,22 @@ public class SalesAggregateRepository
             .ToListAsync();
     }
 
-    public async Task UpsertSalesAggregatesAsync(IEnumerable<SalesAggregate> newAggregates)
+    public async Task InsertSalesAggregatesAsync(Guid companyId, Period? periodType = null)
     {
-        if (!newAggregates.Any()) return;
+        var paramCompany = new SqlParameter("@CompanyId", companyId);
 
-        // Preload existing aggregates for these products in one query
-        var productIds = newAggregates.Select(a => a.ProductId).Distinct().ToList();
-        var periodTypes = newAggregates.Select(a => a.PeriodType).Distinct().ToList();
-
-        var existing = await _context.SalesAggregates
-            .Where(sa => productIds.Contains(sa.ProductId) && periodTypes.Contains(sa.PeriodType))
-            .ToListAsync();
-
-        foreach (var aggregate in newAggregates)
+        string procedureName = periodType switch
         {
-            var match = existing.FirstOrDefault(sa =>
-                sa.ProductId == aggregate.ProductId &&
-                sa.PeriodType == aggregate.PeriodType &&
-                sa.PeriodStartDate.Date == aggregate.PeriodStartDate.Date);
+            Period.Daily => "dbo.InsertDailySalesAggregates",
+            Period.Weekly => "dbo.InsertWeeklySalesAggregates",
+            Period.Monthly => "dbo.InsertMonthlySalesAggregates",
+            _ => "dbo.InsertSalesAggregates" 
+        };
 
-            if (match != null)
-            {
-                match.TotalQuantity = aggregate.TotalQuantity;
-                match.TotalRevenue = aggregate.TotalRevenue;
-                _context.SalesAggregates.Update(match);
-            }
-            else
-            {
-                await _context.SalesAggregates.AddAsync(aggregate);
-            }
-        }
-
-        await _context.SaveChangesAsync();
+        await _context.Database.ExecuteSqlAsync($"EXEC {procedureName} {paramCompany}");
     }
 
-    public async Task UpdateSalesAggregatesStoredProcAsync(Guid companyId, IEnumerable<Guid>? productIds = null)
+    public async Task UpdateSalesAggregatesAsync(Guid companyId, IEnumerable<Guid>? productIds = null, Period? periodType = null)
     {
         var productIdsTable = new DataTable();
         productIdsTable.Columns.Add("Id", typeof(Guid));
@@ -122,9 +66,14 @@ public class SalesAggregateRepository
             SqlDbType = SqlDbType.Structured
         };
 
-        await _context.Database.ExecuteSqlRawAsync(
-            "EXEC dbo.UpdateSalesAggregates @CompanyId, @ProductIds",
-            paramCompany, paramProductIds);
-    }
+        string procedureName = periodType switch
+        {
+            Period.Daily => "dbo.UpdateDailySalesAggregates",
+            Period.Weekly => "dbo.UpdateWeeklySalesAggregates",
+            Period.Monthly => "dbo.UpdateMonthlySalesAggregates",
+            _ => "dbo.UpdateSalesAggregates"
+        };
 
+        await _context.Database.ExecuteSqlAsync($"EXEC {procedureName} {paramCompany}, {paramProductIds}");
+    }
 }

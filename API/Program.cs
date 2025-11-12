@@ -1,8 +1,8 @@
 using Infrastructure.Context;
 using Application.Core;
-using Microsoft.EntityFrameworkCore;
 using API.Extensions;
 using API.Middleware;
+using Infrastructure.Context.DatabaseInitializer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +13,7 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 
 // Configure CORS to allow requests from the React client
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+var MyAllowSpecificOrigins = "CorsPolicyName";
 
 builder.Services.AddCors(options =>
 {
@@ -38,16 +38,13 @@ using (var scope = app.Services.CreateScope())
     var logger = services.GetRequiredService<ILogger<Program>>();
     try
     {
-        await DatabaseInitializer.InitializeAsync(context, logger);
+        await DbInitializer.InitializeAsync(context, logger);
         logger.LogInformation("Database initialized successfully.");
     }
     catch (Exception ex)
     {
         logger.LogError(ex, "An error occurred while initializing the database.");
     }
-
-    // Apply any pending migrations
-    //await context.Database.MigrateAsync();
 
     // Seed data into the database for development environment
     if (app.Environment.IsDevelopment())

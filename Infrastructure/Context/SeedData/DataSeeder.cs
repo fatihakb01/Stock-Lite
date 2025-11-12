@@ -39,7 +39,7 @@ public static class DataSeeder
         // Product names with simple descriptions
         var productDefinitions = new Dictionary<string, string>();
 
-        string path = "./CustomData/modified_products.csv";
+        string path = "C:/CSharp/Stock-Lite/Infrastructure/Context/SeedData/CustomData/modified_products.csv";
         productDefinitions = LoadProductsFromCsv(path);
 
         var products = productDefinitions.Select((pd, index) => new Product

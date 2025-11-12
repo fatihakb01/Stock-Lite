@@ -8,6 +8,7 @@ FROM SalesAggregates
 ORDER BY ProductId, PeriodType
 
 SELECT * FROM Products WHERE Id IS NULL
+SELECT * FROM TransactionLineItems
 
 SELECT *
 FROM SalesAggregates
@@ -67,4 +68,55 @@ INNER JOIN Products P
     ON P.Id = L.ProductId
 WHERE T.Id = 'd8f355fb-ac23-4108-95e2-00d98fb317f7'
 GROUP BY T.Id
+GO;
+
+
+/*
+BEGIN TRAN
+DECLARE @ProductIds dbo.GuidList, @CompanyId UNIQUEIDENTIFIER = 'f9a49ab3-3fa0-4efe-9f40-6629bc742284'
+
+EXEC dbo.InsertSalesAggregates @CompanyId
+
+SELECT * FROM SalesAggregates
+
+ROLLBACK TRAN
+*/
+
+/*
+BEGIN TRAN
+DECLARE @ProductIds dbo.GuidList, @CompanyId UNIQUEIDENTIFIER = 'f9a49ab3-3fa0-4efe-9f40-6629bc742284'
+
+IF NOT EXISTS (SELECT 1 FROM @ProductIds)
+BEGIN
+    -- Use all products for the company instead
+    INSERT INTO @ProductIds (Id)
+    SELECT Id FROM dbo.Products WHERE CompanyId = @CompanyId;
+END
+
+EXEC dbo.UpdateSalesAggregates @CompanyId, @ProductIds
+
+SELECT *
+FROM SalesAggregates
+ORDER BY ProductId, PeriodType
+ROLLBACK TRAN
 GO
+*/
+
+
+BEGIN TRAN
+DECLARE @ProductIds dbo.GuidList, @CompanyId UNIQUEIDENTIFIER = 'f9a49ab3-3fa0-4efe-9f40-6629bc742284'
+
+IF NOT EXISTS (SELECT 1 FROM @ProductIds)
+BEGIN
+    -- Use all products for the company instead
+    INSERT INTO @ProductIds (Id)
+    SELECT Id FROM dbo.Products WHERE CompanyId = @CompanyId;
+END
+
+EXEC dbo.InsertSalesAggregates @CompanyId
+EXEC dbo.UpdateSalesAggregates @CompanyId, @ProductIds
+
+
+ROLLBACK TRAN
+GO
+
