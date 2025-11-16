@@ -6,7 +6,7 @@ using Application.Entities.Transactions.DTOs;
 using Application.Entities.Products.DTOs;
 using Application.Entities.TransactionLineItems.DTOs;
 using Application.Entities.SalesAggregates.DTOs;
-
+using Application.Entities.Users.DTOs;
 
 namespace Application.Core;
 
@@ -46,5 +46,11 @@ public class MappingProfiles : Profile
 
         //SalesAggregate entity
         CreateMap<SalesAggregate, SalesAggregateDto>();
+
+        // User entity
+        CreateMap<User, UserDto>();
+        CreateMap<RegisterUserDto, User>();
+        CreateMap<LoginUserDto, User>();
+        CreateMap<ResetPasswordDto, User>();
     }
 }

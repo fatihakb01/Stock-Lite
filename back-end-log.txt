@@ -1,3 +1,15 @@
+Git commands
+1. Create seperate branch and commit
+- git checkout -b feature/auth
+- git add . 
+- git commit -m "Add authentication and authorization logic"
+- git push -u origin feature/auth
+2. Merge locally
+- git checkout main
+- git pull origin main
+- git merge feature/auth
+- git push origin main
+
 Set-up project
 - dotnet new sln = creating a solution file template.
 - dotnet new webapi -n API -controllers = creating a webapi folder/template (folder called API).

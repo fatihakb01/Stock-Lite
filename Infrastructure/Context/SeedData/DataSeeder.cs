@@ -3,6 +3,8 @@ using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using CsvHelper;
 using System.Globalization;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace Infrastructure.Context;
 
@@ -30,11 +32,31 @@ public static class DataSeeder
         // Users
         var users = new List<User>
         {
-            new() { Username = "Superadmin", Email = "superadmin@business.com", PasswordHash = "hashedpassword", Company = company, Role = UserRole.SuperAdmin },
-            new() { Username = "Admin", Email = "admin@business.com", PasswordHash = "hashedpassword", Company = company, Role = UserRole.Admin },
-            new() { Username = "Keyuser", Email = "keyuser@business.com", PasswordHash = "hashedpassword", Company = company, Role = UserRole.KeyUser },
-            new() { Username = "User", Email = "user@business.com", PasswordHash = "hashedpassword", Company = company, Role = UserRole.User }
+            new() { UserName = "Superadmin", Email = "superadmin@business.com", Company = company, Role = UserRole.SuperAdmin },
+            new() { UserName = "Admin", Email = "admin@business.com", Company = company, Role = UserRole.Admin },
+            new() { UserName = "Keyuser", Email = "keyuser@business.com", Company = company, Role = UserRole.KeyUser },
+            new() { UserName = "User", Email = "user@business.com", Company = company, Role = UserRole.User }
         };
+
+        var passwordHasher = new PasswordHasher<User>();
+        string defaultPassword = "Password123!"; 
+
+        foreach (var user in users)
+        {
+            user.NormalizedEmail = user.Email?.ToUpperInvariant();
+            user.NormalizedUserName = user.UserName?.ToUpperInvariant();
+
+            if (string.IsNullOrEmpty(user.SecurityStamp))
+                user.SecurityStamp = Guid.NewGuid().ToString();
+
+            if (string.IsNullOrEmpty(user.ConcurrencyStamp))
+                user.ConcurrencyStamp = Guid.NewGuid().ToString();
+
+            user.EmailConfirmed = true;
+            user.IsActive = true;
+
+            user.PasswordHash = passwordHasher.HashPassword(user, defaultPassword);
+        }
 
         // Product names with simple descriptions
         var productDefinitions = new Dictionary<string, string>();

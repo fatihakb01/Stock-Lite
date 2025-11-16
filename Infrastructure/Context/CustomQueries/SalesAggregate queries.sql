@@ -10,6 +10,19 @@ ORDER BY ProductId, PeriodType
 SELECT * FROM Products WHERE Id IS NULL
 SELECT * FROM TransactionLineItems
 
+SELECT * FROM Users WHERE UserName = 'Superadmin';
+
+SELECT * FROM Roles
+
+SELECT name FROM sys.databases;
+
+
+SELECT *
+--INTO TEMP_USERS
+FROM Users
+
+DROP TABLE Users
+
 SELECT *
 FROM SalesAggregates
 WHERE ProductId = '51440746-19b8-4d4f-99cb-d49dbf93800e'
