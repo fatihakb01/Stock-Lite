@@ -1,4 +1,6 @@
-namespace Domain.Entities;
+using Domain.Entities.Derived;
+
+namespace Domain.Entities.Core;
 
 public class Product
 {

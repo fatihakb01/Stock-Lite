@@ -1,12 +1,13 @@
 using AutoMapper;
-using Domain.Entities;
-using Application.Entities.Companies.DTOs;
-using Application.Entities.Customers.DTOs;
-using Application.Entities.Transactions.DTOs;
-using Application.Entities.Products.DTOs;
-using Application.Entities.TransactionLineItems.DTOs;
-using Application.Entities.SalesAggregates.DTOs;
-using Application.Entities.Users.DTOs;
+using Domain.Entities.Core;
+using Domain.Entities.Derived;
+using Application.Entities.Core.Companies.DTOs;
+using Application.Entities.Core.Customers.DTOs;
+using Application.Entities.Core.Transactions.DTOs;
+using Application.Entities.Core.Products.DTOs;
+using Application.Entities.Core.TransactionLineItems.DTOs;
+using Application.Entities.Derived.SalesAggregates.DTOs;
+using Application.Entities.Core.Users.DTOs;
 
 namespace Application.Core;
 

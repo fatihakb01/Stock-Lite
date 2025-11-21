@@ -1,5 +1,5 @@
 using System.Data;
-using Domain.Entities;
+using Domain.Entities.Derived;
 using Domain.Enums;
 using Domain.Interfaces;
 using Infrastructure.Context;

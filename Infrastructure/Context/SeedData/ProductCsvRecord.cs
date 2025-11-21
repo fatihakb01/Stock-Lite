@@ -1,4 +1,4 @@
-namespace Infrastructure.Context;
+namespace Infrastructure.Context.SeedData;
 
 public class ProductCsvRecord
 {

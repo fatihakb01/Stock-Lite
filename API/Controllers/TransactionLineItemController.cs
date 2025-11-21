@@ -1,6 +1,6 @@
-using Application.Entities.TransactionLineItems.DTOs;
-using Application.Entities.TransactionLineItems.Features.Commands;
-using Application.Entities.TransactionLineItems.Features.Queries;
+using Application.Entities.Core.TransactionLineItems.DTOs;
+using Application.Entities.Core.TransactionLineItems.Features.Commands;
+using Application.Entities.Core.TransactionLineItems.Features.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

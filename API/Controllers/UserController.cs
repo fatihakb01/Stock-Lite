@@ -1,6 +1,6 @@
-using Application.Entities.Users.DTOs;
-using Application.Entities.Users.Features.Commands;
-using Application.Entities.Users.Features.Queries;
+using Application.Entities.Core.Users.DTOs;
+using Application.Entities.Core.Users.Features.Commands;
+using Application.Entities.Core.Users.Features.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

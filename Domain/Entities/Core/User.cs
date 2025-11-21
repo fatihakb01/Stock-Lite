@@ -1,7 +1,7 @@
 using Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 
-namespace Domain.Entities;
+namespace Domain.Entities.Core;
 
 public class User : IdentityUser
 {

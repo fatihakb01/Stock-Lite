@@ -1,4 +1,4 @@
-using Domain.Entities;
+using Domain.Entities.Core;
 using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using CsvHelper;
@@ -6,7 +6,7 @@ using System.Globalization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 
-namespace Infrastructure.Context;
+namespace Infrastructure.Context.SeedData;
 
 public static class DataSeeder
 {

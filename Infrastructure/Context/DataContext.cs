@@ -1,4 +1,5 @@
-using Domain.Entities;
+using Domain.Entities.Core;
+using Domain.Entities.Derived;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

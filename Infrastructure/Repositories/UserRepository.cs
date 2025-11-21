@@ -1,4 +1,4 @@
-using Domain.Entities;
+using Domain.Entities.Core;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;

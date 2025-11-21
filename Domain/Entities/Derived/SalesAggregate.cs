@@ -1,6 +1,7 @@
 using Domain.Enums;
+using Domain.Entities.Core;
 
-namespace Domain.Entities;
+namespace Domain.Entities.Derived;
 
 public class SalesAggregate
 {

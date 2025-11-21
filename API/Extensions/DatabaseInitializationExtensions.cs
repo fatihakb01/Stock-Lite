@@ -1,5 +1,6 @@
 using Infrastructure.Context;
 using Infrastructure.Context.DatabaseInitializer;
+using Infrastructure.Context.SeedData;
 
 namespace API.Extensions;
 

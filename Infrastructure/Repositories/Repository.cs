@@ -12,11 +12,6 @@ public class Repository<T>(DataContext context)
     {
         await context.Set<T>().AddAsync(entity, cancellationToken);
     }
-
-    // public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken)
-    // {
-    //     return await context.Set<T>().Where(predicate).ToListAsync(cancellationToken);
-    // }
     public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken)
     {
         return await context.Set<T>().AnyAsync(predicate, cancellationToken);

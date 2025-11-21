@@ -1,6 +1,6 @@
-using Application.Entities.SalesAggregates.Features.Commands;
-using Application.Entities.SalesAggregates.Features.Queries;
-using Domain.Entities;
+using Application.Entities.Derived.SalesAggregates.Features.Commands;
+using Application.Entities.Derived.SalesAggregates.Features.Queries;
+using Domain.Entities.Derived;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

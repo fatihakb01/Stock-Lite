@@ -1,6 +1,6 @@
-using Application.Entities.Transactions.DTOs;
-using Application.Entities.Transactions.Features.Commands;
-using Application.Entities.Transactions.Features.Queries;
+using Application.Entities.Core.Transactions.DTOs;
+using Application.Entities.Core.Transactions.Features.Commands;
+using Application.Entities.Core.Transactions.Features.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
