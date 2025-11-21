@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using CsvHelper;
 using System.Globalization;
 using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
+using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Context;
 
@@ -13,7 +13,7 @@ public static class DataSeeder
     private const int BatchSize = 10_000;
     private const int TotalTransactions = 1_000_000;
 
-    public static async Task SeedAsync(DataContext context)
+    public static async Task SeedAsync(DataContext context, IConfiguration config)
     {
         if (await context.Companies.AsNoTracking().AnyAsync())
             return;
@@ -61,8 +61,8 @@ public static class DataSeeder
         // Product names with simple descriptions
         var productDefinitions = new Dictionary<string, string>();
 
-        string path = "C:/CSharp/Stock-Lite/Infrastructure/Context/SeedData/CustomData/modified_products.csv";
-        productDefinitions = LoadProductsFromCsv(path);
+        var productPath = config["SeedData:Product"]!;
+        productDefinitions = LoadProductsFromCsv(productPath);
 
         var products = productDefinitions.Select((pd, index) => new Product
         {

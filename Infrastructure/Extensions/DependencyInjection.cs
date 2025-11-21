@@ -11,7 +11,6 @@ using Domain.Interfaces;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Resend;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace Infrastructure.Extensions;
 

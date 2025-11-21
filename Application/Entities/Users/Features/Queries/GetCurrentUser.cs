@@ -1,7 +1,6 @@
 using Application.Core;
 using Application.Entities.Users.DTOs;
 using AutoMapper;
-using Domain.Entities;
 using Domain.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Http;

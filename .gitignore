@@ -6,8 +6,13 @@
 # dotenv files
 .env
 
+# ignore notes
+front-end-log.txt
+back-end-log.txt
+
 # app settings
 appsettings.json
+appsettings.Development.json
 
 # User-specific files
 *.rsuser

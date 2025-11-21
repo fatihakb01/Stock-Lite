@@ -1,6 +1,5 @@
 using Infrastructure.Context;
 using Infrastructure.Context.DatabaseInitializer;
-using Infrastructure.Context.SeedData;
 
 namespace API.Extensions;
 
@@ -13,6 +12,7 @@ public static class DatabaseInitializationExtensions
         var services = scope.ServiceProvider;
         var context = services.GetRequiredService<DataContext>();
         var logger = services.GetRequiredService<ILogger<Program>>();
+        var config = services.GetRequiredService<IConfiguration>();
 
         try
         {
@@ -26,8 +26,7 @@ public static class DatabaseInitializationExtensions
 
         if (app.Environment.IsDevelopment())
         {
-            await DataSeeder.SeedAsync(context);
-            //await ModifyData.RunAsync(context);
+            await DataSeeder.SeedAsync(context, config);
         }
     }
 }

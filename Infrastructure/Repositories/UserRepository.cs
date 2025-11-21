@@ -1,23 +1,24 @@
 using Domain.Entities;
 using Domain.Interfaces;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Resend;
 
 namespace Infrastructure.Repositories;
 
-public class UserRepository : IUserRepository
+public class UserRepository(
+    UserManager<User> userManager, 
+    IResend resend, 
+    IConfiguration config, 
+    IWebHostEnvironment env
+) : IUserRepository
 {
-    private readonly UserManager<User> _userManager;
-    private readonly IResend _resend;
-    private readonly IConfiguration _config;
-
-    public UserRepository(UserManager<User> userManager, IResend resend, IConfiguration config)
-    {
-        _userManager = userManager;
-        _resend = resend;
-        _config = config;
-    }
+    private readonly UserManager<User> _userManager = userManager;
+    private readonly IResend _resend = resend;
+    private readonly IConfiguration _config = config;
+    private readonly IWebHostEnvironment _env = env;
 
     #region Identity Operations
 
@@ -75,12 +76,21 @@ public class UserRepository : IUserRepository
     {
         var message = new EmailMessage
         {
-            From = _config["Email:From"] ?? "no-reply@yourapp.com",
+            From = _config["Resend:Email:From"]!,
             Subject = subject,
             HtmlBody = body
         };
 
-        message.To.Add(email);
+        if (_env.IsDevelopment())
+        {
+            // Only send emails to yourself in dev mode
+            message.To.Add(_config["Resend:Email:To"]!);
+        }
+        else
+        { 
+            // Send to actual user in production
+            message.To.Add(email);
+        }
 
         await _resend.EmailSendAsync(message);
     }
