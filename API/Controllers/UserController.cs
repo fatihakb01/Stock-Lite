@@ -29,7 +29,7 @@ public class UserController(IMediator mediator) : BaseApiController(mediator)
     }
 
     [HttpPost("reset-password")]
-    public async Task<ActionResult<UserDto>> ResetPassword([FromBody] ForgotPasswordDto dto)
+    public async Task<ActionResult<Unit>> ResetPassword([FromBody] ForgotPasswordDto dto)
     {
         return HandleResult(await Mediator.Send(new ResetPassword.Command { Dto = dto }));
     }
@@ -52,7 +52,6 @@ public class UserController(IMediator mediator) : BaseApiController(mediator)
         return HandleResult(await Mediator.Send(new GetCurrentUser.Query()));
     }
 
-    [Authorize(Policy = "SuperAdminOnly")]
     [HttpGet("{id}")]
     public async Task<ActionResult<UserDto>> GetUserById(Guid id)
     {

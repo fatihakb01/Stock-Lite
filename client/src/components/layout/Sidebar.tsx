@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { NavLink } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 import {
   Menu,
   Home,
   ShoppingBag,
   Users,
   CreditCard,
+  LogOut,
 } from "lucide-react";
 
 import {
@@ -27,18 +28,26 @@ import { Brightness4, Brightness7 } from "@mui/icons-material";*/
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
   const theme = useTheme();
+  const navigate = useNavigate();
   /*const { mode, toggleMode } = useColorMode();*/
 
   const toggleDrawer = (newOpen: boolean) => () => setOpen(newOpen);
 
   const menuItems = [
-    { text: "Home", icon: <Home />, to: "/" },
+    { text: "Home", icon: <Home />, to: "/home" },
     { text: "Products", icon: <ShoppingBag />, to: "/products" },
     { text: "Customers", icon: <Users />, to: "/customers" },
     { text: "Transactions", icon: <CreditCard />, to: "/transactions" },
+    { text: "User Management", icon: <Users/>, to: "/users"}
   ];
 
   const iconColor = theme.palette.mode === "light" ? "black" : "white";
+
+  // Logout handler
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
 
   return (
     <Box>
@@ -57,7 +66,7 @@ export default function Sidebar() {
         {<Menu />}
       </IconButton>
 
-      {/* Drawer itself */}
+      {/* Drawer */}
       <Drawer anchor="left" open={open} onClose={toggleDrawer(false)}>
         <Box
           sx={{ width: 250 }}
@@ -77,7 +86,7 @@ export default function Sidebar() {
           </Box>
           <Divider />
           
-          {/* Show each page in the side bar */}
+          {/* Main menu items */}
           <List>
             {menuItems.map((item) => (
               <ListItem key={item.text} disablePadding>
@@ -101,7 +110,25 @@ export default function Sidebar() {
               </ListItem>
             ))}
           </List>
+
           <Divider />
+
+          {/* Sign Out Button at Bottom */}
+          <Box sx={{ p: 1 }}>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleLogout();
+                }}
+              >
+                <ListItemIcon>
+                  <LogOut />
+                </ListItemIcon>
+                <ListItemText primary="Sign Out" />
+              </ListItemButton>
+            </ListItem>
+          </Box>
 
           {/* Enabling/disabling dark mode */}
           {/*<ListItem disablePadding>

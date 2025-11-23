@@ -51,7 +51,7 @@ export default function ProductsPage() {
     >
       {/* DataGrid Table */}
       <Box flex={1}>
-        <Typography variant="h5" mb={2}>
+        <Typography variant="h5" mb={2} ml={5}>
           Products
         </Typography>
 

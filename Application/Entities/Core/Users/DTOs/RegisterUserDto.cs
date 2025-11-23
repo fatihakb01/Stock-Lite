@@ -7,6 +7,7 @@ public class RegisterUserDto
     public required string Password { get; set; } = "";
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
+    public string? PhoneNumber { get; set; }
     public required string Role { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; } = true;

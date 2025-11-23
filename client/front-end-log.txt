@@ -10,6 +10,8 @@ Some of the installed packages:
 - npm install @mui/icons-material @mui/material @emotion/styled @emotion/react
 - npm install @mui/x-data-grid
 - npm i recharts
+- npm install zod
+- npm install @hookform/resolvers
 
 🧩 1. What Axios Interceptors Are and Why They’re Useful
 An Axios interceptor lets you “intercept” every request or response before it’s actually sent or processed 
