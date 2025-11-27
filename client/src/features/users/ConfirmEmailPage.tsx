@@ -43,7 +43,7 @@ export default function ConfirmEmailPage() {
       {
         onSuccess: (data) => {
           // Check if email has already been confirmed
-          if (data.emailConfirmed) {
+          if (data.alreadyConfirmed) {
             setError("Your email has already been confirmed.");
             return;
           }

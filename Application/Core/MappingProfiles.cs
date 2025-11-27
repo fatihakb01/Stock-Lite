@@ -53,7 +53,6 @@ public class MappingProfiles : Profile
         CreateMap<RegisterUserDto, User>();
         CreateMap<LoginUserDto, User>();
         CreateMap<ConfirmEmailDto, User>();
-        // CreateMap<ChangePasswordDto, User>();
-        // CreateMap<ForgotPasswordDto, User>();
+        CreateMap<EditUserDto, User>();
     }
 }

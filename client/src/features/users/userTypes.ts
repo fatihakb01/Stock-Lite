@@ -31,6 +31,11 @@ export type AuthResponse = {
   token: string
 }
 
+export type ConfirmEmailResult = {
+  email: string,
+  alreadyConfirmed: boolean
+}
+
 export type RegisterUserDto = {
   firstName?: string
   lastName?: string
@@ -40,6 +45,15 @@ export type RegisterUserDto = {
   phoneNumber?: string
   role: string
   companyId: string
+}
+
+export type EditUserDto = {
+  firstName?: string
+  lastName?: string
+  userName: string
+  email: string
+  phoneNumber?: string
+  role: string
 }
 
 export type ForgotPasswordDto = {

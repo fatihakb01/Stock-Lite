@@ -22,6 +22,20 @@ public class UserController(IMediator mediator) : BaseApiController(mediator)
         return HandleResult(await Mediator.Send(new RegisterUser.Command { RegisterUserDto = registerUserDto }));
     }
 
+    [Authorize(Policy = "SuperAdminOnly")]
+    [HttpPut("edit/{id}")]
+    public async Task<ActionResult<UserDto>> EditUser(Guid id, [FromBody] EditUserDto editUserDto)
+    {
+        return HandleResult(await Mediator.Send(new EditUser.Command { Id = id, EditUserDto = editUserDto }));
+    }
+
+    [Authorize(Policy = "SuperAdminOnly")]
+    [HttpDelete("delete/{id}")]
+    public async Task<ActionResult<Unit>> DeleteUser(Guid id,[FromQuery] Guid companyId)
+    {
+        return HandleResult(await Mediator.Send(new DeleteUser.Command { Id = id, CompanyId = companyId }));
+    }
+
     [HttpPost("confirm-email")]
     public async Task<ActionResult<UserDto>> ConfirmEmail([FromBody] ConfirmEmailDto dto)
     {

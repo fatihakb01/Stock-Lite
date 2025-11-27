@@ -7,7 +7,9 @@ import {
   getCurrentUser,
   resetPassword,
   changePassword,
-  confirmEmail
+  confirmEmail,
+  editUser,
+  deleteUser
 } from "../api/usersApi";
 
 import type {
@@ -17,7 +19,9 @@ import type {
   ChangePasswordDto,
   ConfirmEmailDto,
   User,
-  AuthResponse
+  AuthResponse,
+  EditUserDto,
+  ConfirmEmailResult
 } from "../features/users/userTypes";
 
 // LOGIN
@@ -35,6 +39,31 @@ export const useRegisterUser = () => {
     mutationFn: registerUser,
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ["users"] }),
+  });
+};
+
+// EDIT USER
+export const useEditUser = (id: string | null) => {
+  const queryClient = useQueryClient();
+
+  return useMutation<User, Error, EditUserDto>({
+    mutationFn: (data) => editUser(id!, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["user", id] });
+    },
+  });
+};
+
+// DELETE USER
+export const useDeleteUser = (id: string | null) => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void>({
+    mutationFn: () => deleteUser(id!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    }
   });
 };
 
@@ -80,7 +109,7 @@ export const useChangePassword = () => {
 
 // CONFIRM EMAIL
 export const useConfirmEmail = () => {
-  return useMutation<User, Error, ConfirmEmailDto>({
+  return useMutation<ConfirmEmailResult, Error, ConfirmEmailDto>({
     mutationFn: confirmEmail
   });
 };

@@ -28,7 +28,7 @@ public class DeleteProduct
             var result = await repository.SaveChangesAsync(cancellationToken);
 
             if (!result)
-                return Result<Unit>.Failure("Faild to delete product", 400);
+                return Result<Unit>.Failure("Failed to delete product", 400);
 
             return Result<Unit>.Success(Unit.Value);
         }

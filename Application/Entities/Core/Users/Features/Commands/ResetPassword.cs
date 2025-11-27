@@ -22,9 +22,6 @@ public class ResetPassword
             if (user == null)
                 return Result<Unit>.Failure("Email not found.", 404);
 
-            if (user.EmailConfirmed)
-                return Result<Unit>.Failure("Email has already been confirmed.", 400);
-
             var token = await userRepository.GeneratePasswordResetTokenAsync(user);
 
             var link = $"{config["ClientAppUrl"]}/change-password?userId={user.Id}&token={Uri.EscapeDataString(token)}";

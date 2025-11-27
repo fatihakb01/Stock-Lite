@@ -6,7 +6,9 @@ import type {
   User,
   ForgotPasswordDto,
   ChangePasswordDto,
-  ConfirmEmailDto
+  ConfirmEmailDto,
+  EditUserDto,
+  ConfirmEmailResult
 } from "../features/users/userTypes";
 
 // LOGIN
@@ -21,8 +23,19 @@ export const registerUser = async (data: RegisterUserDto): Promise<User> => {
   return res.data;
 };
 
+// EDIT
+export const editUser = async (id: string, data: EditUserDto): Promise<User> => {
+  const res = await api.put(`/user/edit/${id}`, data);
+  return res.data;
+};
+
+// DELETE
+export const deleteUser = async (id: string): Promise<void> => {
+  await api.delete(`/user/delete/${id}`);
+};
+
 // CONFIRM EMAIL
-export const confirmEmail = async (data: ConfirmEmailDto): Promise<User> => {
+export const confirmEmail = async (data: ConfirmEmailDto): Promise<ConfirmEmailResult> => {
   const res = await api.post("/user/confirm-email", data);
   return res.data;
 };
