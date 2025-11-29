@@ -12,6 +12,7 @@ Some of the installed packages:
 - npm i recharts
 - npm install zod
 - npm install @hookform/resolvers
+- npm install react-hot-toast
 
 🧩 1. What Axios Interceptors Are and Why They’re Useful
 An Axios interceptor lets you “intercept” every request or response before it’s actually sent or processed 

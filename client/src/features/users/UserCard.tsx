@@ -11,9 +11,9 @@ export default function UserCard({ user, onClick }: { user: User; onClick: () =>
             <Avatar sx={{ width: 64, height: 64, mb: 1 }} />
 
             <Typography variant="h6">{user.userName}</Typography>
-            <Typography color="text.secondary">{user.email}</Typography>
+            {/* <Typography color="text.secondary">{user.email}</Typography> */}
             <Typography mt={1} fontSize={14}>
-              {roleMap[user.role]}
+              {roleMap[Number(user.role)]}
             </Typography>
 
             <Typography fontSize={12} color="text.secondary" mt={1}>

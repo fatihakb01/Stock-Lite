@@ -14,6 +14,10 @@ export default function UsersPage() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
 
+  const openUserDialog = (id: string) => {
+    setSelectedUserId(id);
+  };
+
   return (
     <Box>
       <Typography variant="h5" mb={2}>User Management</Typography>
@@ -51,6 +55,7 @@ export default function UsersPage() {
       <NewUserDialog
         open={createOpen}
         onClose={() => setCreateOpen(false)}
+        onUserCreated={openUserDialog}
       />
     </Box>
   );

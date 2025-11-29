@@ -4,7 +4,6 @@ import {
   Typography,
   TextField,
   Button,
-  Alert,
   CircularProgress
 } from "@mui/material";
 
@@ -18,9 +17,13 @@ import {
 
 import { useResetPassword } from "../../hooks/useUsers";
 import { useState } from "react";
+import FormInfo from "../../components/forms/FormInfo";
+import FormError from "../../components/forms/FormError";
 
 export default function ForgotPasswordPage() {
   const resetPasswordMutation = useResetPassword();
+
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   const {
@@ -36,9 +39,21 @@ export default function ForgotPasswordPage() {
     resetPasswordMutation.mutate(values, {
       onSuccess: () => {
         setSuccess(true);
+      },
+      onError: (err: any) => {
+        console.error("Failed to create user:", err);
+        if (Array.isArray(err)) {
+          // Validation errors from backend (400)
+          setErrorMessage(err.join(", "));
+        } else {
+          setErrorMessage(
+            err?.response?.data?.message ?? "Failed to create user."
+          );
+        }
       }
     });
   };
+
 
   return (
     <Box
@@ -59,17 +74,12 @@ export default function ForgotPasswordPage() {
 
         {/* Success Message */}
         {success && (
-          <Alert severity="info" sx={{ mb: 2 }}>
-            If an account with that email exists, you will receive an email with password reset instructions.
-          </Alert>
+          <FormInfo message="If an account with that email exists, you will receive an email with password reset instructions." />
         )}
 
         {/* Error Message */}
         {resetPasswordMutation.isError && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {resetPasswordMutation.error?.message ??
-              "Something went wrong. Please try again."}
-          </Alert>
+          <FormError message={errorMessage} />
         )}
 
         <form onSubmit={handleSubmit(onSubmit)}>

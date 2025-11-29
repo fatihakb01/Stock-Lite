@@ -13,12 +13,15 @@ import {
   Typography,
   CircularProgress,
 } from "@mui/material";
+import FormError from "../../components/forms/FormError";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const { mutateAsync: loginUser } = useLogin();
 
   const [notVerified, setNotVerified] = useState(false);
+
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const {
     control,
@@ -45,6 +48,15 @@ export default function LoginPage() {
     } catch (err: any) {
       if (err.message === "NotAllowed") {
         setNotVerified(true);
+        setErrorMessage("Your email is not verified. Please confirm your email.")
+      } else {
+        if (Array.isArray(err)) {
+          setErrorMessage(err.join(", "));
+        } else {
+          setErrorMessage(
+            err?.response?.data?.message ?? "Email or password is incorrect."
+          );
+        }
       }
     }
   };
@@ -71,6 +83,7 @@ export default function LoginPage() {
           borderRadius: 3,
         }}
       >
+
         {/* Header */}
         <Box
           display="flex"
@@ -83,20 +96,14 @@ export default function LoginPage() {
           <Typography variant="h4">Login</Typography>
         </Box>
 
+        {/* GLOBAL FORM ERROR */}
+        <FormError message={errorMessage} />
+
         {/* Email */}
-        <TextInput
-          name="email"
-          label="Email"
-          control={control}
-        />
+        <TextInput name="email" label="Email" control={control} />
 
         {/* Password */}
-        <TextInput
-          name="password"
-          label="Password"
-          type="password"
-          control={control}
-        />
+        <TextInput name="password" label="Password" type="password" control={control} />
 
         {/* Submit Button */}
         <Button
@@ -110,30 +117,12 @@ export default function LoginPage() {
           {isSubmitting ? "Logging in..." : "Login"}
         </Button>
 
-        {/* If email not verified */}
-        {notVerified ? (
-          <Box textAlign="center">
-            <Typography color="error" mb={1}>
-              Your email is not verified.  
-              Please confirm your email.
-            </Typography>
-
-            {/* Add resend confirmation later */}
-          </Box>
-        ) : (
-          <>
-            {/* Forgot password */}
-            <Typography textAlign="center">
-              Forgot password?{" "}
-              <Link to="/forgot-password">Click here</Link>
-            </Typography>
-
-            {/* Register link */}
-            {/* <Typography textAlign="center">
-              Don't have an account?{" "}
-              <Link to="/register">Sign up</Link>
-            </Typography> */}
-          </>
+        {/* If email not verified → hide forgot password */}
+        {!notVerified && (
+          <Typography textAlign="center">
+            Forgot password?{" "}
+            <Link to="/forgot-password">Click here</Link>
+          </Typography>
         )}
       </Paper>
     </Box>

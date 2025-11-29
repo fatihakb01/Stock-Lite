@@ -5,8 +5,7 @@ import {
   TextField,
   Typography,
   Paper,
-  CircularProgress,
-  Alert
+  CircularProgress
 } from "@mui/material";
 
 import { useForm } from "react-hook-form";
@@ -14,11 +13,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useChangePassword } from "../../hooks/useUsers";
 import { changePasswordSchema, type ChangePasswordFormValues } from "./schemas/changePasswordSchema";
 import { useState } from "react";
+import FormError from "../../components/forms/FormError";
+import FormSuccess from "../../components/forms/FormSuccess";
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [success, setSuccess] = useState(false);
+
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Extract URL params
   const userId = searchParams.get("userId");
@@ -42,12 +45,15 @@ export default function ResetPasswordPage() {
   if (!userId || !token) {
     return (
       <Box p={4} display="flex" justifyContent="center" alignItems="center">
-        <Alert severity="error">Invalid password reset link.</Alert>
+        <FormError message="Invalid password reset link." />
       </Box>
     );
   }
 
   const onSubmit = (values: ChangePasswordFormValues) => {
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
     changePasswordMutation.mutate(
       {
         userId,
@@ -56,12 +62,21 @@ export default function ResetPasswordPage() {
       },
       {
         onSuccess: () => {
-          setSuccess(true);
+          setSuccessMessage("Password changed successfully. You will be redirected to the login page...");
   
           // Redirect after 2.5 seconds
           setTimeout(() => {
             navigate("/login?passwordReset=success");
           }, 2500);
+        }, 
+        onError: (err: any) => {
+          if (Array.isArray(err)) {
+            setErrorMessage(err.join(", "));
+          } else {
+            setErrorMessage(
+              err?.response?.data?.message ?? "Failed to change password."
+            );
+          }
         }
       }
     );
@@ -106,16 +121,11 @@ export default function ResetPasswordPage() {
           />
 
           {changePasswordMutation.isError && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {changePasswordMutation.error?.message ??
-                "Failed to reset password."}
-            </Alert>
+            <FormError message={errorMessage} />
           )}
 
-          {success && (
-            <Alert severity="success" sx={{ mt: 2 }}>
-                Password successfully changed! Redirecting to login…
-            </Alert>
+          {changePasswordMutation.isSuccess && (
+            <FormSuccess message={successMessage} />
           )}
 
           <Button

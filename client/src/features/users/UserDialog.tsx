@@ -17,6 +17,8 @@ import { useEditUser, useDeleteUser } from "../../hooks/useUsers";
 import { userSchema, type UserFormValues } from "./schemas/userSchema";
 import { roleMap } from "./roleMap";
 import { useEffect, useState } from "react";
+import FormError from "../../components/forms/FormError";
+import FormSuccess from "../../components/forms/FormSuccess";
 
 export default function UserDialog({
   open,
@@ -33,11 +35,13 @@ export default function UserDialog({
   const deleteUserMutation = useDeleteUser(userId);
 
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const isSuperAdmin = currentUser && roleMap[Number(currentUser.role)] === "SuperAdmin";
   const sameUserSelected = user?.id === currentUser?.id;
 
-  const { handleSubmit, reset, register } = useForm<UserFormValues>({
+  const { handleSubmit, reset, register, formState: { errors }} = useForm<UserFormValues>({
     resolver: zodResolver(userSchema),
     defaultValues: {
       firstName: "",
@@ -63,16 +67,32 @@ export default function UserDialog({
     }
   }, [user]);
 
+  // Reset messages after re-opening a form
+  useEffect(() => {
+    if (open) {
+      setErrorMessage(null);
+      setSuccessMessage(null);
+    }
+  }, [open, userId]);
+
   const onSubmit = (values: UserFormValues) => {
     if (!isSuperAdmin || !userId) return;
 
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
     editUserMutation.mutate(values, {
       onSuccess: () => {
-        console.log("User updated");
-        onClose();
+        setSuccessMessage("User updated successfully.");
       },
-      onError: (err) => {
-        console.error("Failed to update user:", err);
+      onError: (err: any) => {
+        if (Array.isArray(err)) {
+          setErrorMessage(err.join(", "));
+        } else {
+          setErrorMessage(
+            err?.response?.data?.message ?? "Failed to update user."
+          );
+        }
       }
     });
   };
@@ -80,13 +100,21 @@ export default function UserDialog({
   const handleDelete = () => {
     if (!userId) return;
 
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
     deleteUserMutation.mutate(undefined, {
       onSuccess: () => {
-        console.log("User deleted");
+        setSuccessMessage("User deleted successfully.");
         setConfirmDeleteOpen(false);
         onClose();
       },
-      onError: (err) => console.error("Delete failed", err),
+      onError: (err: any) => {
+        console.error("Delete failed:", err);
+        setErrorMessage(
+          err?.response?.data?.message ?? "Failed to delete user."
+        );
+      }
     });
   };
 
@@ -101,12 +129,18 @@ export default function UserDialog({
               <CircularProgress />
             </Box>
           ) : (
+            <>
+            <FormError message={errorMessage} />
+            <FormSuccess message={successMessage} />
+            
             <form id="user-form" onSubmit={handleSubmit(onSubmit)}>
               <TextField
                 label="First Name"
                 fullWidth
                 margin="normal"
                 {...register("firstName")}
+                error={!!errors.firstName}
+                helperText={errors.firstName?.message}
                 disabled={!isSuperAdmin}
               />
 
@@ -115,6 +149,8 @@ export default function UserDialog({
                 fullWidth
                 margin="normal"
                 {...register("lastName")}
+                error={!!errors.lastName}
+                helperText={errors.lastName?.message}
                 disabled={!isSuperAdmin}
               />
 
@@ -123,6 +159,8 @@ export default function UserDialog({
                 fullWidth
                 margin="normal"
                 {...register("userName")}
+                error={!!errors.userName}
+                helperText={errors.userName?.message}
                 disabled={!isSuperAdmin}
               />
 
@@ -131,6 +169,8 @@ export default function UserDialog({
                 fullWidth
                 margin="normal"
                 {...register("email")}
+                error={!!errors.email}
+                helperText={errors.email?.message}
                 disabled={!isSuperAdmin}
               />
 
@@ -139,6 +179,8 @@ export default function UserDialog({
                 fullWidth
                 margin="normal"
                 {...register("phoneNumber")}
+                error={!!errors.phoneNumber}
+                helperText={errors.phoneNumber?.message}
                 disabled={!isSuperAdmin}
               />
 
@@ -148,6 +190,8 @@ export default function UserDialog({
                 fullWidth
                 margin="normal"
                 {...register("role")}
+                error={!!errors.role}
+                helperText={errors.role?.message}
                 defaultValue={roleMap[Number(user.role)]}
                 disabled={!isSuperAdmin || sameUserSelected}
               >
@@ -158,6 +202,7 @@ export default function UserDialog({
                 ))}
               </TextField>
             </form>
+            </>
           )}
         </DialogContent>
 

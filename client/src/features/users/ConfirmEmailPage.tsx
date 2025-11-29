@@ -7,9 +7,10 @@ import {
   Paper,
   Typography,
   Button,
-  CircularProgress,
-  Alert
+  CircularProgress
 } from "@mui/material";
+import FormError from "../../components/forms/FormError";
+import FormSuccess from "../../components/forms/FormSuccess";
 
 export default function ConfirmEmailPage() {
   const [searchParams] = useSearchParams();
@@ -26,9 +27,7 @@ export default function ConfirmEmailPage() {
   if (!userId || !token) {
     return (
       <Container maxWidth="sm">
-        <Alert severity="error" sx={{ mt: 4 }}>
-          Invalid confirmation link.
-        </Alert>
+        <FormError message="Invalid confirmation link." />
       </Container>
     );
   }
@@ -85,15 +84,11 @@ export default function ConfirmEmailPage() {
           </Typography>
 
           {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
+            <FormError message={error} />
           )}
 
           {message && (
-            <Alert severity="success" sx={{ mb: 2 }}>
-              {message}
-            </Alert>
+            <FormSuccess message={message} />
           )}
 
           <Button

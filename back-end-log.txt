@@ -9,6 +9,8 @@ Git commands
 - git pull origin main
 - git merge feature/auth
 - git push origin main
+3. Delete branch
+- git branch -d <branch_name>
 
 Set-up project
 - dotnet new sln = creating a solution file template.
