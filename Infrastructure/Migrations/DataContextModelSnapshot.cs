@@ -22,7 +22,7 @@ namespace Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Domain.Entities.Company", b =>
+            modelBuilder.Entity("Domain.Entities.Core.Company", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -63,7 +63,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("Companies");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Customer", b =>
+            modelBuilder.Entity("Domain.Entities.Core.Customer", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -108,7 +108,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("Customers");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Product", b =>
+            modelBuilder.Entity("Domain.Entities.Core.Product", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -149,45 +149,7 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Domain.Entities.SalesAggregate", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("PeriodEndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("PeriodStartDate")
-                        .HasColumnType("date");
-
-                    b.Property<string>("PeriodType")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("TotalQuantity")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TotalRevenue")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("SalesAggregates", t =>
-                        {
-                            t.HasCheckConstraint("CK_Period_Start_End_Date", "[PeriodStartDate] <= [PeriodEndDate]");
-
-                            t.HasCheckConstraint("CK_Total_Quantity", "[TotalQuantity] >= 0");
-                        });
-                });
-
-            modelBuilder.Entity("Domain.Entities.StockLevel", b =>
+            modelBuilder.Entity("Domain.Entities.Core.StockLevel", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -219,7 +181,7 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Domain.Entities.Transaction", b =>
+            modelBuilder.Entity("Domain.Entities.Core.Transaction", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -252,7 +214,7 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Domain.Entities.TransactionLineItem", b =>
+            modelBuilder.Entity("Domain.Entities.Core.TransactionLineItem", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -283,7 +245,7 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Domain.Entities.User", b =>
+            modelBuilder.Entity("Domain.Entities.Core.User", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -372,6 +334,37 @@ namespace Infrastructure.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.Derived.SalesAggregate", b =>
+                {
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PeriodType")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<DateTime>("PeriodStartDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("PeriodEndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TotalQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalRevenue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("ProductId", "PeriodType", "PeriodStartDate");
+
+                    b.ToTable("SalesAggregates", t =>
+                        {
+                            t.HasCheckConstraint("CK_Period_Start_End_Date", "[PeriodStartDate] <= [PeriodEndDate]");
+
+                            t.HasCheckConstraint("CK_Total_Quantity", "[TotalQuantity] >= 0");
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -507,9 +500,9 @@ namespace Infrastructure.Migrations
                     b.ToTable("UserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Entities.Customer", b =>
+            modelBuilder.Entity("Domain.Entities.Core.Customer", b =>
                 {
-                    b.HasOne("Domain.Entities.Company", "Company")
+                    b.HasOne("Domain.Entities.Core.Company", "Company")
                         .WithMany("Customers")
                         .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -518,9 +511,9 @@ namespace Infrastructure.Migrations
                     b.Navigation("Company");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Product", b =>
+            modelBuilder.Entity("Domain.Entities.Core.Product", b =>
                 {
-                    b.HasOne("Domain.Entities.Company", "Company")
+                    b.HasOne("Domain.Entities.Core.Company", "Company")
                         .WithMany("Products")
                         .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -529,31 +522,20 @@ namespace Infrastructure.Migrations
                     b.Navigation("Company");
                 });
 
-            modelBuilder.Entity("Domain.Entities.SalesAggregate", b =>
+            modelBuilder.Entity("Domain.Entities.Core.StockLevel", b =>
                 {
-                    b.HasOne("Domain.Entities.Product", "Product")
-                        .WithMany("SalesAggregates")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("Domain.Entities.StockLevel", b =>
-                {
-                    b.HasOne("Domain.Entities.Product", "Product")
+                    b.HasOne("Domain.Entities.Core.Product", "Product")
                         .WithOne("StockLevel")
-                        .HasForeignKey("Domain.Entities.StockLevel", "ProductId")
+                        .HasForeignKey("Domain.Entities.Core.StockLevel", "ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Transaction", b =>
+            modelBuilder.Entity("Domain.Entities.Core.Transaction", b =>
                 {
-                    b.HasOne("Domain.Entities.Customer", "Customer")
+                    b.HasOne("Domain.Entities.Core.Customer", "Customer")
                         .WithMany("Transactions")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -562,15 +544,15 @@ namespace Infrastructure.Migrations
                     b.Navigation("Customer");
                 });
 
-            modelBuilder.Entity("Domain.Entities.TransactionLineItem", b =>
+            modelBuilder.Entity("Domain.Entities.Core.TransactionLineItem", b =>
                 {
-                    b.HasOne("Domain.Entities.Product", "Product")
+                    b.HasOne("Domain.Entities.Core.Product", "Product")
                         .WithMany("TransactionLineItems")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Transaction", "Transaction")
+                    b.HasOne("Domain.Entities.Core.Transaction", "Transaction")
                         .WithMany("LineItems")
                         .HasForeignKey("TransactionId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -581,15 +563,26 @@ namespace Infrastructure.Migrations
                     b.Navigation("Transaction");
                 });
 
-            modelBuilder.Entity("Domain.Entities.User", b =>
+            modelBuilder.Entity("Domain.Entities.Core.User", b =>
                 {
-                    b.HasOne("Domain.Entities.Company", "Company")
+                    b.HasOne("Domain.Entities.Core.Company", "Company")
                         .WithMany("Users")
                         .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Derived.SalesAggregate", b =>
+                {
+                    b.HasOne("Domain.Entities.Core.Product", "Product")
+                        .WithMany("SalesAggregates")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -603,7 +596,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Domain.Entities.User", null)
+                    b.HasOne("Domain.Entities.Core.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -612,7 +605,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Domain.Entities.User", null)
+                    b.HasOne("Domain.Entities.Core.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -627,7 +620,7 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.User", null)
+                    b.HasOne("Domain.Entities.Core.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -636,14 +629,14 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Domain.Entities.User", null)
+                    b.HasOne("Domain.Entities.Core.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Domain.Entities.Company", b =>
+            modelBuilder.Entity("Domain.Entities.Core.Company", b =>
                 {
                     b.Navigation("Customers");
 
@@ -652,12 +645,12 @@ namespace Infrastructure.Migrations
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Customer", b =>
+            modelBuilder.Entity("Domain.Entities.Core.Customer", b =>
                 {
                     b.Navigation("Transactions");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Product", b =>
+            modelBuilder.Entity("Domain.Entities.Core.Product", b =>
                 {
                     b.Navigation("SalesAggregates");
 
@@ -666,7 +659,7 @@ namespace Infrastructure.Migrations
                     b.Navigation("TransactionLineItems");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Transaction", b =>
+            modelBuilder.Entity("Domain.Entities.Core.Transaction", b =>
                 {
                     b.Navigation("LineItems");
                 });

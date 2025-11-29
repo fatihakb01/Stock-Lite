@@ -8,7 +8,7 @@ public class SalesAggregateConfiguration : IEntityTypeConfiguration<SalesAggrega
 {
     public void Configure(EntityTypeBuilder<SalesAggregate> builder)
     {
-        builder.HasKey(sa => sa.Id);
+        builder.HasKey(s => new { s.ProductId, s.PeriodType, s.PeriodStartDate });
 
         builder.Property(sa => sa.PeriodType)
             .IsRequired()

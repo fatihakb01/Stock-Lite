@@ -5,7 +5,6 @@ namespace Domain.Entities.Derived;
 
 public class SalesAggregate
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
     public Guid ProductId { get; set; }
     public Period PeriodType { get; set; } = Period.Daily;
     public DateTime PeriodStartDate { get; set; }

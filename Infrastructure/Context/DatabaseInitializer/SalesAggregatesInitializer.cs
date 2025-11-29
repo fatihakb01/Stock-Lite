@@ -54,8 +54,8 @@ namespace Infrastructure.Context.DatabaseInitializer
                     FROM master.dbo.spt_values v
                     WHERE v.type = 'P' AND v.number < 30
                 )
-                INSERT INTO SalesAggregates (Id, ProductId, PeriodType, PeriodStartDate, PeriodEndDate, TotalQuantity, TotalRevenue)
-                SELECT NEWID(), p.Id, pr.PeriodType, pr.PeriodStartDate, pr.PeriodStartDate, 0, 0
+                INSERT INTO SalesAggregates (ProductId, PeriodType, PeriodStartDate, PeriodEndDate, TotalQuantity, TotalRevenue)
+                SELECT p.Id, pr.PeriodType, pr.PeriodStartDate, pr.PeriodStartDate, 0, 0
                 FROM Products p
                 CROSS JOIN Periods pr
                 LEFT JOIN SalesAggregates sa
@@ -86,8 +86,8 @@ namespace Infrastructure.Context.DatabaseInitializer
                     FROM master.dbo.spt_values v
                     WHERE v.type = 'P' AND v.number < 13
                 )
-                INSERT INTO SalesAggregates (Id, ProductId, PeriodType, PeriodStartDate, PeriodEndDate, TotalQuantity, TotalRevenue)
-                SELECT NEWID(), p.Id, pr.PeriodType, pr.PeriodStartDate, DATEADD(DAY, 6, pr.PeriodStartDate), 0, 0
+                INSERT INTO SalesAggregates (ProductId, PeriodType, PeriodStartDate, PeriodEndDate, TotalQuantity, TotalRevenue)
+                SELECT p.Id, pr.PeriodType, pr.PeriodStartDate, DATEADD(DAY, 6, pr.PeriodStartDate), 0, 0
                 FROM Products p
                 CROSS JOIN Periods pr
                 LEFT JOIN SalesAggregates sa
@@ -118,8 +118,8 @@ namespace Infrastructure.Context.DatabaseInitializer
                     FROM master.dbo.spt_values v
                     WHERE v.type = 'P' AND v.number < 12
                 )
-                INSERT INTO SalesAggregates (Id, ProductId, PeriodType, PeriodStartDate, PeriodEndDate, TotalQuantity, TotalRevenue)
-                SELECT NEWID(), p.Id, pr.PeriodType, pr.PeriodStartDate, EOMONTH(pr.PeriodStartDate), 0, 0
+                INSERT INTO SalesAggregates (ProductId, PeriodType, PeriodStartDate, PeriodEndDate, TotalQuantity, TotalRevenue)
+                SELECT p.Id, pr.PeriodType, pr.PeriodStartDate, EOMONTH(pr.PeriodStartDate), 0, 0
                 FROM Products p
                 CROSS JOIN Periods pr
                 LEFT JOIN SalesAggregates sa
