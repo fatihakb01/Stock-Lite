@@ -5,8 +5,9 @@ import {
   Home,
   ShoppingBag,
   Users,
-  CreditCard,
   LogOut,
+  Database,
+  CalendarCheck,
 } from "lucide-react";
 
 import {
@@ -36,8 +37,8 @@ export default function Sidebar() {
   const menuItems = [
     { text: "Home", icon: <Home />, to: "/home" },
     { text: "Products", icon: <ShoppingBag />, to: "/products" },
-    { text: "Customers", icon: <Users />, to: "/customers" },
-    { text: "Transactions", icon: <CreditCard />, to: "/transactions" },
+    { text: "Master Data", icon: <Database />, to: "/data" },
+    { text: "Scheduler", icon: <CalendarCheck />, to: "/scheduler" },
     { text: "User Management", icon: <Users/>, to: "/users"}
   ];
 

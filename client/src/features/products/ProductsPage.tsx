@@ -3,7 +3,7 @@ import { Box, Typography } from "@mui/material";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { useProducts } from "../../hooks/useProducts";
 import type { Product } from "./productTypes";
-import ProductDetailDrawer from "./components/ProductDetailDrawer";
+import ProductDetailDrawer from "../../components/drawers/ProductDetailDrawer";
 import { useCompanies } from "../../hooks/useCompanies";
 
 export default function ProductsPage() {

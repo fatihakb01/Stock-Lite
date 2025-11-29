@@ -8,9 +8,9 @@ import {
   Button,
   CircularProgress,
 } from "@mui/material";
-import { useProduct } from "../../../hooks/useProducts";
-import { useSalesAggregates } from "../../../hooks/useSalesAggregates";
-import SalesAggregateChart from "../../../components/charts/SalesAggregateChart"
+import { useProduct } from "../../hooks/useProducts";
+import { useSalesAggregates } from "../../hooks/useSalesAggregates";
+import SalesAggregateChart from "../../components/charts/SalesAggregateChart"
 import { useState } from "react";
 
 // Small reusable section wrapper for consistent layout

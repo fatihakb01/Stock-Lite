@@ -2,8 +2,6 @@ import { createBrowserRouter, RouterProvider } from "react-router";
 import LoginPage from "../features/users/LoginPage";
 import HomePage from "../features/home/HomePage";
 import ProductsPage from "../features/products/ProductsPage";
-import CustomersPage from "../features/customers/CustomersPage";
-import TransactionsPage from "../features/transactions/TransactionsPage";
 import AuthLayout from "../components/layout/AuthLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import AppLayout from "../components/layout/AppLayout";
@@ -11,6 +9,8 @@ import UsersPage from "../features/users/UsersPage";
 import ConfirmEmailPage from "../features/users/ConfirmEmailPage";
 import ChangePasswordPage from "../features/users/ChangePasswordPage";
 import ForgotPasswordPage from "../features/users/ForgotPasswordPage";
+import MasterDataPage from "../features/masterdata/MasterDataPage";
+import SchedulerPage from "../features/scheduler/SchedulerPage";
 
 const router = createBrowserRouter([
   // Public routes (no sidebar)
@@ -35,8 +35,8 @@ const router = createBrowserRouter([
     children: [
       { path: "/home", element: <HomePage /> },
       { path: "/products", element: <ProductsPage /> },
-      { path: "/customers", element: <CustomersPage /> },
-      { path: "/transactions", element: <TransactionsPage /> },
+      { path: "/data", element: <MasterDataPage /> },
+      { path: "/scheduler", element: <SchedulerPage /> },
       { path: "/users", element: <UsersPage /> }
     ]
   }
