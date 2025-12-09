@@ -14,6 +14,13 @@ public class ProductRepository : Repository<Product>, IProductRepository
         _context = context;
     }
 
+    public async Task<IEnumerable<Product>> GetByIdsAsync(IEnumerable<Guid> ids, Guid companyId, CancellationToken cancellationToken)
+    {
+        return await _context.Products
+            .Where(p => ids.Contains(p.Id) && p.CompanyId == companyId)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<Product?> GetWithStockAsync(Guid productId, Guid companyId)
     {
         return await _context.Products

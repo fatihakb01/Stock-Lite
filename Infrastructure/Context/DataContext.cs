@@ -15,8 +15,8 @@ public class DataContext(DbContextOptions<DataContext> options)
     public DbSet<StockLevel> StockLevels { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<TransactionLineItem> TransactionLineItems { get; set; }
-    // public override DbSet<User> Users { get; set; }
     public DbSet<SalesAggregate> SalesAggregates { get; set; }
+    public DbSet<Forecast> Forecasts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

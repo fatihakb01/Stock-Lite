@@ -12,6 +12,9 @@ namespace Infrastructure.Context.DatabaseInitializer
 
             // Initialize sales aggregates
             await SalesAggregatesInitializer.InitializeAsync(context, logger);
+
+            // Initialize forecasts
+            await ForecastsInitializer.InitializeAsync(context, logger);           
         }
     }
 }
