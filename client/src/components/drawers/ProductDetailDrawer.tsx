@@ -10,8 +10,9 @@ import {
 } from "@mui/material";
 import { useProduct } from "../../hooks/useProducts";
 import { useSalesAggregates } from "../../hooks/useSalesAggregates";
-import SalesAggregateChart from "../../components/charts/SalesAggregateChart"
+import SalesAndForecastChart from "../charts/SalesAndForecastChart"
 import { useState } from "react";
+import { useForecasts } from "../../hooks/useForecasts";
 
 // Small reusable section wrapper for consistent layout
 function Section({
@@ -56,6 +57,11 @@ export default function ProductDetailDrawer({
     isLoading: isLoadingSales,
     isError: isErrorSales,
   } = useSalesAggregates(periodType, productId);
+  const {
+    data: forecast,
+    isLoading: isLoadingForecasts,
+    isError: isErrorForecasts,
+  } = useForecasts(periodType, productId);
 
   return (
     <Drawer
@@ -118,11 +124,13 @@ export default function ProductDetailDrawer({
 
             {/* --- Forecast Section --- */}
             <Section title="Forecast">
-              {isLoadingSales && <Typography>Loading chart...</Typography>}
+              {(isLoadingSales || isLoadingForecasts) && <Typography>Loading chart...</Typography>}
               {isErrorSales && <Typography color="error">Failed to load sales data.</Typography>}
-              {salesaggregate && salesaggregate.length > 0 ? (
-                <SalesAggregateChart
-                  data={salesaggregate}
+              {isErrorForecasts && <Typography color="error">Failed to load forecast data.</Typography>}
+              {(salesaggregate && salesaggregate.length > 0 && forecast && forecast.length > 0) ? (
+                <SalesAndForecastChart
+                  sales={salesaggregate}
+                  forecast={forecast}
                   periodType={periodType}
                   onPeriodTypeChange={setPeriodType}
                 />

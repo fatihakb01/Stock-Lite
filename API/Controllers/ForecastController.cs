@@ -29,7 +29,5 @@ namespace API.Controllers
                 ProductIds = productIds
             }));
         }
-
-        // To DO: create delete endpoint
     }
 }

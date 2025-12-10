@@ -78,8 +78,8 @@ namespace Infrastructure.Context.DatabaseInitializer
                 ),
                 ForecastDays AS (
                     SELECT 
-                        CONVERT(DATE, SYSUTCDATETIME()) AS StartBase,
-                        v.number AS Offset
+					    'Daily' AS PeriodType,
+						DATEADD(DAY, v.number - 1, CONVERT(DATE, SYSUTCDATETIME())) AS PeriodStartDate
                     FROM master.dbo.spt_values v
                     WHERE v.type = 'P' AND v.number BETWEEN 1 AND 30
                 )
@@ -87,8 +87,8 @@ namespace Infrastructure.Context.DatabaseInitializer
                 SELECT 
                     p.Id,
                     'Daily',
-                    DATEADD(DAY, fd.Offset, fd.StartBase),
-                    DATEADD(DAY, fd.Offset, fd.StartBase),
+                    fd.PeriodStartDate,
+                    fd.PeriodStartDate,
                     ISNULL(a.AvgQty, 0),
                     ISNULL(a.AvgRev, 0),
                     0.50
@@ -97,8 +97,8 @@ namespace Infrastructure.Context.DatabaseInitializer
                 LEFT JOIN AvgDaily a ON a.ProductId = p.Id
                 LEFT JOIN Forecasts f
                     ON f.ProductId = p.Id
-                    AND f.PeriodType = 'Daily'
-                    AND f.PeriodStartDate = DATEADD(DAY, fd.Offset, fd.StartBase)
+                    AND f.PeriodType = fd.PeriodType
+                    AND f.PeriodStartDate = fd.PeriodStartDate
                 WHERE p.CompanyId = @CompanyId
                 AND f.ProductId IS NULL;
             END
@@ -135,18 +135,17 @@ namespace Infrastructure.Context.DatabaseInitializer
                     GROUP BY sa.ProductId
                 ),
                 ForecastWeeks AS (
-                    SELECT 
-                        CONVERT(DATE, SYSUTCDATETIME()) AS StartBase,
-                        v.number AS Offset
+                    SELECT 'Weekly' AS PeriodType, 
+                    DATEADD(WEEK, v.number, DATEADD(DAY, 1 - DATEPART(WEEKDAY, CAST(GETUTCDATE() AS DATE)) + 1, CAST(GETUTCDATE() AS DATE))) AS PeriodStartDate
                     FROM master.dbo.spt_values v
-                    WHERE v.type = 'P' AND v.number BETWEEN 1 AND 13
+                    WHERE v.type = 'P' AND v.number < 13
                 )
                 INSERT INTO Forecasts (ProductId, PeriodType, PeriodStartDate, PeriodEndDate, PredictedQuantity, PredictedRevenue, Confidence)
                 SELECT 
                     p.Id,
                     'Weekly',
-                    DATEADD(WEEK, fw.Offset, fw.StartBase),
-                    DATEADD(DAY, 6, DATEADD(WEEK, fw.Offset, fw.StartBase)),
+                    fw.PeriodStartDate,
+                    DATEADD(DAY, 6, fw.PeriodStartDate),
                     ISNULL(a.AvgQty, 0),
                     ISNULL(a.AvgRev, 0),
                     0.50
@@ -155,8 +154,8 @@ namespace Infrastructure.Context.DatabaseInitializer
                 LEFT JOIN AvgWeekly a ON a.ProductId = p.Id
                 LEFT JOIN Forecasts f
                     ON f.ProductId = p.Id
-                    AND f.PeriodType = 'Weekly'
-                    AND f.PeriodStartDate = DATEADD(WEEK, fw.Offset, fw.StartBase)
+                    AND f.PeriodType = fw.PeriodType
+                    AND f.PeriodStartDate = fw.PeriodStartDate
                 WHERE p.CompanyId = @CompanyId
                 AND f.ProductId IS NULL;
             END
@@ -194,8 +193,8 @@ namespace Infrastructure.Context.DatabaseInitializer
                 ),
                 ForecastMonths AS (
                     SELECT 
-                        CONVERT(DATE, SYSUTCDATETIME()) AS StartBase,
-                        v.number AS Offset
+                        'Monthly' AS PeriodType,
+						DATEFROMPARTS(YEAR(DATEADD(MONTH, v.number, DATEADD(MONTH, -1, GETUTCDATE()))), MONTH(DATEADD(MONTH, v.number, DATEADD(MONTH, -1, GETUTCDATE()))), 1) AS PeriodStartDate
                     FROM master.dbo.spt_values v
                     WHERE v.type = 'P' AND v.number BETWEEN 1 AND 12
                 )
@@ -203,8 +202,8 @@ namespace Infrastructure.Context.DatabaseInitializer
                 SELECT 
                     p.Id,
                     'Monthly',
-                    DATEADD(MONTH, fm.Offset, fm.StartBase),
-                    EOMONTH(DATEADD(MONTH, fm.Offset, fm.StartBase)),
+                    fm.PeriodStartDate,
+                    EOMONTH(fm.PeriodStartDate),
                     ISNULL(a.AvgQty, 0),
                     ISNULL(a.AvgRev, 0),
                     0.50
@@ -213,8 +212,8 @@ namespace Infrastructure.Context.DatabaseInitializer
                 LEFT JOIN AvgMonthly a ON a.ProductId = p.Id
                 LEFT JOIN Forecasts f
                     ON f.ProductId = p.Id
-                    AND f.PeriodType = 'Monthly'
-                    AND f.PeriodStartDate = DATEADD(MONTH, fm.Offset, fm.StartBase)
+                    AND f.PeriodType = fm.PeriodType
+                    AND f.PeriodStartDate = fm.PeriodStartDate
                 WHERE p.CompanyId = @CompanyId
                 AND f.ProductId IS NULL;
             END

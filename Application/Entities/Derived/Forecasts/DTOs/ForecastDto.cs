@@ -8,6 +8,7 @@ public class ForecastDto
     public Period PeriodType { get; set; }
     public DateTime PeriodStartDate { get; set; }
     public DateTime PeriodEndDate { get; set; }
-    public int PredictedQuantity { get; set; }
+    public double PredictedQuantity { get; set; }
+    public double PredictedRevenue { get; set; }
     public double Confidence { get; set; }
 }
