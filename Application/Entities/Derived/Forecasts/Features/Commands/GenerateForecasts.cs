@@ -39,18 +39,18 @@ public class GenerateForecasts
             }
 
             // Retrieve product IDs
-            IEnumerable<Guid>? productIds = request.ProductIds;
-            if (productIds == null || !productIds.Any())
-            {
-                productIds = await productRepo.FindSelectAsync(
-                    p => p.CompanyId == request.CompanyId,
-                    p => p.Id,
-                    cancellationToken
-                );
-            }
+            // IEnumerable<Guid>? productIds = request.ProductIds;
+            // if (productIds == null || !productIds.Any())
+            // {
+            //     productIds = await productRepo.FindSelectAsync(
+            //         p => p.CompanyId == request.CompanyId,
+            //         p => p.Id,
+            //         cancellationToken
+            //     );
+            // }
 
-            await forecastRepo.InsertForecastsAsync(request.CompanyId, productIds, period);
-            await forecastRepo.UpdateForecastsAsync(request.CompanyId, productIds, period);
+            await forecastRepo.InsertForecastsAsync(request.CompanyId, request.ProductIds, period);
+            await forecastRepo.UpdateForecastsAsync(request.CompanyId, request.ProductIds, period);
 
             return Result<Unit>.Success(Unit.Value);
         }

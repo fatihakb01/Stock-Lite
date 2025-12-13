@@ -12,6 +12,5 @@ public class Forecast
     public decimal PredictedQuantity { get; set; }
     public decimal PredictedRevenue { get; set; }
     public double Confidence { get; set; } 
-
     public required Product Product { get; set; }
 }
