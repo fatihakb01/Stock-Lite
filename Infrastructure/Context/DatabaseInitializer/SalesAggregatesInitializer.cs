@@ -33,12 +33,19 @@ namespace Infrastructure.Context.DatabaseInitializer
                 SET NOCOUNT ON;
 
                 WITH Periods AS (
-                    SELECT 'Daily' AS PeriodType, DATEADD(DAY, -v.number, CAST(GETUTCDATE() AS DATE)) AS PeriodStartDate
+                    SELECT 'Daily' AS PeriodType, DATEADD(DAY, -v.number, CAST(SYSUTCDATETIME() AS DATE)) AS PeriodStartDate
                     FROM master.dbo.spt_values v
-                    WHERE v.type = 'P' AND v.number < 30
+                    WHERE v.type = 'P' 
+                    AND v.number BETWEEN 1 AND 30
                 )
                 INSERT INTO SalesAggregates (ProductId, PeriodType, PeriodStartDate, PeriodEndDate, TotalQuantity, TotalRevenue)
-                SELECT p.Id, pr.PeriodType, pr.PeriodStartDate, pr.PeriodStartDate, 0, 0
+                SELECT 
+                    p.Id, 
+                    pr.PeriodType, 
+                    pr.PeriodStartDate, 
+                    pr.PeriodStartDate, 
+                    0, 
+                    0
                 FROM Products p
                 CROSS JOIN Periods pr
                 LEFT JOIN SalesAggregates sa
@@ -69,13 +76,30 @@ namespace Infrastructure.Context.DatabaseInitializer
             BEGIN
                 SET NOCOUNT ON;
 
-                WITH Periods AS (
-                    SELECT 'Weekly' AS PeriodType, DATEADD(WEEK, -v.number, DATEADD(DAY, 1 - DATEPART(WEEKDAY, CAST(GETUTCDATE() AS DATE)), CAST(GETUTCDATE() AS DATE))) AS PeriodStartDate
-                    FROM master.dbo.spt_values v
-                    WHERE v.type = 'P' AND v.number < 13
-                )
+				WITH Periods AS (
+					SELECT
+						'Weekly' AS PeriodType,
+						DATEADD(
+							WEEK,
+							-v.number,
+							DATEADD(
+								DAY,
+								-((DATEDIFF(DAY, '19000101', CAST(SYSUTCDATETIME() AS DATE)) % 7)),
+								CAST(SYSUTCDATETIME() AS DATE)
+							)
+						) AS PeriodStartDate
+					FROM master.dbo.spt_values v
+					WHERE v.type = 'P'
+					  AND v.number BETWEEN 1 AND 13
+				)
                 INSERT INTO SalesAggregates (ProductId, PeriodType, PeriodStartDate, PeriodEndDate, TotalQuantity, TotalRevenue)
-                SELECT p.Id, pr.PeriodType, pr.PeriodStartDate, DATEADD(DAY, 6, pr.PeriodStartDate), 0, 0
+				SELECT
+					p.Id,
+					pr.PeriodType,
+					pr.PeriodStartDate,
+					DATEADD(DAY, 6, pr.PeriodStartDate) AS PeriodEndDate,
+					0 AS TotalQuantity,
+					0 AS TotalRevenue
                 FROM Products p
                 CROSS JOIN Periods pr
                 LEFT JOIN SalesAggregates sa
@@ -105,14 +129,21 @@ namespace Infrastructure.Context.DatabaseInitializer
             AS
             BEGIN
                 SET NOCOUNT ON;
-
-                WITH Periods AS (
-                    SELECT 'Monthly' AS PeriodType, DATEFROMPARTS(YEAR(DATEADD(MONTH, -v.number, GETUTCDATE())), MONTH(DATEADD(MONTH, -v.number, GETUTCDATE())), 1) AS PeriodStartDate
+				
+				WITH Periods AS (
+                    SELECT 'Monthly' AS PeriodType, DATEFROMPARTS(YEAR(DATEADD(MONTH, -v.number, SYSUTCDATETIME())), MONTH(DATEADD(MONTH, -v.number, SYSUTCDATETIME())), 1) AS PeriodStartDate
                     FROM master.dbo.spt_values v
-                    WHERE v.type = 'P' AND v.number < 12
+                    WHERE v.type = 'P' 
+					AND v.number BETWEEN 1 AND 12
                 )
                 INSERT INTO SalesAggregates (ProductId, PeriodType, PeriodStartDate, PeriodEndDate, TotalQuantity, TotalRevenue)
-                SELECT p.Id, pr.PeriodType, pr.PeriodStartDate, EOMONTH(pr.PeriodStartDate), 0, 0
+                SELECT 
+					p.Id, 
+					pr.PeriodType, 
+					pr.PeriodStartDate, 
+					EOMONTH(pr.PeriodStartDate), 
+					0, 
+					0
                 FROM Products p
                 CROSS JOIN Periods pr
                 LEFT JOIN SalesAggregates sa
@@ -125,7 +156,7 @@ namespace Infrastructure.Context.DatabaseInitializer
                     OR p.Id IN (SELECT Id FROM @ProductIds)
                 )
                 AND sa.ProductId IS NULL;
-            END
+			END
             ";
 
             await context.Database.ExecuteSqlRawAsync(sql);
@@ -164,21 +195,45 @@ namespace Infrastructure.Context.DatabaseInitializer
             BEGIN
                 SET NOCOUNT ON;
 
-                WITH DailyAgg AS (
-                    SELECT 
-                        p.Id,
-                        CAST(t.TransactionDate AS DATE) AS PeriodStartDate,
-                        SUM(tli.Quantity) AS TotalQuantity,
-                        SUM(tli.Quantity * tli.UnitPrice) AS TotalRevenue
-                    FROM TransactionLineItems tli
-                    INNER JOIN Transactions t ON t.Id = tli.TransactionId
-                    INNER JOIN Products p ON p.Id = tli.ProductId
-                    WHERE p.CompanyId = @CompanyId
+                WITH Periods AS (
+                    SELECT 'Daily' AS PeriodType, 
+					DATEADD(DAY, -v.number, CAST(SYSUTCDATETIME() AS DATE)) AS PeriodStartDate
+                    FROM master.dbo.spt_values v
+                    WHERE v.type = 'P' 
+                    AND v.number BETWEEN 1 AND 30
+                ),		
+				DailyProducts AS (
+					SELECT 
+						p.Id,
+						pr.PeriodType,
+						pr.PeriodStartDate
+					FROM Periods pr
+					JOIN SalesAggregates s
+						ON s.PeriodType = pr.PeriodType
+					   AND s.PeriodStartDate = pr.PeriodStartDate
+					JOIN Products p 
+						ON p.Id = s.ProductId
+					WHERE p.CompanyId = @CompanyId
                     AND (
                         NOT EXISTS (SELECT 1 FROM @ProductIds)
                         OR p.Id IN (SELECT Id FROM @ProductIds)
                     )
-                    GROUP BY p.Id, CAST(t.TransactionDate AS DATE)
+				),
+				DailyAgg AS (
+					SELECT 
+						dp.Id AS ProductId,
+						dp.PeriodStartDate,
+						SUM(tli.Quantity) AS TotalQuantity,
+						SUM(tli.Quantity * tli.UnitPrice) AS TotalRevenue
+					FROM DailyProducts dp
+					JOIN TransactionLineItems tli
+						ON tli.ProductId = dp.Id
+					JOIN Transactions t
+						ON t.Id = tli.TransactionId
+					   AND CAST(t.TransactionDate AS DATE) = dp.PeriodStartDate
+					GROUP BY 
+						dp.Id,
+						dp.PeriodStartDate
                 )
 
                 UPDATE s
@@ -186,7 +241,7 @@ namespace Infrastructure.Context.DatabaseInitializer
                     s.TotalRevenue = d.TotalRevenue
                 FROM SalesAggregates s
                 JOIN DailyAgg d
-                ON s.ProductId = d.Id
+                ON s.ProductId = d.ProductId
                 AND s.PeriodType = 'Daily'
                 AND s.PeriodStartDate = d.PeriodStartDate
             END
@@ -207,32 +262,66 @@ namespace Infrastructure.Context.DatabaseInitializer
             BEGIN
                 SET NOCOUNT ON;
 
-                WITH WeeklyAgg AS (
-                    SELECT 
-                        p.Id,
-                        DATEADD(DAY, 1 - DATEPART(WEEKDAY, t.TransactionDate), CAST(t.TransactionDate AS DATE)) AS PeriodStartDate,
-                        SUM(tli.Quantity) AS TotalQuantity,
-                        SUM(tli.Quantity * tli.UnitPrice) AS TotalRevenue
-                    FROM TransactionLineItems tli
-                    INNER JOIN Transactions t ON t.Id = tli.TransactionId
-                    INNER JOIN Products p ON p.Id = tli.ProductId
-                    WHERE p.CompanyId = @CompanyId
+				WITH Periods AS (
+					SELECT
+						'Weekly' AS PeriodType,
+						DATEADD(
+							WEEK,
+							-v.number,
+							DATEADD(
+								DAY,
+								-((DATEDIFF(DAY, '19000101', CAST(SYSUTCDATETIME() AS DATE)) % 7)),
+								CAST(SYSUTCDATETIME() AS DATE)
+							)
+						) AS PeriodStartDate
+					FROM master.dbo.spt_values v
+					WHERE v.type = 'P'
+					  AND v.number BETWEEN 1 AND 13
+				),
+				WeeklyProducts AS (
+					SELECT 
+						p.Id,
+						pr.PeriodType,
+						pr.PeriodStartDate
+					FROM Periods pr
+					JOIN SalesAggregates s
+						ON s.PeriodType = pr.PeriodType
+					   AND s.PeriodStartDate = pr.PeriodStartDate
+					JOIN Products p 
+						ON p.Id = s.ProductId
+					WHERE p.CompanyId = @CompanyId
                     AND (
                         NOT EXISTS (SELECT 1 FROM @ProductIds)
                         OR p.Id IN (SELECT Id FROM @ProductIds)
                     )
-                    GROUP BY p.Id, DATEADD(DAY, 1 - DATEPART(WEEKDAY, t.TransactionDate), CAST(t.TransactionDate AS DATE))
-                )
+				),
+				WeeklyAgg AS (
+					SELECT 
+						wp.Id AS ProductId,
+						wp.PeriodStartDate,
+						SUM(tli.Quantity) AS TotalQuantity,
+						SUM(tli.Quantity * tli.UnitPrice) AS TotalRevenue
+					FROM WeeklyProducts wp
+					JOIN TransactionLineItems tli
+						ON tli.ProductId = wp.Id
+					JOIN Transactions t
+						ON t.Id = tli.TransactionId
+					   AND CAST(t.TransactionDate AS DATE) >= wp.PeriodStartDate
+					   AND CAST(t.TransactionDate AS DATE) < DATEADD(DAY, 7, wp.PeriodStartDate)
+					GROUP BY 
+						wp.Id,
+						wp.PeriodStartDate
+				)
 
                 UPDATE s
                 SET s.TotalQuantity = w.TotalQuantity,
                     s.TotalRevenue = w.TotalRevenue
                 FROM SalesAggregates s
                 JOIN WeeklyAgg w
-                ON s.ProductId = w.Id
+                ON s.ProductId = w.ProductId
                 AND s.PeriodType = 'Weekly'
                 AND s.PeriodStartDate = w.PeriodStartDate
-            END
+			END
             ";
 
             await context.Database.ExecuteSqlRawAsync(sql);
@@ -249,33 +338,58 @@ namespace Infrastructure.Context.DatabaseInitializer
             AS
             BEGIN
                 SET NOCOUNT ON;
-
-                WITH MonthlyAgg AS (
-                    SELECT 
-                        p.Id,
-                        DATEFROMPARTS(YEAR(t.TransactionDate), MONTH(t.TransactionDate), 1) AS PeriodStartDate,
-                        SUM(tli.Quantity) AS TotalQuantity,
-                        SUM(tli.Quantity * tli.UnitPrice) AS TotalRevenue
-                    FROM TransactionLineItems tli
-                    INNER JOIN Transactions t ON t.Id = tli.TransactionId
-                    INNER JOIN Products p ON p.Id = tli.ProductId
-                    WHERE p.CompanyId = @CompanyId
+				
+				WITH Periods AS (
+                    SELECT 'Monthly' AS PeriodType, 
+					DATEFROMPARTS(YEAR(DATEADD(MONTH, -v.number, SYSUTCDATETIME())), MONTH(DATEADD(MONTH, -v.number, SYSUTCDATETIME())), 1) AS PeriodStartDate
+                    FROM master.dbo.spt_values v
+                    WHERE v.type = 'P' 
+					AND v.number BETWEEN 1 AND 12
+                ),		
+				MonthlyProducts AS (
+					SELECT 
+						p.Id,
+						pr.PeriodType,
+						pr.PeriodStartDate
+					FROM Periods pr
+					JOIN SalesAggregates s
+						ON s.PeriodType = pr.PeriodType
+					   AND s.PeriodStartDate = pr.PeriodStartDate
+					JOIN Products p 
+						ON p.Id = s.ProductId
+					WHERE p.CompanyId = @CompanyId
                     AND (
                         NOT EXISTS (SELECT 1 FROM @ProductIds)
                         OR p.Id IN (SELECT Id FROM @ProductIds)
                     )
-                    GROUP BY p.Id, DATEFROMPARTS(YEAR(t.TransactionDate), MONTH(t.TransactionDate), 1)
+				),
+				MonthlyAgg AS (
+					SELECT 
+						mp.Id AS ProductId,
+						mp.PeriodStartDate,
+						SUM(tli.Quantity) AS TotalQuantity,
+						SUM(tli.Quantity * tli.UnitPrice) AS TotalRevenue
+					FROM MonthlyProducts mp
+					JOIN TransactionLineItems tli
+						ON tli.ProductId = mp.Id
+					JOIN Transactions t
+						ON t.Id = tli.TransactionId
+					   AND CAST(t.TransactionDate AS DATE) >= mp.PeriodStartDate
+                       AND CAST(t.TransactionDate AS DATE) <= EOMONTH(mp.PeriodStartDate)
+					GROUP BY 
+						mp.Id,
+						mp.PeriodStartDate
                 )
 
-                UPDATE s
+				UPDATE s
                 SET s.TotalQuantity = m.TotalQuantity,
                     s.TotalRevenue = m.TotalRevenue
                 FROM SalesAggregates s
                 JOIN MonthlyAgg m
-                ON s.ProductId = m.Id
+                ON s.ProductId = m.ProductId
                 AND s.PeriodType = 'Monthly'
                 AND s.PeriodStartDate = m.PeriodStartDate
-            END
+			END
             ";
 
             await context.Database.ExecuteSqlRawAsync(sql);
