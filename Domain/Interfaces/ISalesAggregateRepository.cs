@@ -5,7 +5,7 @@ namespace Domain.Interfaces;
 
 public interface ISalesAggregateRepository : IRepository<SalesAggregate>
 {
-    Task InsertSalesAggregatesAsync(Guid companyId, Period? periodType = null);
-    Task<IEnumerable<SalesAggregate>> GetByProductIdAsync(Guid productId, Period periodType);
+    Task InsertSalesAggregatesAsync(Guid companyId, IEnumerable<Guid>? productIds = null, Period? periodType = null);
     Task UpdateSalesAggregatesAsync(Guid companyId, IEnumerable<Guid>? productIds = null, Period? periodType = null);
+    Task<IEnumerable<SalesAggregate>> GetByProductIdAsync(Guid productId, Period periodType);
 }

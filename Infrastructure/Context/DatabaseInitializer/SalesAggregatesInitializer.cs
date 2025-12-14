@@ -7,9 +7,6 @@ namespace Infrastructure.Context.DatabaseInitializer
     {
         public static async Task InitializeAsync(DataContext context, ILogger logger)
         {
-            // Ensure guid list table exist
-            await EnsureGuidListTableAsync(context, logger);
-
             // Initialize empty sales aggregates
             await InsertDailySalesAggregatesProcAsync(context, logger);
             await InsertWeeklySalesAggregatesProcAsync(context, logger);
@@ -23,28 +20,14 @@ namespace Infrastructure.Context.DatabaseInitializer
             await UpdateSalesAggregatesProcAsync(context, logger);
         }
 
-        private static async Task EnsureGuidListTableAsync(DataContext context, ILogger logger)
-        {
-            logger.LogInformation("Ensuring guid list table exist...");
-
-            var sql = """
-            -- Ensure the GuidList table type exists
-            IF NOT EXISTS (SELECT * FROM sys.types WHERE is_table_type = 1 AND name = 'GuidList')
-            BEGIN
-                CREATE TYPE dbo.GuidList AS TABLE (Id UNIQUEIDENTIFIER);
-            END
-            """;
-
-            await context.Database.ExecuteSqlRawAsync(sql);
-        }
-
         private static async Task InsertDailySalesAggregatesProcAsync(DataContext context, ILogger logger)
         {
             logger.LogInformation("Ensuring dbo.InsertDailySalesAggregates stored procedures exist...");
 
             var sql = @"
             CREATE OR ALTER PROCEDURE dbo.InsertDailySalesAggregates
-                @CompanyId UNIQUEIDENTIFIER
+                @CompanyId UNIQUEIDENTIFIER,
+                @ProductIds dbo.GuidList READONLY
             AS
             BEGIN
                 SET NOCOUNT ON;
@@ -63,6 +46,10 @@ namespace Infrastructure.Context.DatabaseInitializer
                 AND sa.PeriodType = pr.PeriodType
                 AND sa.PeriodStartDate = pr.PeriodStartDate
                 WHERE p.CompanyId = @CompanyId
+                AND (
+                    NOT EXISTS (SELECT 1 FROM @ProductIds)
+                    OR p.Id IN (SELECT Id FROM @ProductIds)
+                )
                 AND sa.ProductId IS NULL;
             END
             ";
@@ -76,7 +63,8 @@ namespace Infrastructure.Context.DatabaseInitializer
 
             var sql = @"
             CREATE OR ALTER PROCEDURE dbo.InsertWeeklySalesAggregates
-                @CompanyId UNIQUEIDENTIFIER
+                @CompanyId UNIQUEIDENTIFIER,
+                @ProductIds dbo.GuidList READONLY
             AS
             BEGIN
                 SET NOCOUNT ON;
@@ -95,6 +83,10 @@ namespace Infrastructure.Context.DatabaseInitializer
                 AND sa.PeriodType = pr.PeriodType
                 AND sa.PeriodStartDate = pr.PeriodStartDate
                 WHERE p.CompanyId = @CompanyId
+                AND (
+                    NOT EXISTS (SELECT 1 FROM @ProductIds)
+                    OR p.Id IN (SELECT Id FROM @ProductIds)
+                )
                 AND sa.ProductId IS NULL;
             END
             ";
@@ -108,7 +100,8 @@ namespace Infrastructure.Context.DatabaseInitializer
 
             var sql = @"
             CREATE OR ALTER PROCEDURE dbo.InsertMonthlySalesAggregates
-                @CompanyId UNIQUEIDENTIFIER
+                @CompanyId UNIQUEIDENTIFIER,
+                @ProductIds dbo.GuidList READONLY
             AS
             BEGIN
                 SET NOCOUNT ON;
@@ -127,6 +120,10 @@ namespace Infrastructure.Context.DatabaseInitializer
                 AND sa.PeriodType = pr.PeriodType
                 AND sa.PeriodStartDate = pr.PeriodStartDate
                 WHERE p.CompanyId = @CompanyId
+                AND (
+                    NOT EXISTS (SELECT 1 FROM @ProductIds)
+                    OR p.Id IN (SELECT Id FROM @ProductIds)
+                )
                 AND sa.ProductId IS NULL;
             END
             ";
@@ -140,14 +137,15 @@ namespace Infrastructure.Context.DatabaseInitializer
 
             var sql = @"
             CREATE OR ALTER PROCEDURE dbo.InsertSalesAggregates
-                @CompanyId UNIQUEIDENTIFIER
+                @CompanyId UNIQUEIDENTIFIER,
+                @ProductIds dbo.GuidList READONLY
             AS
             BEGIN
                 SET NOCOUNT ON;
 
-                EXEC dbo.InsertDailySalesAggregates @CompanyId;
-                EXEC dbo.InsertWeeklySalesAggregates @CompanyId;
-                EXEC dbo.InsertMonthlySalesAggregates @CompanyId;
+                EXEC dbo.InsertMonthlySalesAggregates @CompanyId, @ProductIds;
+                EXEC dbo.InsertWeeklySalesAggregates @CompanyId, @ProductIds;
+                EXEC dbo.InsertDailySalesAggregates @CompanyId, @ProductIds;
             END
             ";
 
@@ -166,7 +164,7 @@ namespace Infrastructure.Context.DatabaseInitializer
             BEGIN
                 SET NOCOUNT ON;
 
-                ;WITH DailyAgg AS (
+                WITH DailyAgg AS (
                     SELECT 
                         p.Id,
                         CAST(t.TransactionDate AS DATE) AS PeriodStartDate,
@@ -176,7 +174,10 @@ namespace Infrastructure.Context.DatabaseInitializer
                     INNER JOIN Transactions t ON t.Id = tli.TransactionId
                     INNER JOIN Products p ON p.Id = tli.ProductId
                     WHERE p.CompanyId = @CompanyId
-                    AND EXISTS (SELECT 1 FROM @ProductIds WHERE Id = p.Id)
+                    AND (
+                        NOT EXISTS (SELECT 1 FROM @ProductIds)
+                        OR p.Id IN (SELECT Id FROM @ProductIds)
+                    )
                     GROUP BY p.Id, CAST(t.TransactionDate AS DATE)
                 )
 
@@ -206,7 +207,7 @@ namespace Infrastructure.Context.DatabaseInitializer
             BEGIN
                 SET NOCOUNT ON;
 
-                ;WITH WeeklyAgg AS (
+                WITH WeeklyAgg AS (
                     SELECT 
                         p.Id,
                         DATEADD(DAY, 1 - DATEPART(WEEKDAY, t.TransactionDate), CAST(t.TransactionDate AS DATE)) AS PeriodStartDate,
@@ -216,7 +217,10 @@ namespace Infrastructure.Context.DatabaseInitializer
                     INNER JOIN Transactions t ON t.Id = tli.TransactionId
                     INNER JOIN Products p ON p.Id = tli.ProductId
                     WHERE p.CompanyId = @CompanyId
-                    AND EXISTS (SELECT 1 FROM @ProductIds WHERE Id = p.Id)
+                    AND (
+                        NOT EXISTS (SELECT 1 FROM @ProductIds)
+                        OR p.Id IN (SELECT Id FROM @ProductIds)
+                    )
                     GROUP BY p.Id, DATEADD(DAY, 1 - DATEPART(WEEKDAY, t.TransactionDate), CAST(t.TransactionDate AS DATE))
                 )
 
@@ -246,7 +250,7 @@ namespace Infrastructure.Context.DatabaseInitializer
             BEGIN
                 SET NOCOUNT ON;
 
-                ;WITH MonthlyAgg AS (
+                WITH MonthlyAgg AS (
                     SELECT 
                         p.Id,
                         DATEFROMPARTS(YEAR(t.TransactionDate), MONTH(t.TransactionDate), 1) AS PeriodStartDate,
@@ -256,7 +260,10 @@ namespace Infrastructure.Context.DatabaseInitializer
                     INNER JOIN Transactions t ON t.Id = tli.TransactionId
                     INNER JOIN Products p ON p.Id = tli.ProductId
                     WHERE p.CompanyId = @CompanyId
-                    AND EXISTS (SELECT 1 FROM @ProductIds WHERE Id = p.Id)
+                    AND (
+                        NOT EXISTS (SELECT 1 FROM @ProductIds)
+                        OR p.Id IN (SELECT Id FROM @ProductIds)
+                    )
                     GROUP BY p.Id, DATEFROMPARTS(YEAR(t.TransactionDate), MONTH(t.TransactionDate), 1)
                 )
 
@@ -286,9 +293,9 @@ namespace Infrastructure.Context.DatabaseInitializer
             BEGIN
                 SET NOCOUNT ON;
 
-                EXEC dbo.UpdateDailySalesAggregates @CompanyId, @ProductIds;
-                EXEC dbo.UpdateWeeklySalesAggregates @CompanyId, @ProductIds;
                 EXEC dbo.UpdateMonthlySalesAggregates @CompanyId, @ProductIds;
+                EXEC dbo.UpdateWeeklySalesAggregates @CompanyId, @ProductIds;
+                EXEC dbo.UpdateDailySalesAggregates @CompanyId, @ProductIds;
             END
             ";
 

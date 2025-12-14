@@ -36,9 +36,21 @@ public class SalesAggregateRepository
             .ToListAsync();
     }
 
-    public async Task InsertSalesAggregatesAsync(Guid companyId, Period? periodType = null)
+    public async Task InsertSalesAggregatesAsync(Guid companyId, IEnumerable<Guid>? productIds = null, Period? periodType = null)
     {
         var paramCompany = new SqlParameter("@CompanyId", companyId);
+
+        var productIdsTable = new DataTable();
+        productIdsTable.Columns.Add("Id", typeof(Guid));
+        if (productIds != null)
+            foreach (var id in productIds)
+                productIdsTable.Rows.Add(id);
+
+        var paramProductIds = new SqlParameter("@ProductIds", productIdsTable)
+        {
+            TypeName = "dbo.GuidList",
+            SqlDbType = SqlDbType.Structured
+        };
 
         string procedureName = periodType switch
         {
@@ -48,18 +60,19 @@ public class SalesAggregateRepository
             _ => "dbo.InsertSalesAggregates" 
         };
 
-        await _context.Database.ExecuteSqlAsync($"EXEC {procedureName} {paramCompany}");
+        await _context.Database.ExecuteSqlAsync($"EXEC {procedureName} {paramCompany}, {paramProductIds}");
     }
 
     public async Task UpdateSalesAggregatesAsync(Guid companyId, IEnumerable<Guid>? productIds = null, Period? periodType = null)
     {
+        var paramCompany = new SqlParameter("@CompanyId", companyId);
+
         var productIdsTable = new DataTable();
         productIdsTable.Columns.Add("Id", typeof(Guid));
         if (productIds != null)
             foreach (var id in productIds)
                 productIdsTable.Rows.Add(id);
 
-        var paramCompany = new SqlParameter("@CompanyId", companyId);
         var paramProductIds = new SqlParameter("@ProductIds", productIdsTable)
         {
             TypeName = "dbo.GuidList",

@@ -35,20 +35,9 @@ public class UpdateSalesAggregates
                     return Result<Unit>.Failure($"Invalid period type '{request.PeriodType}'. Allowed values: Daily, Weekly, Monthly.", 400);
             }
 
-            // Retrieve product IDs
-            IEnumerable<Guid>? productIds = request.ProductIds;
-            if (productIds == null || !productIds.Any())
-            {
-                productIds = await productRepo.FindSelectAsync(
-                    p => p.CompanyId == request.CompanyId,
-                    p => p.Id,
-                    cancellationToken
-                );
-            }
-
             // Run aggregation
-            await aggregateRepo.InsertSalesAggregatesAsync(request.CompanyId, period);
-            await aggregateRepo.UpdateSalesAggregatesAsync(request.CompanyId, productIds, period);
+            await aggregateRepo.InsertSalesAggregatesAsync(request.CompanyId, request.ProductIds, period);
+            await aggregateRepo.UpdateSalesAggregatesAsync(request.CompanyId, request.ProductIds, period);
 
             return Result<Unit>.Success(Unit.Value);
         }
