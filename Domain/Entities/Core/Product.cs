@@ -21,4 +21,5 @@ public class Product
     public ICollection<SalesAggregate> SalesAggregates { get; set; } = new List<SalesAggregate>();
     public ICollection<Forecast> Forecasts { get; set; } = new List<Forecast>();
     public ICollection<TransactionLineItem> TransactionLineItems { get; set; } = new List<TransactionLineItem>();
+    public ICollection<PurchaseOrderLineItem> PurchaseOrderLineItem { get; set; } = new List<PurchaseOrderLineItem>();
 }

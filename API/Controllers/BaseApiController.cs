@@ -22,7 +22,7 @@ namespace API.Controllers
         /// <returns>An <see cref="ActionResult"/> with appropriate HTTP status and value.</returns>
         protected ActionResult HandleResult<T>(Result<T> result)
         {
-            if (!result.IsSuccess && result.Code == 404) return NotFound();
+            if (!result.IsSuccess) return Problem(title: result.Error, statusCode: result.Code);
 
             if (result.IsSuccess && result.Value != null) return Ok(result.Value);
 

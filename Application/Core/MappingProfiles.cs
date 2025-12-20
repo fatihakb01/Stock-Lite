@@ -9,6 +9,7 @@ using Application.Entities.Core.TransactionLineItems.DTOs;
 using Application.Entities.Derived.SalesAggregates.DTOs;
 using Application.Entities.Core.Users.DTOs;
 using Application.Entities.Derived.Forecasts.DTOs;
+using Application.Entities.Core.PurchaseOrders.DTOs;
 
 namespace Application.Core;
 
@@ -45,6 +46,16 @@ public class MappingProfiles : Profile
         CreateMap<TransactionLineItem, TransactionLineItemDto>();
         CreateMap<CreateTransactionLineItemDto, TransactionLineItem>();
         CreateMap<EditTransactionLineItemDto, TransactionLineItem>();
+
+        // PurchaseOrder entity
+        CreateMap<PurchaseOrder, PurchaseOrderDto>();
+        CreateMap<CreatePurchaseOrderDto, PurchaseOrder>();
+        CreateMap<UpdatePurchaseOrderDto, PurchaseOrder>();
+
+        // PurchaseOrderLineItem entity
+        CreateMap<PurchaseOrderLineItem, PurchaseOrderLineItemDto>();
+        CreateMap<CreatePurchaseOrderLineItemDto, PurchaseOrderLineItem>();
+        CreateMap<UpdatePurchaseOrderLineItemDto, PurchaseOrderLineItem>();
 
         // SalesAggregate entity
         CreateMap<SalesAggregate, SalesAggregateDto>();

@@ -5,7 +5,8 @@ public class StockLevel
     public Guid Id { get; set; }
     public Guid ProductId { get; set; }
 
-    public int Quantity { get; set; }
+    public int QuantityOnHand { get; set; }
+    public int QuantityOnOrder { get; set; }
     public int ReorderPoint { get; set; } 
 
     // Navigation property

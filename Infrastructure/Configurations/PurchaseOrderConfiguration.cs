@@ -1,0 +1,31 @@
+using Domain.Entities.Core;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace Infrastructure.Configurations;
+
+public class PurchaseOrderConfiguration : IEntityTypeConfiguration<PurchaseOrder>
+{
+    public void Configure(EntityTypeBuilder<PurchaseOrder> builder)
+    {
+        builder.HasKey(po => po.Id);
+
+        builder.Property(po => po.OrderNumber)
+               .IsRequired()
+               .HasMaxLength(50);
+
+        builder.Property(po => po.Status)
+               .IsRequired();
+
+        builder.Property(po => po.OrderDate)
+               .IsRequired();
+
+        builder.HasMany(po => po.LineItems)
+               .WithOne(li => li.PurchaseOrder)
+               .HasForeignKey(li => li.PurchaseOrderId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(li => li.OrderNumber).IsUnique();
+    }
+}
+

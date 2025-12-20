@@ -79,7 +79,7 @@ public static class DataSeeder
         var stockLevels = products.Select(p => new StockLevel
         {
             Product = p,
-            Quantity = random.Next(10, 500),
+            QuantityOnHand = random.Next(10, 500),
             ReorderPoint = random.Next(5, 50)
         }).ToList();
 

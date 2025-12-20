@@ -10,7 +10,11 @@ public class StockLevelConfiguration : IEntityTypeConfiguration<StockLevel>
     {
         builder.HasKey(p => p.Id);
 
-        builder.Property(s => s.Quantity)
+        builder.Property(s => s.QuantityOnHand)
+            .IsRequired()
+            .HasDefaultValue(0);
+
+        builder.Property(s => s.QuantityOnOrder)
             .IsRequired()
             .HasDefaultValue(0);
 
@@ -18,12 +22,10 @@ public class StockLevelConfiguration : IEntityTypeConfiguration<StockLevel>
             .IsRequired()
             .HasDefaultValue(0);
 
-        builder.ToTable(p =>
-            p.HasCheckConstraint("CK_StockLevel_Quantity", "[Quantity] >= 0")
-        );
-
-        builder.ToTable(p =>
-            p.HasCheckConstraint("CK_StockLevel_ReorderPoint", "[ReorderPoint] >= 0")
-        );
+        builder.ToTable(p => {
+            p.HasCheckConstraint("CK_StockLevel_QuantityOnHand", "[QuantityOnHand] >= 0");
+            p.HasCheckConstraint("CK_StockLevel_QuantityOnOrder", "[QuantityOnOrder] >= 0");
+            p.HasCheckConstraint("CK_StockLevel_ReorderPoint", "[ReorderPoint] >= 0");
+        });
     }
 }

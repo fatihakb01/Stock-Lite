@@ -18,6 +18,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
+  </ItemGroup>  
+
+  <ItemGroup>
+    <Folder Include="Entities\Core\PurchaseOrders\Features\" />
+    <Folder Include="Entities\Core\PurchaseOrders\Features\Commands\" />
+    <Folder Include="Entities\Core\PurchaseOrders\Features\Queries\" />
+    <Folder Include="Entities\Core\PurchaseOrders\Validators\" />
   </ItemGroup>
 
 </Project>

@@ -20,7 +20,9 @@ public class GetProductsByCompanyId
         public async Task<Result<List<ProductDto>>> Handle(Query request, CancellationToken cancellationToken)
         {
             var products = await repository
-                .FindAsync(x => x.CompanyId == request.CompanyId, cancellationToken);
+                .FindAsync(x => x.CompanyId == request.CompanyId, 
+                cancellationToken
+            );
 
             if (products == null || !products.Any())
                 return Result<List<ProductDto>>.Failure("No products found for this company", 404);
