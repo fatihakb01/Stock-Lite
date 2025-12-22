@@ -11,19 +11,19 @@ public class SubmitPurchaseOrder
     public class Command : IRequest<Result<Unit>>
     {
         public Guid Id { get; set; }
-        public Guid CompanyId { get; set; }
     }
 
     public class Handler(
         IRepository<PurchaseOrder> poRepository,
-        IRepository<StockLevel> stockRepository)
-        : IRequestHandler<Command, Result<Unit>>
+        IRepository<StockLevel> stockRepository,
+        ICurrentUserService currentUser
+    ) : IRequestHandler<Command, Result<Unit>>
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
             var pos = await poRepository.FindAsync(
                 po => po.Id == request.Id
-                   && po.CompanyId == request.CompanyId,
+                   && po.CompanyId == currentUser.CompanyId,
                 ct,
                 po => po.LineItems
             );

@@ -2,24 +2,27 @@ using Application.Entities.Core.PurchaseOrders.DTOs;
 using Application.Entities.Core.PurchaseOrders.Features.Commands;
 using Application.Entities.Core.PurchaseOrders.Features.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+[Authorize]
 public class PurchaseOrderController(IMediator mediator) : BaseApiController(mediator)
 {
     [HttpGet("{id}")]
-    public async Task<ActionResult<PurchaseOrderDto>> GetPurchaseOrderById(Guid id, [FromQuery] Guid companyId)
+    public async Task<ActionResult<PurchaseOrderDto>> GetPurchaseOrderById(Guid id)
     {
-        return HandleResult(await Mediator.Send(new GetPurchaseOrderById.Query { Id = id, CompanyId = companyId }));
+        return HandleResult(await Mediator.Send(new GetPurchaseOrderById.Query { Id = id }));
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<PurchaseOrderDto>>> GetPurchaseOrders([FromQuery] Guid companyId)
+    public async Task<ActionResult<List<PurchaseOrderDto>>> GetPurchaseOrders()
     {
-        return HandleResult(await Mediator.Send(new GetPurchaseOrders.Query { CompanyId = companyId }));
+        return HandleResult(await Mediator.Send(new GetPurchaseOrders.Query { }));
     }   
 
+    [Authorize(Policy = "AdminOrSuperAdmin")]
     [HttpPost]
     public async Task<ActionResult<PurchaseOrderDto>> CreatePurchaseOrder(
         [FromBody] CreatePurchaseOrderDto purchaseOrderDto)
@@ -31,6 +34,7 @@ public class PurchaseOrderController(IMediator mediator) : BaseApiController(med
         );
     }
 
+    [Authorize(Policy = "AdminOrSuperAdmin")]
     [HttpPost("{id}/receive")]
     public async Task<ActionResult<PurchaseOrderDto>> ReceivePurchaseOrder(
         Guid id, [FromBody] ReceivePurchaseOrderDto purchaseOrderDto)
@@ -42,28 +46,29 @@ public class PurchaseOrderController(IMediator mediator) : BaseApiController(med
         );
     }
 
+    [Authorize(Policy = "AdminOrSuperAdmin")]
     [HttpPost("{id}/submit")]
-    public async Task<ActionResult<PurchaseOrderDto>> SubmitPurchaseOrder(
-        Guid id, [FromQuery] Guid companyId)
+    public async Task<ActionResult<PurchaseOrderDto>> SubmitPurchaseOrder(Guid id)
     {
         return HandleResult(
             await Mediator.Send(
-                new SubmitPurchaseOrder.Command { Id = id, CompanyId = companyId }
+                new SubmitPurchaseOrder.Command { Id = id }
             )
         );
     }
 
+    [Authorize(Policy = "AdminOrSuperAdmin")]
     [HttpPost("{id}/cancel")]
-    public async Task<ActionResult<PurchaseOrderDto>> CancelPurchaseOrder(
-        Guid id, [FromQuery] Guid companyId)
+    public async Task<ActionResult<PurchaseOrderDto>> CancelPurchaseOrder(Guid id)
     {
         return HandleResult(
             await Mediator.Send(
-                new CancelPurchaseOrder.Command { Id = id, CompanyId = companyId }
+                new CancelPurchaseOrder.Command { Id = id }
             )
         );
     }
 
+    [Authorize(Policy = "AdminOrSuperAdmin")]
     [HttpPut("{id}")]
     public async Task<ActionResult<PurchaseOrderDto>> UpdatePurchaseOrder(
         Guid id, [FromBody] UpdatePurchaseOrderDto purchaseOrderDto)

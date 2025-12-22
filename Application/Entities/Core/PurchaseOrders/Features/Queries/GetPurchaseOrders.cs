@@ -9,18 +9,18 @@ namespace Application.Entities.Core.PurchaseOrders.Features.Queries;
 
 public class GetPurchaseOrders
 {
-    public class Query : IRequest<Result<List<PurchaseOrderDto>>>
-    {
-        public Guid CompanyId { get; set; }
-    }
+    public class Query : IRequest<Result<List<PurchaseOrderDto>>> { }
 
-    public class Handler(IRepository<PurchaseOrder> repository, IMapper mapper)
-        : IRequestHandler<Query, Result<List<PurchaseOrderDto>>>
+    public class Handler(
+        IRepository<PurchaseOrder> repository, 
+        IMapper mapper,
+        ICurrentUserService currentUser
+    ) : IRequestHandler<Query, Result<List<PurchaseOrderDto>>>
     {
         public async Task<Result<List<PurchaseOrderDto>>> Handle(Query request, CancellationToken ct)
         {
             var pos = await repository.FindAsync(x => 
-                x.CompanyId == request.CompanyId, 
+                x.CompanyId == currentUser.CompanyId, 
                 ct,
                 po => po.LineItems
             );

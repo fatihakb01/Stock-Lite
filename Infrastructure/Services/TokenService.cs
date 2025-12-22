@@ -20,7 +20,8 @@ public class TokenService(IConfiguration config) : ITokenService
             new("nameid", user.Id.ToString()),
             new("email", user.Email!),
             new("unique_name", user.UserName!),
-            new("role", user.Role.ToString())   
+            new("role", user.Role.ToString()),
+            new("companyId", user.CompanyId.ToString())   
         };
 
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

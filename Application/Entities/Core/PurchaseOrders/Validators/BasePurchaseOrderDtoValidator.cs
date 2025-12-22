@@ -9,9 +9,6 @@ public class BasePurchaseOrderDtoValidator : AbstractValidator<BasePurchaseOrder
 {
     public BasePurchaseOrderDtoValidator(IUniquenessChecker<PurchaseOrder> uniquenessChecker)
     {
-        RuleFor(x => x.CompanyId)
-            .NotEmpty();
-
         RuleFor(x => x.OrderNumber)
             .NotEmpty()
             .MaximumLength(50)

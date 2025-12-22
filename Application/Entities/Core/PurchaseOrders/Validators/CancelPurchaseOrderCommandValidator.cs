@@ -10,9 +10,5 @@ public class CancelPurchaseOrderCommandValidator : AbstractValidator<CancelPurch
         RuleFor(x => x.Id)
             .NotEmpty()
             .WithMessage("ProductId is required");
-
-        RuleFor(x => x.CompanyId)
-            .NotEmpty()
-            .WithMessage("CompanyId is required");
     }
 }

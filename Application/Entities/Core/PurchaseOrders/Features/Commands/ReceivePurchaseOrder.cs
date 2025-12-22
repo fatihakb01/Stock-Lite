@@ -17,8 +17,9 @@ public class ReceivePurchaseOrder
 
     public class Handler(
         IRepository<PurchaseOrder> poRepository,
-        IRepository<StockLevel> stockRepository)
-        : IRequestHandler<Command, Result<Unit>>
+        IRepository<StockLevel> stockRepository,
+        ICurrentUserService currentUser
+    ) : IRequestHandler<Command, Result<Unit>>
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
@@ -26,7 +27,7 @@ public class ReceivePurchaseOrder
 
             var pos = await poRepository.FindAsync(
                 po => po.Id == request.PurchaseOrderId
-                   && po.CompanyId == dto.CompanyId,
+                   && po.CompanyId == currentUser.CompanyId,
                 ct,
                 po => po.LineItems
             );

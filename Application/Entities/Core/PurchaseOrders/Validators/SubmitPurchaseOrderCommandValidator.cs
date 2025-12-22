@@ -11,9 +11,5 @@ public class SubmitPurchaseOrderCommandValidator
         RuleFor(x => x.Id)
             .NotEmpty()
             .WithMessage("Id is required");
-
-        RuleFor(x => x.CompanyId)
-            .NotEmpty()
-            .WithMessage("CompanyId is required");
     }
 }

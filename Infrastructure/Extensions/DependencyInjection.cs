@@ -90,6 +90,9 @@ public static class DependencyInjection
         services.AddScoped(typeof(IUniquenessChecker<>), typeof(UniquenessChecker<>));
         services.AddScoped<ITokenService, TokenService>();
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
+        
+        services.AddHttpContextAccessor();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
 
         // --- External Services ---
         services.AddOptions();

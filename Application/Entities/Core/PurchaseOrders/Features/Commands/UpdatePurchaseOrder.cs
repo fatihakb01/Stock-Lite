@@ -15,20 +15,22 @@ public class UpdatePurchaseOrder
         public required UpdatePurchaseOrderDto UpdatePurchaseOrderDto { get; set; }
     }
 
-    public class Handler(IRepository<PurchaseOrder> poRepository)
-        : IRequestHandler<Command, Result<Unit>>
+    public class Handler(
+        IRepository<PurchaseOrder> poRepository,
+        ICurrentUserService currentUser
+    ) : IRequestHandler<Command, Result<Unit>>
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
             var dto = request.UpdatePurchaseOrderDto;
 
             var pos = await poRepository.FindAsync(
-                po => po.Id == request.PurchaseOrderId && po.CompanyId == dto.CompanyId,
+                po => po.Id == request.PurchaseOrderId && po.CompanyId == currentUser.CompanyId,
                 ct,
                 po => po.LineItems
             );
-
             var po = pos.SingleOrDefault();
+            
             if (po == null)
                 return Result<Unit>.Failure("Purchase order not found", 404);
 

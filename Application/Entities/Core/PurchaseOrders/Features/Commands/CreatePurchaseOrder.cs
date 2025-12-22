@@ -15,8 +15,11 @@ public class CreatePurchaseOrder
         public required CreatePurchaseOrderDto CreatePurchaseOrderDto { get; set; }
     }
 
-    public class Handler(IRepository<PurchaseOrder> repository, IMapper mapper)
-        : IRequestHandler<Command, Result<PurchaseOrderDto>>
+    public class Handler(
+        IRepository<PurchaseOrder> repository, 
+        IMapper mapper,
+        ICurrentUserService currentUser
+    ) : IRequestHandler<Command, Result<PurchaseOrderDto>>
     {
         public async Task<Result<PurchaseOrderDto>> Handle(Command request, CancellationToken ct)
         {
@@ -24,6 +27,7 @@ public class CreatePurchaseOrder
 
             var purchaseOrder = mapper.Map<PurchaseOrder>(dto);
             purchaseOrder.Status = PurchaseOrderStatus.Draft;
+            purchaseOrder.CompanyId = currentUser.CompanyId;
 
             await repository.AddAsync(purchaseOrder, ct);
             await repository.SaveChangesAsync(ct);

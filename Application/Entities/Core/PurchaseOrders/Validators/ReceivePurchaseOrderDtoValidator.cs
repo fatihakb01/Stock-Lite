@@ -7,10 +7,6 @@ public class ReceivePurchaseOrderDtoValidator : AbstractValidator<ReceivePurchas
 {
     public ReceivePurchaseOrderDtoValidator()
     {
-        RuleFor(x => x.ReceivePurchaseOrderDto.CompanyId)
-            .NotEmpty()
-            .WithMessage("CompanyId is required");
-
         RuleFor(x => x.ReceivePurchaseOrderDto.lineItems)
             .NotEmpty()
             .WithMessage("At least one item must be received");
