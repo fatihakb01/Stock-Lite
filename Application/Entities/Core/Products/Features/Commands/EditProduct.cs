@@ -15,19 +15,26 @@ public class EditProduct
         public required EditProductDto ProductDto { get; set; }
     }
 
-    public class Handler(IRepository<Product> repository, IMapper mapper)
-        : IRequestHandler<Command, Result<ProductDto>>
+    public class Handler(
+        IRepository<Product> repository, 
+        IMapper mapper,
+        ICurrentUserService currentUser
+    ) : IRequestHandler<Command, Result<ProductDto>>
     {
-        public async Task<Result<ProductDto>> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<ProductDto>> Handle(Command request, CancellationToken ct)
         {
-            var product = await repository.GetByIdAsync(request.Id, cancellationToken);
+            var products = await repository.FindAsync(x => 
+                x.Id == request.Id && x.CompanyId == currentUser.CompanyId, 
+                ct
+            );
+            var product = products.SingleOrDefault();
 
             if (product == null)
                 return Result<ProductDto>.Failure("Product not found", 404);
 
             mapper.Map(request.ProductDto, product);
 
-            var result = await repository.SaveChangesAsync(cancellationToken);
+            var result = await repository.SaveChangesAsync(ct);
 
             if (!result)
                 return Result<ProductDto>.Failure("Failed to update product", 400);

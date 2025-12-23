@@ -14,12 +14,16 @@ public class CreateProduct
         public required CreateProductDto ProductDto { get; set; }
     }
 
-    public class Handler(IRepository<Product> repository, IMapper mapper)
-        : IRequestHandler<Command, Result<ProductDto>>
+    public class Handler(
+        IRepository<Product> repository, 
+        IMapper mapper,
+        ICurrentUserService currentUser
+    ) : IRequestHandler<Command, Result<ProductDto>>
     {
         public async Task<Result<ProductDto>> Handle(Command request, CancellationToken cancellationToken)
         {
             var product = mapper.Map<Product>(request.ProductDto);
+            product.CompanyId = currentUser.CompanyId;
 
             await repository.AddAsync(product, cancellationToken);
 

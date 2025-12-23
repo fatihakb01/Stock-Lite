@@ -2,22 +2,24 @@ using Application.Entities.Core.Products.DTOs;
 using Application.Entities.Core.Products.Features.Commands;
 using Application.Entities.Core.Products.Features.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+[Authorize]
 public class ProductController(IMediator mediator) : BaseApiController(mediator)
 {
     [HttpGet("{id}")]
-    public async Task<ActionResult<ProductDto>> GetProduct(Guid id, [FromQuery] Guid companyId)
+    public async Task<ActionResult<ProductDto>> GetProductById(Guid id)
     {
-        return HandleResult(await Mediator.Send(new GetProduct.Query { Id = id, CompanyId = companyId }));
+        return HandleResult(await Mediator.Send(new GetProductById.Query { Id = id }));
     }
 
     [HttpGet]
-    public async Task<ActionResult<ProductDto>> GetProducts([FromQuery] Guid companyId)
+    public async Task<ActionResult<ProductDto>> GetProducts()
     {
-        return HandleResult(await Mediator.Send(new GetProductsByCompanyId.Query { CompanyId = companyId }));
+        return HandleResult(await Mediator.Send(new GetProducts.Query { }));
     }    
     
     [HttpPost]
@@ -38,9 +40,9 @@ public class ProductController(IMediator mediator) : BaseApiController(mediator)
         }));
     }
 
-    // [HttpDelete("{id}")]
-    // public async Task<ActionResult<Unit>> DeleteProduct(Guid id,[FromQuery] Guid companyId)
-    // {
-    //     return HandleResult(await Mediator.Send(new DeleteProduct.Command { Id = id, CompanyId = companyId }));
-    // }
+    [HttpDelete("{id}")]
+    public async Task<ActionResult<Unit>> DeleteProduct(Guid id)
+    {
+        return HandleResult(await Mediator.Send(new DeleteProduct.Command { Id = id }));
+    }
 }

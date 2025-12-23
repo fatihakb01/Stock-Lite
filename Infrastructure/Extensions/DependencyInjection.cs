@@ -81,7 +81,6 @@ public static class DependencyInjection
 
         // --- Repositories ---
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-        services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<ISalesAggregateRepository, SalesAggregateRepository>();
         services.AddScoped<IForecastRepository, ForecastRepository>();
         services.AddScoped<IUserRepository, UserRepository>();

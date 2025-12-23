@@ -10,22 +10,25 @@ public class DeleteProduct
     public class Command : IRequest<Result<Unit>>
     {
         public Guid Id { get; set; }
-        // public Guid CompanyId { get; set; } // not yet implemented
     }
 
-    public class Handler(IRepository<Product> repository)
+    public class Handler(IRepository<Product> repository, ICurrentUserService currentUser)
         : IRequestHandler<Command, Result<Unit>>
     {
-        public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
-            var product = await repository.GetByIdAsync(request.Id, cancellationToken);
+            var products = await repository.FindAsync(x => 
+                x.Id == request.Id && x.CompanyId == currentUser.CompanyId, 
+                ct
+            );
+            var product = products.SingleOrDefault();
 
             if (product == null)
                 return Result<Unit>.Failure("Product not found", 404);
 
             repository.Remove(product);
 
-            var result = await repository.SaveChangesAsync(cancellationToken);
+            var result = await repository.SaveChangesAsync(ct);
 
             if (!result)
                 return Result<Unit>.Failure("Failed to delete product", 400);
