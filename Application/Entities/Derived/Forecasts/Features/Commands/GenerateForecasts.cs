@@ -1,5 +1,4 @@
 using Application.Core;
-using Domain.Entities.Core;
 using Domain.Enums;
 using Domain.Interfaces;
 using MediatR;
@@ -12,22 +11,15 @@ public class GenerateForecasts
     {
         public IEnumerable<Guid>? ProductIds { get; set; }
         public string? PeriodType { get; set; }
-        public Guid CompanyId { get; set; }
     }
 
     public class Handler(
-        IRepository<Product> productRepo, 
-        IForecastRepository forecastRepo
-    )
-        : IRequestHandler<Command, Result<Unit>>
+        IForecastRepository forecastRepo,
+        ICurrentUserService currentUser
+    ) : IRequestHandler<Command, Result<Unit>>
     {
-        public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
-            // Validate company existence
-            var companyExists = await productRepo.ExistsAsync(x => x.CompanyId == request.CompanyId, cancellationToken);
-            if (!companyExists)
-                return Result<Unit>.Failure("Company not found", 404);
-
             // Parse period type
             Period? period = null;
             if (!string.IsNullOrWhiteSpace(request.PeriodType))
@@ -38,8 +30,9 @@ public class GenerateForecasts
                     return Result<Unit>.Failure($"Invalid period type '{request.PeriodType}'. Allowed values: Daily, Weekly, Monthly.", 400);
             }
 
-            await forecastRepo.InsertForecastsAsync(request.CompanyId, request.ProductIds, period);
-            await forecastRepo.UpdateForecastsAsync(request.CompanyId, request.ProductIds, period);
+            // Run aggregation
+            await forecastRepo.InsertForecastsAsync(currentUser.CompanyId, request.ProductIds, period);
+            await forecastRepo.UpdateForecastsAsync(currentUser.CompanyId, request.ProductIds, period);
 
             return Result<Unit>.Success(Unit.Value);
         }

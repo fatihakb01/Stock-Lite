@@ -12,19 +12,16 @@ public class UpdateSalesAggregates
     {
         public IEnumerable<Guid>? ProductIds { get; set; }
         public string? PeriodType { get; set; }
-        public Guid CompanyId { get; set; }
     }
 
-    public class Handler(IRepository<Product> productRepo,ISalesAggregateRepository aggregateRepo)
+    public class Handler(
+        ISalesAggregateRepository aggregateRepo,
+        ICurrentUserService currentUser
+    )
         : IRequestHandler<Command, Result<Unit>>
     {
-        public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
-            // Validate company existence
-            var companyExists = await productRepo.ExistsAsync(x => x.CompanyId == request.CompanyId, cancellationToken);
-            if (!companyExists)
-                return Result<Unit>.Failure("Company not found", 404);
-
             // Parse period type
             Period? period = null;
             if (!string.IsNullOrWhiteSpace(request.PeriodType))
@@ -36,8 +33,8 @@ public class UpdateSalesAggregates
             }
 
             // Run aggregation
-            await aggregateRepo.InsertSalesAggregatesAsync(request.CompanyId, request.ProductIds, period);
-            await aggregateRepo.UpdateSalesAggregatesAsync(request.CompanyId, request.ProductIds, period);
+            await aggregateRepo.InsertSalesAggregatesAsync(currentUser.CompanyId, request.ProductIds, period);
+            await aggregateRepo.UpdateSalesAggregatesAsync(currentUser.CompanyId, request.ProductIds, period);
 
             return Result<Unit>.Success(Unit.Value);
         }
