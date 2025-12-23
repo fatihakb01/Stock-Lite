@@ -19,12 +19,15 @@ public class ForecastRepository : Repository<Forecast>, IForecastRepository
 
     public async Task<IEnumerable<Forecast>> GetForecastByProductAsync(Guid productId, Period periodType)
     {
+        DateTime today = DateTime.UtcNow;
+        int diff = (7 + (DateTime.UtcNow.DayOfWeek - DayOfWeek.Monday)) % 7;
+
         DateTime startDate = periodType switch
         {
-            Period.Daily => DateTime.UtcNow.AddDays(-30),
-            Period.Weekly => DateTime.UtcNow.AddMonths(-3),
-            Period.Monthly => DateTime.UtcNow.AddYears(-1),
-            _ => DateTime.UtcNow.AddDays(-30)
+            Period.Daily => today,
+            Period.Weekly => today.AddDays(-diff),
+            Period.Monthly => today.AddMonths(-1),
+            _ => today
         };
 
         return await _context.Forecasts
