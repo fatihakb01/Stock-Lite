@@ -2,23 +2,19 @@ using Application.Entities.Core.Transactions.DTOs;
 using Application.Entities.Core.Transactions.Features.Commands;
 using Application.Entities.Core.Transactions.Features.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+[Authorize]
 public class TransactionController(IMediator mediator) : BaseApiController(mediator)
 {
     [HttpGet("{id}")]
-    public async Task<ActionResult<TransactionDto>> GetTransaction(Guid id)
+    public async Task<ActionResult<TransactionDto>> GetTransactionById(Guid id)
     {
-        return HandleResult(await Mediator.Send(new GetTransaction.Query { Id = id }));
-    }
-
-    [HttpGet("customer/{customerId}")]
-    public async Task<ActionResult<TransactionDto>> GetTransactionsByCustomerId(Guid customerId)
-    {
-        return HandleResult(await Mediator.Send(new GetTransactionsByCustomerId.Query { CustomerId = customerId }));
-    }    
+        return HandleResult(await Mediator.Send(new GetTransactionById.Query { Id = id }));
+    }  
 
     [HttpGet]
     public async Task<ActionResult<List<TransactionDto>>> GetTransactions()
@@ -26,6 +22,7 @@ public class TransactionController(IMediator mediator) : BaseApiController(media
         return HandleResult(await Mediator.Send(new GetTransactions.Query()));
     }
 
+    [Authorize(Policy = "AdminOrSuperAdmin")]
     [HttpPost]
     public async Task<ActionResult<TransactionDto>> CreateTransaction(
         [FromBody] CreateTransactionDto transactionDto)
@@ -33,6 +30,7 @@ public class TransactionController(IMediator mediator) : BaseApiController(media
         return HandleResult(await Mediator.Send(new CreateTransaction.Command { TransactionDto = transactionDto }));
     }
 
+    [Authorize(Policy = "AdminOrSuperAdmin")]
     [HttpPut("{id}")]
     public async Task<ActionResult<TransactionDto>> EditTransaction(Guid id,
         [FromBody] EditTransactionDto transactionDto)
@@ -44,6 +42,7 @@ public class TransactionController(IMediator mediator) : BaseApiController(media
         }));
     }
 
+    [Authorize(Policy = "AdminOrSuperAdmin")]
     [HttpDelete("{id}")]
     public async Task<ActionResult<Unit>> DeleteTransaction(Guid id)
     {

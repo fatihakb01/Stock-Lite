@@ -11,14 +11,21 @@ public class GetTransactions
 {
     public class Query : IRequest<Result<List<TransactionDto>>> { }
 
-    public class Handler(IRepository<Transaction> repository, IMapper mapper)
-        : IRequestHandler<Query, Result<List<TransactionDto>>>
+    public class Handler(
+        IRepository<Transaction> repository, 
+        IMapper mapper,
+        ICurrentUserService currentUser
+    ) : IRequestHandler<Query, Result<List<TransactionDto>>>
     {
-        public async Task<Result<List<TransactionDto>>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Result<List<TransactionDto>>> Handle(Query request, CancellationToken ct)
         {
-            var transactions = await repository.GetAllAsync(cancellationToken);
+            var transactions = await repository.FindAsync(x =>
+                x.CompanyId == currentUser.CompanyId,
+                ct,
+                t => t.LineItems
+            );
 
-            if (transactions == null)
+            if (!transactions.Any())
                 return Result<List<TransactionDto>>.Failure("Transactions not found", 404);
 
             var transactionDtos = mapper.Map<List<TransactionDto>>(transactions);

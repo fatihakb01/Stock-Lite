@@ -31,9 +31,13 @@ public class MappingProfiles : Profile
 
         // Transaction entity
         CreateMap<Transaction, TransactionDto>();
-        CreateMap<Transaction, EditTransactionDto>();
         CreateMap<CreateTransactionDto, Transaction>();
         CreateMap<EditTransactionDto, Transaction>();
+
+        // TransactionLineItem entity
+        CreateMap<TransactionLineItem, TransactionLineItemDto>();
+        CreateMap<CreateTransactionLineItemDto, TransactionLineItem>();
+        CreateMap<EditTransactionLineItemDto, TransactionLineItem>();
 
         // Product entity
         CreateMap<CreateProductDto, Product>();
@@ -41,11 +45,6 @@ public class MappingProfiles : Profile
         CreateMap<Product, ProductDto>()
             .ForMember(dest => dest.Stock, opt => opt.MapFrom(src => src.StockLevel));
         CreateMap<StockLevel, ProductStockDto>();
-
-        // TransactionLineItem entity
-        CreateMap<TransactionLineItem, TransactionLineItemDto>();
-        CreateMap<CreateTransactionLineItemDto, TransactionLineItem>();
-        CreateMap<EditTransactionLineItemDto, TransactionLineItem>();
 
         // PurchaseOrder entity
         CreateMap<PurchaseOrder, PurchaseOrderDto>();

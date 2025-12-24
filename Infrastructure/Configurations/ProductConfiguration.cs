@@ -24,6 +24,14 @@ namespace Infrastructure.Configurations
                    .WithOne(s => s.Product)
                    .HasForeignKey<StockLevel>(s => s.ProductId)
                    .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(p => p.Company)
+                .WithMany(c => c.Products)
+                .HasForeignKey(p => p.CompanyId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(p => p.SKU).IsUnique();
+            builder.HasIndex(p => new { p.CompanyId, p.SKU }).IsUnique();
         }
     }
 }

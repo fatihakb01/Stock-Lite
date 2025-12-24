@@ -14,5 +14,4 @@ public class Customer
 
     // Navigation
     public required Company Company { get; set; }
-    public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }

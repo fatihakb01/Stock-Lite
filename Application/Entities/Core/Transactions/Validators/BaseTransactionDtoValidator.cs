@@ -1,23 +1,22 @@
 using Application.Entities.Core.Transactions.DTOs;
-using Domain.Interfaces;
 using FluentValidation;
 
 namespace Application.Entities.Core.Transactions.Validators;
 
-public class TransactionDtoValidator : AbstractValidator<BaseTransactionDto>
+public class BaseTransactionDtoValidator : AbstractValidator<BaseTransactionDto>
 {
-    public TransactionDtoValidator(IDateTimeProvider clock)
+    public BaseTransactionDtoValidator()
     {
-        RuleFor(x => x.TotalAmount)
+        RuleFor(x => x.TransactionId)
             .NotEmpty()
-                .WithMessage("Transaction's total amount is required")
-            .Must(amount => decimal.Round(amount, 2) == amount)
-                .WithMessage("Transaction's total amount can only have up to 2 decimal places");
+                .WithMessage("Transaction Id is required")
+            .MaximumLength(50)
+                .WithMessage("Transaction Id can only have a maximum of 50 characters");
 
         RuleFor(x => x.TransactionDate)
             .NotEmpty()
                 .WithMessage("Transaction date is required")
-            .Must(date => date.ToUniversalTime() <= clock.UtcNow)
+            .Must(date => date.ToUniversalTime() <= DateTime.UtcNow)
                 .WithMessage("Transaction date must be in the past or equal to now (UTC)");
 
         RuleFor(x => x.PaymentMethod)

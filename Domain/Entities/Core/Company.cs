@@ -13,5 +13,6 @@ public class Company
     // Navigation properties
     public ICollection<User> Users { get; set; } = new List<User>();
     public ICollection<Product> Products { get; set; } = new List<Product>();
-    public ICollection<Customer> Customers { get; set; } = new List<Customer>();
+    public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+    public ICollection<PurchaseOrder> PurchaseOrders { get; set; } = new List<PurchaseOrder>();
 }

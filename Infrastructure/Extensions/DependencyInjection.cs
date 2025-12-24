@@ -88,7 +88,6 @@ public static class DependencyInjection
         // --- Internal Services ---
         services.AddScoped(typeof(IUniquenessChecker<>), typeof(UniquenessChecker<>));
         services.AddScoped<ITokenService, TokenService>();
-        services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
         
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUserService, CurrentUserService>();

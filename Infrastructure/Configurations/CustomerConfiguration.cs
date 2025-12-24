@@ -23,16 +23,6 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
         builder.Property(c => c.PhoneNumber)
             .HasMaxLength(20);
 
-        builder.HasOne(c => c.Company)
-            .WithMany(b => b.Customers)
-            .HasForeignKey(c => c.CompanyId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasMany(c => c.Transactions)
-            .WithOne(t => t.Customer)
-            .HasForeignKey(t => t.CustomerId)
-            .OnDelete(DeleteBehavior.Cascade);
-
         builder.HasIndex(c => new { c.CompanyId, c.DisplayName }).IsUnique();
         builder.HasIndex(c => new { c.CompanyId, c.LegalName }).IsUnique();
         builder.HasIndex(c => new { c.CompanyId, c.Email }).IsUnique();

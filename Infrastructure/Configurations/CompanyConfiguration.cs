@@ -34,11 +34,6 @@ public class CompanyConfiguration : IEntityTypeConfiguration<Company>
             .HasForeignKey(p => p.CompanyId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany(b => b.Customers)
-            .WithOne(c => c.Company)
-            .HasForeignKey(c => c.CompanyId)
-            .OnDelete(DeleteBehavior.Cascade);
-
         builder.HasIndex(c => c.Name).IsUnique();
         builder.HasIndex(c => c.Email).IsUnique();
     }

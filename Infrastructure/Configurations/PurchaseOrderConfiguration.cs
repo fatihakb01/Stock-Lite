@@ -25,7 +25,13 @@ public class PurchaseOrderConfiguration : IEntityTypeConfiguration<PurchaseOrder
                .HasForeignKey(li => li.PurchaseOrderId)
                .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasIndex(li => li.OrderNumber).IsUnique();
+        builder.HasOne(po => po.Company)
+            .WithMany(c => c.PurchaseOrders)
+            .HasForeignKey(po => po.CompanyId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(po => po.OrderNumber).IsUnique();
+        builder.HasIndex(po => new { po.CompanyId, po.OrderNumber }).IsUnique();
     }
 }
 

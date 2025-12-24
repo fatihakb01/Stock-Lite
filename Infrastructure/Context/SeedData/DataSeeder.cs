@@ -123,7 +123,7 @@ public static class DataSeeder
 
             var transaction = new Transaction
             {
-                Customer = customer,
+                TransactionId = "T" + i,
                 TransactionDate = DateTime.UtcNow.AddDays(-random.Next(1, 365)),
                 PaymentMethod = random.Next(2) == 0 ? "Credit Card" : "Cash",
                 Notes = random.Next(3) switch
@@ -131,7 +131,8 @@ public static class DataSeeder
                     0 => null,
                     1 => "Thank you for your purchase!",
                     _ => "Processed by cashier #" + random.Next(1, 10)
-                }
+                },
+                Company = company
             };
 
             decimal total = 0;

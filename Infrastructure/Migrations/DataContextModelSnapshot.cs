@@ -141,7 +141,11 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CompanyId");
+                    b.HasIndex("SKU")
+                        .IsUnique();
+
+                    b.HasIndex("CompanyId", "SKU")
+                        .IsUnique();
 
                     b.ToTable("Products", t =>
                         {
@@ -177,9 +181,10 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CompanyId");
-
                     b.HasIndex("OrderNumber")
+                        .IsUnique();
+
+                    b.HasIndex("CompanyId", "OrderNumber")
                         .IsUnique();
 
                     b.ToTable("PurchaseOrder");
@@ -259,7 +264,7 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CustomerId")
+                    b.Property<Guid>("CompanyId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Notes")
@@ -276,9 +281,18 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("TransactionDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("TransactionId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomerId");
+                    b.HasIndex("TransactionId")
+                        .IsUnique();
+
+                    b.HasIndex("CompanyId", "TransactionId")
+                        .IsUnique();
 
                     b.ToTable("Transactions", t =>
                         {
@@ -288,8 +302,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Core.TransactionLineItem", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("TransactionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ProductId")
@@ -298,18 +311,12 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("TransactionId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.HasKey("Id");
+                    b.HasKey("TransactionId", "ProductId");
 
                     b.HasIndex("ProductId");
-
-                    b.HasIndex("TransactionId", "ProductId")
-                        .IsUnique();
 
                     b.ToTable("TransactionLineItems", t =>
                         {
@@ -610,7 +617,7 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Core.Customer", b =>
                 {
                     b.HasOne("Domain.Entities.Core.Company", "Company")
-                        .WithMany("Customers")
+                        .WithMany()
                         .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -623,7 +630,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.Core.Company", "Company")
                         .WithMany("Products")
                         .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Company");
@@ -632,9 +639,9 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Core.PurchaseOrder", b =>
                 {
                     b.HasOne("Domain.Entities.Core.Company", "Company")
-                        .WithMany()
+                        .WithMany("PurchaseOrders")
                         .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Company");
@@ -672,13 +679,13 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Core.Transaction", b =>
                 {
-                    b.HasOne("Domain.Entities.Core.Customer", "Customer")
+                    b.HasOne("Domain.Entities.Core.Company", "Company")
                         .WithMany("Transactions")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Customer");
+                    b.Navigation("Company");
                 });
 
             modelBuilder.Entity("Domain.Entities.Core.TransactionLineItem", b =>
@@ -692,7 +699,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.Core.Transaction", "Transaction")
                         .WithMany("LineItems")
                         .HasForeignKey("TransactionId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Product");
@@ -786,16 +793,13 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Core.Company", b =>
                 {
-                    b.Navigation("Customers");
-
                     b.Navigation("Products");
 
-                    b.Navigation("Users");
-                });
+                    b.Navigation("PurchaseOrders");
 
-            modelBuilder.Entity("Domain.Entities.Core.Customer", b =>
-                {
                     b.Navigation("Transactions");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Domain.Entities.Core.Product", b =>

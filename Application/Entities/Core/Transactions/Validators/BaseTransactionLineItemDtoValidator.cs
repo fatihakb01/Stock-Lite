@@ -1,12 +1,16 @@
 using Application.Entities.Core.TransactionLineItems.DTOs;
 using FluentValidation;
 
-namespace Application.Entities.Core.TransactionLineItems.Validators;
+namespace Application.Entities.Core.Transactions.Validators;
 
-public class TransactionLineItemDtoValidator : AbstractValidator<BaseTransactionLineItemDto>
+public class BaseTransactionLineItemDtoValidator : AbstractValidator<BaseTransactionLineItemDto>
 {
-    public TransactionLineItemDtoValidator()
+    public BaseTransactionLineItemDtoValidator()
     {
+        RuleFor(x => x.ProductId)
+            .NotEmpty()
+                .WithMessage("Product Id is required");
+
         RuleFor(x => x.Quantity)
             .NotEmpty()
                 .WithMessage("Transaction line item's quantity is required");

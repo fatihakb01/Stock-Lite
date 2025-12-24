@@ -14,16 +14,47 @@ public class CreateTransaction
         public required CreateTransactionDto TransactionDto { get; set; }
     }
 
-    public class Handler(IRepository<Transaction> repository, IMapper mapper)
+    public class Handler(
+        IRepository<Transaction> transactionRepo, 
+        IRepository<Product> productRepo,
+        IMapper mapper,
+        ICurrentUserService currentUser
+    )
         : IRequestHandler<Command, Result<TransactionDto>>
     {
-        public async Task<Result<TransactionDto>> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<TransactionDto>> Handle(Command request, CancellationToken ct)
         {
-            var transaction = mapper.Map<Transaction>(request.TransactionDto);
+            var dto = request.TransactionDto;
 
-            await repository.AddAsync(transaction, cancellationToken);
+            var productIds = dto.LineItems
+                .Select(li => li.ProductId)
+                .Distinct()
+                .ToList();
 
-            var result = await repository.SaveChangesAsync(cancellationToken);
+            var validProductIds = await productRepo.FindSelectAsync(
+                p => productIds.Contains(p.Id) && p.CompanyId == currentUser.CompanyId,
+                p => p.Id,
+                ct
+            );
+
+            if (validProductIds.Count() != productIds.Count)
+                return Result<TransactionDto>.Failure("One or more products do not belong to your company", 400);
+
+            var transactionIdExist = await transactionRepo.ExistsAsync(x =>
+                x.TransactionId == dto.TransactionId,
+                ct
+            );
+
+            if (transactionIdExist)
+                return Result<TransactionDto>.Failure("Transaction Id must be unique", 400);
+
+            var transaction = mapper.Map<Transaction>(dto);
+            transaction.CompanyId = currentUser.CompanyId;
+            transaction.TotalAmount = dto.LineItems.Sum(x => x.Quantity * x.UnitPrice);
+
+            await transactionRepo.AddAsync(transaction, ct);
+
+            var result = await transactionRepo.SaveChangesAsync(ct);
 
             if (!result)
                 return Result<TransactionDto>.Failure("Failed to create transaction", 400);
