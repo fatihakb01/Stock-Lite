@@ -86,7 +86,6 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
 
         // --- Internal Services ---
-        services.AddScoped(typeof(IUniquenessChecker<>), typeof(UniquenessChecker<>));
         services.AddScoped<ITokenService, TokenService>();
         
         services.AddHttpContextAccessor();

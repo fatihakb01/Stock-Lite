@@ -20,14 +20,32 @@ public class CreateProduct
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<ProductDto>>
     {
-        public async Task<Result<ProductDto>> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<ProductDto>> Handle(Command request, CancellationToken ct)
         {
-            var product = mapper.Map<Product>(request.ProductDto);
+            var dto = request.ProductDto;
+
+            var skuExist = await repository.ExistsAsync(x => 
+                x.SKU == dto.SKU && x.CompanyId == currentUser.CompanyId, 
+                ct
+            );
+
+            if (skuExist)
+                return Result<ProductDto>.Failure("SKU must be unique", 400);
+
+            var nameExist = await repository.ExistsAsync(x => 
+                x.Name == dto.Name && x.CompanyId == currentUser.CompanyId, 
+                ct
+            );
+
+            if (nameExist)
+                return Result<ProductDto>.Failure("Name must be unique", 400);
+
+            var product = mapper.Map<Product>(dto);
             product.CompanyId = currentUser.CompanyId;
 
-            await repository.AddAsync(product, cancellationToken);
+            await repository.AddAsync(product, ct);
 
-            var result = await repository.SaveChangesAsync(cancellationToken);
+            var result = await repository.SaveChangesAsync(ct);
 
             if (!result)
                 return Result<ProductDto>.Failure("Failed to create product", 400);

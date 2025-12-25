@@ -25,6 +25,14 @@ public class CreatePurchaseOrder
         {
             var dto = request.CreatePurchaseOrderDto;
 
+            var orderNumberExist = await repository.ExistsAsync(x =>
+                x.OrderNumber == dto.OrderNumber && x.CompanyId == currentUser.CompanyId,
+                ct
+            );
+
+            if (orderNumberExist)
+                return Result<PurchaseOrderDto>.Failure("Order number must be unique", 400);
+
             var purchaseOrder = mapper.Map<PurchaseOrder>(dto);
             purchaseOrder.Status = PurchaseOrderStatus.Draft;
             purchaseOrder.CompanyId = currentUser.CompanyId;

@@ -41,7 +41,7 @@ public class CreateTransaction
                 return Result<TransactionDto>.Failure("One or more products do not belong to your company", 400);
 
             var transactionIdExist = await transactionRepo.ExistsAsync(x =>
-                x.TransactionId == dto.TransactionId,
+                x.TransactionId == dto.TransactionId && x.CompanyId == currentUser.CompanyId,
                 ct
             );
 

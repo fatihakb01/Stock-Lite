@@ -12,19 +12,26 @@ public class DeleteCompany
         public Guid Id { get; set; }
     }
 
-    public class Handler(IRepository<Company> repository)
-        : IRequestHandler<Command, Result<Unit>>
+    public class Handler(
+        IRepository<Company> repository,
+        ICurrentUserService currentUser
+    ) : IRequestHandler<Command, Result<Unit>>
     {
-        public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
-            var company = await repository.GetByIdAsync(request.Id, cancellationToken);
+            var companies = await repository.FindAsync(x => 
+                x.Id == currentUser.CompanyId, 
+                ct
+            );
+
+            var company = companies.SingleOrDefault();
 
             if (company == null)
                 return Result<Unit>.Failure("Company not found", 404);
 
             repository.Remove(company);
 
-            var result = await repository.SaveChangesAsync(cancellationToken);
+            var result = await repository.SaveChangesAsync(ct);
 
             if (!result)
                 return Result<Unit>.Failure("Failed to delete company", 400);

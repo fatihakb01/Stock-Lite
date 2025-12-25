@@ -9,32 +9,40 @@ namespace Application.Entities.Core.Companies.Features.Commands;
 
 public class EditCompany
 {
-    public class Command : IRequest<Result<EditCompanyDto>>
+    public class Command : IRequest<Result<CompanyDto>>
     {
         public Guid Id { get; set; }
         public required EditCompanyDto CompanyDto { get; set; }
     }
 
-    public class Handler(IRepository<Company> repository, IMapper mapper)
-        : IRequestHandler<Command, Result<EditCompanyDto>>
+    public class Handler(
+        IRepository<Company> repository, 
+        IMapper mapper,
+        ICurrentUserService currentUser
+    ) : IRequestHandler<Command, Result<CompanyDto>>
     {
-        public async Task<Result<EditCompanyDto>> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<CompanyDto>> Handle(Command request, CancellationToken ct)
         {
-            var company = await repository.GetByIdAsync(request.Id, cancellationToken);
+            var dto = request.CompanyDto;
+
+            var company = await repository.FindAsync(x =>
+                x.Id == currentUser.CompanyId && x.Id == request.Id, 
+                ct
+            );
 
             if (company == null)
-                return Result<EditCompanyDto>.Failure("Company not found", 404);
+                return Result<CompanyDto>.Failure("Company not found", 404);
 
             mapper.Map(request.CompanyDto, company);
 
-            var result = await repository.SaveChangesAsync(cancellationToken);
+            var result = await repository.SaveChangesAsync(ct);
 
             if (!result)
-                return Result<EditCompanyDto>.Failure("Failed to update company", 400);
+                return Result<CompanyDto>.Failure("Failed to update company", 400);
 
-            var updatedCompanyDto = mapper.Map<EditCompanyDto>(company);
+            var updatedCompanyDto = mapper.Map<CompanyDto>(company);
 
-            return Result<EditCompanyDto>.Success(updatedCompanyDto);
+            return Result<CompanyDto>.Success(updatedCompanyDto);
         }
     }
 }

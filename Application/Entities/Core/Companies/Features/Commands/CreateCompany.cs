@@ -14,16 +14,20 @@ public class CreateCompany
         public required CreateCompanyDto CompanyDto { get; set; }
     }
 
-    public class Handler(IRepository<Company> repository, IMapper mapper)
-        : IRequestHandler<Command, Result<CompanyDto>>
+    public class Handler(
+        IRepository<Company> repository, 
+        IMapper mapper
+    ) : IRequestHandler<Command, Result<CompanyDto>>
     {
-        public async Task<Result<CompanyDto>> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<CompanyDto>> Handle(Command request, CancellationToken ct)
         {
-            var company = mapper.Map<Company>(request.CompanyDto);
+            var dto = request.CompanyDto;
 
-            await repository.AddAsync(company, cancellationToken);
+            var company = mapper.Map<Company>(dto);
 
-            var result = await repository.SaveChangesAsync(cancellationToken);
+            await repository.AddAsync(company, ct);
+
+            var result = await repository.SaveChangesAsync(ct);
 
             if (!result)
                 return Result<CompanyDto>.Failure("Failed to create business", 400);

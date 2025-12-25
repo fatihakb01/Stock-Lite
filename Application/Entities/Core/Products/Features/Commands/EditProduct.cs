@@ -23,6 +23,8 @@ public class EditProduct
     {
         public async Task<Result<ProductDto>> Handle(Command request, CancellationToken ct)
         {
+            var dto = request.ProductDto;
+
             var products = await repository.FindAsync(x => 
                 x.Id == request.Id && x.CompanyId == currentUser.CompanyId, 
                 ct
@@ -32,7 +34,27 @@ public class EditProduct
             if (product == null)
                 return Result<ProductDto>.Failure("Product not found", 404);
 
-            mapper.Map(request.ProductDto, product);
+            var skuExist = await repository.ExistsAsync(x => 
+                x.Id != request.Id && 
+                x.SKU == dto.SKU && 
+                x.CompanyId == currentUser.CompanyId, 
+                ct
+            );
+
+            if (skuExist)
+                return Result<ProductDto>.Failure("SKU must be unique", 400);
+
+            var nameExist = await repository.ExistsAsync(x => 
+                x.Id != request.Id && 
+                x.Name == dto.Name && 
+                x.CompanyId == currentUser.CompanyId, 
+                ct
+            );
+
+            if (nameExist)
+                return Result<ProductDto>.Failure("Name must be unique", 400);
+
+            mapper.Map(dto, product);
 
             var result = await repository.SaveChangesAsync(ct);
 

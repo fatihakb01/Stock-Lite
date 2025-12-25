@@ -24,6 +24,14 @@ public class UpdatePurchaseOrder
         {
             var dto = request.UpdatePurchaseOrderDto;
 
+            var orderNumberExist = await poRepository.ExistsAsync(x =>
+                x.OrderNumber == dto.OrderNumber && x.CompanyId == currentUser.CompanyId,
+                ct
+            );
+
+            if (orderNumberExist)
+                return Result<Unit>.Failure("Order number must be unique", 400);
+
             var pos = await poRepository.FindAsync(
                 po => po.Id == request.PurchaseOrderId && po.CompanyId == currentUser.CompanyId,
                 ct,

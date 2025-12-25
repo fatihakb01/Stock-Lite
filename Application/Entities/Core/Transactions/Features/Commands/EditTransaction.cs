@@ -16,7 +16,8 @@ public class EditTransaction
     }
 
     public class Handler(
-        IRepository<Transaction> repository, 
+        IRepository<Transaction> transactionRepo, 
+        IRepository<Product> productRepo,
         IMapper mapper,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<TransactionDto>>
@@ -25,7 +26,21 @@ public class EditTransaction
         {
             var dto = request.TransactionDto;
 
-            var transactions = await repository.FindAsync(x =>
+            var productIds = dto.LineItems
+                .Select(li => li.ProductId)
+                .Distinct()
+                .ToList();
+
+            var validProductIds = await productRepo.FindSelectAsync(
+                p => productIds.Contains(p.Id) && p.CompanyId == currentUser.CompanyId,
+                p => p.Id,
+                ct
+            );
+
+            if (validProductIds.Count() != productIds.Count)
+                return Result<TransactionDto>.Failure("One or more products do not belong to your company", 400);
+
+            var transactions = await transactionRepo.FindAsync(x =>
                 x.Id == request.Id && x.CompanyId == currentUser.CompanyId, 
                 ct,
                 t => t.LineItems
@@ -36,14 +51,21 @@ public class EditTransaction
             if (transaction == null)
                 return Result<TransactionDto>.Failure("Transaction not found", 404);
 
-            if (transaction.TransactionId != dto.TransactionId)
-                return Result<TransactionDto>.Failure("Transaction Id cannot be changed", 400);
+            var transactionIdExist = await transactionRepo.ExistsAsync(x =>
+                x.Id != request.Id &&
+                x.TransactionId == dto.TransactionId && 
+                x.CompanyId == currentUser.CompanyId,
+                ct
+            );
+
+            if (transactionIdExist)
+                return Result<TransactionDto>.Failure("Transaction Id must be unique", 400);
 
             transaction.TotalAmount = dto.LineItems.Sum(x => x.Quantity * x.UnitPrice);
 
             mapper.Map(dto, transaction);
 
-            var result = await repository.SaveChangesAsync(ct);
+            var result = await transactionRepo.SaveChangesAsync(ct);
 
             if (!result)
                 return Result<TransactionDto>.Failure("Failed to update transaction", 400);
