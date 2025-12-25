@@ -10,6 +10,12 @@ public class TransactionLineItemConfiguration : IEntityTypeConfiguration<Transac
     {
         builder.HasKey(tl => new { tl.TransactionId, tl.ProductId });
 
+        builder.Property(f => f.TransactionId)
+            .IsRequired();
+
+        builder.Property(f => f.ProductId)
+            .IsRequired();
+
         builder.Property(tl => tl.Quantity)
             .IsRequired();
 
@@ -24,6 +30,11 @@ public class TransactionLineItemConfiguration : IEntityTypeConfiguration<Transac
         builder.HasOne(tl => tl.Product)
             .WithMany(p => p.TransactionLineItems)
             .HasForeignKey(tl => tl.ProductId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(tl => tl.Transaction)
+            .WithMany(t => t.LineItems)
+            .HasForeignKey(tl => tl.TransactionId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -10,6 +10,9 @@ public class ForecastConfiguration : IEntityTypeConfiguration<Forecast>
     {
         builder.HasKey(f => new { f.ProductId, f.PeriodType, f.PeriodStartDate });
 
+        builder.Property(f => f.ProductId)
+            .IsRequired();
+
         builder.Property(f => f.PeriodType)
             .IsRequired()
             .HasConversion<string>()
@@ -17,7 +20,11 @@ public class ForecastConfiguration : IEntityTypeConfiguration<Forecast>
 
         builder.Property(f => f.PeriodStartDate)
             .IsRequired()
-            .HasColumnType("date");
+            .HasColumnType("datetime2");
+
+        builder.Property(f => f.PeriodEndDate)
+            .IsRequired()
+            .HasColumnType("datetime2");
 
         builder.Property(f => f.PredictedQuantity)
             .IsRequired()
@@ -38,7 +45,7 @@ public class ForecastConfiguration : IEntityTypeConfiguration<Forecast>
         });
 
         builder.HasOne(f => f.Product)
-            .WithMany(p => p.Forecasts) 
+            .WithMany(p => p.Forecasts)
             .HasForeignKey(f => f.ProductId)
             .OnDelete(DeleteBehavior.Cascade);
     }

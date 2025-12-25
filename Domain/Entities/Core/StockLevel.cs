@@ -2,7 +2,6 @@ namespace Domain.Entities.Core;
 
 public class StockLevel
 {
-    public Guid Id { get; set; }
     public Guid ProductId { get; set; }
 
     public int QuantityOnHand { get; set; }

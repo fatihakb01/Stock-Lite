@@ -18,6 +18,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasMaxLength(255);
 
+        builder.Property(u => u.Role)
+            .IsRequired();
+
         builder.Property(u => u.PhoneNumber)
             .HasMaxLength(20);
 
@@ -25,13 +28,15 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired();
 
         builder.Property(u => u.FirstName)
-            .HasMaxLength(100);
+            .HasMaxLength(50);
 
         builder.Property(u => u.LastName)
-            .HasMaxLength(100);
+            .HasMaxLength(50);
+
+        builder.HasIndex(u => new { u.CompanyId, u.UserName }).IsUnique();
 
         builder.HasOne(u => u.Company)
-            .WithMany(b => b.Users)
+            .WithMany(c => c.Users)
             .HasForeignKey(u => u.CompanyId)
             .OnDelete(DeleteBehavior.Cascade);
     }

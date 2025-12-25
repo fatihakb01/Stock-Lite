@@ -8,7 +8,7 @@ public class StockLevelConfiguration : IEntityTypeConfiguration<StockLevel>
 {
     public void Configure(EntityTypeBuilder<StockLevel> builder)
     {
-        builder.HasKey(p => p.Id);
+        builder.HasKey(s => s.ProductId);
 
         builder.Property(s => s.QuantityOnHand)
             .IsRequired()

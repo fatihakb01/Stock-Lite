@@ -18,19 +18,25 @@ public class PurchaseOrderConfiguration : IEntityTypeConfiguration<PurchaseOrder
                .IsRequired();
 
         builder.Property(po => po.OrderDate)
-               .IsRequired();
+               .IsRequired()
+               .HasColumnType("date");
 
-        builder.HasMany(po => po.LineItems)
-               .WithOne(li => li.PurchaseOrder)
-               .HasForeignKey(li => li.PurchaseOrderId)
-               .OnDelete(DeleteBehavior.Cascade);
+        builder.Property(po => po.ReceivedDate)
+               .HasColumnType("date");
+
+        builder.Property(po => po.ExpectedDeliveryDate)
+               .HasColumnType("date");
 
         builder.HasOne(po => po.Company)
             .WithMany(c => c.PurchaseOrders)
             .HasForeignKey(po => po.CompanyId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasIndex(po => po.OrderNumber).IsUnique();
+        builder.HasMany(po => po.LineItems)
+               .WithOne(li => li.PurchaseOrder)
+               .HasForeignKey(li => li.PurchaseOrderId)
+               .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasIndex(po => new { po.CompanyId, po.OrderNumber }).IsUnique();
     }
 }

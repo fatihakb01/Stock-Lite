@@ -10,6 +10,9 @@ public class SalesAggregateConfiguration : IEntityTypeConfiguration<SalesAggrega
     {
         builder.HasKey(s => new { s.ProductId, s.PeriodType, s.PeriodStartDate });
 
+        builder.Property(sa => sa.ProductId)
+            .IsRequired();
+
         builder.Property(sa => sa.PeriodType)
             .IsRequired()
             .HasConversion<string>()
@@ -17,7 +20,11 @@ public class SalesAggregateConfiguration : IEntityTypeConfiguration<SalesAggrega
 
         builder.Property(sa => sa.PeriodStartDate)
             .IsRequired()
-            .HasColumnType("date");
+            .HasColumnType("datetime2");
+
+        builder.Property(sa => sa.PeriodEndDate)
+            .IsRequired()
+            .HasColumnType("datetime2");
 
         builder.Property(sa => sa.TotalQuantity)
             .IsRequired();
@@ -33,7 +40,7 @@ public class SalesAggregateConfiguration : IEntityTypeConfiguration<SalesAggrega
         });
 
         builder.HasOne(sa => sa.Product)
-            .WithMany(p => p.SalesAggregates) 
+            .WithMany(p => p.SalesAggregates)
             .HasForeignKey(sa => sa.ProductId)
             .OnDelete(DeleteBehavior.Cascade);
     }

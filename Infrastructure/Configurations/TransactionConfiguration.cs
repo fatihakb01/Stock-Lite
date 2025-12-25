@@ -19,11 +19,8 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
             .HasColumnType("decimal(18,2)");
 
         builder.Property(t => t.TransactionDate)
-            .IsRequired();
-
-        builder.ToTable(p => 
-            p.HasCheckConstraint("CK_Transaction_TransactionDate", "[TransactionDate] <= SYSUTCDATETIME()")
-        );
+            .IsRequired()
+            .HasColumnType("datetime2");
 
         builder.Property(t => t.PaymentMethod)
             .HasMaxLength(50);
@@ -31,17 +28,20 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
         builder.Property(t => t.Notes)
             .HasMaxLength(200);
 
-        builder.HasMany(t => t.LineItems)
-            .WithOne(l => l.Transaction)
-            .HasForeignKey(l => l.TransactionId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.ToTable(p => 
+            p.HasCheckConstraint("CK_Transaction_TransactionDate", "[TransactionDate] <= SYSUTCDATETIME()")
+        );
 
         builder.HasOne(t => t.Company)
             .WithMany(c => c.Transactions)
             .HasForeignKey(t => t.CompanyId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasIndex(t => t.TransactionId).IsUnique();
+        builder.HasMany(t => t.LineItems)
+            .WithOne(l => l.Transaction)
+            .HasForeignKey(l => l.TransactionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasIndex(t => new { t.CompanyId, t.TransactionId }).IsUnique();
     }
 }
