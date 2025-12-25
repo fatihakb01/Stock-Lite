@@ -83,27 +83,11 @@ public static class DataSeeder
             ReorderPoint = random.Next(5, 50)
         }).ToList();
 
-        // Customers
-        var customers = new List<Customer>
-        {
-            new() { DisplayName = "Albert Heijn", LegalName = "Albert Heijn B.V.", Email = "info@albertheijn.nl", Company = company },
-            new() { DisplayName = "Jumbo", LegalName = "Jumbo Supermarkten B.V.", Email = "info@jumbo.nl", Company = company },
-            new() { DisplayName = "Aldi", LegalName = "Aldi Nederland B.V.", Email = "contact@aldi.nl", Company = company },
-            new() { DisplayName = "Action", LegalName = "Action Nederland B.V.", Email = "info@action.nl", Company = company },
-            new() { DisplayName = "Bol.com", LegalName = "Bol.com B.V.", Email = "support@bol.com", Company = company },
-            new() { DisplayName = "Coolblue", LegalName = "Coolblue B.V.", Email = "service@coolblue.nl", Company = company },
-            new() { DisplayName = "MediaMarkt", LegalName = "MediaMarkt Nederland B.V.", Email = "contact@mediamarkt.nl", Company = company },
-            new() { DisplayName = "Hema", LegalName = "Hema B.V.", Email = "info@hema.nl", Company = company },
-            new() { DisplayName = "Blokker", LegalName = "Blokker B.V.", Email = "service@blokker.nl", Company = company },
-            new() { DisplayName = "Gamma", LegalName = "Gamma Nederland B.V.", Email = "info@gamma.nl", Company = company }
-        };
-
         // Save entities (except for transactions) to database
         context.Companies.Add(company);
         context.Users.AddRange(users);
         context.Products.AddRange(products);
         context.StockLevels.AddRange(stockLevels);
-        context.Customers.AddRange(customers);
         await context.SaveChangesAsync();
 
         // Transactions
@@ -118,7 +102,6 @@ public static class DataSeeder
 
         for (int i = 0; i < TotalTransactions; i++)
         {
-            var customer = customers[random.Next(customers.Count)];
             var selectedProducts = products.OrderBy(_ => random.Next()).Take(random.Next(1, 4)).ToList();
 
             var transaction = new Transaction
