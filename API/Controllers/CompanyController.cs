@@ -16,12 +16,6 @@ public class CompanyController(IMediator mediator) : BaseApiController(mediator)
         return HandleResult(await Mediator.Send(new GetCompany.Query { Id = id }));
     }
 
-    [HttpGet]
-    public async Task<ActionResult<List<CompanyDto>>> GetCompanies()
-    {
-        return HandleResult(await Mediator.Send(new GetCompanies.Query()));
-    }
-
     [Authorize(Policy = "SuperAdminOnly")]
     [HttpPost]
     public async Task<ActionResult<CompanyDto>> CreateCompany([FromBody] CreateCompanyDto companyDto)
