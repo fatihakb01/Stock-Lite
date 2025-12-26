@@ -44,7 +44,6 @@ export type RegisterUserDto = {
   password: string
   phoneNumber?: string
   role: string
-  companyId: string
 }
 
 export type EditUserDto = {

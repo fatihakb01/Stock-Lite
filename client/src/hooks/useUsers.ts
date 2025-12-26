@@ -76,11 +76,10 @@ export const useCurrentUser = () => {
 };
 
 // GET ALL USERS
-export const useUsers = (companyId: string | null) => {
+export const useUsers = () => {
   return useQuery<User[]>({
-    queryKey: ["users", companyId],
-    queryFn: () => getUsers(companyId!),
-    enabled: !!companyId
+    queryKey: ["users"],
+    queryFn: () => getUsers()
   });
 };
 

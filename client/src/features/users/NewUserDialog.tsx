@@ -63,8 +63,6 @@ export default function NewUserDialog({
       password: "Temp12345!", 
     };
 
-    console.log(payload.role);
-
     registerMutation.mutate(payload, {
       onSuccess: (createdUser) => {
         handleClose();

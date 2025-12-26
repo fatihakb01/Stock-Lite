@@ -36,13 +36,11 @@ function Section({
 }
 
 interface ProductDetailDrawerProps {
-  companyId: string | null;
   productId: string | null;
   onClose: () => void;
 }
 
 export default function ProductDetailDrawer({
-  companyId,
   productId,
   onClose,
 }: ProductDetailDrawerProps) {
@@ -51,7 +49,7 @@ export default function ProductDetailDrawer({
     data: product, 
     isLoading: isLoadingProduct, 
     isError: isErrorProduct 
-  } = useProduct(productId, companyId);
+  } = useProduct(productId);
   const {
     data: salesaggregate,
     isLoading: isLoadingSales,
@@ -143,7 +141,10 @@ export default function ProductDetailDrawer({
             {product.stock && (
               <Section title="Stock">
                 <Typography variant="body1">
-                  Quantity: <strong>{product.stock.quantity}</strong>
+                  Quantity on hand: <strong>{product.stock.quantityOnHand}</strong>
+                </Typography>
+                <Typography variant="body1">
+                  Quantity on order: <strong>{product.stock.quantityOnOrder}</strong>
                 </Typography>
                 <Typography variant="body1">
                   Reorder Point: <strong>{product.stock.reorderPoint}</strong>

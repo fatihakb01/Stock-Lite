@@ -57,8 +57,8 @@ export const getCurrentUser = async (): Promise<User> => {
 };
 
 // GET ALL USERS FOR A COMPANY
-export const getUsers = async (companyId: string): Promise<User[]> => {
-  const res = await api.get(`/user/all?companyId=${companyId}`);
+export const getUsers = async (): Promise<User[]> => {
+  const res = await api.get('/user/all');
   return res.data;
 };
 

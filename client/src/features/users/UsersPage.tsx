@@ -9,7 +9,7 @@ import { roleMap } from "./roleMap";
 
 export default function UsersPage() {
   const { data: currentUser } = useCurrentUser();
-  const { data: users, isLoading } = useUsers(currentUser?.companyId ?? null);
+  const { data: users, isLoading } = useUsers();
 
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);

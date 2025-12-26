@@ -7,7 +7,8 @@ export type Product = {
     createdAt: Date
     isActive: boolean
     stock: {
-        quantity: number,
+        quantityOnHand: number,
+        quantityOnOrder: number,
         reorderPoint: number
     }
 }
