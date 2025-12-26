@@ -17,11 +17,11 @@ public class TokenService(IConfiguration config) : ITokenService
 
         var claims = new List<Claim>
         {
-            new("nameid", user.Id.ToString()),
-            new("email", user.Email!),
-            new("unique_name", user.UserName!),
-            new("role", user.Role.ToString()),
-            new("companyId", user.CompanyId.ToString())   
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Email, user.Email!),
+            new Claim(ClaimTypes.Name, user.UserName!),
+            new Claim(ClaimTypes.Role, user.Role.ToString()),
+            new Claim("companyId", user.CompanyId.ToString())
         };
 
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

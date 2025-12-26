@@ -16,8 +16,12 @@ public class RegisterUser
         public required RegisterUserDto RegisterUserDto { get; set; }
     }
 
-    public class Handler(IUserRepository userRepository, IMapper mapper, IConfiguration config)
-        : IRequestHandler<Command, Result<UserDto>>
+    public class Handler(
+        IUserRepository userRepository, 
+        IMapper mapper, 
+        IConfiguration config,
+        ICurrentUserService currentUser
+    ) : IRequestHandler<Command, Result<UserDto>>
     {
         public async Task<Result<UserDto>> Handle(Command request, CancellationToken cancellationToken)
         {
@@ -30,6 +34,7 @@ public class RegisterUser
 
             // Map DTO → Entity
             var user = mapper.Map<User>(dto);
+            user.CompanyId = currentUser.CompanyId;
             user.Role = Enum.TryParse<UserRole>(dto.Role, true, out var parsedRole)
                 ? parsedRole
                 : UserRole.User;

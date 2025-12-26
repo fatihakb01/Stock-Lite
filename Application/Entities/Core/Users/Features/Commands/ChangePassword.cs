@@ -12,14 +12,15 @@ public class ChangePassword
         public required ChangePasswordDto Dto { get; set; }
     }
 
-    public class Handler(IUserRepository userRepository)
-        : IRequestHandler<Command, Result<Unit>>
+    public class Handler(
+        IUserRepository userRepository
+    ) : IRequestHandler<Command, Result<Unit>>
     {
-        public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
             var dto = request.Dto;
 
-            var user = await userRepository.GetByIdAsync(dto.UserId, cancellationToken);
+            var user = await userRepository.GetByIdAsync(dto.UserId, ct);
             if (user == null)
                 return Result<Unit>.Failure("User not found.", 404);
 

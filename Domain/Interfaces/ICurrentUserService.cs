@@ -2,7 +2,7 @@ namespace Domain.Interfaces;
 
 public interface ICurrentUserService
 {
-    Guid UserId { get; }
+    Guid Id { get; }
     Guid CompanyId { get; }
     bool IsAdmin { get; }
     bool IsSuperAdmin { get; }

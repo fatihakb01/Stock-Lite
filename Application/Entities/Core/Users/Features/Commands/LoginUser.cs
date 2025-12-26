@@ -13,14 +13,18 @@ public class LoginUser
         public required LoginUserDto LoginUserDto { get; set; }
     }
 
-    public class Handler(IUserRepository userRepository, ITokenService tokenService, IMapper mapper)
-        : IRequestHandler<Command, Result<AuthResponseDto>>
+    public class Handler(
+        IUserRepository userRepository, 
+        ITokenService tokenService, 
+        IMapper mapper
+    ) : IRequestHandler<Command, Result<AuthResponseDto>>
     {
-        public async Task<Result<AuthResponseDto>> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<AuthResponseDto>> Handle(Command request, CancellationToken ct)
         {
             var dto = request.LoginUserDto;
 
-            var user = await userRepository.GetByEmailAsync(dto.Email, cancellationToken);
+            var user = await userRepository.GetByEmailAsync(dto.Email, ct);
+
             if (user == null)
                 return Result<AuthResponseDto>.Failure("Invalid email.", 401);
 

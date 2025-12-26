@@ -7,10 +7,6 @@ public class ChangePasswordValidator : AbstractValidator<ChangePasswordDto>
 {
     public ChangePasswordValidator()
     {
-        RuleFor(x => x.UserId)
-            .NotEmpty()
-            .WithMessage("UserId is required.");
-
         RuleFor(x => x.Token)
             .NotEmpty()
             .WithMessage("Token is required.")

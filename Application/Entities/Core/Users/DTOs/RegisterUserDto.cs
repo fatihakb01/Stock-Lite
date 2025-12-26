@@ -11,5 +11,4 @@ public class RegisterUserDto
     public required string Role { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; } = true;
-    public Guid CompanyId { get; set; }
 }

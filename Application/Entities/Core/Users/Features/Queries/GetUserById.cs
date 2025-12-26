@@ -13,17 +13,19 @@ public class GetUserById
         public Guid UserId { get; set; }
     }
 
-    public class Handler(IUserRepository userRepository, IMapper mapper)
-        : IRequestHandler<Query, Result<UserDto>>
+    public class Handler(
+        IUserRepository userRepository, 
+        IMapper mapper
+    ) : IRequestHandler<Query, Result<UserDto>>
     {
-        public async Task<Result<UserDto>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Result<UserDto>> Handle(Query request, CancellationToken ct)
         {
-            var user = await userRepository.GetByIdAsync(request.UserId, cancellationToken);
-            
+            var user = await userRepository.GetByIdAsync(request.UserId, ct);
             if (user == null)
                 return Result<UserDto>.Failure("User not found.", 404);
 
             var userDto = mapper.Map<UserDto>(user);
+            
             return Result<UserDto>.Success(userDto);
         }
     }

@@ -12,14 +12,15 @@ public class ConfirmEmail
         public required ConfirmEmailDto Dto { get; set; } 
     }
 
-    public class Handler(IUserRepository userRepository) 
-        : IRequestHandler<Command, Result<ConfirmEmailResult>>
+    public class Handler(
+        IUserRepository userRepository
+    ) : IRequestHandler<Command, Result<ConfirmEmailResult>>
     {
-        public async Task<Result<ConfirmEmailResult>> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<ConfirmEmailResult>> Handle(Command request, CancellationToken ct)
         {
             var dto = request.Dto;
 
-            var user = await userRepository.GetByIdAsync(dto.UserId, cancellationToken);
+            var user = await userRepository.GetByIdAsync(dto.UserId, ct);
 
             if (user == null)
                 return Result<ConfirmEmailResult>.Failure("User not found.", 404);

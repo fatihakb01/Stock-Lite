@@ -10,11 +10,12 @@ public class DeleteUser
     public class Command : IRequest<Result<Unit>>
     {
         public Guid Id { get; set; }
-        public Guid CompanyId { get; set; } 
     }
 
-    public class Handler(IRepository<User> repository, IUserRepository userRepository)
-        : IRequestHandler<Command, Result<Unit>>
+    public class Handler(
+        IRepository<User> repository, 
+        IUserRepository userRepository
+    ) : IRequestHandler<Command, Result<Unit>>
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
@@ -33,5 +34,4 @@ public class DeleteUser
             return Result<Unit>.Success(Unit.Value);
         }
     }
-
 }

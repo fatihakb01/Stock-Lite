@@ -15,8 +15,8 @@ public class CurrentUserService : ICurrentUserService
         _httpContextAccessor.HttpContext?.User
         ?? throw new UnauthorizedAccessException();
 
-    public Guid UserId =>
-        Guid.Parse(User.FindFirst("nameid")!.Value);
+    public Guid Id =>
+        Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
     public Guid CompanyId =>
         Guid.Parse(User.FindFirst("companyId")!.Value);

@@ -34,6 +34,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(50);
 
         builder.HasIndex(u => new { u.CompanyId, u.UserName }).IsUnique();
+        builder.HasIndex(u => u.Email).IsUnique();
 
         builder.HasOne(u => u.Company)
             .WithMany(c => c.Users)

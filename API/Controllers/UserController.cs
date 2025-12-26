@@ -31,9 +31,9 @@ public class UserController(IMediator mediator) : BaseApiController(mediator)
 
     [Authorize(Policy = "SuperAdminOnly")]
     [HttpDelete("delete/{id}")]
-    public async Task<ActionResult<Unit>> DeleteUser(Guid id,[FromQuery] Guid companyId)
+    public async Task<ActionResult<Unit>> DeleteUser(Guid id)
     {
-        return HandleResult(await Mediator.Send(new DeleteUser.Command { Id = id, CompanyId = companyId }));
+        return HandleResult(await Mediator.Send(new DeleteUser.Command { Id = id }));
     }
 
     [HttpPost("confirm-email")]
@@ -54,18 +54,21 @@ public class UserController(IMediator mediator) : BaseApiController(mediator)
         return HandleResult(await Mediator.Send(new ChangePassword.Command { Dto = dto }));
     }
 
+    [Authorize]
     [HttpGet("all")]
-    public async Task<ActionResult<List<UserDto>>> GetAllUsers([FromQuery] Guid companyId)
+    public async Task<ActionResult<List<UserDto>>> GetAllUsers()
     {
-        return HandleResult(await Mediator.Send(new GetAllUsers.Query { CompanyId = companyId }));
+        return HandleResult(await Mediator.Send(new GetAllUsers.Query { }));
     }
 
+    [Authorize]
     [HttpGet("current")]
     public async Task<ActionResult<UserDto>> GetCurrentUser()
     {
         return HandleResult(await Mediator.Send(new GetCurrentUser.Query()));
     }
 
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<ActionResult<UserDto>> GetUserById(Guid id)
     {
