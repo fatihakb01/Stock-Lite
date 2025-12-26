@@ -9,7 +9,7 @@ public class DeleteCompany
 {
     public class Command : IRequest<Result<Unit>>
     {
-        public Guid Id { get; set; }
+        
     }
 
     public class Handler(

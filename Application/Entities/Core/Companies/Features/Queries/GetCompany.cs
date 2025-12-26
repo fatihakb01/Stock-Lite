@@ -11,15 +11,19 @@ public class GetCompany
 {
     public class Query : IRequest<Result<CompanyDto>>
     {
-        public required Guid Id { get; set; }
+        
     }
 
-    public class Handler(IRepository<Company> repository, IMapper mapper)
+    public class Handler(
+        IRepository<Company> repository, 
+        IMapper mapper,
+        ICurrentUserService currentUser
+    )
         : IRequestHandler<Query, Result<CompanyDto>>
     {
         public async Task<Result<CompanyDto>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var company = await repository.GetByIdAsync(request.Id, cancellationToken);
+            var company = await repository.GetByIdAsync(currentUser.CompanyId, cancellationToken);
 
             if (company == null)
                 return Result<CompanyDto>.Failure("Company not found", 404);

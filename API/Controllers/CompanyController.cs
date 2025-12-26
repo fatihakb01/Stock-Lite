@@ -10,10 +10,10 @@ namespace API.Controllers;
 [Authorize]
 public class CompanyController(IMediator mediator) : BaseApiController(mediator)
 {
-    [HttpGet("{id}")]
-    public async Task<ActionResult<CompanyDto>> GetCompany(Guid id)
+    [HttpGet]
+    public async Task<ActionResult<CompanyDto>> GetCompany()
     {
-        return HandleResult(await Mediator.Send(new GetCompany.Query { Id = id }));
+        return HandleResult(await Mediator.Send(new GetCompany.Query()));
     }
 
     [Authorize(Policy = "SuperAdminOnly")]
@@ -24,16 +24,16 @@ public class CompanyController(IMediator mediator) : BaseApiController(mediator)
     }
 
     [Authorize(Policy = "SuperAdminOnly")]
-    [HttpPut("{id}")]
-    public async Task<ActionResult<CompanyDto>> EditCompany(Guid id, [FromBody] EditCompanyDto companyDto)
+    [HttpPut]
+    public async Task<ActionResult<CompanyDto>> EditCompany([FromBody] EditCompanyDto companyDto)
     {
-        return HandleResult(await Mediator.Send(new EditCompany.Command { Id = id, CompanyDto = companyDto }));
+        return HandleResult(await Mediator.Send(new EditCompany.Command { CompanyDto = companyDto }));
     }
     
-    [Authorize(Policy = "SuperAdminOnly")]
-    [HttpDelete("{id}")]
-    public async Task<ActionResult<Unit>> DeleteCompany(Guid id)
-    {
-        return HandleResult(await Mediator.Send(new DeleteCompany.Command { Id = id }));
-    }
+    // [Authorize(Policy = "SuperAdminOnly")]
+    // [HttpDelete]
+    // public async Task<ActionResult<Unit>> DeleteCompany()
+    // {
+    //     return HandleResult(await Mediator.Send(new DeleteCompany.Command()));
+    // }
 }

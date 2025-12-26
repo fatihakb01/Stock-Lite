@@ -11,7 +11,6 @@ public class EditCompany
 {
     public class Command : IRequest<Result<CompanyDto>>
     {
-        public Guid Id { get; set; }
         public required EditCompanyDto CompanyDto { get; set; }
     }
 
@@ -25,10 +24,12 @@ public class EditCompany
         {
             var dto = request.CompanyDto;
 
-            var company = await repository.FindAsync(x =>
-                x.Id == currentUser.CompanyId && x.Id == request.Id, 
+            var companies = await repository.FindAsync(x =>
+                x.Id == currentUser.CompanyId, 
                 ct
             );
+
+            var company = companies.SingleOrDefault();
 
             if (company == null)
                 return Result<CompanyDto>.Failure("Company not found", 404);
