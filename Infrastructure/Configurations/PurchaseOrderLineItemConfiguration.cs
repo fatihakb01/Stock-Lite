@@ -28,6 +28,7 @@ public class PurchaseOrderLineItemConfiguration : IEntityTypeConfiguration<Purch
 
        builder.ToTable(t => {
            t.HasCheckConstraint("CK_PurchaseOrderLineItem_Quantity", "[Quantity] > 0");
+           t.HasCheckConstraint("CK_PurchaseOrderLineItem_ReceivedQuantity", "[ReceivedQuantity] >= 0");
            t.HasCheckConstraint("CK_PurchaseOrderLineItem_UnitCost", "[UnitCost] >= 0");
        });
 
