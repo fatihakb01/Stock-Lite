@@ -27,6 +27,11 @@
     <Folder Include="Entities\Core\PurchaseOrders\Features\Commands\" />
     <Folder Include="Entities\Core\PurchaseOrders\Features\Queries\" />
     <Folder Include="Entities\Core\PurchaseOrders\Validators\" />
+    <Folder Include="Entities\Derived\ConfirmedOrderAggregates\" />
+    <Folder Include="Entities\Derived\ConfirmedOrderAggregates\DTOs\" />
+    <Folder Include="Entities\Derived\ConfirmedOrderAggregates\Features\" />
+    <Folder Include="Entities\Derived\ConfirmedOrderAggregates\Features\Commands\" />
+    <Folder Include="Entities\Derived\ConfirmedOrderAggregates\Features\Queries\" />
   </ItemGroup>
 
 </Project>

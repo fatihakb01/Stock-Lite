@@ -46,6 +46,11 @@ namespace Infrastructure.Configurations
                    .HasForeignKey(f => f.ProductId)
                    .OnDelete(DeleteBehavior.Cascade);
 
+            builder.HasMany(p => p.ConfirmedOrderAggregates)
+                   .WithOne(s => s.Product)
+                   .HasForeignKey(s => s.ProductId)
+                   .OnDelete(DeleteBehavior.Cascade);
+
             builder.HasMany(p => p.TransactionLineItems)
                    .WithOne(tl => tl.Product)
                    .HasForeignKey(tl => tl.ProductId)

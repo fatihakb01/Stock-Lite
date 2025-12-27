@@ -20,6 +20,7 @@ public class Product
     public StockLevel? StockLevel { get; set; }
     public ICollection<SalesAggregate> SalesAggregates { get; set; } = new List<SalesAggregate>();
     public ICollection<Forecast> Forecasts { get; set; } = new List<Forecast>();
+    public ICollection<ConfirmedOrderAggregate> ConfirmedOrderAggregates { get; set; } = new List<ConfirmedOrderAggregate>();
     public ICollection<TransactionLineItem> TransactionLineItems { get; set; } = new List<TransactionLineItem>();
     public ICollection<PurchaseOrderLineItem> PurchaseOrderLineItem { get; set; } = new List<PurchaseOrderLineItem>();
     public ICollection<ConfirmedOrderLineItem> ConfirmedOrderLineItem { get; set; } = new List<ConfirmedOrderLineItem>();

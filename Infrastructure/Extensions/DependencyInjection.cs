@@ -40,14 +40,6 @@ public static class DependencyInjection
         .AddSignInManager<SignInManager<User>>()
         .AddDefaultTokenProviders();
 
-        // services.Configure<IdentityOptions>(options =>
-        // {
-        //     options.ClaimsIdentity.RoleClaimType = "role";
-        //     options.ClaimsIdentity.UserIdClaimType = "nameid";
-        //     options.ClaimsIdentity.UserNameClaimType = "unique_name";
-        //     options.ClaimsIdentity.EmailClaimType = "email";
-        // });
-
         // --- JWT configuration ---
         var jwtSettings = config.GetSection("Jwt");
 
@@ -83,6 +75,7 @@ public static class DependencyInjection
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<ISalesAggregateRepository, SalesAggregateRepository>();
         services.AddScoped<IForecastRepository, ForecastRepository>();
+        services.AddScoped<IConfirmedOrderAggregateRepository, ConfirmedOrderAggregateRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
 
         // --- Internal Services ---

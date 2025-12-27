@@ -40,8 +40,8 @@ public class ForecastConfiguration : IEntityTypeConfiguration<Forecast>
 
         builder.ToTable(f =>
         {
-            f.HasCheckConstraint("CK_Confidence", "[Confidence] > 0 AND [Confidence] < 1");
-            f.HasCheckConstraint("CK_Period_Start_End_Date", "[PeriodStartDate] <= [PeriodEndDate]");
+            f.HasCheckConstraint("CK_Forecast_Confidence", "[Confidence] > 0 AND [Confidence] < 1");
+            f.HasCheckConstraint("CK_Forecast_Period_Start_End_Date", "[PeriodStartDate] <= [PeriodEndDate]");
         });
 
         builder.HasOne(f => f.Product)

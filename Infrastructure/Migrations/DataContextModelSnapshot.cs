@@ -422,6 +422,37 @@ namespace Infrastructure.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Entities.Derived.ConfirmedOrderAggregate", b =>
+                {
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PeriodType")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<DateTime>("PeriodStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("PeriodEndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TotalConfirmedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalConfirmedRevenue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("ProductId", "PeriodType", "PeriodStartDate");
+
+                    b.ToTable("ConfirmedOrderAggregates", t =>
+                        {
+                            t.HasCheckConstraint("CK_ConfirmedOrderAggregate_Period_Start_End_Date", "[PeriodStartDate] <= [PeriodEndDate]");
+
+                            t.HasCheckConstraint("CK_ConfirmedOrderAggregate_Total_Quantity", "[TotalConfirmedQuantity] >= 0");
+                        });
+                });
+
             modelBuilder.Entity("Domain.Entities.Derived.Forecast", b =>
                 {
                     b.Property<Guid>("ProductId")
@@ -450,9 +481,9 @@ namespace Infrastructure.Migrations
 
                     b.ToTable("Forecasts", t =>
                         {
-                            t.HasCheckConstraint("CK_Confidence", "[Confidence] > 0 AND [Confidence] < 1");
+                            t.HasCheckConstraint("CK_Forecast_Confidence", "[Confidence] > 0 AND [Confidence] < 1");
 
-                            t.HasCheckConstraint("CK_Period_Start_End_Date", "[PeriodStartDate] <= [PeriodEndDate]");
+                            t.HasCheckConstraint("CK_Forecast_Period_Start_End_Date", "[PeriodStartDate] <= [PeriodEndDate]");
                         });
                 });
 
@@ -481,10 +512,9 @@ namespace Infrastructure.Migrations
 
                     b.ToTable("SalesAggregates", t =>
                         {
-                            t.HasCheckConstraint("CK_Period_Start_End_Date", "[PeriodStartDate] <= [PeriodEndDate]")
-                                .HasName("CK_Period_Start_End_Date1");
+                            t.HasCheckConstraint("CK_SalesAggregate_Period_Start_End_Date", "[PeriodStartDate] <= [PeriodEndDate]");
 
-                            t.HasCheckConstraint("CK_Total_Quantity", "[TotalQuantity] >= 0");
+                            t.HasCheckConstraint("CK_SalesAggregate_Total_Quantity", "[TotalQuantity] >= 0");
                         });
                 });
 
@@ -744,6 +774,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("Company");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Derived.ConfirmedOrderAggregate", b =>
+                {
+                    b.HasOne("Domain.Entities.Core.Product", "Product")
+                        .WithMany("ConfirmedOrderAggregates")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Domain.Entities.Derived.Forecast", b =>
                 {
                     b.HasOne("Domain.Entities.Core.Product", "Product")
@@ -837,6 +878,8 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Core.Product", b =>
                 {
+                    b.Navigation("ConfirmedOrderAggregates");
+
                     b.Navigation("ConfirmedOrderLineItem");
 
                     b.Navigation("Forecasts");

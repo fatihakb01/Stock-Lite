@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Context\CustomQueries\" />
     <Folder Include="Context\SeedData\CustomData\" />
     <Folder Include="Migrations\" />
   </ItemGroup>

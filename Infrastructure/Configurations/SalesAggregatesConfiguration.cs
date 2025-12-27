@@ -35,8 +35,8 @@ public class SalesAggregateConfiguration : IEntityTypeConfiguration<SalesAggrega
 
         builder.ToTable(sa =>
         {
-            sa.HasCheckConstraint("CK_Total_Quantity", "[TotalQuantity] >= 0");
-            sa.HasCheckConstraint("CK_Period_Start_End_Date", "[PeriodStartDate] <= [PeriodEndDate]");
+            sa.HasCheckConstraint("CK_SalesAggregate_Total_Quantity", "[TotalQuantity] >= 0");
+            sa.HasCheckConstraint("CK_SalesAggregate_Period_Start_End_Date", "[PeriodStartDate] <= [PeriodEndDate]");
         });
 
         builder.HasOne(sa => sa.Product)

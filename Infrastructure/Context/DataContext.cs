@@ -20,6 +20,7 @@ public class DataContext(DbContextOptions<DataContext> options)
     public DbSet<ConfirmedOrderLineItem> ConfirmedOrderLineItem { get; set; }
     public DbSet<SalesAggregate> SalesAggregates { get; set; }
     public DbSet<Forecast> Forecasts { get; set; }
+    public DbSet<ConfirmedOrderAggregate> ConfirmedOrderAggregates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
