@@ -43,5 +43,10 @@ public class CompanyConfiguration : IEntityTypeConfiguration<Company>
             .WithOne(po => po.Company)
             .HasForeignKey(po => po.CompanyId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasMany(b => b.ConfirmedOrders)
+            .WithOne(c => c.Company)
+            .HasForeignKey(c => c.CompanyId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

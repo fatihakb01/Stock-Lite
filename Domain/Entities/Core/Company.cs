@@ -15,4 +15,5 @@ public class Company
     public ICollection<Product> Products { get; set; } = new List<Product>();
     public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
     public ICollection<PurchaseOrder> PurchaseOrders { get; set; } = new List<PurchaseOrder>();
+    public ICollection<ConfirmedOrder> ConfirmedOrders { get; set; } = new List<ConfirmedOrder>();
 }

@@ -56,6 +56,11 @@ namespace Infrastructure.Configurations
                    .HasForeignKey(l => l.ProductId)
                    .OnDelete(DeleteBehavior.Restrict);
 
+            builder.HasMany(p => p.ConfirmedOrderLineItem)
+                   .WithOne(l => l.Product)
+                   .HasForeignKey(l => l.ProductId)
+                   .OnDelete(DeleteBehavior.Restrict);
+
             builder.HasIndex(p => new { p.CompanyId, p.SKU }).IsUnique();
             builder.HasIndex(p => new { p.CompanyId, p.Name }).IsUnique();
         }

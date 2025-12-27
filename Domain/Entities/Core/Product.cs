@@ -22,4 +22,5 @@ public class Product
     public ICollection<Forecast> Forecasts { get; set; } = new List<Forecast>();
     public ICollection<TransactionLineItem> TransactionLineItems { get; set; } = new List<TransactionLineItem>();
     public ICollection<PurchaseOrderLineItem> PurchaseOrderLineItem { get; set; } = new List<PurchaseOrderLineItem>();
+    public ICollection<ConfirmedOrderLineItem> ConfirmedOrderLineItem { get; set; } = new List<ConfirmedOrderLineItem>();
 }

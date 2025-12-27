@@ -57,6 +57,71 @@ namespace Infrastructure.Migrations
                     b.ToTable("Companies");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Core.ConfirmedOrder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ExpectedDeliveryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OrderNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("ReceivedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId", "OrderNumber")
+                        .IsUnique();
+
+                    b.ToTable("ConfirmedOrder");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Core.ConfirmedOrderLineItem", b =>
+                {
+                    b.Property<Guid>("ConfirmedOrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SoldQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("UnitCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("ConfirmedOrderId", "ProductId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ConfirmedOrderLineItem", t =>
+                        {
+                            t.HasCheckConstraint("CK_ConfirmedOrderLineItem_Quantity", "[Quantity] > 0");
+
+                            t.HasCheckConstraint("CK_ConfirmedOrderLineItem_SoldQuantity", "[SoldQuantity] >= 0");
+
+                            t.HasCheckConstraint("CK_ConfirmedOrderLineItem_UnitCost", "[UnitCost] >= 0");
+                        });
+                });
+
             modelBuilder.Entity("Domain.Entities.Core.Product", b =>
                 {
                     b.Property<Guid>("Id")
@@ -554,6 +619,36 @@ namespace Infrastructure.Migrations
                     b.ToTable("UserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Entities.Core.ConfirmedOrder", b =>
+                {
+                    b.HasOne("Domain.Entities.Core.Company", "Company")
+                        .WithMany("ConfirmedOrders")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Core.ConfirmedOrderLineItem", b =>
+                {
+                    b.HasOne("Domain.Entities.Core.ConfirmedOrder", "ConfirmedOrder")
+                        .WithMany("LineItems")
+                        .HasForeignKey("ConfirmedOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Core.Product", "Product")
+                        .WithMany("ConfirmedOrderLineItem")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ConfirmedOrder");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Domain.Entities.Core.Product", b =>
                 {
                     b.HasOne("Domain.Entities.Core.Company", "Company")
@@ -722,6 +817,8 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Core.Company", b =>
                 {
+                    b.Navigation("ConfirmedOrders");
+
                     b.Navigation("Products");
 
                     b.Navigation("PurchaseOrders");
@@ -731,8 +828,15 @@ namespace Infrastructure.Migrations
                     b.Navigation("Users");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Core.ConfirmedOrder", b =>
+                {
+                    b.Navigation("LineItems");
+                });
+
             modelBuilder.Entity("Domain.Entities.Core.Product", b =>
                 {
+                    b.Navigation("ConfirmedOrderLineItem");
+
                     b.Navigation("Forecasts");
 
                     b.Navigation("PurchaseOrderLineItem");
