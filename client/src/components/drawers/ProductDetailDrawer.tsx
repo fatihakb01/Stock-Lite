@@ -13,6 +13,7 @@ import { useSalesAggregates } from "../../hooks/useSalesAggregates";
 import SalesAndForecastChart from "../charts/SalesAndForecastChart"
 import { useState } from "react";
 import { useForecasts } from "../../hooks/useForecasts";
+import { useConfirmedOrderAggregates } from "../../hooks/useConfirmedOrderAggregates";
 
 // Small reusable section wrapper for consistent layout
 function Section({
@@ -45,21 +46,30 @@ export default function ProductDetailDrawer({
   onClose,
 }: ProductDetailDrawerProps) {
   const [periodType, setPeriodType] = useState<"Daily" | "Weekly" | "Monthly">("Monthly");
+
   const { 
     data: product, 
     isLoading: isLoadingProduct, 
     isError: isErrorProduct 
   } = useProduct(productId);
+
   const {
     data: salesaggregate,
     isLoading: isLoadingSales,
     isError: isErrorSales,
   } = useSalesAggregates(periodType, productId);
+
   const {
     data: forecast,
     isLoading: isLoadingForecasts,
     isError: isErrorForecasts,
   } = useForecasts(periodType, productId);
+
+  const {
+    data: confirmedOrderAggregate,
+    isLoading: isLoadingCoAggregate,
+    isError: isErrorCoAggregate,
+  } = useConfirmedOrderAggregates(periodType, productId);
 
   return (
     <Drawer
@@ -122,13 +132,19 @@ export default function ProductDetailDrawer({
 
             {/* --- Forecast Section --- */}
             <Section title="Forecast">
-              {(isLoadingSales || isLoadingForecasts) && <Typography>Loading chart...</Typography>}
+              {(isLoadingSales || isLoadingForecasts || isLoadingCoAggregate) && <Typography>Loading chart...</Typography>}
               {isErrorSales && <Typography color="error">Failed to load sales data.</Typography>}
               {isErrorForecasts && <Typography color="error">Failed to load forecast data.</Typography>}
-              {(salesaggregate && salesaggregate.length > 0 && forecast && forecast.length > 0) ? (
+              {isErrorCoAggregate && <Typography color="error">Failed to load confirmed order data.</Typography>}
+              {(
+                salesaggregate && salesaggregate.length > 0 && 
+                forecast && forecast.length > 0 &&
+                confirmedOrderAggregate && confirmedOrderAggregate.length > 0) ? 
+              (
                 <SalesAndForecastChart
                   sales={salesaggregate}
                   forecast={forecast}
+                  confirmedOrder={confirmedOrderAggregate}
                   periodType={periodType}
                   onPeriodTypeChange={setPeriodType}
                 />

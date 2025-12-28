@@ -21,10 +21,14 @@ import {
 
 import type { SalesAggregate } from "../../features/salesaggregates/salesaggregateTypes";
 import type { Forecast } from "../../features/forecasts/forecastTypes";
+import type { ConfirmedOrderAggregate } from "../../features/confirmedOrderAggregates/confirmedOrderAggregatesTypes";
+import CustomTooltip from "./CustomTooltip";
+
 
 interface SalesAndForecastChartProps {
   sales: SalesAggregate[];
   forecast: Forecast[];
+  confirmedOrder: ConfirmedOrderAggregate[],
   periodType: "Daily" | "Weekly" | "Monthly";
   onPeriodTypeChange: (periodType: "Daily" | "Weekly" | "Monthly") => void;
 }
@@ -32,6 +36,7 @@ interface SalesAndForecastChartProps {
 export default function SalesAndForecastChart({
   sales,
   forecast,
+  confirmedOrder,
   periodType,
   onPeriodTypeChange,
 }: SalesAndForecastChartProps) {
@@ -41,44 +46,81 @@ export default function SalesAndForecastChart({
   // STEP 1 — MERGE SALES + FORECAST INTO SAME PERIOD BUCKET
   //
   const combinedData = useMemo(() => {
-    const map = new Map<Date, any>();
+    const map = new Map<number, any>();
 
-    // Add sales
+    const getKey = (date: string | Date) =>
+      new Date(date).getTime();
+
+    // Sales
     for (const s of sales) {
-      const key = s.periodStartDate;
-
+      const key = getKey(s.periodStartDate);
       map.set(key, {
         date: new Date(s.periodStartDate),
         salesQuantity: s.totalQuantity,
         salesRevenue: s.totalRevenue,
         forecastQuantity: 0,
         forecastRevenue: 0,
+        confirmedQuantity: 0,
+        confirmedRevenue: 0,
       });
     }
 
-    // Add forecast
+    // Forecast
     for (const f of forecast) {
-      const key = f.periodStartDate;
+      const key = getKey(f.periodStartDate);
+      const row = map.get(key) ?? {
+        date: new Date(f.periodStartDate),
+        salesQuantity: 0,
+        salesRevenue: 0,
+        confirmedQuantity: 0,
+        confirmedRevenue: 0,
+      };
 
-      if (!map.has(key)) {
-        map.set(key, {
-          date: new Date(f.periodStartDate),
-          salesQuantity: 0,
-          salesRevenue: 0,
-          forecastQuantity: f.predictedQuantity,
-          forecastRevenue: f.predictedRevenue,
-        });
-      } else {
-        const row = map.get(key);
-        row.forecastQuantity = f.predictedQuantity;
-        row.forecastRevenue = f.predictedRevenue;
-      }
+      row.forecastQuantity = f.predictedQuantity;
+      row.forecastRevenue = f.predictedRevenue;
+
+      map.set(key, row);
     }
 
-    return Array.from(map.values()).sort(
-      (a, b) => a.date.getTime() - b.date.getTime()
-    );
-  }, [sales, forecast]);
+    // Confirmed
+    for (const c of confirmedOrder) {
+      const key = getKey(c.periodStartDate);
+      const row = map.get(key) ?? {
+        date: new Date(c.periodStartDate),
+        salesQuantity: 0,
+        salesRevenue: 0,
+        forecastQuantity: 0,
+        forecastRevenue: 0,
+      };
+
+      row.confirmedQuantity = c.totalConfirmedQuantity;
+      row.confirmedRevenue = c.totalConfirmedRevenue;
+
+      map.set(key, row);
+    }
+
+    // DERIVED VALUES 
+    return Array.from(map.values())
+      .map((row) => {
+        const remainingForecastQuantity = Math.max(
+          0,
+          (row.forecastQuantity ?? 0) - (row.confirmedQuantity ?? 0)
+        );
+
+        const remainingForecastRevenue = Math.max(
+          0,
+          (row.forecastRevenue ?? 0) - (row.confirmedRevenue ?? 0)
+        );
+
+        return {
+          ...row,
+          remainingForecastQuantity,
+          remainingForecastRevenue,
+        };
+      })
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [sales, forecast, confirmedOrder]);
+
 
   //
   // STEP 2 — APPLY LABELS (Daily, Weekly, Monthly)
@@ -124,20 +166,9 @@ export default function SalesAndForecastChart({
   // STEP 3 — Choose correct metric fields
   //
   const salesKey = metricType === "Quantity" ? "salesQuantity" : "salesRevenue";
-  const forecastKey = metricType === "Quantity" ? "forecastQuantity" : "forecastRevenue";
+  const confirmedKey = metricType === "Quantity" ? "confirmedQuantity" : "confirmedRevenue";
+  const remainingForecastKey = metricType === "Quantity" ? "remainingForecastQuantity" : "remainingForecastRevenue";
   const barSize = periodType === "Daily" ? 5 : periodType === "Weekly" ? 13 : 15;
-
-  //
-  // STEP 4 — Custom tooltip
-  //
-  const tooltipFormatter = (value: number, name: string) => {
-    if (metricType === "Quantity") return [`${value} units`, name];
-    return [`$${value.toFixed(2)}`, name];
-  };
-
-  const tooltipLabelFormatter = (label: string) => {
-    return `Period: ${label}`;
-  };
 
   return (
     <Box>
@@ -196,40 +227,36 @@ export default function SalesAndForecastChart({
           <XAxis dataKey="label" />
           <YAxis />
 
-          <Tooltip
-            formatter={tooltipFormatter}
-            labelFormatter={tooltipLabelFormatter}
-            contentStyle={{
-              backgroundColor: "#424242",   
-              border: "none",
-              borderRadius: "6px",
-            }}
-            labelStyle={{
-              color: "#ffffff",             
-            }}
-            itemStyle={{
-              color: "#ffffff",             
-            }}
-          />
+          <Tooltip content={<CustomTooltip metricType={metricType} periodType={periodType} />} />
 
           <Legend />
 
-          {/* SALES BAR (Yellow, transparent) */}
+          {/* SALES (past actuals) */}
           <Bar
             dataKey={salesKey}
-            fill="rgba(255, 215, 0, 0.6)"
+            fill="rgba(255, 215, 0, 0.7)"
+            stroke="rgba(255, 215, 0, 0.7)"
             name="Sales"
-            stroke="rgba(255, 215, 0, 1)"
             stackId="a"
-            barSize={barSize}       
+            barSize={barSize}
           />
 
-          {/* FORECAST BAR (Blue, solid) */}
+          {/* CONFIRMED DEMAND (firm future) */}
           <Bar
-            dataKey={forecastKey}
-            fill="#1976d2"
-            name="Forecast"
-            stroke="#1976d2"
+            dataKey={confirmedKey}
+            fill="rgba(76, 175, 80, 0.9)"
+            stroke="rgba(76, 175, 80, 0.9)"
+            name="Confirmed demand"
+            stackId="a"
+            barSize={barSize}
+          />
+
+          {/* REMAINING FORECAST (uncertain future) */}
+          <Bar
+            dataKey={remainingForecastKey}
+            fill="rgba(25, 118, 210, 0.6)"
+            stroke="rgba(25, 118, 210, 0.6)"
+            name="Remaining forecast"
             stackId="a"
             barSize={barSize}
           />
