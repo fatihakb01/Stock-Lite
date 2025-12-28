@@ -43,7 +43,7 @@ export default function SalesAndForecastChart({
   const [metricType, setMetricType] = useState<"Quantity" | "Revenue">("Quantity");
 
   //
-  // STEP 1 — MERGE SALES + FORECAST INTO SAME PERIOD BUCKET
+  // STEP 1 — MERGE DATA INTO SAME PERIOD BUCKET
   //
   const combinedData = useMemo(() => {
     const map = new Map<number, any>();
@@ -231,7 +231,7 @@ export default function SalesAndForecastChart({
 
           <Legend />
 
-          {/* SALES (past actuals) */}
+          {/* SALES */}
           <Bar
             dataKey={salesKey}
             fill="rgba(255, 215, 0, 0.7)"
@@ -241,7 +241,7 @@ export default function SalesAndForecastChart({
             barSize={barSize}
           />
 
-          {/* CONFIRMED DEMAND (firm future) */}
+          {/* CONFIRMED DEMAND */}
           <Bar
             dataKey={confirmedKey}
             fill="rgba(76, 175, 80, 0.9)"
@@ -251,7 +251,7 @@ export default function SalesAndForecastChart({
             barSize={barSize}
           />
 
-          {/* REMAINING FORECAST (uncertain future) */}
+          {/* REMAINING FORECAST */}
           <Bar
             dataKey={remainingForecastKey}
             fill="rgba(25, 118, 210, 0.6)"

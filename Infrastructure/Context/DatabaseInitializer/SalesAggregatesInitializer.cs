@@ -36,7 +36,7 @@ namespace Infrastructure.Context.DatabaseInitializer
                     SELECT 'Daily' AS PeriodType, DATEADD(DAY, -v.number, CAST(SYSUTCDATETIME() AS DATE)) AS PeriodStartDate
                     FROM master.dbo.spt_values v
                     WHERE v.type = 'P' 
-                    AND v.number BETWEEN 1 AND 30
+                    AND v.number BETWEEN 0 AND 29
                 )
                 INSERT INTO SalesAggregates (ProductId, PeriodType, PeriodStartDate, PeriodEndDate, TotalQuantity, TotalRevenue)
                 SELECT 
@@ -90,7 +90,7 @@ namespace Infrastructure.Context.DatabaseInitializer
 						) AS PeriodStartDate
 					FROM master.dbo.spt_values v
 					WHERE v.type = 'P'
-					  AND v.number BETWEEN 1 AND 13
+					  AND v.number BETWEEN 0 AND 12
 				)
                 INSERT INTO SalesAggregates (ProductId, PeriodType, PeriodStartDate, PeriodEndDate, TotalQuantity, TotalRevenue)
 				SELECT
@@ -134,7 +134,7 @@ namespace Infrastructure.Context.DatabaseInitializer
                     SELECT 'Monthly' AS PeriodType, DATEFROMPARTS(YEAR(DATEADD(MONTH, -v.number, SYSUTCDATETIME())), MONTH(DATEADD(MONTH, -v.number, SYSUTCDATETIME())), 1) AS PeriodStartDate
                     FROM master.dbo.spt_values v
                     WHERE v.type = 'P' 
-					AND v.number BETWEEN 1 AND 12
+					AND v.number BETWEEN 0 AND 11
                 )
                 INSERT INTO SalesAggregates (ProductId, PeriodType, PeriodStartDate, PeriodEndDate, TotalQuantity, TotalRevenue)
                 SELECT 
@@ -200,7 +200,7 @@ namespace Infrastructure.Context.DatabaseInitializer
 					DATEADD(DAY, -v.number, CAST(SYSUTCDATETIME() AS DATE)) AS PeriodStartDate
                     FROM master.dbo.spt_values v
                     WHERE v.type = 'P' 
-                    AND v.number BETWEEN 1 AND 30
+                    AND v.number BETWEEN 0 AND 29
                 ),		
 				DailyProducts AS (
 					SELECT 
@@ -276,7 +276,7 @@ namespace Infrastructure.Context.DatabaseInitializer
 						) AS PeriodStartDate
 					FROM master.dbo.spt_values v
 					WHERE v.type = 'P'
-					  AND v.number BETWEEN 1 AND 13
+					  AND v.number BETWEEN 0 AND 12
 				),
 				WeeklyProducts AS (
 					SELECT 
@@ -344,7 +344,7 @@ namespace Infrastructure.Context.DatabaseInitializer
 					DATEFROMPARTS(YEAR(DATEADD(MONTH, -v.number, SYSUTCDATETIME())), MONTH(DATEADD(MONTH, -v.number, SYSUTCDATETIME())), 1) AS PeriodStartDate
                     FROM master.dbo.spt_values v
                     WHERE v.type = 'P' 
-					AND v.number BETWEEN 1 AND 12
+					AND v.number BETWEEN 0 AND 11
                 ),		
 				MonthlyProducts AS (
 					SELECT 
