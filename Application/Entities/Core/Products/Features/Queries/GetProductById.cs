@@ -9,7 +9,7 @@ namespace Application.Entities.Core.Products.Features.Queries;
 
 public class GetProductById
 {
-    public class Query : IRequest<Result<ProductDto>>
+    public class Query : IRequest<Result<ProductDetailDto>>
     {
         public required Guid Id { get; set; }
     }
@@ -18,23 +18,25 @@ public class GetProductById
         IRepository<Product> repository, 
         IMapper mapper,
         ICurrentUserService currentUser
-    ) : IRequestHandler<Query, Result<ProductDto>>
+    ) : IRequestHandler<Query, Result<ProductDetailDto>>
     {
-        public async Task<Result<ProductDto>> Handle(Query request, CancellationToken ct)
+        public async Task<Result<ProductDetailDto>> Handle(Query request, CancellationToken ct)
         {
             var products = await repository.FindAsync(x => 
                 x.Id == request.Id && x.CompanyId == currentUser.CompanyId,
                 ct,
-                s => s.StockLevel!
+                s => s.StockLevel!,
+                s => s.InventoryPolicy!
             );
+
             var product = products.SingleOrDefault();
 
             if (product == null)
-                return Result<ProductDto>.Failure("Product not found", 404);
+                return Result<ProductDetailDto>.Failure("Product not found", 404);
 
-            var productDto = mapper.Map<ProductDto>(product);
+            var productDto = mapper.Map<ProductDetailDto>(product);
 
-            return Result<ProductDto>.Success(productDto);
+            return Result<ProductDetailDto>.Success(productDto);
         }
     }
 }

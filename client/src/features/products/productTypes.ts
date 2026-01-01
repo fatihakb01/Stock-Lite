@@ -6,9 +6,31 @@ export type Product = {
     price: number,
     createdAt: Date
     isActive: boolean
-    stock: {
+}
+
+export type ProductDetail = {
+    id: string,
+    name: string,
+    description? : string,
+    sku?: string,
+    price: number,
+    createdAt: Date
+    isActive: boolean
+    stockLevel: {
         quantityOnHand: number,
         quantityOnOrder: number,
-        reorderPoint: number
+        quantityCommitted: number,
+        netStockPosition: number,
+        projectedStockAtLeadTime: number,
+        reorderPoint: number,
+        needsReorder: boolean,
+        recommendedOrderQuantity: number
+    },
+    inventoryPolicy: {
+        leadTimeDays: number,
+        minimumOrderQuantity: number,
+        orderIncrementQuantity: number,
+        safetyStock: number,
+        stockAdjustment: number
     }
 }

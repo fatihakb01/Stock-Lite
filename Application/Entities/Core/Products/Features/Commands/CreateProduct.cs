@@ -9,7 +9,7 @@ namespace Application.Entities.Core.Products.Features.Commands;
 
 public class CreateProduct
 {
-    public class Command : IRequest<Result<ProductDto>>
+    public class Command : IRequest<Result<ProductListDto>>
     {
         public required CreateProductDto ProductDto { get; set; }
     }
@@ -18,9 +18,9 @@ public class CreateProduct
         IRepository<Product> repository, 
         IMapper mapper,
         ICurrentUserService currentUser
-    ) : IRequestHandler<Command, Result<ProductDto>>
+    ) : IRequestHandler<Command, Result<ProductListDto>>
     {
-        public async Task<Result<ProductDto>> Handle(Command request, CancellationToken ct)
+        public async Task<Result<ProductListDto>> Handle(Command request, CancellationToken ct)
         {
             var dto = request.ProductDto;
 
@@ -30,7 +30,7 @@ public class CreateProduct
             );
 
             if (skuExist)
-                return Result<ProductDto>.Failure("SKU must be unique", 400);
+                return Result<ProductListDto>.Failure("SKU must be unique", 400);
 
             var nameExist = await repository.ExistsAsync(x => 
                 x.Name == dto.Name && x.CompanyId == currentUser.CompanyId, 
@@ -38,7 +38,7 @@ public class CreateProduct
             );
 
             if (nameExist)
-                return Result<ProductDto>.Failure("Name must be unique", 400);
+                return Result<ProductListDto>.Failure("Name must be unique", 400);
 
             var product = mapper.Map<Product>(dto);
             product.CompanyId = currentUser.CompanyId;
@@ -48,11 +48,11 @@ public class CreateProduct
             var result = await repository.SaveChangesAsync(ct);
 
             if (!result)
-                return Result<ProductDto>.Failure("Failed to create product", 400);
+                return Result<ProductListDto>.Failure("Failed to create product", 400);
 
-            var createdProductDto = mapper.Map<ProductDto>(product);
+            var createdProductDto = mapper.Map<ProductListDto>(product);
 
-            return Result<ProductDto>.Success(createdProductDto);
+            return Result<ProductListDto>.Success(createdProductDto);
         }
     }
 }

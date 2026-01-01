@@ -154,16 +154,16 @@ export default function ProductDetailDrawer({
             </Section>
 
             {/* --- Stock Section --- */}
-            {product.stock && (
+            {product.stockLevel && (
               <Section title="Stock">
                 <Typography variant="body1">
-                  Quantity on hand: <strong>{product.stock.quantityOnHand}</strong>
+                  Quantity on hand: <strong>{product.stockLevel.quantityOnHand}</strong>
                 </Typography>
                 <Typography variant="body1">
-                  Quantity on order: <strong>{product.stock.quantityOnOrder}</strong>
+                  Quantity on order: <strong>{product.stockLevel.quantityOnOrder}</strong>
                 </Typography>
                 <Typography variant="body1">
-                  Reorder Point: <strong>{product.stock.reorderPoint}</strong>
+                  Reorder Point: <strong>{product.stockLevel.reorderPoint}</strong>
                 </Typography>
               </Section>
             )}

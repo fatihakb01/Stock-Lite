@@ -37,9 +37,10 @@ public class MappingProfiles : Profile
         // Product entity
         CreateMap<CreateProductDto, Product>();
         CreateMap<EditProductDto, Product>();
-        CreateMap<Product, ProductDto>()
-            .ForMember(dest => dest.Stock, opt => opt.MapFrom(src => src.StockLevel));
+        CreateMap<Product, ProductDetailDto>();
+        CreateMap<Product, ProductListDto>();
         CreateMap<StockLevel, ProductStockDto>();
+        CreateMap<ProductInventoryPolicy, ProductInventoryPolicyDto>();
 
         // PurchaseOrder entity
         CreateMap<PurchaseOrder, PurchaseOrderDto>();

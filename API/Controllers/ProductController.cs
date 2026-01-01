@@ -11,26 +11,26 @@ namespace API.Controllers;
 public class ProductController(IMediator mediator) : BaseApiController(mediator)
 {
     [HttpGet("{id}")]
-    public async Task<ActionResult<ProductDto>> GetProductById(Guid id)
+    public async Task<ActionResult<ProductDetailDto>> GetProductById(Guid id)
     {
         return HandleResult(await Mediator.Send(new GetProductById.Query { Id = id }));
     }
 
     [HttpGet]
-    public async Task<ActionResult<ProductDto>> GetProducts()
+    public async Task<ActionResult<ProductListDto>> GetProducts()
     {
         return HandleResult(await Mediator.Send(new GetProducts.Query { }));
     }    
     
     [HttpPost]
-    public async Task<ActionResult<ProductDto>> CreateProduct(
+    public async Task<ActionResult<ProductListDto>> CreateProduct(
         [FromBody] CreateProductDto productDto)
     {
         return HandleResult(await Mediator.Send(new CreateProduct.Command { ProductDto = productDto }));
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<ProductDto>> EditProduct(Guid id,
+    public async Task<ActionResult<ProductListDto>> EditProduct(Guid id,
         [FromBody] EditProductDto productDto)
     {
         return HandleResult(await Mediator.Send(new EditProduct.Command

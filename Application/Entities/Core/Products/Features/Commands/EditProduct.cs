@@ -9,7 +9,7 @@ namespace Application.Entities.Core.Products.Features.Commands;
 
 public class EditProduct
 {
-    public class Command : IRequest<Result<ProductDto>>
+    public class Command : IRequest<Result<ProductListDto>>
     {
         public Guid Id { get; set; }
         public required EditProductDto ProductDto { get; set; }
@@ -19,9 +19,9 @@ public class EditProduct
         IRepository<Product> repository, 
         IMapper mapper,
         ICurrentUserService currentUser
-    ) : IRequestHandler<Command, Result<ProductDto>>
+    ) : IRequestHandler<Command, Result<ProductListDto>>
     {
-        public async Task<Result<ProductDto>> Handle(Command request, CancellationToken ct)
+        public async Task<Result<ProductListDto>> Handle(Command request, CancellationToken ct)
         {
             var dto = request.ProductDto;
 
@@ -32,7 +32,7 @@ public class EditProduct
             var product = products.SingleOrDefault();
 
             if (product == null)
-                return Result<ProductDto>.Failure("Product not found", 404);
+                return Result<ProductListDto>.Failure("Product not found", 404);
 
             var skuExist = await repository.ExistsAsync(x => 
                 x.Id != request.Id && 
@@ -42,7 +42,7 @@ public class EditProduct
             );
 
             if (skuExist)
-                return Result<ProductDto>.Failure("SKU must be unique", 400);
+                return Result<ProductListDto>.Failure("SKU must be unique", 400);
 
             var nameExist = await repository.ExistsAsync(x => 
                 x.Id != request.Id && 
@@ -52,18 +52,18 @@ public class EditProduct
             );
 
             if (nameExist)
-                return Result<ProductDto>.Failure("Name must be unique", 400);
+                return Result<ProductListDto>.Failure("Name must be unique", 400);
 
             mapper.Map(dto, product);
 
             var result = await repository.SaveChangesAsync(ct);
 
             if (!result)
-                return Result<ProductDto>.Failure("Failed to update product", 400);
+                return Result<ProductListDto>.Failure("Failed to update product", 400);
 
-            var updatedProductDto = mapper.Map<ProductDto>(product);
+            var updatedProductDto = mapper.Map<ProductListDto>(product);
 
-            return Result<ProductDto>.Success(updatedProductDto);
+            return Result<ProductListDto>.Success(updatedProductDto);
         }
     }
 }

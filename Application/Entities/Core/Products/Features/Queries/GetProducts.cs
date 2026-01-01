@@ -9,15 +9,15 @@ namespace Application.Entities.Core.Products.Features.Queries;
 
 public class GetProducts
 {
-    public class Query : IRequest<Result<List<ProductDto>>> {}
+    public class Query : IRequest<Result<List<ProductListDto>>> {}
 
     public class Handler(
         IRepository<Product> repository, 
         IMapper mapper,
         ICurrentUserService currentUser
-    ) : IRequestHandler<Query, Result<List<ProductDto>>>
+    ) : IRequestHandler<Query, Result<List<ProductListDto>>>
     {
-        public async Task<Result<List<ProductDto>>> Handle(Query request, CancellationToken ct)
+        public async Task<Result<List<ProductListDto>>> Handle(Query request, CancellationToken ct)
         {
             var products = await repository.FindAsync(x => 
                 x.CompanyId == currentUser.CompanyId, 
@@ -25,11 +25,11 @@ public class GetProducts
             );
 
             if (products == null || !products.Any())
-                return Result<List<ProductDto>>.Failure("No products found for this company", 404);
+                return Result<List<ProductListDto>>.Failure("No products found for this company", 404);
 
-            var productDtos = mapper.Map<List<ProductDto>>(products);
+            var productDtos = mapper.Map<List<ProductListDto>>(products);
 
-            return Result<List<ProductDto>>.Success(productDtos);
+            return Result<List<ProductListDto>>.Success(productDtos);
         }
     }
 }
