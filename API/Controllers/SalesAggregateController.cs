@@ -1,6 +1,6 @@
+using Application.Entities.Derived.SalesAggregates.DTOs;
 using Application.Entities.Derived.SalesAggregates.Features.Commands;
 using Application.Entities.Derived.SalesAggregates.Features.Queries;
-using Domain.Entities.Derived;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +11,7 @@ namespace API.Controllers;
 public class SalesAggregateController(IMediator mediator) : BaseApiController(mediator)
 {
     [HttpGet("{periodType}/{productId}")]
-    public async Task<ActionResult<SalesAggregate>> GetSalesTrend(string periodType, Guid productId)
+    public async Task<ActionResult<List<SalesAggregateDto>>> GetSalesTrend(string periodType, Guid productId)
     {
         return HandleResult(await Mediator.Send(new GetSalesTrend.Query
         {

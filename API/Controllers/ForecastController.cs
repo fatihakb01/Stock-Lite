@@ -1,6 +1,6 @@
+using Application.Entities.Derived.Forecasts.DTOs;
 using Application.Entities.Derived.Forecasts.Features.Commands;
 using Application.Entities.Derived.Forecasts.Features.Queries;
-using Domain.Entities.Derived;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +11,7 @@ namespace API.Controllers;
 public class ForecastController(IMediator mediator) : BaseApiController(mediator)
 {
     [HttpGet("{periodType}/{productId}")]
-    public async Task<ActionResult<Forecast>> GetForecasts(string periodType, Guid productId)
+    public async Task<ActionResult<List<ForecastDto>>> GetForecasts(string periodType, Guid productId)
     {
         return HandleResult(await Mediator.Send(new GetForecasts.Query
         {
@@ -19,9 +19,10 @@ public class ForecastController(IMediator mediator) : BaseApiController(mediator
             PeriodType = periodType
         }));
     }
+    
     [Authorize(Policy = "AdminOrSuperAdmin")]
     [HttpPost("{periodType?}")]
-    public async Task<ActionResult<Forecast>> GenerateForecasts
+    public async Task<ActionResult<Unit>> GenerateForecasts
         (string? periodType, [FromBody] IEnumerable<Guid>? productIds)
     {
         return HandleResult(await Mediator.Send(new GenerateForecasts.Command

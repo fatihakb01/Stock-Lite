@@ -1,6 +1,6 @@
+using Application.Entities.Derived.ConfirmedOrderAggregates.DTOs;
 using Application.Entities.Derived.ConfirmedOrderAggregates.Features.Commands;
 using Application.Entities.Derived.ConfirmedOrderAggregates.Features.Queries;
-using Domain.Entities.Derived;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +12,7 @@ public class ConfirmedOrderAggregateController(IMediator mediator)
     : BaseApiController(mediator)
 {
     [HttpGet("{periodType}/{productId}")]
-    public async Task<ActionResult<ConfirmedOrderAggregate>> GetConfirmedOrderOutlook(
+    public async Task<ActionResult<List<ConfirmedOrderAggregateDto>>> GetConfirmedOrderOutlook(
         string periodType,
         Guid productId
     )
