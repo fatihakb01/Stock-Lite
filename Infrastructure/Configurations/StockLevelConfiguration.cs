@@ -1,4 +1,4 @@
-using Domain.Entities.Core;
+using Domain.Entities.Derived;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,21 +11,37 @@ public class StockLevelConfiguration : IEntityTypeConfiguration<StockLevel>
         builder.HasKey(s => s.ProductId);
 
         builder.Property(s => s.QuantityOnHand)
-            .IsRequired()
-            .HasDefaultValue(0);
+            .IsRequired();
 
         builder.Property(s => s.QuantityOnOrder)
-            .IsRequired()
-            .HasDefaultValue(0);
+            .IsRequired();
+
+        builder.Property(s => s.QuantityCommitted)
+            .IsRequired();
+
+        builder.Property(s => s.NetStockPosition)
+            .IsRequired();
+
+        builder.Property(s => s.ProjectedStockAtLeadTime)
+            .IsRequired();
 
         builder.Property(s => s.ReorderPoint)
-            .IsRequired()
-            .HasDefaultValue(0);
+            .IsRequired();
+
+        builder.Property(s => s.NeedsReorder)
+            .IsRequired();
+
+        builder.Property(s => s.RecommendedOrderQuantity)
+            .IsRequired();
+
+        builder.Property(s => s.LastCalculatedAt)
+            .IsRequired();
 
         builder.ToTable(p => {
             p.HasCheckConstraint("CK_StockLevel_QuantityOnHand", "[QuantityOnHand] >= 0");
             p.HasCheckConstraint("CK_StockLevel_QuantityOnOrder", "[QuantityOnOrder] >= 0");
             p.HasCheckConstraint("CK_StockLevel_ReorderPoint", "[ReorderPoint] >= 0");
+            p.HasCheckConstraint("CK_StockLevel_RecommendedOrderQuantity", "[RecommendedOrderQuantity] >= 0");
         });
     }
 }

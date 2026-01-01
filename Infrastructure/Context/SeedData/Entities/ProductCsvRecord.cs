@@ -1,6 +1,6 @@
-namespace Infrastructure.Context.SeedData;
+namespace Infrastructure.Context.SeedData.Entities;
 
-public class ProductCsvRecord
+public sealed class ProductCsvRecord
 {
     public string Name { get; set; } = "";
     public string? Description { get; set; }

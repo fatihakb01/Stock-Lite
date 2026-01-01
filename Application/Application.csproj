@@ -32,6 +32,11 @@
     <Folder Include="Entities\Derived\ConfirmedOrderAggregates\Features\" />
     <Folder Include="Entities\Derived\ConfirmedOrderAggregates\Features\Commands\" />
     <Folder Include="Entities\Derived\ConfirmedOrderAggregates\Features\Queries\" />
+    <Folder Include="Entities\Derived\StockLevels\" />
+    <Folder Include="Entities\Derived\StockLevels\DTOs\" />
+    <Folder Include="Entities\Derived\StockLevels\Features\" />
+    <Folder Include="Entities\Derived\StockLevels\Features\Commands\" />
+    <Folder Include="Entities\Derived\StockLevels\Features\Queries\" />
   </ItemGroup>
 
 </Project>

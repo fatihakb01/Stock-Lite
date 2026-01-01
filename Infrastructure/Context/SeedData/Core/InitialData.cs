@@ -1,23 +1,18 @@
+using System.Globalization;
+using CsvHelper;
 using Domain.Entities.Core;
 using Domain.Enums;
-using Microsoft.EntityFrameworkCore;
-using CsvHelper;
-using System.Globalization;
+using Infrastructure.Context.SeedData.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 
-namespace Infrastructure.Context.SeedData;
+namespace Infrastructure.Context.SeedData.Core;
 
-public static class DataSeeder
+public class InitialData
 {
-    private const int BatchSize = 10_000;
-    private const int TotalTransactions = 1_000_000;
-
     public static async Task SeedAsync(DataContext context, IConfiguration config)
     {
-        if (await context.Companies.AsNoTracking().AnyAsync())
-            return;
-
+        
         var random = new Random();
 
         // Company
@@ -75,80 +70,34 @@ public static class DataSeeder
             Company = company
         }).ToList();
 
-        // Stock Levels
-        var stockLevels = products.Select(p => new StockLevel
+        var policies = products.Select(p =>
         {
-            Product = p,
-            QuantityOnHand = random.Next(10, 500),
-            ReorderPoint = random.Next(5, 50)
+            return new ProductInventoryPolicy
+            {
+                ProductId = p.Id,
+                Product = null!,
+
+                LeadTimeDays = random.Next(3, 30),
+
+                MinimumOrderQuantity = random.Next(10, 100),
+                OrderIncrementQuantity = random.Next(1, 10),
+
+                SafetyStock = random.Next(5, 50),
+
+                StockAdjustment = random.Next(-10, 10),
+
+                
+            };
         }).ToList();
 
-        // Save entities (except for transactions) to database
+        // Save entities to database
         context.Companies.Add(company);
         context.Users.AddRange(users);
         context.Products.AddRange(products);
-        context.StockLevels.AddRange(stockLevels);
+        context.ProductInventoryPolicies.AddRange(policies);
         await context.SaveChangesAsync();
-
-        // Transactions
-        var transactions = new List<Transaction>();
-        var lineItems = new List<TransactionLineItem>();
-
-        // Initialize batch number and total batches
-        int batchNr = 0;
-        double totalBatches = TotalTransactions % BatchSize > 0 ?
-            (TotalTransactions / BatchSize) + 1 :
-            TotalTransactions / BatchSize;
-
-        for (int i = 0; i < TotalTransactions; i++)
-        {
-            var selectedProducts = products.OrderBy(_ => random.Next()).Take(random.Next(1, 4)).ToList();
-
-            var transaction = new Transaction
-            {
-                TransactionId = "T" + i,
-                TransactionDate = DateTime.UtcNow.AddDays(-random.Next(1, 365)),
-                PaymentMethod = random.Next(2) == 0 ? "Credit Card" : "Cash",
-                Notes = random.Next(3) switch
-                {
-                    0 => null,
-                    1 => "Thank you for your purchase!",
-                    _ => "Processed by cashier #" + random.Next(1, 10)
-                },
-                Company = company
-            };
-
-            decimal total = 0;
-            foreach (var product in selectedProducts)
-            {
-                var quantity = random.Next(1, 5);
-                var lineItem = new TransactionLineItem
-                {
-                    Quantity = quantity,
-                    UnitPrice = product.Price,
-                    Transaction = transaction,
-                    Product = product
-                };
-                total += product.Price * quantity;
-                lineItems.Add(lineItem);
-            }
-
-            transaction.TotalAmount = total;
-            transactions.Add(transaction);
-
-            if (transactions.Count % BatchSize == 0)
-            {
-                await context.Transactions.AddRangeAsync(transactions);
-                await context.TransactionLineItems.AddRangeAsync(lineItems);
-                await context.SaveChangesAsync();
-                transactions.Clear();
-                lineItems.Clear();
-
-                Console.WriteLine($"Batch {++batchNr}/{totalBatches} completed.");
-            }
-        }
     }
-    
+
     private static Dictionary<string, string> LoadProductsFromCsv(string path)
     {
         var productDefinitions = new Dictionary<string, string>();

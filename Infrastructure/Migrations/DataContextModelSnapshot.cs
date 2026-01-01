@@ -167,6 +167,42 @@ namespace Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Domain.Entities.Core.ProductInventoryPolicy", b =>
+                {
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("LeadTimeDays")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MinimumOrderQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderIncrementQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SafetyStock")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("StockAdjustment")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.HasKey("ProductId");
+
+                    b.ToTable("ProductInventoryPolicies", t =>
+                        {
+                            t.HasCheckConstraint("CK_ProductInventoryPolicy_LeadTimeDays", "[LeadTimeDays] BETWEEN 1 AND 365");
+
+                            t.HasCheckConstraint("CK_ProductInventoryPolicy_MinimumOrderQuantity", "[MinimumOrderQuantity] > 0");
+
+                            t.HasCheckConstraint("CK_ProductInventoryPolicy_OrderIncrementQuantity", "[OrderIncrementQuantity] > 0");
+                        });
+                });
+
             modelBuilder.Entity("Domain.Entities.Core.PurchaseOrder", b =>
                 {
                     b.Property<Guid>("Id")
@@ -229,38 +265,6 @@ namespace Infrastructure.Migrations
                             t.HasCheckConstraint("CK_PurchaseOrderLineItem_ReceivedQuantity", "[ReceivedQuantity] >= 0");
 
                             t.HasCheckConstraint("CK_PurchaseOrderLineItem_UnitCost", "[UnitCost] >= 0");
-                        });
-                });
-
-            modelBuilder.Entity("Domain.Entities.Core.StockLevel", b =>
-                {
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("QuantityOnHand")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
-
-                    b.Property<int>("QuantityOnOrder")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
-
-                    b.Property<int>("ReorderPoint")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
-
-                    b.HasKey("ProductId");
-
-                    b.ToTable("StockLevels", t =>
-                        {
-                            t.HasCheckConstraint("CK_StockLevel_QuantityOnHand", "[QuantityOnHand] >= 0");
-
-                            t.HasCheckConstraint("CK_StockLevel_QuantityOnOrder", "[QuantityOnOrder] >= 0");
-
-                            t.HasCheckConstraint("CK_StockLevel_ReorderPoint", "[ReorderPoint] >= 0");
                         });
                 });
 
@@ -518,6 +522,52 @@ namespace Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Domain.Entities.Derived.StockLevel", b =>
+                {
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastCalculatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("NeedsReorder")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("NetStockPosition")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProjectedStockAtLeadTime")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuantityCommitted")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuantityOnHand")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuantityOnOrder")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RecommendedOrderQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReorderPoint")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProductId");
+
+                    b.ToTable("StockLevels", t =>
+                        {
+                            t.HasCheckConstraint("CK_StockLevel_QuantityOnHand", "[QuantityOnHand] >= 0");
+
+                            t.HasCheckConstraint("CK_StockLevel_QuantityOnOrder", "[QuantityOnOrder] >= 0");
+
+                            t.HasCheckConstraint("CK_StockLevel_RecommendedOrderQuantity", "[RecommendedOrderQuantity] >= 0");
+
+                            t.HasCheckConstraint("CK_StockLevel_ReorderPoint", "[ReorderPoint] >= 0");
+                        });
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -692,6 +742,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("Company");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Core.ProductInventoryPolicy", b =>
+                {
+                    b.HasOne("Domain.Entities.Core.Product", "Product")
+                        .WithOne("InventoryPolicy")
+                        .HasForeignKey("Domain.Entities.Core.ProductInventoryPolicy", "ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Domain.Entities.Core.PurchaseOrder", b =>
                 {
                     b.HasOne("Domain.Entities.Core.Company", "Company")
@@ -720,17 +781,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("PurchaseOrder");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Core.StockLevel", b =>
-                {
-                    b.HasOne("Domain.Entities.Core.Product", "Product")
-                        .WithOne("StockLevel")
-                        .HasForeignKey("Domain.Entities.Core.StockLevel", "ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Domain.Entities.Core.Transaction", b =>
@@ -801,6 +851,17 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.Core.Product", "Product")
                         .WithMany("SalesAggregates")
                         .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Derived.StockLevel", b =>
+                {
+                    b.HasOne("Domain.Entities.Core.Product", "Product")
+                        .WithOne("StockLevel")
+                        .HasForeignKey("Domain.Entities.Derived.StockLevel", "ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -883,6 +944,8 @@ namespace Infrastructure.Migrations
                     b.Navigation("ConfirmedOrderLineItem");
 
                     b.Navigation("Forecasts");
+
+                    b.Navigation("InventoryPolicy");
 
                     b.Navigation("PurchaseOrderLineItem");
 

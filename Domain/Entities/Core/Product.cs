@@ -17,6 +17,7 @@ public class Product
 
     // Navigation
     public required Company Company { get; set; }
+    public ProductInventoryPolicy? InventoryPolicy { get; set; }
     public StockLevel? StockLevel { get; set; }
     public ICollection<SalesAggregate> SalesAggregates { get; set; } = new List<SalesAggregate>();
     public ICollection<Forecast> Forecasts { get; set; } = new List<Forecast>();

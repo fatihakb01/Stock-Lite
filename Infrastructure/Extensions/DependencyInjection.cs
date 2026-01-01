@@ -76,6 +76,7 @@ public static class DependencyInjection
         services.AddScoped<ISalesAggregateRepository, SalesAggregateRepository>();
         services.AddScoped<IForecastRepository, ForecastRepository>();
         services.AddScoped<IConfirmedOrderAggregateRepository, ConfirmedOrderAggregateRepository>();
+        services.AddScoped<IStockLevelRepository, StockLevelRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
 
         // --- Internal Services ---

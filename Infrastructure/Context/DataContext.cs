@@ -11,6 +11,7 @@ public class DataContext(DbContextOptions<DataContext> options)
 {
     public DbSet<Company> Companies { get; set; }
     public DbSet<Product> Products { get; set; }
+    public DbSet<ProductInventoryPolicy> ProductInventoryPolicies { get; set; }
     public DbSet<StockLevel> StockLevels { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<TransactionLineItem> TransactionLineItems { get; set; }

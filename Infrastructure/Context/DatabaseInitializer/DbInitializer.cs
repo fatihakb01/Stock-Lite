@@ -15,7 +15,9 @@ namespace Infrastructure.Context.DatabaseInitializer
             
             await ForecastsInitializer.InitializeAsync(context, logger);           
 
-            await ConfirmedOrderAggregatesInitializer.InitializeAsync(context, logger);    
+            await ConfirmedOrderAggregatesInitializer.InitializeAsync(context, logger); 
+
+            await StockLevelInitializer.InitializeAsync(context, logger);   
         }
     }
 }

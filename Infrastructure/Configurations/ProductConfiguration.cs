@@ -1,4 +1,5 @@
 using Domain.Entities.Core;
+using Domain.Entities.Derived;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -30,6 +31,11 @@ namespace Infrastructure.Configurations
                 .WithMany(c => c.Products)
                 .HasForeignKey(p => p.CompanyId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(p => p.InventoryPolicy)
+                   .WithOne(i => i.Product)
+                   .HasForeignKey<ProductInventoryPolicy>(i => i.ProductId)
+                   .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(p => p.StockLevel)
                    .WithOne(s => s.Product)

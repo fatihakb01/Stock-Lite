@@ -1,6 +1,7 @@
 using Application.Core;
 using Application.Entities.Core.PurchaseOrders.DTOs;
 using Domain.Entities.Core;
+using Domain.Entities.Derived;
 using Domain.Enums;
 using Domain.Interfaces;
 using MediatR;

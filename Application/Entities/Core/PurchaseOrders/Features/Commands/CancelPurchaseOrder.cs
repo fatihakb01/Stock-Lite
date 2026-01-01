@@ -1,5 +1,6 @@
 using Application.Core;
 using Domain.Entities.Core;
+using Domain.Entities.Derived;
 using Domain.Enums;
 using Domain.Interfaces;
 using MediatR;
