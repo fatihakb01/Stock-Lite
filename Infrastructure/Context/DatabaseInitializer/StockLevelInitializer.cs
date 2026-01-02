@@ -196,10 +196,10 @@ public static class StockLevelInitializer
                 LastCalculatedAt
             )
             SELECT
-                p.Id,
-                ISNULL(inv.QuantityOnHand, 0),
-                ISNULL(po.QuantityOnOrder, 0),
-                ISNULL(co.QuantityCommitted, 0),
+                p.Id AS ProductId,
+				ISNULL(inv.QuantityOnHand, 0),
+				ISNULL(po.QuantityOnOrder, 0),
+				ISNULL(co.QuantityCommitted, 0),
 
                 -- NetStockPosition
                 ISNULL(inv.QuantityOnHand, 0)
@@ -231,18 +231,42 @@ public static class StockLevelInitializer
                     THEN 1 ELSE 0
                 END,
 
-                -- RecommendedOrderQuantity
-                CASE
-                    WHEN pol.OrderIncrementQuantity <= 0 THEN 0
-                    ELSE
-                        CEILING(
-                            CAST(
-                                (ISNULL(fd.ForecastQty, 0) + pol.SafetyStock)
-                                AS FLOAT
-                            ) / pol.OrderIncrementQuantity
-                        ) * pol.OrderIncrementQuantity
-                END,
-
+				-- RecommendedOrderQuantity
+				CASE
+					WHEN pol.OrderIncrementQuantity <= 0
+						 OR pol.MinimumOrderQuantity <= 0
+						 OR   
+                            -- NeedsReorder                 
+							CASE
+								WHEN (
+									ISNULL(inv.QuantityOnHand, 0)
+									+ ISNULL(po.QuantityOnOrder, 0)
+									- ISNULL(co.QuantityCommitted, 0)
+									+ pol.StockAdjustment
+									- ISNULL(fd.ForecastQty, 0)
+								) < pol.SafetyStock
+								THEN 1 ELSE 0 END = 0							
+					THEN 0
+					ELSE
+						CASE
+							WHEN
+								CEILING(
+									CAST(
+										(ISNULL(fd.ForecastQty, 0) + pol.SafetyStock)
+										AS FLOAT
+									) / pol.OrderIncrementQuantity
+								) * pol.OrderIncrementQuantity
+								< pol.MinimumOrderQuantity
+							THEN pol.MinimumOrderQuantity
+							ELSE
+								CEILING(
+									CAST(
+										(ISNULL(fd.ForecastQty, 0) + pol.SafetyStock)
+										AS FLOAT
+									) / pol.OrderIncrementQuantity
+								) * pol.OrderIncrementQuantity
+						END
+				END,
                 SYSUTCDATETIME()
             FROM Products p
             INNER JOIN ProductInventoryPolicies pol ON pol.ProductId = p.Id
@@ -324,17 +348,42 @@ public static class StockLevelInitializer
                         THEN 1 ELSE 0
                     END AS NeedsReorder,
 
-                    -- RecommendedOrderQuantity
-                    CASE
-                        WHEN pol.MinimumOrderQuantity <= 0 THEN 0
-                        ELSE
-                            CEILING(
-                                CAST(
-                                    (ISNULL(fd.ForecastQty, 0) + pol.SafetyStock)
-                                    AS FLOAT
-                                ) / pol.OrderIncrementQuantity
-                            ) * pol.OrderIncrementQuantity
-                    END AS RecommendedOrderQuantity
+					-- RecommendedOrderQuantity
+					CASE
+						WHEN pol.OrderIncrementQuantity <= 0
+							 OR pol.MinimumOrderQuantity <= 0
+							 OR        
+                                -- NeedsReorder             
+								CASE
+									WHEN (
+										ISNULL(inv.QuantityOnHand, 0)
+										+ ISNULL(po.QuantityOnOrder, 0)
+										- ISNULL(co.QuantityCommitted, 0)
+										+ pol.StockAdjustment
+										- ISNULL(fd.ForecastQty, 0)
+									) < pol.SafetyStock
+								THEN 1 ELSE 0 END = 0							
+						THEN 0
+						ELSE
+							CASE
+								WHEN
+									CEILING(
+										CAST(
+											(ISNULL(fd.ForecastQty, 0) + pol.SafetyStock)
+											AS FLOAT
+										) / pol.OrderIncrementQuantity
+									) * pol.OrderIncrementQuantity
+									< pol.MinimumOrderQuantity
+								THEN pol.MinimumOrderQuantity
+								ELSE
+									CEILING(
+										CAST(
+											(ISNULL(fd.ForecastQty, 0) + pol.SafetyStock)
+											AS FLOAT
+										) / pol.OrderIncrementQuantity
+									) * pol.OrderIncrementQuantity
+							END
+					END AS RecommendedOrderQuantity
                 FROM Products p
                 INNER JOIN ProductInventoryPolicies pol ON pol.ProductId = p.Id
 				INNER JOIN StockLevels s ON s.ProductId = p.Id
