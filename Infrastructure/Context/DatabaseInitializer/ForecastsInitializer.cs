@@ -139,8 +139,7 @@ namespace Infrastructure.Context.DatabaseInitializer
 						PeriodEndDate
 					FROM Forecasts f
 					JOIN Products p ON p.Id = f.ProductId
-					WHERE f.PeriodStartDate >= DATEADD(MONTH, -12, CONVERT(DATE, SYSUTCDATETIME()))
-                      AND f.PeriodType = 'Monthly'
+					WHERE f.PeriodType = 'Monthly'
 					  AND p.CompanyId = @CompanyId
 					  AND (
                         NOT EXISTS (SELECT 1 FROM @ProductIds)
@@ -170,7 +169,7 @@ namespace Infrastructure.Context.DatabaseInitializer
 						DATEADD(DAY, 6, DATEADD(WEEK, v.number, bm.MondayStart)) AS WeekEnd
 					FROM master.dbo.spt_values v
 					CROSS JOIN BaseMonday bm
-					WHERE v.type = 'P' AND v.number BETWEEN 0 AND 12 
+					WHERE v.type = 'P' AND v.number BETWEEN 0 AND 51 
 				),
                 ProductWeeks AS (
                     SELECT p.Id AS ProductId, fw.WeekStart, fw.WeekEnd
@@ -441,8 +440,7 @@ namespace Infrastructure.Context.DatabaseInitializer
 						PeriodEndDate
 					FROM Forecasts f
 					JOIN Products p ON p.Id = f.ProductId
-					WHERE f.PeriodStartDate >= DATEADD(MONTH, -12, CONVERT(DATE, SYSUTCDATETIME()))
-                      AND f.PeriodType = 'Monthly'
+					WHERE f.PeriodType = 'Monthly'
 					  AND p.CompanyId = @CompanyId
                       AND (
                         NOT EXISTS (SELECT 1 FROM @ProductIds)
@@ -472,7 +470,7 @@ namespace Infrastructure.Context.DatabaseInitializer
 						DATEADD(DAY, 6, DATEADD(WEEK, v.number, bm.MondayStart)) AS WeekEnd
 					FROM master.dbo.spt_values v
 					CROSS JOIN BaseMonday bm
-					WHERE v.type = 'P' AND v.number BETWEEN 0 AND 12 
+					WHERE v.type = 'P' AND v.number BETWEEN 0 AND 51 
 				),
                 ProductWeeks AS (
                     SELECT p.Id AS ProductId, fw.WeekStart, fw.WeekEnd

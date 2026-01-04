@@ -20,10 +20,16 @@ public class StockLevelConfiguration : IEntityTypeConfiguration<StockLevel>
             .IsRequired();
 
         builder.Property(s => s.NetStockPosition)
-            .IsRequired();
+            .IsRequired()
+            .HasColumnType("decimal(15,2)");
+
+        builder.Property(s => s.ForecastQuantity)
+            .IsRequired()
+            .HasColumnType("decimal(15,2)");
 
         builder.Property(s => s.ProjectedStockAtLeadTime)
-            .IsRequired();
+            .IsRequired()
+            .HasColumnType("decimal(15,2)");
 
         builder.Property(s => s.ReorderPoint)
             .IsRequired();
@@ -40,6 +46,8 @@ public class StockLevelConfiguration : IEntityTypeConfiguration<StockLevel>
         builder.ToTable(p => {
             p.HasCheckConstraint("CK_StockLevel_QuantityOnHand", "[QuantityOnHand] >= 0");
             p.HasCheckConstraint("CK_StockLevel_QuantityOnOrder", "[QuantityOnOrder] >= 0");
+            p.HasCheckConstraint("CK_StockLevel_QuantityCommitted", "[QuantityCommitted] >= 0");
+            p.HasCheckConstraint("CK_StockLevel_ForecastQuantity", "[ForecastQuantity] >= 0");
             p.HasCheckConstraint("CK_StockLevel_ReorderPoint", "[ReorderPoint] >= 0");
             p.HasCheckConstraint("CK_StockLevel_RecommendedOrderQuantity", "[RecommendedOrderQuantity] >= 0");
         });

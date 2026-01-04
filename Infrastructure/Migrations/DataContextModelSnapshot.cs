@@ -491,6 +491,58 @@ namespace Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Domain.Entities.Derived.PurchaseForecast", b =>
+                {
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("WeekStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CalculatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("ForecastQuantity")
+                        .HasColumnType("decimal(15,2)");
+
+                    b.Property<bool>("NeedsReorder")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("ProjectedStock")
+                        .HasColumnType("decimal(15,2)");
+
+                    b.Property<int>("QuantityCommitted")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuantityOnOrder")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("RecommendedOrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("RecommendedOrderQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("WeekEndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("WeekIndex")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProductId", "WeekStartDate");
+
+                    b.ToTable("PurchaseForecasts", t =>
+                        {
+                            t.HasCheckConstraint("CK_PurchaseForecast_ForecastQuantity", "[ForecastQuantity] >= 0");
+
+                            t.HasCheckConstraint("CK_PurchaseForecast_QuantityCommitted", "[QuantityCommitted] >= 0");
+
+                            t.HasCheckConstraint("CK_PurchaseForecast_QuantityOnOrder", "[QuantityOnOrder] >= 0");
+
+                            t.HasCheckConstraint("CK_PurchaseForecast_RecommendedOrderQuantity", "[RecommendedOrderQuantity] >= 0");
+                        });
+                });
+
             modelBuilder.Entity("Domain.Entities.Derived.SalesAggregate", b =>
                 {
                     b.Property<Guid>("ProductId")
@@ -527,17 +579,20 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal>("ForecastQuantity")
+                        .HasColumnType("decimal(15,2)");
+
                     b.Property<DateTime>("LastCalculatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("NeedsReorder")
                         .HasColumnType("bit");
 
-                    b.Property<int>("NetStockPosition")
-                        .HasColumnType("int");
+                    b.Property<decimal>("NetStockPosition")
+                        .HasColumnType("decimal(15,2)");
 
-                    b.Property<int>("ProjectedStockAtLeadTime")
-                        .HasColumnType("int");
+                    b.Property<decimal>("ProjectedStockAtLeadTime")
+                        .HasColumnType("decimal(15,2)");
 
                     b.Property<int>("QuantityCommitted")
                         .HasColumnType("int");
@@ -558,6 +613,10 @@ namespace Infrastructure.Migrations
 
                     b.ToTable("StockLevels", t =>
                         {
+                            t.HasCheckConstraint("CK_StockLevel_ForecastQuantity", "[ForecastQuantity] >= 0");
+
+                            t.HasCheckConstraint("CK_StockLevel_QuantityCommitted", "[QuantityCommitted] >= 0");
+
                             t.HasCheckConstraint("CK_StockLevel_QuantityOnHand", "[QuantityOnHand] >= 0");
 
                             t.HasCheckConstraint("CK_StockLevel_QuantityOnOrder", "[QuantityOnOrder] >= 0");
@@ -846,6 +905,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Derived.PurchaseForecast", b =>
+                {
+                    b.HasOne("Domain.Entities.Core.Product", "Product")
+                        .WithMany("PurchaseForecasts")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Domain.Entities.Derived.SalesAggregate", b =>
                 {
                     b.HasOne("Domain.Entities.Core.Product", "Product")
@@ -946,6 +1016,8 @@ namespace Infrastructure.Migrations
                     b.Navigation("Forecasts");
 
                     b.Navigation("InventoryPolicy");
+
+                    b.Navigation("PurchaseForecasts");
 
                     b.Navigation("PurchaseOrderLineItem");
 

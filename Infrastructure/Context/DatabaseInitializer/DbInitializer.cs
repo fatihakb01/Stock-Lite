@@ -10,13 +10,10 @@ namespace Infrastructure.Context.DatabaseInitializer
             await context.Database.MigrateAsync();
 
             await UserDefinedTypesInitializer.InitializeAsync(context, logger);
-
             await SalesAggregatesInitializer.InitializeAsync(context, logger);
-            
-            await ForecastsInitializer.InitializeAsync(context, logger);           
-
+            await ForecastsInitializer.InitializeAsync(context, logger);          
             await ConfirmedOrderAggregatesInitializer.InitializeAsync(context, logger); 
-
+            await PurchaseForecastInitializer.InitializeAsync(context, logger);
             await StockLevelInitializer.InitializeAsync(context, logger);   
         }
     }

@@ -42,6 +42,11 @@ namespace Infrastructure.Configurations
                    .HasForeignKey<StockLevel>(s => s.ProductId)
                    .OnDelete(DeleteBehavior.Cascade);
 
+            builder.HasMany(p => p.PurchaseForecasts)
+                   .WithOne(s => s.Product)
+                   .HasForeignKey(s => s.ProductId)
+                   .OnDelete(DeleteBehavior.Cascade);
+
             builder.HasMany(p => p.SalesAggregates)
                    .WithOne(s => s.Product)
                    .HasForeignKey(s => s.ProductId)

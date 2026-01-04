@@ -19,6 +19,7 @@ public class Product
     public required Company Company { get; set; }
     public ProductInventoryPolicy? InventoryPolicy { get; set; }
     public StockLevel? StockLevel { get; set; }
+    public ICollection<PurchaseForecast> PurchaseForecasts { get; set; } = new List<PurchaseForecast>();
     public ICollection<SalesAggregate> SalesAggregates { get; set; } = new List<SalesAggregate>();
     public ICollection<Forecast> Forecasts { get; set; } = new List<Forecast>();
     public ICollection<ConfirmedOrderAggregate> ConfirmedOrderAggregates { get; set; } = new List<ConfirmedOrderAggregate>();

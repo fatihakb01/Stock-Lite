@@ -12,13 +12,14 @@ public class DataContext(DbContextOptions<DataContext> options)
     public DbSet<Company> Companies { get; set; }
     public DbSet<Product> Products { get; set; }
     public DbSet<ProductInventoryPolicy> ProductInventoryPolicies { get; set; }
-    public DbSet<StockLevel> StockLevels { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<TransactionLineItem> TransactionLineItems { get; set; }
     public DbSet<PurchaseOrder> PurchaseOrder { get; set; }
     public DbSet<PurchaseOrderLineItem> PurchaseOrderLineItem { get; set; }
     public DbSet<ConfirmedOrder> ConfirmedOrder { get; set; }
     public DbSet<ConfirmedOrderLineItem> ConfirmedOrderLineItem { get; set; }
+    public DbSet<StockLevel> StockLevels { get; set; }
+    public DbSet<PurchaseForecast> PurchaseForecasts { get; set; }
     public DbSet<SalesAggregate> SalesAggregates { get; set; }
     public DbSet<Forecast> Forecasts { get; set; }
     public DbSet<ConfirmedOrderAggregate> ConfirmedOrderAggregates { get; set; }

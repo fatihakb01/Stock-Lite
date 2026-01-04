@@ -12,6 +12,7 @@ using Application.Entities.Core.PurchaseOrders.DTOs;
 using Application.Entities.Core.ConfirmedOrders.DTOs;
 using Application.Entities.Derived.ConfirmedOrderAggregates.DTOs;
 using Application.Entities.Derived.StockLevels.DTOs;
+using Application.Entities.Derived.PurchaseForecasts.DTOs;
 
 namespace Application.Core;
 
@@ -70,6 +71,9 @@ public class MappingProfiles : Profile
 
         // Forecast entity
         CreateMap<Forecast, ForecastDto>();
+
+        // PurchaseForecast entity
+        CreateMap<PurchaseForecast, PurchaseForecastDto>();
 
         // Stocklevel entity
         CreateMap<StockLevel, StockLevelDto>();
