@@ -68,23 +68,7 @@ namespace Infrastructure.Context.DatabaseInitializer
                 EXEC dbo.DeletePastForecasts @CompanyId, @ProductIds, 'Monthly';
 				
 				-- Compute average monthly quantity/revenue from SalesAggregates
-                WITH ForecastMonthly AS (
-                    SELECT 
-                        sa.ProductId,
-                        AVG(CAST(sa.TotalQuantity AS FLOAT)) AS AvgQty,
-                        AVG(CAST(sa.TotalRevenue AS FLOAT)) AS AvgRev
-                    FROM SalesAggregates sa
-                    JOIN Products p ON p.Id = sa.ProductId
-                    WHERE sa.PeriodType = 'Monthly'
-                      AND p.CompanyId = @CompanyId
-                      AND sa.PeriodStartDate >= DATEADD(MONTH, -12, CONVERT(DATE, SYSUTCDATETIME()))
-                      AND (
-                        NOT EXISTS (SELECT 1 FROM @ProductIds)
-                        OR p.Id IN (SELECT Id FROM @ProductIds)
-                      )
-                    GROUP BY sa.ProductId
-                ),
-                ForecastMonths AS (
+                WITH FutureMonths AS (
                     -- Next 12 months starting with this coming month
                     SELECT 
                         v.number AS Offset,
@@ -92,24 +76,42 @@ namespace Infrastructure.Context.DatabaseInitializer
                                       MONTH(DATEADD(MONTH, v.number, DATEADD(MONTH, 0, CONVERT(DATE, SYSUTCDATETIME())))), 1) AS PeriodStartDate
                     FROM master.dbo.spt_values v
                     WHERE v.type = 'P' AND v.number BETWEEN 0 AND 11
-                )
-                INSERT INTO Forecasts (ProductId, PeriodType, PeriodStartDate, PeriodEndDate, PredictedQuantity, PredictedRevenue, Confidence)
+                ),
+                ProductMonths AS (
+                    SELECT p.Id AS ProductId, fd.PeriodStartDate AS MonthStart, EOMONTH(fd.PeriodStartDate) AS MonthEnd
+                    FROM Products p
+                    CROSS JOIN FutureMonths fd
+                    WHERE p.CompanyId = @CompanyId
+                      AND (
+                        NOT EXISTS (SELECT 1 FROM @ProductIds)
+                        OR p.Id IN (SELECT Id FROM @ProductIds)
+                      )
+                ) 
+                INSERT INTO Forecasts (
+					ProductId, 
+					PeriodType, 
+					PeriodStartDate, 
+					PeriodEndDate, 
+					PredictedQuantity, 
+					PredictedRevenue, 
+					Confidence
+				)
                 SELECT
-                    p.Id,
+                    pm.ProductId,
                     'Monthly',
-                    fms.PeriodStartDate,
-                    EOMONTH(fms.PeriodStartDate),
-                    ISNULL(fm.AvgQty, 0),
-                    ISNULL(fm.AvgRev, 0),
+                    pm.MonthStart,
+                    pm.MonthEnd,
+                    0,
+                    0,
                     0.50
-                FROM Products p
-                CROSS JOIN ForecastMonths fms
-                LEFT JOIN ForecastMonthly fm ON fm.ProductId = p.Id
-                LEFT JOIN Forecasts f
-                    ON f.ProductId = p.Id
-                    AND f.PeriodType = 'Monthly'
-                    AND f.PeriodStartDate = fms.PeriodStartDate
-                WHERE f.ProductId IS NULL; 
+                FROM ProductMonths pm
+                WHERE NOT EXISTS (
+					SELECT 1
+					FROM Forecasts f
+					WHERE f.ProductId = pm.ProductId
+					AND f.PeriodType = 'Monthly'
+					AND f.PeriodStartDate = pm.MonthStart
+				)
 			END
             ";
 
@@ -130,31 +132,7 @@ namespace Infrastructure.Context.DatabaseInitializer
 
                 EXEC dbo.DeletePastForecasts @CompanyId, @ProductIds, 'Weekly';
 
-                WITH ForecastMonthly AS (
-					SELECT 
-						ProductId,
-						PredictedQuantity,
-						PredictedRevenue,
-						PeriodStartDate,
-						PeriodEndDate
-					FROM Forecasts f
-					JOIN Products p ON p.Id = f.ProductId
-					WHERE f.PeriodType = 'Monthly'
-					  AND p.CompanyId = @CompanyId
-					  AND (
-                        NOT EXISTS (SELECT 1 FROM @ProductIds)
-                        OR p.Id IN (SELECT Id FROM @ProductIds)
-                      )
-                ),
-                ForecastMonths AS (
-					SELECT 
-						DATEFROMPARTS(YEAR(DATEADD(MONTH, v.number, CONVERT(DATE, SYSUTCDATETIME()))),
-									  MONTH(DATEADD(MONTH, v.number, CONVERT(DATE, SYSUTCDATETIME()))), 1) AS MonthStart,
-						EOMONTH(DATEADD(MONTH, v.number, CONVERT(DATE, SYSUTCDATETIME()))) AS MonthEnd
-					FROM master.dbo.spt_values v
-					WHERE v.type = 'P' AND v.number BETWEEN 0 AND 11
-                ),
-				BaseMonday AS (
+                WITH BaseMonday AS (
 					SELECT
 						DATEADD(
 							DAY,
@@ -180,65 +158,33 @@ namespace Infrastructure.Context.DatabaseInitializer
                         NOT EXISTS (SELECT 1 FROM @ProductIds)
                         OR p.Id IN (SELECT Id FROM @ProductIds)
                       )
-                ),
-                WeekMonthOverlap AS (
-                    SELECT
-                        pw.ProductId,
-                        pw.WeekStart,
-                        pw.WeekEnd,
-                        fm.MonthStart,
-                        fm.MonthEnd,
-                        CASE WHEN fm.MonthStart > pw.WeekStart THEN fm.MonthStart ELSE pw.WeekStart END AS OverlapStart,
-                        CASE WHEN fm.MonthEnd < pw.WeekEnd THEN fm.MonthEnd ELSE pw.WeekEnd END AS OverlapEnd
-                    FROM ProductWeeks pw
-                    CROSS JOIN ForecastMonths fm
-                    WHERE fm.MonthStart <= pw.WeekEnd
-                      AND fm.MonthEnd >= pw.WeekStart
-                ),
-                WeekMonthWeighted AS (
-                    SELECT
-                        wmo.ProductId,
-                        wmo.WeekStart AS PeriodStartDate,
-                        wmo.WeekEnd AS PeriodEndDate,
-                        CASE 
-                            WHEN DATEDIFF(DAY, wmo.OverlapStart, wmo.OverlapEnd) < 0 THEN 0
-                            ELSE DATEDIFF(DAY, wmo.OverlapStart, wmo.OverlapEnd) + 1
-                        END AS OverlapDays,
-                        fmCalc.PredictedQuantity,
-                        fmCalc.PredictedRevenue
-                    FROM WeekMonthOverlap wmo
-                    JOIN ForecastMonthly fmCalc
-                        ON fmCalc.ProductId IS NOT NULL 
-						AND fmCalc.ProductId = wmo.ProductId
-						AND fmCalc.PeriodStartDate = wmo.MonthStart
-						AND fmCalc.PeriodEndDate = wmo.MonthEnd
-                ),
-                ForecastWeekly AS (
-                    SELECT
-                        wm.ProductId,
-                        wm.PeriodStartDate,
-                        wm.PeriodEndDate,
-                        SUM(ISNULL(wm.PredictedQuantity, 0) * (CAST(wm.OverlapDays AS FLOAT) / 7.0) * (12.0/52.0)) AS PredictedQuantity,
-                        SUM(ISNULL(wm.PredictedRevenue, 0) * (CAST(wm.OverlapDays AS FLOAT) / 7.0) * (12.0/52.0)) AS PredictedRevenue
-                    FROM WeekMonthWeighted wm
-                    GROUP BY wm.ProductId, wm.PeriodStartDate, wm.PeriodEndDate
                 )
 
-                INSERT INTO Forecasts (ProductId, PeriodType, PeriodStartDate, PeriodEndDate, PredictedQuantity, PredictedRevenue, Confidence)
+                INSERT INTO Forecasts (
+					ProductId, 
+					PeriodType, 
+					PeriodStartDate, 
+					PeriodEndDate, 
+					PredictedQuantity, 
+					PredictedRevenue, 
+					Confidence
+				)
                 SELECT
-                    fw.ProductId,
+                    pw.ProductId,
                     'Weekly',
-                    fw.PeriodStartDate,
-                    fw.PeriodEndDate,
-                    fw.PredictedQuantity,
-                    fw.PredictedRevenue,
+                    pw.WeekStart,
+                    pw.WeekEnd,
+                    0,
+                    0,
                     0.50
-                FROM ForecastWeekly fw
-                LEFT JOIN Forecasts f
-                    ON f.ProductId = fw.ProductId
-                    AND f.PeriodType = 'Weekly'
-                    AND f.PeriodStartDate = fw.PeriodStartDate
-                WHERE f.ProductId IS NULL
+                FROM ProductWeeks pw
+                WHERE NOT EXISTS (
+					SELECT 1
+					FROM Forecasts f
+					WHERE f.ProductId = pw.ProductId
+					AND f.PeriodType = 'Weekly'
+					AND f.PeriodStartDate = pw.WeekStart
+				)
 			END
             ";
 
@@ -254,29 +200,13 @@ namespace Infrastructure.Context.DatabaseInitializer
                 @CompanyId UNIQUEIDENTIFIER,
                 @ProductIds dbo.GuidList READONLY
             AS
-            BEGIN				
-                SET NOCOUNT ON;
+            BEGIN
 
-                EXEC dbo.DeletePastForecasts @CompanyId, @ProductIds, 'Daily';
+				SET NOCOUNT ON;
+
+				EXEC dbo.DeletePastForecasts @CompanyId, @ProductIds, 'Daily';
 				
-				WITH ForecastWeekly AS (
-					SELECT 
-						ProductId,
-						PredictedQuantity,
-						PredictedRevenue,
-						PeriodStartDate,
-						PeriodEndDate
-					FROM Forecasts f
-					JOIN Products p ON p.Id = f.ProductId
-					WHERE f.PeriodStartDate >= DATEADD(WEEK, -13, CONVERT(DATE, SYSUTCDATETIME()))
-                      AND f.PeriodType = 'Weekly'
-					  AND p.CompanyId = @CompanyId
-					  AND (
-                        NOT EXISTS (SELECT 1 FROM @ProductIds)
-                        OR p.Id IN (SELECT Id FROM @ProductIds)
-                      )
-                ),
-				FutureDays AS (
+				WITH FutureDays AS (
                     SELECT v.number AS Offset,
                            DATEADD(DAY, v.number, CONVERT(DATE, SYSUTCDATETIME())) AS PeriodStartDate
                     FROM master.dbo.spt_values v
@@ -291,66 +221,33 @@ namespace Infrastructure.Context.DatabaseInitializer
                         NOT EXISTS (SELECT 1 FROM @ProductIds)
                         OR p.Id IN (SELECT Id FROM @ProductIds)
                       )
-                ),
-				BaseMonday AS (
-					SELECT
-						DATEADD(
-							DAY,
-							-((DATEPART(WEEKDAY, CONVERT(DATE, SYSUTCDATETIME())) + @@DATEFIRST - 2) % 7),
-							CONVERT(DATE, SYSUTCDATETIME())
-						) AS MondayStart
-				),
-				ForecastWeeks AS (
-					SELECT
-						v.number AS WeekOffset,
-						DATEADD(WEEK, v.number, bm.MondayStart) AS WeekStart,
-						DATEADD(DAY, 6, DATEADD(WEEK, v.number, bm.MondayStart)) AS WeekEnd
-					FROM master.dbo.spt_values v
-					CROSS JOIN BaseMonday bm
-					WHERE v.type = 'P' AND v.number BETWEEN 0 AND 12   
-                ) ,
-                DayWeekOverlap AS (
-                    SELECT
-                        pw.ProductId,
-                        pw.DayStart,
-                        pw.DayEnd,
-                        fw.WeekStart,
-                        fw.WeekEnd
-                    FROM ProductDays pw
-                    CROSS JOIN ForecastWeeks fw
-                    WHERE fw.WeekStart <= pw.DayEnd
-                      AND fw.WeekEnd >= pw.DayStart
-                ),
-                ForecastDaily AS (
-                    SELECT
-                        dwo.ProductId,
-                        dwo.DayStart AS PeriodStartDate,
-                        dwo.DayEnd AS PeriodEndDate,
-                        ISNULL(fwCalc.PredictedQuantity, 0) / 7.0 AS PredictedQuantity,
-                        ISNULL(fwCalc.PredictedRevenue, 0) / 7.0 AS PredictedRevenue
-                    FROM DayWeekOverlap dwo
-                    JOIN ForecastWeekly fwCalc
-                        ON fwCalc.ProductId IS NOT NULL 
-						AND fwCalc.ProductId = dwo.ProductId
-						AND fwCalc.PeriodStartDate = dwo.WeekStart
-						AND fwCalc.PeriodEndDate = dwo.WeekEnd
-                )
-                INSERT INTO Forecasts (ProductId, PeriodType, PeriodStartDate, PeriodEndDate, PredictedQuantity, PredictedRevenue, Confidence)
+                ) 
+                INSERT INTO Forecasts (
+					ProductId, 
+					PeriodType, 
+					PeriodStartDate, 
+					PeriodEndDate, 
+					PredictedQuantity, 
+					PredictedRevenue, 
+					Confidence
+				)
                 SELECT
-                    fd.ProductId,
+                    pd.ProductId,
                     'Daily',
-                    fd.PeriodStartDate,
-                    fd.PeriodEndDate,
-                    fd.PredictedQuantity,
-                    fd.PredictedRevenue,
+                    pd.DayStart,
+                    pd.DayEnd,
+                    0,
+                    0,
                     0.50
-                FROM ForecastDaily fd
-                LEFT JOIN Forecasts f
-                    ON f.ProductId = fd.ProductId
-                    AND f.PeriodType = 'Daily'
-                    AND f.PeriodStartDate = fd.PeriodStartDate
-                WHERE f.ProductId IS NULL
-			END
+                FROM ProductDays pd
+				WHERE NOT EXISTS (
+					SELECT 1
+					FROM Forecasts f
+					WHERE f.ProductId = pd.ProductId
+					AND f.PeriodType = 'Daily'
+					AND f.PeriodStartDate = pd.DayStart
+				)
+            END
             ";
 
             await context.Database.ExecuteSqlRawAsync(sql);
