@@ -33,11 +33,21 @@ public class ConfirmedOrderAggregateRepository
             _ => today
         };
 
+        DateTime endDate = periodType switch
+        {
+            Period.Daily => today.AddDays(30),
+            Period.Weekly => today.AddDays(84),
+            Period.Monthly => today.AddMonths(12),
+            _ => today
+        };
+
         return await _context.ConfirmedOrderAggregates
             .Where(coa =>
                 coa.ProductId == productId &&
                 coa.PeriodType == periodType &&
-                coa.PeriodStartDate >= startDate)
+                coa.PeriodStartDate >= startDate &&
+                coa.PeriodEndDate <= endDate
+            )
             .OrderBy(coa => coa.PeriodStartDate)
             .ToListAsync();
     }

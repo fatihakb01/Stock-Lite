@@ -30,10 +30,21 @@ public class ForecastRepository : Repository<Forecast>, IForecastRepository
             _ => today
         };
 
+        DateTime endDate = periodType switch
+        {
+            Period.Daily => today.AddDays(30),
+            Period.Weekly => today.AddDays(84),
+            Period.Monthly => today.AddMonths(12),
+            _ => today
+        };
+
         return await _context.Forecasts
-            .Where(f => f.ProductId == productId
-                         && f.PeriodType == periodType
-                         && f.PeriodStartDate >= startDate)
+            .Where(f => 
+                f.ProductId == productId
+                && f.PeriodType == periodType
+                && f.PeriodStartDate >= startDate
+                && f.PeriodEndDate <= endDate
+            )
             .OrderBy(f => f.PeriodStartDate)
             .ToListAsync();
     }

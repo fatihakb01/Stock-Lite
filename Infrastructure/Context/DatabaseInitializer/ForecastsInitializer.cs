@@ -69,13 +69,12 @@ namespace Infrastructure.Context.DatabaseInitializer
 				
 				-- Compute average monthly quantity/revenue from SalesAggregates
                 WITH FutureMonths AS (
-                    -- Next 12 months starting with this coming month
-                    SELECT 
+                    SELECT DISTINCT
                         v.number AS Offset,
                         DATEFROMPARTS(YEAR(DATEADD(MONTH, v.number, DATEADD(MONTH, 0, CONVERT(DATE, SYSUTCDATETIME())))),
                                       MONTH(DATEADD(MONTH, v.number, DATEADD(MONTH, 0, CONVERT(DATE, SYSUTCDATETIME())))), 1) AS PeriodStartDate
                     FROM master.dbo.spt_values v
-                    WHERE v.type = 'P' AND v.number BETWEEN 0 AND 11
+                    WHERE v.number BETWEEN -1 AND 11
                 ),
                 ProductMonths AS (
                     SELECT p.Id AS ProductId, fd.PeriodStartDate AS MonthStart, EOMONTH(fd.PeriodStartDate) AS MonthEnd
@@ -141,13 +140,13 @@ namespace Infrastructure.Context.DatabaseInitializer
 						) AS MondayStart
 				),
 				FutureWeeks AS (
-					SELECT
+					SELECT DISTINCT
 						v.number AS WeekOffset,
 						DATEADD(WEEK, v.number, bm.MondayStart) AS WeekStart,
 						DATEADD(DAY, 6, DATEADD(WEEK, v.number, bm.MondayStart)) AS WeekEnd
 					FROM master.dbo.spt_values v
 					CROSS JOIN BaseMonday bm
-					WHERE v.type = 'P' AND v.number BETWEEN 0 AND 51 
+					WHERE v.number BETWEEN -1 AND 51 
 				),
                 ProductWeeks AS (
                     SELECT p.Id AS ProductId, fw.WeekStart, fw.WeekEnd
@@ -207,8 +206,9 @@ namespace Infrastructure.Context.DatabaseInitializer
 				EXEC dbo.DeletePastForecasts @CompanyId, @ProductIds, 'Daily';
 				
 				WITH FutureDays AS (
-                    SELECT v.number AS Offset,
-                           DATEADD(DAY, v.number, CONVERT(DATE, SYSUTCDATETIME())) AS PeriodStartDate
+                    SELECT
+                        v.number AS Offset,
+                        DATEADD(DAY, v.number, CONVERT(DATE, SYSUTCDATETIME())) AS PeriodStartDate
                     FROM master.dbo.spt_values v
                     WHERE v.type = 'P' AND v.number BETWEEN 0 AND 29
 				),
@@ -307,7 +307,7 @@ namespace Infrastructure.Context.DatabaseInitializer
                     f.PredictedRevenue = ISNULL(fm.AvgRev, 0),
                     f.Confidence = 0.50
                 FROM Forecasts f
-                LEFT JOIN ForecastMonthly fm 
+                JOIN ForecastMonthly fm 
 					ON fm.ProductId = f.ProductId
 				    AND f.PeriodType = 'Monthly'
             END
@@ -345,12 +345,12 @@ namespace Infrastructure.Context.DatabaseInitializer
                       )
                 ),
                 ForecastMonths AS (
-					SELECT 
+					SELECT DISTINCT
 						DATEFROMPARTS(YEAR(DATEADD(MONTH, v.number, CONVERT(DATE, SYSUTCDATETIME()))),
 									  MONTH(DATEADD(MONTH, v.number, CONVERT(DATE, SYSUTCDATETIME()))), 1) AS MonthStart,
 						EOMONTH(DATEADD(MONTH, v.number, CONVERT(DATE, SYSUTCDATETIME()))) AS MonthEnd
 					FROM master.dbo.spt_values v
-					WHERE v.type = 'P' AND v.number BETWEEN 0 AND 11
+					WHERE v.number BETWEEN -1 AND 11
                 ),
 				BaseMonday AS (
 					SELECT
@@ -361,13 +361,13 @@ namespace Infrastructure.Context.DatabaseInitializer
 						) AS MondayStart
 				),
 				FutureWeeks AS (
-					SELECT
+					SELECT DISTINCT
 						v.number AS WeekOffset,
 						DATEADD(WEEK, v.number, bm.MondayStart) AS WeekStart,
 						DATEADD(DAY, 6, DATEADD(WEEK, v.number, bm.MondayStart)) AS WeekEnd
 					FROM master.dbo.spt_values v
 					CROSS JOIN BaseMonday bm
-					WHERE v.type = 'P' AND v.number BETWEEN 0 AND 51 
+					WHERE v.number BETWEEN -1 AND 51
 				),
                 ProductWeeks AS (
                     SELECT p.Id AS ProductId, fw.WeekStart, fw.WeekEnd
@@ -457,8 +457,7 @@ namespace Infrastructure.Context.DatabaseInitializer
 						PeriodEndDate
 					FROM Forecasts f
 					JOIN Products p ON p.Id = f.ProductId
-					WHERE f.PeriodStartDate >= DATEADD(WEEK, -13, CONVERT(DATE, SYSUTCDATETIME()))
-                      AND f.PeriodType = 'Weekly'
+					WHERE f.PeriodType = 'Weekly'
 					  AND p.CompanyId = @CompanyId
 					  AND (
                         NOT EXISTS (SELECT 1 FROM @ProductIds)
@@ -466,8 +465,9 @@ namespace Infrastructure.Context.DatabaseInitializer
                       )
                 ),
 				FutureDays AS (
-                    SELECT v.number AS Offset,
-                           DATEADD(DAY, v.number, CONVERT(DATE, SYSUTCDATETIME())) AS PeriodStartDate
+                    SELECT
+                        v.number AS Offset,
+                        DATEADD(DAY, v.number, CONVERT(DATE, SYSUTCDATETIME())) AS PeriodStartDate
                     FROM master.dbo.spt_values v
                     WHERE v.type = 'P' AND v.number BETWEEN 0 AND 29
 				),
@@ -490,13 +490,13 @@ namespace Infrastructure.Context.DatabaseInitializer
 						) AS MondayStart
 				),
 				ForecastWeeks AS (
-					SELECT
+					SELECT DISTINCT
 						v.number AS WeekOffset,
 						DATEADD(WEEK, v.number, bm.MondayStart) AS WeekStart,
 						DATEADD(DAY, 6, DATEADD(WEEK, v.number, bm.MondayStart)) AS WeekEnd
 					FROM master.dbo.spt_values v
 					CROSS JOIN BaseMonday bm
-					WHERE v.type = 'P' AND v.number BETWEEN 0 AND 12   
+                    WHERE v.number BETWEEN -1 AND 51  
                 ) ,
                 DayWeekOverlap AS (
                     SELECT

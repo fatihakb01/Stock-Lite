@@ -19,9 +19,19 @@ public class PurchaseForecastRepository
 
     public async Task<ICollection<PurchaseForecast>> GetByProductAsync(Guid productId)
     {
+        DateTime today = DateTime.UtcNow;
+        int diff = (7 + (DateTime.UtcNow.DayOfWeek - DayOfWeek.Monday)) % 7;
+
+        DateTime startDate = today.AddDays(-diff);
+        DateTime endDate = today.AddDays(357);
+
         return await _context.PurchaseForecasts
             .Include(pf => pf.Product)
-            .Where(pf => pf.ProductId == productId)
+            .Where(pf => 
+                pf.ProductId == productId &&
+                pf.WeekStartDate >= startDate &&
+                pf.WeekEndDate <= endDate
+            )
             .OrderBy(pf => pf.WeekStartDate)
             .ToListAsync();
     }
