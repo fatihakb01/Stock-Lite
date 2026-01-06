@@ -15,7 +15,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEditUser, useDeleteUser } from "../../hooks/useUsers";
 import { userSchema, type UserFormValues } from "./schemas/userSchema";
-import { roleMap } from "./roleMap";
+import { roleMap } from "../../types/users/roleMap";
 import { useEffect, useState } from "react";
 import FormError from "../../components/forms/FormError";
 import FormSuccess from "../../components/forms/FormSuccess";

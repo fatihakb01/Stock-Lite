@@ -9,7 +9,7 @@ import UsersPage from "../features/users/UsersPage";
 import ConfirmEmailPage from "../features/users/ConfirmEmailPage";
 import ChangePasswordPage from "../features/users/ChangePasswordPage";
 import ForgotPasswordPage from "../features/users/ForgotPasswordPage";
-import MasterDataPage from "../features/masterdata/MasterDataPage";
+/*import MasterDataPage from "../features/masterdata/MasterDataPage";*/
 import SchedulerPage from "../features/scheduler/SchedulerPage";
 
 const router = createBrowserRouter([
@@ -35,7 +35,7 @@ const router = createBrowserRouter([
     children: [
       { path: "/home", element: <HomePage /> },
       { path: "/products", element: <ProductsPage /> },
-      { path: "/data", element: <MasterDataPage /> },
+      /*{ path: "/data", element: <MasterDataPage /> },*/
       { path: "/scheduler", element: <SchedulerPage /> },
       { path: "/users", element: <UsersPage /> }
     ]

@@ -1,4 +1,4 @@
-import type { SalesAggregate } from "../features/salesaggregates/salesaggregateTypes";
+import type { SalesAggregate } from "../types/salesAggregates/salesaggregateTypes";
 import api from "./axios";
 
 export const getSalesAggregates = async (periodType: string, productId: string): 

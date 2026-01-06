@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { SalesAggregate } from "../features/salesaggregates/salesaggregateTypes";
+import type { SalesAggregate } from "../types/salesAggregates/salesaggregateTypes";
 import { getSalesAggregates } from "../api/salesaggregatesApi";
 
 export const useSalesAggregates = (periodType: string | null, productId: string | null) => {

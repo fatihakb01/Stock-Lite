@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getConfirmedOrderAggregates } from "../api/confirmedOrderAggregatesApi";
-import type { ConfirmedOrderAggregate } from "../features/confirmedOrderAggregates/confirmedOrderAggregatesTypes";
+import type { ConfirmedOrderAggregate } from "../types/confirmedOrderAggregates/confirmedOrderAggregateTypes";
 
 export const useConfirmedOrderAggregates = (periodType: string | null, productId: string | null) => {
   return useQuery<ConfirmedOrderAggregate[]>({

@@ -19,9 +19,9 @@ import {
   Typography
 } from "@mui/material";
 
-import type { SalesAggregate } from "../../features/salesaggregates/salesaggregateTypes";
-import type { Forecast } from "../../features/forecasts/forecastTypes";
-import type { ConfirmedOrderAggregate } from "../../features/confirmedOrderAggregates/confirmedOrderAggregatesTypes";
+import type { SalesAggregate } from "../../../../types/salesAggregates/salesaggregateTypes";
+import type { Forecast } from "../../../../types/forecasts/forecastTypes";
+import type { ConfirmedOrderAggregate } from "../../../../types/confirmedOrderAggregates/confirmedOrderAggregateTypes";
 import CustomTooltip from "./CustomTooltip";
 
 

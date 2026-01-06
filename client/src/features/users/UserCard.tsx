@@ -1,6 +1,6 @@
 import { Card, CardActionArea, CardContent, Typography, Avatar, Box } from "@mui/material";
-import type { User } from "./userTypes";
-import { roleMap } from "./roleMap";
+import type { User } from "../../types/users/userTypes";
+import { roleMap } from "../../types/users/roleMap";
 
 export default function UserCard({ user, onClick }: { user: User; onClick: () => void }) {
   return (

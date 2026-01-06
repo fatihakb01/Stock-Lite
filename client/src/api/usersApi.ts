@@ -9,7 +9,7 @@ import type {
   ConfirmEmailDto,
   EditUserDto,
   ConfirmEmailResult
-} from "../features/users/userTypes";
+} from "../types/users/userTypes";
 
 // LOGIN
 export const login = async (data: LoginDto): Promise<AuthResponse> => {

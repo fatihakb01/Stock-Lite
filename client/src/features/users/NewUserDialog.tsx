@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { userSchema, type UserFormValues } from "./schemas/userSchema";
-import { roleMap } from "./roleMap";
+import { roleMap } from "../../types/users/roleMap";
 import { useRegisterUser, useCurrentUser } from "../../hooks/useUsers";
 import FormError from "../../components/forms/FormError";
 import FormSuccess from "../../components/forms/FormSuccess";

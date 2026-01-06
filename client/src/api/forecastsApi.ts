@@ -1,4 +1,4 @@
-import type { Forecast } from "../features/forecasts/forecastTypes";
+import type { Forecast } from "../types/forecasts/forecastTypes";
 import api from "./axios";
 
 export const getForecasts = async (periodType: string, productId: string): 

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { Forecast } from "../features/forecasts/forecastTypes";
+import type { Forecast } from "../types/forecasts/forecastTypes";
 import { getForecasts } from "../api/forecastsApi";
 
 export const useForecasts = (periodType: string | null, productId: string | null) => {

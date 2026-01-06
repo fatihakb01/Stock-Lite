@@ -1,4 +1,4 @@
-import type { Company } from "../features/companies/companyTypes";
+import type { Company } from "../types/companies/companyTypes";
 import api from "./axios";
 
 export const getCompany = async (): Promise<Company> => {

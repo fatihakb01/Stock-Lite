@@ -22,7 +22,7 @@ import type {
   AuthResponse,
   EditUserDto,
   ConfirmEmailResult
-} from "../features/users/userTypes";
+} from "../types/users/userTypes";
 
 // LOGIN
 export const useLogin = () => {

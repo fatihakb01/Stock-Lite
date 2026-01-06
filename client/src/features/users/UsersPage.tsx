@@ -5,7 +5,7 @@ import UserDialog from "./UserDialog";
 import NewUserDialog from "./NewUserDialog";
 import { useState } from "react";
 import { useUsers, useCurrentUser } from "../../hooks/useUsers";
-import { roleMap } from "./roleMap";
+import { roleMap } from "../../types/users/roleMap";
 
 export default function UsersPage() {
   const { data: currentUser } = useCurrentUser();

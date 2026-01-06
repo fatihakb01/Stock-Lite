@@ -1,4 +1,4 @@
-import type { ConfirmedOrderAggregate } from "../features/confirmedOrderAggregates/confirmedOrderAggregatesTypes";
+import type { ConfirmedOrderAggregate } from "../types/confirmedOrderAggregates/confirmedOrderAggregateTypes";
 import api from "./axios";
 
 export const getConfirmedOrderAggregates = async (periodType: string, productId: string): 
