@@ -10,10 +10,10 @@ namespace API.Controllers;
 [Authorize]
 public class PurchaseOrderController(IMediator mediator) : BaseApiController(mediator)
 {
-    [HttpGet("{id}")]
-    public async Task<ActionResult<PurchaseOrderDto>> GetPurchaseOrderById(Guid id)
+    [HttpGet("by-product/{productId}")]
+    public async Task<ActionResult<List<PurchaseOrderDto>>> GetPurchaseOrdersByProductId(Guid productId)
     {
-        return HandleResult(await Mediator.Send(new GetPurchaseOrderById.Query { Id = id }));
+        return HandleResult(await Mediator.Send(new GetPurchaseOrdersByProductId.Query { ProductId = productId }));
     }
 
     [HttpGet]

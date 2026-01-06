@@ -10,10 +10,10 @@ namespace API.Controllers;
 [Authorize]
 public class ConfirmedOrderController(IMediator mediator) : BaseApiController(mediator)
 {
-    [HttpGet("{id}")]
-    public async Task<ActionResult<ConfirmedOrderDto>> GetConfirmedOrderById(Guid id)
+    [HttpGet("by-product/{productId}")]
+    public async Task<ActionResult<ConfirmedOrderDto>> GetConfirmedOrdersByProductId(Guid productId)
     {
-        return HandleResult(await Mediator.Send(new GetConfirmedOrderById.Query { Id = id }));
+        return HandleResult(await Mediator.Send(new GetConfirmedOrdersByProductId.Query { ProductId = productId }));
     }
 
     [HttpGet]

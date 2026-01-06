@@ -10,10 +10,10 @@ namespace API.Controllers;
 [Authorize]
 public class TransactionController(IMediator mediator) : BaseApiController(mediator)
 {
-    [HttpGet("{id}")]
-    public async Task<ActionResult<TransactionDto>> GetTransactionById(Guid id)
+    [HttpGet("by-product/{productId}")]
+    public async Task<ActionResult<TransactionDto>> GetTransactionsByProductId(Guid productId)
     {
-        return HandleResult(await Mediator.Send(new GetTransactionById.Query { Id = id }));
+        return HandleResult(await Mediator.Send(new GetTransactionsByProductId.Query { ProductId = productId }));
     }  
 
     [HttpGet]
