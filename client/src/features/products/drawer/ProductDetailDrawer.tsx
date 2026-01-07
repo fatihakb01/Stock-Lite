@@ -2,13 +2,14 @@
 import { CircularProgress, Drawer, Stack, Typography } from "@mui/material";
 import { useProduct } from "../../../hooks/useProducts";
 import ProductOverviewTab from "./tabs/ProductOverviewTab";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Tabs, Tab } from "@mui/material";
 import TabPanel from "../../../components/tabs/TabPanel";
 import ProductTransactionsTab from "./tabs/ProductTransactionsTab";
 import ProductPoTab from "./tabs/ProductPoTab";
 import ProductPfcTab from "./tabs/ProductPfcTab";
 import ProductCoTab from "./tabs/ProductCoTab";
+import DrawerResizeHandle from "./handle/DrawerResizeHandle";
 
 interface ProductDetailDrawerProps {
   productId: string | null;
@@ -26,6 +27,8 @@ export default function ProductDetailDrawer({
   } = useProduct(productId);
 
   const [tab, setTab] = useState(0);
+  const [drawerWidthPct, setDrawerWidthPct] = useState(50);
+  const isDraggingRef = useRef(false);
 
   return (
     <Drawer
@@ -34,15 +37,22 @@ export default function ProductDetailDrawer({
       open={!!productId}
       onClose={onClose}
       sx={{
-        width: "50%",
-        flexShrink: 0,
         "& .MuiDrawer-paper": {
-          width: "50%",
+          width: `${drawerWidthPct}%`,
           p: 3,
           boxSizing: "border-box",
+          transition: "width 300ms ease",
         },
       }}
     >
+      {/* Resize Handle */}
+      <DrawerResizeHandle
+        onResize={(w) => {
+          isDraggingRef.current = true;
+          setDrawerWidthPct(w);
+        }}
+      />
+
       {/* Tabs */}
       <Tabs
         value={tab}

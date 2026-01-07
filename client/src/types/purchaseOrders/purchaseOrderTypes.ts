@@ -5,10 +5,10 @@ export type PurchaseOrder = {
     expectedDeliveryDate?: string,
     receivedDate?: string,
     companyId: string
-    linItems: {
+    lineItems: [{
         productId: string,
         quantity: number,
         receivedQuantity: number,
         unitCost: number
-    }
+    }]
 }

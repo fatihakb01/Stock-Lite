@@ -1,14 +1,14 @@
 export type ConfirmedOrder = {
     orderNumber: string,
     status: string,
-    orderDate: string,
-    expectedDeliveryDate: string,
-    receivedDate?: string,
+    orderDate: Date,
+    expectedDeliveryDate: Date,
+    receivedDate?: Date,
     companyId: string
-    linItems: {
+    lineItems: [{
         productId: string,
         quantity: number,
         soldQuantity: number,
         unitCost: number
-    }
+    }]
 }

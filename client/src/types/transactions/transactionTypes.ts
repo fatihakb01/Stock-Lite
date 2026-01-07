@@ -4,10 +4,9 @@ export type Transaction = {
     transactionDate: Date,
     paymentMethod?: string,
     notes?: string,
-    customerId: string,
-    lineItems: {
+    lineItems: [{
         productId: string,
         quantity: number,
         unitPrice: number
-    }
+    }]
 }

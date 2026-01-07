@@ -1,24 +1,45 @@
+import {
+  CircularProgress,
+  Stack,
+  Typography
+} from "@mui/material";
 import { usePurchaseOrders } from "../../../../hooks/usePurchaseOrders";
+import OrderLineLookupTable from "../tables/OrderLineLookupTable";
+import { poStatusMap } from "../../../../types/purchaseOrders/poStatusMap";
 
 interface ProductPoTabProps {
   productId: string | null;
 }
 
-export default function ProductPoTab({
-    productId
-} : ProductPoTabProps) {
+export default function ProductPoTab({ productId }: ProductPoTabProps) {
+  const { data, isLoading, isError } = usePurchaseOrders(productId);
 
-    const { 
-      data: purchaseOrders, 
-      isLoading: isLoading, 
-      isError: isError 
-    } = usePurchaseOrders(productId);
+  if (isLoading) return <CircularProgress />;
+  if (isError) return <Typography color="error">Failed to load purchase orders</Typography>;
+  if (!data || data.length === 0)
+    return <Typography>No purchase orders for this product</Typography>;
 
-    console.log(purchaseOrders);
+  const rows = data.flatMap(po =>
+    po.lineItems.map(li => ({
+      orderNumber: po.orderNumber,
+      status: poStatusMap[Number(po.status)],
+      orderDate: new Date(po.orderDate).toLocaleDateString(),
+      expectedDate: new Date(po.expectedDeliveryDate!).toLocaleDateString(),
+      receivedDate: new Date(po.receivedDate!).toLocaleDateString(),
+      orderedQty: li.quantity,
+      processedQty: li.receivedQuantity,
+      openQty: li.quantity - li.receivedQuantity
+    }))
+  );
 
-    return (
-        <>
-            Test
-        </>
-    )
-};
+  return (
+    <Stack spacing={2}>
+      <Typography variant="h6">Incoming Supply</Typography>
+
+      <OrderLineLookupTable
+        rows={rows}
+        openQtyLabel="Open Supply"
+      />
+    </Stack>
+  );
+}

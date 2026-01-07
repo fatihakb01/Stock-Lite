@@ -1,6 +1,6 @@
 export type PurchaseForecast = {
     productId: string,
-    weekStartDate: string,
+    weekStartDate: Date,
     weekEndDate: string,
     weekIndex: number,
     forecastQuantity: number,

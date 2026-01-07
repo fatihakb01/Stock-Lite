@@ -11,7 +11,7 @@ namespace API.Controllers;
 public class ConfirmedOrderController(IMediator mediator) : BaseApiController(mediator)
 {
     [HttpGet("by-product/{productId}")]
-    public async Task<ActionResult<ConfirmedOrderDto>> GetConfirmedOrdersByProductId(Guid productId)
+    public async Task<ActionResult<List<ConfirmedOrderDto>>> GetConfirmedOrdersByProductId(Guid productId)
     {
         return HandleResult(await Mediator.Send(new GetConfirmedOrdersByProductId.Query { ProductId = productId }));
     }

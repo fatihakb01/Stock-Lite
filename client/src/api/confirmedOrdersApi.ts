@@ -2,6 +2,6 @@ import type { ConfirmedOrder } from "../types/confirmedOrders/confirmedOrderType
 import api from "./axios";
 
 export const getConfirmedOrders = async (productId: string): Promise<ConfirmedOrder[]> => {
-  const res = await api.get(`/confirmedorder/${productId}`);
+  const res = await api.get(`/confirmedorder/by-product/${productId}`);
   return res.data;
 };
