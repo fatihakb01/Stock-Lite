@@ -212,11 +212,11 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("CompanyId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("ExpectedDeliveryDate")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("ExpectedDeliveryDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("OrderDate")
-                        .HasColumnType("date");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("OrderNumber")
                         .IsRequired()
@@ -224,7 +224,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime?>("ReceivedDate")
-                        .HasColumnType("date");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -589,9 +589,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<decimal>("NetStockPosition")
-                        .HasColumnType("decimal(15,2)");
-
-                    b.Property<decimal>("ProjectedStockAtLeadTime")
                         .HasColumnType("decimal(15,2)");
 
                     b.Property<int>("QuantityCommitted")

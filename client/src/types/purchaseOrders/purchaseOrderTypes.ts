@@ -2,7 +2,7 @@ export type PurchaseOrder = {
     orderNumber: string,
     status: string,
     orderDate: string,
-    expectedDeliveryDate?: string,
+    expectedDeliveryDate: string,
     receivedDate?: string,
     companyId: string
     lineItems: [{

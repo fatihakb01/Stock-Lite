@@ -18,7 +18,6 @@ public class BasePurchaseOrderDtoValidator : AbstractValidator<BasePurchaseOrder
 
         RuleFor(x => x.ExpectedDeliveryDate)
             .GreaterThanOrEqualTo(x => x.OrderDate)
-            .When(x => x.ExpectedDeliveryDate.HasValue)
             .WithMessage("Expected delivery date cannot be before order date");
     }
 }

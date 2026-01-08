@@ -21,7 +21,7 @@ export type ProductDetail = {
         quantityOnOrder: number,
         quantityCommitted: number,
         netStockPosition: number,
-        projectedStockAtLeadTime: number,
+        forecastQuantity: number,
         reorderPoint: number,
         needsReorder: boolean,
         recommendedOrderQuantity: number

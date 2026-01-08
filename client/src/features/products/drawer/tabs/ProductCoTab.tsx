@@ -25,7 +25,7 @@ export default function ProductCoTab({ productId }: ProductCoTabProps) {
       status: coStatusMap[Number(co.status)],
       orderDate: new Date(co.orderDate).toLocaleDateString(),
       expectedDate: new Date(co.expectedDeliveryDate).toLocaleDateString(),
-      receivedDate: new Date(co.receivedDate!).toLocaleDateString(),
+      receivedDate: co.receivedDate == null ? '-' : new Date(co.receivedDate).toLocaleDateString(),
       orderedQty: li.quantity,
       processedQty: li.soldQuantity,
       openQty: li.quantity - li.soldQuantity

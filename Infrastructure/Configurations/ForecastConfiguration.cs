@@ -19,12 +19,10 @@ public class ForecastConfiguration : IEntityTypeConfiguration<Forecast>
             .HasMaxLength(10);
 
         builder.Property(f => f.PeriodStartDate)
-            .IsRequired()
-            .HasColumnType("datetime2");
+            .IsRequired();
 
         builder.Property(f => f.PeriodEndDate)
-            .IsRequired()
-            .HasColumnType("datetime2");
+            .IsRequired();
 
         builder.Property(f => f.PredictedQuantity)
             .IsRequired()

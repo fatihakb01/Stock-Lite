@@ -20,7 +20,7 @@ public class PurchaseForecastRepository
     public async Task<ICollection<PurchaseForecast>> GetByProductAsync(Guid productId)
     {
         DateTime today = DateTime.UtcNow;
-        int diff = (7 + (DateTime.UtcNow.DayOfWeek - DayOfWeek.Monday)) % 7;
+        int diff = ((7 + (DateTime.UtcNow.DayOfWeek - DayOfWeek.Monday)) % 7) + 7;
 
         DateTime startDate = today.AddDays(-diff);
         DateTime endDate = today.AddDays(357);

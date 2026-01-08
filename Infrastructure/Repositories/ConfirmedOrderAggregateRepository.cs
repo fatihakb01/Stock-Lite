@@ -23,7 +23,7 @@ public class ConfirmedOrderAggregateRepository
         Period periodType)
     {
         DateTime today = DateTime.UtcNow;
-        int diff = (7 + (DateTime.UtcNow.DayOfWeek - DayOfWeek.Monday)) % 7;
+        int diff = ((7 + (DateTime.UtcNow.DayOfWeek - DayOfWeek.Monday)) % 7) + 7;
 
         DateTime startDate = periodType switch
         {

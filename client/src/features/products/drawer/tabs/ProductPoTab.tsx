@@ -24,8 +24,8 @@ export default function ProductPoTab({ productId }: ProductPoTabProps) {
       orderNumber: po.orderNumber,
       status: poStatusMap[Number(po.status)],
       orderDate: new Date(po.orderDate).toLocaleDateString(),
-      expectedDate: new Date(po.expectedDeliveryDate!).toLocaleDateString(),
-      receivedDate: new Date(po.receivedDate!).toLocaleDateString(),
+      expectedDate: new Date(po.expectedDeliveryDate).toLocaleDateString(),
+      receivedDate: po.receivedDate == null ? '-' : new Date(po.receivedDate).toLocaleDateString(),
       orderedQty: li.quantity,
       processedQty: li.receivedQuantity,
       openQty: li.quantity - li.receivedQuantity

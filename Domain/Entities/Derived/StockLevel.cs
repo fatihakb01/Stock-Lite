@@ -12,7 +12,6 @@ public class StockLevel
 
     public decimal NetStockPosition { get; set; }
     public decimal ForecastQuantity { get; set; }
-    public decimal ProjectedStockAtLeadTime { get; set; }
 
     public int ReorderPoint { get; set; }
 

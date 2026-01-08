@@ -8,7 +8,7 @@ public class PurchaseOrder
     public required string OrderNumber { get; set; }
     public PurchaseOrderStatus Status { get; set; }
     public DateTime OrderDate { get; set; } = DateTime.UtcNow;
-    public DateTime? ExpectedDeliveryDate { get; set; }
+    public DateTime ExpectedDeliveryDate { get; set; }
     public DateTime? ReceivedDate { get; set; }
     
     // Foreign keys

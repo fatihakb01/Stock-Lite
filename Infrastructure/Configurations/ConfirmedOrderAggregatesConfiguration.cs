@@ -19,19 +19,16 @@ public class ConfirmedOrderAggregatesConfiguration : IEntityTypeConfiguration<Co
             .HasMaxLength(10);
 
         builder.Property(co => co.PeriodStartDate)
-            .IsRequired()
-            .HasColumnType("datetime2");
+            .IsRequired();
 
         builder.Property(co => co.PeriodEndDate)
-            .IsRequired()
-            .HasColumnType("datetime2");
+            .IsRequired();
 
         builder.Property(co => co.TotalConfirmedQuantity)
             .IsRequired();
 
         builder.Property(co => co.TotalConfirmedRevenue)
-            .IsRequired()
-            .HasColumnType("decimal(18,2)");
+            .IsRequired();
 
         builder.ToTable(co =>
         {

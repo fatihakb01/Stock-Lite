@@ -68,19 +68,19 @@ export default function ProductOverviewTab({ product }: Props) {
       <Grid container spacing={2}>
         <Grid sx={{xs:4}}>
           <Paper sx={{ p: 2 }}>
-            <Typography color="text.secondary">Net Stock</Typography>
+            <Typography color="text.secondary">Forecast Quantity</Typography>
             <Typography variant="h6">
-              {stock.netStockPosition}
+              {stock.forecastQuantity}
             </Typography>
           </Paper>
         </Grid>
         <Grid sx={{xs:4}}>
           <Paper sx={{ p: 2 }}>
             <Typography color="text.secondary">
-              Projected @ Lead Time
+              Projected stock @ Lead Time
             </Typography>
             <Typography variant="h6">
-              {stock.projectedStockAtLeadTime}
+              {stock.netStockPosition}
             </Typography>
           </Paper>
         </Grid>

@@ -15,43 +15,79 @@ public static class StockLevelInitializer
     private static async Task CreatePfcWithinLeadTimeAgg(DataContext context, ILogger logger)
     {
         var sql = @"
-        CREATE OR ALTER VIEW dbo.PurchaseForecastWithinLeadTimeAgg AS
-        WITH RankedForecast AS (
+        CREATE OR ALTER VIEW dbo.PurchaseForecastWithinLeadTimeAgg
+        AS
+        WITH ForecastWindow AS (
+            SELECT
+                pol.ProductId,
+                CONVERT(date, SYSUTCDATETIME()) AS WindowStart,
+                DATEADD(DAY, pol.LeadTimeDays, CONVERT(date, SYSUTCDATETIME())) AS WindowEnd
+            FROM ProductInventoryPolicies pol
+        ),
+        WeightedForecast AS (
             SELECT
                 pf.ProductId,
                 pf.WeekIndex,
+                pf.WeekStartDate,
+                pf.WeekEndDate,
                 pf.ProjectedStock,
                 pf.RecommendedOrderQuantity,
                 pf.QuantityCommitted,
                 pf.QuantityOnOrder,
-                pf.ForecastQuantity,
 
+                -- Calculate overlapping days
+                DATEDIFF(
+                    DAY,
+                    CASE
+                        WHEN pf.WeekStartDate > fw.WindowStart THEN pf.WeekStartDate
+                        ELSE fw.WindowStart
+                    END,
+                    CASE
+                        WHEN pf.WeekEndDate < fw.WindowEnd THEN DATEADD(DAY, 1, pf.WeekEndDate)
+                        ELSE fw.WindowEnd
+                    END
+                ) AS OverlapDays,
+
+                pf.ForecastQuantity
+            FROM PurchaseForecasts pf
+            JOIN ForecastWindow fw
+                ON fw.ProductId = pf.ProductId
+            WHERE
+                pf.WeekEndDate > fw.WindowStart
+                AND pf.WeekStartDate < fw.WindowEnd
+        ),
+        RankedForecast AS (
+            SELECT
+                wf.ProductId,
+                wf.WeekIndex,
+                wf.ProjectedStock,
+                wf.RecommendedOrderQuantity,
+                wf.QuantityCommitted,
+                wf.QuantityOnOrder,
+
+                -- Weighted forecast
+                wf.ForecastQuantity * (wf.OverlapDays / 7.0) AS WeightedForecastQuantity,
+
+                -- Effective demand based on weighted forecast
                 CASE
-                    WHEN pf.ForecastQuantity > pf.QuantityCommitted
-                    THEN pf.ForecastQuantity
-                    ELSE pf.QuantityCommitted
+                    WHEN wf.ForecastQuantity * (wf.OverlapDays / 7.0) > wf.QuantityCommitted
+                    THEN wf.ForecastQuantity * (wf.OverlapDays / 7.0)
+                    ELSE wf.QuantityCommitted
                 END AS EffectiveDemand,
 
                 ROW_NUMBER() OVER (
-                    PARTITION BY pf.ProductId
-                    ORDER BY pf.WeekIndex DESC
+                    PARTITION BY wf.ProductId
+                    ORDER BY wf.WeekIndex DESC
                 ) AS rn
-            FROM PurchaseForecasts pf
-            JOIN ProductInventoryPolicies pol
-                ON pol.ProductId = pf.ProductId
-            WHERE pf.WeekStartDate <= DATEADD(
-                    DAY,
-                    pol.LeadTimeDays,
-                    CONVERT(date, SYSUTCDATETIME())
-                )
+            FROM WeightedForecast wf
         )
         SELECT
             ProductId,
-            SUM(RecommendedOrderQuantity) AS RecommendedOrderQuantity,
-            SUM(QuantityCommitted)        AS QuantityCommitted,
-            SUM(QuantityOnOrder)          AS QuantityOnOrder,
-            SUM(ForecastQuantity)         AS ForecastQuantity,
-            SUM(EffectiveDemand)          AS EffectiveDemand,
+            SUM(RecommendedOrderQuantity)        AS RecommendedOrderQuantity,
+            SUM(QuantityCommitted)               AS QuantityCommitted,
+            SUM(QuantityOnOrder)                 AS QuantityOnOrder,
+            SUM(WeightedForecastQuantity)        AS ForecastQuantity,
+            SUM(EffectiveDemand)                 AS EffectiveDemand,
             MAX(CASE WHEN rn = 1 THEN ProjectedStock END) AS ProjectedStockAtLeadTime
         FROM RankedForecast
         GROUP BY ProductId;
@@ -78,7 +114,6 @@ public static class StockLevelInitializer
                 QuantityOnOrder,
                 QuantityCommitted,
                 NetStockPosition,
-                ProjectedStockAtLeadTime,
                 ReorderPoint,
                 NeedsReorder,
                 RecommendedOrderQuantity,
@@ -86,7 +121,13 @@ public static class StockLevelInitializer
             )
             SELECT
                 p.Id,
-                0,0,0,0,0,0,0,0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
                 SYSUTCDATETIME()
             FROM Products p
             LEFT JOIN StockLevels sl ON sl.ProductId = p.Id
@@ -127,9 +168,6 @@ public static class StockLevelInitializer
 
                 sl.ForecastQuantity = 
                     ISNULL(pfc.ForecastQuantity, 0),
-
-                sl.ProjectedStockAtLeadTime =
-                    ISNULL(pfc.ProjectedStockAtLeadTime, 0),
 
                 sl.ReorderPoint =
                     pol.SafetyStock,

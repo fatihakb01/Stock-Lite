@@ -19,12 +19,10 @@ public class SalesAggregateConfiguration : IEntityTypeConfiguration<SalesAggrega
             .HasMaxLength(10);
 
         builder.Property(sa => sa.PeriodStartDate)
-            .IsRequired()
-            .HasColumnType("datetime2");
+            .IsRequired();
 
         builder.Property(sa => sa.PeriodEndDate)
-            .IsRequired()
-            .HasColumnType("datetime2");
+            .IsRequired();
 
         builder.Property(sa => sa.TotalQuantity)
             .IsRequired();

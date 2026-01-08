@@ -27,10 +27,6 @@ public class StockLevelConfiguration : IEntityTypeConfiguration<StockLevel>
             .IsRequired()
             .HasColumnType("decimal(15,2)");
 
-        builder.Property(s => s.ProjectedStockAtLeadTime)
-            .IsRequired()
-            .HasColumnType("decimal(15,2)");
-
         builder.Property(s => s.ReorderPoint)
             .IsRequired();
 

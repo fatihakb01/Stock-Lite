@@ -37,10 +37,10 @@ export default function ProductsPage() {
         display: "flex",
         flexDirection: "column",
         flexGrow: 1,
-        width: "100vw",      
-        maxWidth: "100vw",   
+        width: "95vw",      
+        maxWidth: "95vw",   
         overflowX: "hidden", 
-        p: 3,
+        p: 2,
       }}
     >
       {/* DataGrid Table */}

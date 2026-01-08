@@ -49,9 +49,6 @@ public class UpdatePurchaseOrder
             if (po.Status != PurchaseOrderStatus.Draft)
                 return Result<PurchaseOrderDto>.Failure("Only draft purchase orders can be updated", 400);
 
-            if (dto.ExpectedDeliveryDate.HasValue)
-                po.ExpectedDeliveryDate = dto.ExpectedDeliveryDate;
-
             foreach (var itemDto in dto.LineItems)
             {
                 var lineItem = po.LineItems.SingleOrDefault(li => li.ProductId == itemDto.ProductId);

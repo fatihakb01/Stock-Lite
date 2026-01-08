@@ -6,6 +6,7 @@ public class PurchaseOrderDto : BasePurchaseOrderDto
 {
     public Guid Id { get; set; }
     public PurchaseOrderStatus Status { get; set; }
+    public DateTime? ReceivedDate { get; set; }
     public ICollection<PurchaseOrderLineItemDto> LineItems { get; set; }
         = new List<PurchaseOrderLineItemDto>();
 }

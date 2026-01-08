@@ -18,14 +18,13 @@ public class PurchaseOrderConfiguration : IEntityTypeConfiguration<PurchaseOrder
                .IsRequired();
 
         builder.Property(po => po.OrderDate)
-               .IsRequired()
-               .HasColumnType("date");
+               .IsRequired();
 
-        builder.Property(po => po.ReceivedDate)
-               .HasColumnType("date");
+        builder.Property(po => po.ExpectedDeliveryDate);
 
-        builder.Property(po => po.ExpectedDeliveryDate)
-               .HasColumnType("date");
+        builder.Property(po => po.ReceivedDate);
+
+        builder.Property(po => po.ExpectedDeliveryDate);
 
         builder.HasOne(po => po.Company)
             .WithMany(c => c.PurchaseOrders)
