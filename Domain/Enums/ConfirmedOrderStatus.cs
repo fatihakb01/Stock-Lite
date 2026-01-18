@@ -1,3 +1,9 @@
 namespace Domain.Enums;
 
-public enum ConfirmedOrderStatus { Confirmed, PartiallyFulfilled, Fulfilled, Cancelled }
+public enum ConfirmedOrderStatus 
+{ 
+    Confirmed = 0, 
+    PartiallyFulfilled = 1, 
+    Fulfilled = 2, 
+    Cancelled = 3
+}
