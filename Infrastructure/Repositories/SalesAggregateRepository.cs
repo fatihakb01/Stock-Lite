@@ -38,20 +38,6 @@ public class SalesAggregateRepository
 
     public async Task InsertSalesAggregatesAsync(Guid companyId, IEnumerable<Guid>? productIds = null, Period? periodType = null)
     {
-        var paramCompany = new SqlParameter("@CompanyId", companyId);
-
-        var productIdsTable = new DataTable();
-        productIdsTable.Columns.Add("Id", typeof(Guid));
-        if (productIds != null)
-            foreach (var id in productIds)
-                productIdsTable.Rows.Add(id);
-
-        var paramProductIds = new SqlParameter("@ProductIds", productIdsTable)
-        {
-            TypeName = "dbo.GuidList",
-            SqlDbType = SqlDbType.Structured
-        };
-
         string procedureName = periodType switch
         {
             Period.Daily => "dbo.InsertDailySalesAggregates",
@@ -60,10 +46,27 @@ public class SalesAggregateRepository
             _ => "dbo.InsertSalesAggregates" 
         };
 
-        await _context.Database.ExecuteSqlAsync($"EXEC {procedureName} {paramCompany}, {paramProductIds}");
+        await ExecuteProcAsync(procedureName, companyId, productIds);
     }
 
     public async Task UpdateSalesAggregatesAsync(Guid companyId, IEnumerable<Guid>? productIds = null, Period? periodType = null)
+    {
+        string procedureName = periodType switch
+        {
+            Period.Daily => "dbo.UpdateDailySalesAggregates",
+            Period.Weekly => "dbo.UpdateWeeklySalesAggregates",
+            Period.Monthly => "dbo.UpdateMonthlySalesAggregates",
+            _ => "dbo.UpdateSalesAggregates"
+        };
+
+        await ExecuteProcAsync(procedureName, companyId, productIds);
+    }
+
+    private async Task ExecuteProcAsync(
+        string procName, 
+        Guid companyId, 
+        IEnumerable<Guid>? productIds
+    )
     {
         var paramCompany = new SqlParameter("@CompanyId", companyId);
 
@@ -79,14 +82,7 @@ public class SalesAggregateRepository
             SqlDbType = SqlDbType.Structured
         };
 
-        string procedureName = periodType switch
-        {
-            Period.Daily => "dbo.UpdateDailySalesAggregates",
-            Period.Weekly => "dbo.UpdateWeeklySalesAggregates",
-            Period.Monthly => "dbo.UpdateMonthlySalesAggregates",
-            _ => "dbo.UpdateSalesAggregates"
-        };
-
-        await _context.Database.ExecuteSqlAsync($"EXEC {procedureName} {paramCompany}, {paramProductIds}");
+        await _context.Database.ExecuteSqlAsync(
+            $"EXEC {procName} {paramCompany}, {paramProductIds}");
     }
 }

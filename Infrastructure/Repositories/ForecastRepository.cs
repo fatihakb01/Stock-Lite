@@ -51,21 +51,6 @@ public class ForecastRepository : Repository<Forecast>, IForecastRepository
 
     public async Task InsertForecastsAsync(Guid companyId, IEnumerable<Guid>? productIds = null, Period? periodType = null)
     {
-        var paramCompany = new SqlParameter("@CompanyId", companyId);
-
-        var productIdsTable = new DataTable();
-        productIdsTable.Columns.Add("Id", typeof(Guid));
-        if (productIds != null)
-            foreach (var id in productIds)
-                productIdsTable.Rows.Add(id);
-
-
-        var paramProductIds = new SqlParameter("@ProductIds", productIdsTable)
-        {
-            TypeName = "dbo.GuidList",
-            SqlDbType = SqlDbType.Structured
-        };
-
         string procedureName = periodType switch
         {
             Period.Daily => "dbo.InsertDailyForecasts",
@@ -74,25 +59,11 @@ public class ForecastRepository : Repository<Forecast>, IForecastRepository
             _ => "dbo.InsertForecasts" 
         };
 
-        await _context.Database.ExecuteSqlAsync($"EXEC {procedureName} {paramCompany}, {paramProductIds}");
+        await ExecuteProcAsync(procedureName, companyId, productIds);
     }
 
     public async Task UpdateForecastsAsync(Guid companyId, IEnumerable<Guid>? productIds = null, Period? periodType = null)
     {
-        var paramCompany = new SqlParameter("@CompanyId", companyId);
-
-        var productIdsTable = new DataTable();
-        productIdsTable.Columns.Add("Id", typeof(Guid));
-        if (productIds != null)
-            foreach (var id in productIds)
-                productIdsTable.Rows.Add(id);
-
-        var paramProductIds = new SqlParameter("@ProductIds", productIdsTable)
-        {
-            TypeName = "dbo.GuidList",
-            SqlDbType = SqlDbType.Structured
-        };
-
         string procedureName = periodType switch
         {
             Period.Daily => "dbo.UpdateDailyForecasts",
@@ -101,10 +72,19 @@ public class ForecastRepository : Repository<Forecast>, IForecastRepository
             _ => "dbo.UpdateForecasts" 
         };
 
-        await _context.Database.ExecuteSqlAsync($"EXEC {procedureName} {paramCompany}, {paramProductIds}");
+        await ExecuteProcAsync(procedureName, companyId, productIds);
     }
 
     public async Task DeleteForecastsAsync(Guid companyId, IEnumerable<Guid>? productIds = null)
+    {
+        await ExecuteProcAsync("dbo.DeletePastForecasts", companyId, productIds);
+    }
+
+    private async Task ExecuteProcAsync(
+        string procName, 
+        Guid companyId, 
+        IEnumerable<Guid>? productIds
+    )
     {
         var paramCompany = new SqlParameter("@CompanyId", companyId);
 
@@ -120,6 +100,7 @@ public class ForecastRepository : Repository<Forecast>, IForecastRepository
             SqlDbType = SqlDbType.Structured
         };
 
-        await _context.Database.ExecuteSqlAsync($"EXEC dbo.DeletePastForecasts {paramCompany}, {paramProductIds}");
+        await _context.Database.ExecuteSqlAsync(
+            $"EXEC {procName} {paramCompany}, {paramProductIds}");
     }
 }

@@ -57,21 +57,6 @@ public class ConfirmedOrderAggregateRepository
         IEnumerable<Guid>? productIds = null,
         Period? periodType = null)
     {
-        var paramCompany = new SqlParameter("@CompanyId", companyId);
-
-        var productIdsTable = new DataTable();
-        productIdsTable.Columns.Add("Id", typeof(Guid));
-
-        if (productIds != null)
-            foreach (var id in productIds)
-                productIdsTable.Rows.Add(id);
-
-        var paramProductIds = new SqlParameter("@ProductIds", productIdsTable)
-        {
-            TypeName = "dbo.GuidList",
-            SqlDbType = SqlDbType.Structured
-        };
-
         string procedureName = periodType switch
         {
             Period.Daily => "dbo.InsertDailyConfirmedOrderAggregates",
@@ -80,7 +65,7 @@ public class ConfirmedOrderAggregateRepository
             _ => "dbo.InsertConfirmedOrderAggregates"
         };
 
-        await _context.Database.ExecuteSqlAsync($"EXEC {procedureName} {paramCompany}, {paramProductIds}");
+        await ExecuteProcAsync(procedureName, companyId, productIds);
     }
 
     public async Task UpdateConfirmedOrderAggregatesAsync(
@@ -88,11 +73,27 @@ public class ConfirmedOrderAggregateRepository
         IEnumerable<Guid>? productIds = null,
         Period? periodType = null)
     {
+        string procedureName = periodType switch
+        {
+            Period.Daily => "dbo.UpdateDailyConfirmedOrderAggregates",
+            Period.Weekly => "dbo.UpdateWeeklyConfirmedOrderAggregates",
+            Period.Monthly => "dbo.UpdateMonthlyConfirmedOrderAggregates",
+            _ => "dbo.UpdateConfirmedOrderAggregates"
+        };
+
+        await ExecuteProcAsync(procedureName, companyId, productIds);
+    }
+
+    private async Task ExecuteProcAsync(
+        string procName, 
+        Guid companyId, 
+        IEnumerable<Guid>? productIds
+    )
+    {
         var paramCompany = new SqlParameter("@CompanyId", companyId);
 
         var productIdsTable = new DataTable();
         productIdsTable.Columns.Add("Id", typeof(Guid));
-
         if (productIds != null)
             foreach (var id in productIds)
                 productIdsTable.Rows.Add(id);
@@ -103,14 +104,7 @@ public class ConfirmedOrderAggregateRepository
             SqlDbType = SqlDbType.Structured
         };
 
-        string procedureName = periodType switch
-        {
-            Period.Daily => "dbo.UpdateDailyConfirmedOrderAggregates",
-            Period.Weekly => "dbo.UpdateWeeklyConfirmedOrderAggregates",
-            Period.Monthly => "dbo.UpdateMonthlyConfirmedOrderAggregates",
-            _ => "dbo.UpdateConfirmedOrderAggregates"
-        };
-
-        await _context.Database.ExecuteSqlAsync($"EXEC {procedureName} {paramCompany}, {paramProductIds}");
+        await _context.Database.ExecuteSqlAsync(
+            $"EXEC {procName} {paramCompany}, {paramProductIds}");
     }
 }
