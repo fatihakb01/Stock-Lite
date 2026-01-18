@@ -22,6 +22,7 @@ public class ProductController(IMediator mediator) : BaseApiController(mediator)
         return HandleResult(await Mediator.Send(new GetProducts.Query { }));
     }    
     
+    [Authorize(Policy = "AdminOrSuperAdmin")]
     [HttpPost]
     public async Task<ActionResult<ProductListDto>> CreateProduct(
         [FromBody] CreateProductDto productDto)
@@ -29,6 +30,7 @@ public class ProductController(IMediator mediator) : BaseApiController(mediator)
         return HandleResult(await Mediator.Send(new CreateProduct.Command { ProductDto = productDto }));
     }
 
+    [Authorize(Policy = "AdminOrSuperAdmin")]
     [HttpPut("{id}")]
     public async Task<ActionResult<ProductListDto>> EditProduct(Guid id,
         [FromBody] EditProductDto productDto)
@@ -40,6 +42,7 @@ public class ProductController(IMediator mediator) : BaseApiController(mediator)
         }));
     }
 
+    [Authorize(Policy = "SuperAdminOnly")]
     [HttpDelete("{id}")]
     public async Task<ActionResult<Unit>> DeleteProduct(Guid id)
     {
