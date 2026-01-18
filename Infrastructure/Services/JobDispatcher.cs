@@ -132,18 +132,6 @@ public class JobDispatcher(IServiceProvider provider, DataContext context) : IJo
             ? job.Target
             : $"dbo.{job.Target}";
 
-        // var exists = await _context.Database
-        //     .SqlQueryRaw<int>(
-        //         @"
-        //         SELECT COUNT(*) AS Value
-        //         FROM sys.procedures p
-        //         JOIN sys.schemas s ON p.schema_id = s.schema_id
-        //         WHERE s.name + '.' + p.name = @procName
-        //         ",
-        //         new SqlParameter("@procName", procName)
-        //     )
-        //     .SingleAsync(ct);
-
         var exists = await _context.Database
             .SqlQueryRaw<int>(
                 @"
@@ -155,7 +143,6 @@ public class JobDispatcher(IServiceProvider provider, DataContext context) : IJo
                 new SqlParameter("@procName", procName)
             )
             .SingleAsync(ct);
-
 
         if (exists == 0)
             throw new InvalidOperationException($"Stored procedure '{procName}' does not exist.");
