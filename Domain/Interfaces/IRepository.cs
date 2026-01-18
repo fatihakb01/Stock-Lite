@@ -8,6 +8,7 @@ public interface IRepository<T> where T : class
     Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<List<T>> GetAllAsync(CancellationToken cancellationToken);
     Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken);
+    void Update(T entity);
     void Remove(T entity);
     Task<bool> SaveChangesAsync(CancellationToken cancellationToken);
     Task<IEnumerable<T>> FindAsync(

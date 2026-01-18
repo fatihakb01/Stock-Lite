@@ -13,6 +13,8 @@ using Application.Entities.Core.ConfirmedOrders.DTOs;
 using Application.Entities.Derived.ConfirmedOrderAggregates.DTOs;
 using Application.Entities.Derived.StockLevels.DTOs;
 using Application.Entities.Derived.PurchaseForecasts.DTOs;
+using Application.Entities.Core.JobTasks.DTOs;
+using Application.Entities.Core.ScheduledJobs.DTOs;
 
 namespace Application.Core;
 
@@ -84,5 +86,20 @@ public class MappingProfiles : Profile
         CreateMap<LoginUserDto, User>();
         CreateMap<ConfirmEmailDto, User>();
         CreateMap<EditUserDto, User>();
+
+        // JobTask entity
+        CreateMap<JobTask, JobTaskDto>();
+        CreateMap<JobTask, JobTaskAndExecutionsDto>();
+        CreateMap<CreateJobTaskDto, JobTask>();
+        CreateMap<EditJobTaskDto, JobTask>();
+
+        // ScheduledJob entity
+        CreateMap<ScheduledJob, ScheduledJobDto>();
+        CreateMap<ScheduledJob, ScheduledJobAndExecutionsDto>();
+        CreateMap<CreateScheduledJobDto, ScheduledJob>();
+        CreateMap<EditScheduledJobDto, ScheduledJob>();
+
+        // JobExecution entity
+        CreateMap<JobExecution, JobExecutionDto>();
     }
 }

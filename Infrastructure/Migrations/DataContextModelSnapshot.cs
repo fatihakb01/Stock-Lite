@@ -122,6 +122,76 @@ namespace Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Domain.Entities.Core.JobExecution", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<DateTime?>("FinishedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ScheduledJobId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ScheduledJobId", "StartedAt");
+
+                    b.HasIndex("ScheduledJobId", "Status");
+
+                    b.ToTable("JobExecutions");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Core.JobTask", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("AllowManualTrigger")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("JobTaskKey")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("JobTaskKey")
+                        .IsUnique();
+
+                    b.ToTable("JobTasks");
+                });
+
             modelBuilder.Entity("Domain.Entities.Core.Product", b =>
                 {
                     b.Property<Guid>("Id")
@@ -265,6 +335,72 @@ namespace Infrastructure.Migrations
                             t.HasCheckConstraint("CK_PurchaseOrderLineItem_ReceivedQuantity", "[ReceivedQuantity] >= 0");
 
                             t.HasCheckConstraint("CK_PurchaseOrderLineItem_UnitCost", "[UnitCost] >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("Domain.Entities.Core.ScheduledJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("AllowManualTrigger")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("CalculationType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("ExecutionOrder")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ImportDataType")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("JobTaskId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("JobType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("PeriodType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Target")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobTaskId", "ExecutionOrder")
+                        .IsUnique();
+
+                    b.ToTable("ScheduledJobs", t =>
+                        {
+                            t.HasCheckConstraint("CK_ScheduledJob_Import_Requires_DataType_And_Source", "\r\n                (JobType <> 0) OR \r\n                (ImportDataType IS NOT NULL AND Source IS NOT NULL)\r\n                ");
+
+                            t.HasCheckConstraint("CK_ScheduledJob_StandardCalculation_Requires_CalculationType", "\r\n                ([JobType] <> 1) OR ([CalculationType] IS NOT NULL)\r\n                ");
+
+                            t.HasCheckConstraint("CK_ScheduledJob_Target_Only_For_Custom", "\r\n                ([JobType] = 2 AND [Target] IS NOT NULL)\r\n                OR ([JobType] <> 2 AND [Target] IS NULL)\r\n                ");
                         });
                 });
 
@@ -787,6 +923,28 @@ namespace Infrastructure.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Core.JobExecution", b =>
+                {
+                    b.HasOne("Domain.Entities.Core.ScheduledJob", "ScheduledJob")
+                        .WithMany("JobExecutions")
+                        .HasForeignKey("ScheduledJobId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ScheduledJob");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Core.JobTask", b =>
+                {
+                    b.HasOne("Domain.Entities.Core.Company", "Company")
+                        .WithMany("JobTasks")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+                });
+
             modelBuilder.Entity("Domain.Entities.Core.Product", b =>
                 {
                     b.HasOne("Domain.Entities.Core.Company", "Company")
@@ -837,6 +995,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("PurchaseOrder");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Core.ScheduledJob", b =>
+                {
+                    b.HasOne("Domain.Entities.Core.JobTask", "JobTask")
+                        .WithMany("Jobs")
+                        .HasForeignKey("JobTaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("JobTask");
                 });
 
             modelBuilder.Entity("Domain.Entities.Core.Transaction", b =>
@@ -990,6 +1159,8 @@ namespace Infrastructure.Migrations
                 {
                     b.Navigation("ConfirmedOrders");
 
+                    b.Navigation("JobTasks");
+
                     b.Navigation("Products");
 
                     b.Navigation("PurchaseOrders");
@@ -1002,6 +1173,11 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Core.ConfirmedOrder", b =>
                 {
                     b.Navigation("LineItems");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Core.JobTask", b =>
+                {
+                    b.Navigation("Jobs");
                 });
 
             modelBuilder.Entity("Domain.Entities.Core.Product", b =>
@@ -1028,6 +1204,11 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Core.PurchaseOrder", b =>
                 {
                     b.Navigation("LineItems");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Core.ScheduledJob", b =>
+                {
+                    b.Navigation("JobExecutions");
                 });
 
             modelBuilder.Entity("Domain.Entities.Core.Transaction", b =>

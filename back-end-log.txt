@@ -11,6 +11,7 @@ Git commands
 - git push origin main
 3. Delete branch
 - git branch -d <branch_name>
+- git push origin --delete <branch_name> (on Github)
 
 Set-up project
 - dotnet new sln = creating a solution file template.

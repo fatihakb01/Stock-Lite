@@ -28,7 +28,8 @@ public class ConfirmedOrderAggregatesConfiguration : IEntityTypeConfiguration<Co
             .IsRequired();
 
         builder.Property(co => co.TotalConfirmedRevenue)
-            .IsRequired();
+            .IsRequired()
+            .HasColumnType("decimal(18,2)");
 
         builder.ToTable(co =>
         {

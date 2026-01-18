@@ -11,6 +11,12 @@ using Domain.Interfaces;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Resend;
+using Infrastructure.Services.Calculations;
+using Domain.Services.Scheduler.Calculations;
+using Domain.Services.Scheduler;
+using Domain.Services.Scheduler.Imports;
+using Infrastructure.Services.Imports;
+using Infrastructure.Services.Imports.Handlers;
 
 namespace Infrastructure.Extensions;
 
@@ -79,12 +85,32 @@ public static class DependencyInjection
         services.AddScoped<IPurchaseForecastRepository, PurchaseForecastRepository>();
         services.AddScoped<IStockLevelRepository, StockLevelRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IJobTaskRepository, JobTaskRepository>();
+        services.AddScoped<IScheduledJobRepository, ScheduledJobRepository>();
+        services.AddScoped<IJobExecutionRepository, JobExecutionRepository>();
 
         // --- Internal Services ---
         services.AddScoped<ITokenService, TokenService>();
         
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+        services.AddScoped<IStockLevelCalculation, StockLevelCalculation>();
+        services.AddScoped<ISalesAggregateCalculation, SalesAggregateCalculation>();
+        services.AddScoped<IPurchaseForecastCalculation, PurchaseForecastCalculation>();
+        services.AddScoped<IForecastCalculation, ForecastCalculation>();
+        services.AddScoped<IConfirmedOrderAggregateCalculation, ConfirmedOrderAggregateCalculation>();
+
+        services.AddScoped<IImportHandler, ProductImportHandler>();
+        services.AddScoped<IImportHandler, TransactionImportHandler>();
+        services.AddScoped<IImportHandler, ConfirmedOrderImportHandler>();
+        services.AddScoped<IImportHandler, PurchaseOrderImportHandler>();
+
+        services.AddScoped<IImportCoordinator, ImportCoordinator>();
+
+        services.AddScoped<IJobDispatcher, JobDispatcher>();
+        services.AddScoped<IJobRunnerService, JobRunnerService>();
+        services.AddScoped<IJobTaskRunnerService, JobTaskRunnerService>();
 
         // --- External Services ---
         services.AddOptions();

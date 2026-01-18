@@ -32,6 +32,11 @@ public class Repository<T>(DataContext context)
         context.Set<T>().Remove(entity);
     }
 
+    public void Update(T entity)
+    {
+        context.Set<T>().Update(entity);
+    }
+
     public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken)
     {
         return await context.SaveChangesAsync(cancellationToken) > 0;

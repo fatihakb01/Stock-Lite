@@ -2,6 +2,8 @@ using System.Security.Claims;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Http;
 
+namespace Infrastructure.Services;
+
 public class CurrentUserService : ICurrentUserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
