@@ -64,7 +64,7 @@ internal static class ConfirmedOrderImportObjects
                 MIN(s.ExpectedDeliveryDate),
                 MIN(s.ReceivedDate),
                 CASE 
-                    WHEN SUM(s.Quantity - s.SoldQuantity) = s.Quantity
+                    WHEN SUM((s.Quantity - s.SoldQuantity) % s.Quantity) = 0
                         THEN 0
                     WHEN SUM(s.Quantity - s.SoldQuantity) > 0
                         THEN 1   
@@ -98,7 +98,7 @@ internal static class ConfirmedOrderImportObjects
                     MIN(ExpectedDeliveryDate) AS ExpectedDeliveryDate,
                     MIN(ReceivedDate) AS ReceivedDate,
                     CASE 
-                        WHEN SUM(s.Quantity - s.SoldQuantity) = s.Quantity
+                        WHEN SUM((s.Quantity - s.SoldQuantity) % s.Quantity) = 0
                             THEN 0
                         WHEN SUM(s.Quantity - s.SoldQuantity) > 0
                             THEN 1   
@@ -106,7 +106,7 @@ internal static class ConfirmedOrderImportObjects
                             THEN 2
                         ELSE 3
                     END AS Status
-                FROM dbo.StagingConfirmedOrders
+                FROM dbo.StagingConfirmedOrders s
                 WHERE CompanyId = @CompanyId
                 GROUP BY CompanyId, OrderNumber
             ) s ON s.CompanyId = o.CompanyId AND s.OrderNumber = o.OrderNumber;

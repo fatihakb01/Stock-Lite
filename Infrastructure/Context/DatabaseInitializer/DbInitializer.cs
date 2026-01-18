@@ -1,3 +1,4 @@
+using Infrastructure.Context.DatabaseInitializer.Scheduler;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -15,6 +16,7 @@ namespace Infrastructure.Context.DatabaseInitializer
             await ConfirmedOrderAggregatesInitializer.InitializeAsync(context, logger); 
             await PurchaseForecastInitializer.InitializeAsync(context, logger);
             await StockLevelInitializer.InitializeAsync(context, logger);   
+            await SchedulerImportInitializer.InitializeAsync(context, logger);
         }
     }
 }

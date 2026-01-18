@@ -16,17 +16,20 @@ public class PurchaseOrderImportObjects
         logger.LogInformation("Ensuring dbo.StagingPurchaseOrders exists...");
 
         var sql = @"
-        CREATE TABLE dbo.StagingPurchaseOrders
-        (
-            CompanyId UNIQUEIDENTIFIER NOT NULL,
-            OrderNumber NVARCHAR(50) NOT NULL,
-            SKU NVARCHAR(50) NOT NULL,
-            OrderDate DATE NOT NULL,
-            ExpectedDeliveryDate DATE NOT NULL,
-            ReceivedDate DATE NULL,
-            Quantity INT NOT NULL,
-            ReceivedQuantity INT NOT NULL
-        );
+        IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'StagingPurchaseOrders')
+        BEGIN
+            CREATE TABLE dbo.StagingPurchaseOrders
+            (
+                CompanyId UNIQUEIDENTIFIER NOT NULL,
+                OrderNumber NVARCHAR(50) NOT NULL,
+                SKU NVARCHAR(50) NOT NULL,
+                OrderDate DATE NOT NULL,
+                ExpectedDeliveryDate DATE NOT NULL,
+                ReceivedDate DATE NULL,
+                Quantity INT NOT NULL,
+                ReceivedQuantity INT NOT NULL
+            );
+        END
         ";
 
         await context.Database.ExecuteSqlRawAsync(sql);
@@ -62,14 +65,14 @@ public class PurchaseOrderImportObjects
                 MIN(s.ExpectedDeliveryDate),
                 MIN(s.ReceivedDate),
                 CASE 
-                    WHEN SUM(s.Quantity - s.SoldQuantity) = s.Quantity
+                    WHEN SUM((s.Quantity - s.ReceivedQuantity) % s.Quantity) = 0
                         THEN 0
-                    WHEN SUM(s.Quantity - s.SoldQuantity) > 0
+                    WHEN SUM(s.Quantity - s.ReceivedQuantity) > 0
                         THEN 2
-                    WHEN SUM(s.Quantity - s.SoldQuantity) = 0
+                    WHEN SUM(s.Quantity - s.ReceivedQuantity) = 0
                         THEN 3
                     ELSE 4
-                END
+                END AS Status
             FROM dbo.StagingPurchaseOrders s
             WHERE s.CompanyId = @CompanyId
             AND NOT EXISTS (
@@ -96,15 +99,15 @@ public class PurchaseOrderImportObjects
                     MIN(ExpectedDeliveryDate) AS ExpectedDeliveryDate,
                     MIN(ReceivedDate) AS ReceivedDate,
                     CASE 
-                        WHEN SUM(s.Quantity - s.SoldQuantity) = s.Quantity
+                        WHEN SUM((s.Quantity - s.ReceivedQuantity) % s.Quantity) = 0
                             THEN 0
-                        WHEN SUM(s.Quantity - s.SoldQuantity) > 0
+                        WHEN SUM(s.Quantity - s.ReceivedQuantity) > 0
                             THEN 2
-                        WHEN SUM(s.Quantity - s.SoldQuantity) = 0
+                        WHEN SUM(s.Quantity - s.ReceivedQuantity) = 0
                             THEN 3
                         ELSE 4
                     END AS Status
-                FROM dbo.StagingPurchaseOrders
+                FROM dbo.StagingPurchaseOrders s
                 WHERE CompanyId = @CompanyId
                 GROUP BY CompanyId, OrderNumber
             ) s ON s.CompanyId = o.CompanyId

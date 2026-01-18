@@ -1,3 +1,9 @@
+Debugger
+1. Start Docker container
+2. In the terminal, navigate to the API folder and enter 'dotnet watch run'.
+3. In VsCode, go to the 'Run and Debug section'
+4. Select 'C#: Launch Startup Project' and start debugging.
+
 Git commands
 1. Create seperate branch and commit
 - git checkout -b feature/auth

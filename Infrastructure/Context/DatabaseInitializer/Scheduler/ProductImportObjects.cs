@@ -91,7 +91,7 @@ public class ProductImportObjects
             WHERE p.CompanyId = @CompanyId;
 
             -- Insert missing inventory policies
-            INSERT INTO ProductInventoryPolicy
+            INSERT INTO ProductInventoryPolicies
             (
                 ProductId,
                 LeadTimeDays,
@@ -111,7 +111,7 @@ public class ProductImportObjects
             JOIN Products p
                 ON p.CompanyId = s.CompanyId
                 AND p.SKU = s.SKU
-            LEFT JOIN ProductInventoryPolicy ip
+            LEFT JOIN ProductInventoryPolicies ip
                 ON ip.ProductId = p.Id
             WHERE s.CompanyId = @CompanyId
             AND ip.ProductId IS NULL;
@@ -124,7 +124,7 @@ public class ProductImportObjects
                 ip.OrderIncrementQuantity = ISNULL(s.OrderIncrementQuantity, 1),
                 ip.SafetyStock = s.SafetyStock,
                 ip.StockAdjustment = ISNULL(s.StockAdjustment, 0)
-            FROM ProductInventoryPolicy ip
+            FROM ProductInventoryPolicies ip
             JOIN Products p ON p.Id = ip.ProductId
             JOIN dbo.StagingProducts s
                 ON s.CompanyId = p.CompanyId

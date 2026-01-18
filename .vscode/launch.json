@@ -1,22 +1,4 @@
 {
   "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "API (.NET Launch)",
-      "type": "coreclr",
-      "request": "launch",
-      "preLaunchTask": "build",
-      "program": "${workspaceFolder}/API/bin/Debug/net9.0/API.dll",
-      "args": [],
-      "cwd": "${workspaceFolder}/API",
-      "stopAtEntry": false,
-      "serverReadyAction": {
-        "action": "openExternally",
-        "pattern": "Now listening on: (https?://\\S+)"
-      },
-      "env": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    }
-  ]
+  "configurations": []
 }

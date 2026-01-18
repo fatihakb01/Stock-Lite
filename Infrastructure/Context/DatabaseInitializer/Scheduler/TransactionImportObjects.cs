@@ -16,16 +16,19 @@ public class TransactionImportObjects
         logger.LogInformation("Ensuring dbo.StagingTransactions exists...");
 
         var sql = @"
-        CREATE TABLE dbo.StagingTransactions
-        (
-            CompanyId UNIQUEIDENTIFIER NOT NULL,
-            TransactionId NVARCHAR(50) NOT NULL,
-            SKU NVARCHAR(50) NOT NULL,
-            TransactionDate DATE NOT NULL,
-            PaymentMethod NVARCHAR(50) NULL,
-            Notes NVARCHAR(200) NULL,
-            Quantity INT NOT NULL
-        );
+        IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'StagingTransactions')
+        BEGIN
+            CREATE TABLE dbo.StagingTransactions
+            (
+                CompanyId UNIQUEIDENTIFIER NOT NULL,
+                TransactionId NVARCHAR(50) NOT NULL,
+                SKU NVARCHAR(50) NOT NULL,
+                TransactionDate DATE NOT NULL,
+                PaymentMethod NVARCHAR(50) NULL,
+                Notes NVARCHAR(200) NULL,
+                Quantity INT NOT NULL
+            );
+        END
         ";
 
         await context.Database.ExecuteSqlRawAsync(sql);
@@ -84,7 +87,7 @@ public class TransactionImportObjects
             FROM Transactions t
             JOIN (
                 SELECT
-                    CompanyId,
+                    s.CompanyId,
                     TransactionId,
                     MIN(TransactionDate) AS TransactionDate,
                     MIN(ISNULL(PaymentMethod, '')) AS PaymentMethod,
@@ -94,13 +97,13 @@ public class TransactionImportObjects
                 JOIN Products p
                     ON p.SKU = s.SKU
                     AND p.CompanyId = s.CompanyId
-                WHERE CompanyId = @CompanyId
-                GROUP BY CompanyId, TransactionId
+                WHERE s.CompanyId = @CompanyId
+                GROUP BY s.CompanyId, TransactionId
             ) s ON s.CompanyId = t.CompanyId
             AND s.TransactionId = t.TransactionId;
 
             -- Insert missing line items
-            INSERT INTO TransactionLineItem
+            INSERT INTO TransactionLineItems
             (
                 TransactionId,
                 ProductId,
@@ -119,7 +122,7 @@ public class TransactionImportObjects
             JOIN Transactions t
                 ON t.TransactionId = s.TransactionId
                 AND t.CompanyId = s.CompanyId
-            LEFT JOIN TransactionLineItem li
+            LEFT JOIN TransactionLineItems li
                 ON li.TransactionId = t.Id
                 AND li.ProductId = p.Id
             WHERE s.CompanyId = @CompanyId
@@ -130,7 +133,7 @@ public class TransactionImportObjects
             SET
                 li.Quantity = s.Quantity,
                 li.UnitPrice = p.Price
-            FROM TransactionLineItem li
+            FROM TransactionLineItems li
             JOIN Transactions t ON t.Id = li.TransactionId
             JOIN Products p ON p.Id = li.ProductId
             JOIN dbo.StagingTransactions s
