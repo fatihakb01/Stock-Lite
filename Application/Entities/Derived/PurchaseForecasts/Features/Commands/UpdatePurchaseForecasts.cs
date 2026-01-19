@@ -1,5 +1,6 @@
 using Application.Core;
 using Domain.Interfaces;
+using Domain.Services.Scheduler.Calculations;
 using MediatR;
 
 namespace Application.Entities.Derived.PurchaseForecasts.Features.Commands;
@@ -12,15 +13,14 @@ public class UpdatePurchaseForecasts
     }
 
     public class Handler(
-        IPurchaseForecastRepository purchaseForecastRepository,
+        IPurchaseForecastCalculation purchaseForecastCalculation,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<Unit>>
     {
 
-        public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
-            await purchaseForecastRepository.InsertPurchaseForecastsAsync(currentUser.CompanyId, request.ProductIds);
-            await purchaseForecastRepository.UpdatePurchaseForecastsAsync(currentUser.CompanyId, request.ProductIds);
+            await purchaseForecastCalculation.RunAsync(currentUser.CompanyId, request.ProductIds, ct);
 
             return Result<Unit>.Success(Unit.Value);
         }

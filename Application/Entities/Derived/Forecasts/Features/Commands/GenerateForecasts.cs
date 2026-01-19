@@ -1,6 +1,7 @@
 using Application.Core;
 using Domain.Enums;
 using Domain.Interfaces;
+using Domain.Services.Scheduler.Calculations;
 using MediatR;
 
 namespace Application.Entities.Derived.Forecasts.Features.Commands;
@@ -14,7 +15,7 @@ public class GenerateForecasts
     }
 
     public class Handler(
-        IForecastRepository forecastRepo,
+        IForecastCalculation forecastCalculation,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<Unit>>
     {
@@ -31,8 +32,7 @@ public class GenerateForecasts
             }
 
             // Run aggregation
-            await forecastRepo.InsertForecastsAsync(currentUser.CompanyId, request.ProductIds, period);
-            await forecastRepo.UpdateForecastsAsync(currentUser.CompanyId, request.ProductIds, period);
+            await forecastCalculation.RunAsync(currentUser.CompanyId, request.ProductIds, period, ct);
 
             return Result<Unit>.Success(Unit.Value);
         }

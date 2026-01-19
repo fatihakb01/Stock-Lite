@@ -1,5 +1,6 @@
 using Application.Core;
 using Domain.Interfaces;
+using Domain.Services.Scheduler.Calculations;
 using MediatR;
 
 namespace Application.Entities.Derived.StockLevels.Features.Commands;
@@ -12,15 +13,14 @@ public class UpdateStockLevels
     }
 
     public class Handler(
-        IStockLevelRepository stockLevelRepository,
+        IStockLevelCalculation stockLevelCalculation,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<Unit>>
     {
 
-        public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
-            await stockLevelRepository.InsertStockLevelsAsync(currentUser.CompanyId, request.ProductIds);
-            await stockLevelRepository.UpdateStockLevelsAsync(currentUser.CompanyId, request.ProductIds);
+            await stockLevelCalculation.RunAsync(currentUser.CompanyId, request.ProductIds, ct);
 
             return Result<Unit>.Success(Unit.Value);
         }

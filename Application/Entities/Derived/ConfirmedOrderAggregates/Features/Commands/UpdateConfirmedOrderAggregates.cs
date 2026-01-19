@@ -1,6 +1,7 @@
 using Application.Core;
 using Domain.Enums;
 using Domain.Interfaces;
+using Domain.Services.Scheduler.Calculations;
 using MediatR;
 
 namespace Application.Entities.Derived.ConfirmedOrderAggregates.Features.Commands;
@@ -14,7 +15,7 @@ public class UpdateConfirmedOrderAggregates
     }
 
     public class Handler(
-        IConfirmedOrderAggregateRepository aggregateRepo,
+        IConfirmedOrderAggregateCalculation aggregateCalculation,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<Unit>>
     {
@@ -33,16 +34,11 @@ public class UpdateConfirmedOrderAggregates
                     );
             }
 
-            await aggregateRepo.InsertConfirmedOrderAggregatesAsync(
+            await aggregateCalculation.RunAsync(
                 currentUser.CompanyId,
                 request.ProductIds,
-                period
-            );
-
-            await aggregateRepo.UpdateConfirmedOrderAggregatesAsync(
-                currentUser.CompanyId,
-                request.ProductIds,
-                period
+                period,
+                ct
             );
 
             return Result<Unit>.Success(Unit.Value);

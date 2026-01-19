@@ -1,7 +1,7 @@
 using Application.Core;
-using Domain.Entities.Core;
 using Domain.Enums;
 using Domain.Interfaces;
+using Domain.Services.Scheduler.Calculations;
 using MediatR;
 
 namespace Application.Entities.Derived.SalesAggregates.Features.Commands;
@@ -15,7 +15,7 @@ public class UpdateSalesAggregates
     }
 
     public class Handler(
-        ISalesAggregateRepository aggregateRepo,
+        ISalesAggregateCalculation salesAggregateCalculation,
         ICurrentUserService currentUser
     )
         : IRequestHandler<Command, Result<Unit>>
@@ -33,8 +33,7 @@ public class UpdateSalesAggregates
             }
 
             // Run aggregation
-            await aggregateRepo.InsertSalesAggregatesAsync(currentUser.CompanyId, request.ProductIds, period);
-            await aggregateRepo.UpdateSalesAggregatesAsync(currentUser.CompanyId, request.ProductIds, period);
+            await salesAggregateCalculation.RunAsync(currentUser.CompanyId, request.ProductIds, period, ct);
 
             return Result<Unit>.Success(Unit.Value);
         }
