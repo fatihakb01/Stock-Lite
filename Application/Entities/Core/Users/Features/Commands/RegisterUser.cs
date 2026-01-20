@@ -3,7 +3,8 @@ using Application.Entities.Core.Users.DTOs;
 using AutoMapper;
 using Domain.Entities.Core;
 using Domain.Enums;
-using Domain.Interfaces;
+using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Users;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 

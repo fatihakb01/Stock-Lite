@@ -2,7 +2,8 @@ using Application.Core;
 using Application.Entities.Core.ConfirmedOrders.DTOs;
 using AutoMapper;
 using Domain.Entities.Core;
-using Domain.Interfaces;
+using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Users;
 using MediatR;
 
 namespace Application.Entities.Core.ConfirmedOrders.Features.Queries;

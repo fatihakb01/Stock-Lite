@@ -1,6 +1,6 @@
 using Application.Core;
 using Domain.Entities.Core;
-using Domain.Interfaces;
+using Domain.Interfaces.Repositories;
 using MediatR;
 
 namespace Application.Entities.Core.Users.Features.Commands;

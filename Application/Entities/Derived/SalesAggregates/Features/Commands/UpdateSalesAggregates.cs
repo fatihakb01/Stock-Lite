@@ -1,7 +1,7 @@
 using Application.Core;
 using Domain.Enums;
-using Domain.Interfaces;
-using Domain.Services.Scheduler.Calculations;
+using Domain.Interfaces.Services.Scheduler.Calculations;
+using Domain.Interfaces.Services.Users;
 using MediatR;
 
 namespace Application.Entities.Derived.SalesAggregates.Features.Commands;

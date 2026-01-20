@@ -1,7 +1,7 @@
 using Application.Core;
 using Application.Entities.Core.Users.DTOs;
 using AutoMapper;
-using Domain.Interfaces;
+using Domain.Interfaces.Repositories;
 using MediatR;
 
 namespace Application.Entities.Core.Users.Features.Queries;

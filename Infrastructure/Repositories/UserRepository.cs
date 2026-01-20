@@ -1,5 +1,5 @@
 using Domain.Entities.Core;
-using Domain.Interfaces;
+using Domain.Interfaces.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;

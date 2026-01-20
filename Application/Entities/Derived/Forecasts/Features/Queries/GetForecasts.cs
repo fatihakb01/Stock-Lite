@@ -3,7 +3,8 @@ using Application.Entities.Derived.Forecasts.DTOs;
 using AutoMapper;
 using Domain.Entities.Core;
 using Domain.Enums;
-using Domain.Interfaces;
+using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Users;
 using MediatR;
 
 namespace Application.Entities.Derived.Forecasts.Features.Queries;

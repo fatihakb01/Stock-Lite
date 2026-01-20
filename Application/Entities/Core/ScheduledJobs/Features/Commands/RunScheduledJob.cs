@@ -1,6 +1,7 @@
 using Application.Core;
-using Domain.Interfaces;
-using Domain.Services.Scheduler;
+using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Scheduler;
+using Domain.Interfaces.Services.Users;
 using MediatR;
 
 namespace Application.Entities.Core.ScheduledJobs.Features.Commands;

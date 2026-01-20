@@ -1,10 +1,11 @@
 using Application.Core;
 using Application.Entities.Core.PurchaseOrders.DTOs;
 using AutoMapper;
-using Domain.Interfaces;
 using MediatR;
 using Domain.Enums;
 using Domain.Entities.Core;
+using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Users;
 
 namespace Application.Entities.Core.PurchaseOrders.Features.Commands;
 

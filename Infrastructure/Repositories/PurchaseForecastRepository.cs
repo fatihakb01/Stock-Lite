@@ -1,6 +1,6 @@
 using System.Data;
 using Domain.Entities.Derived;
-using Domain.Interfaces;
+using Domain.Interfaces.Repositories;
 using Infrastructure.Context;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;

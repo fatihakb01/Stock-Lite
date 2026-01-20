@@ -1,6 +1,6 @@
 using Application.Core;
 using Application.Entities.Core.Users.DTOs;
-using Domain.Interfaces;
+using Domain.Interfaces.Repositories;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 

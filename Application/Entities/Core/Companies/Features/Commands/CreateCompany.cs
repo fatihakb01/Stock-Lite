@@ -2,7 +2,7 @@ using Application.Core;
 using Application.Entities.Core.Companies.DTOs;
 using AutoMapper;
 using Domain.Entities.Core;
-using Domain.Interfaces;
+using Domain.Interfaces.Repositories;
 using MediatR;
 
 namespace Application.Entities.Core.Companies.Features.Commands;

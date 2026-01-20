@@ -7,16 +7,18 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Domain.Interfaces;
 using Infrastructure.Repositories;
-using Infrastructure.Services;
 using Resend;
-using Infrastructure.Services.Calculations;
-using Domain.Services.Scheduler.Calculations;
-using Domain.Services.Scheduler;
-using Domain.Services.Scheduler.Imports;
-using Infrastructure.Services.Imports;
-using Infrastructure.Services.Imports.Handlers;
+using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Scheduler.Imports;
+using Domain.Interfaces.Services.Scheduler.Calculations;
+using Domain.Interfaces.Services.Scheduler;
+using Infrastructure.Services.Scheduler.Imports.Handlers;
+using Infrastructure.Services.Scheduler.Calculations;
+using Infrastructure.Services.Users;
+using Domain.Interfaces.Services.Users;
+using Infrastructure.Services.Scheduler.Imports;
+using Infrastructure.Services.Scheduler;
 
 namespace Infrastructure.Extensions;
 

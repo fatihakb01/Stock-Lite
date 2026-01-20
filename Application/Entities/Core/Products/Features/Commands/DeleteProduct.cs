@@ -1,6 +1,7 @@
 using Application.Core;
 using Domain.Entities.Core;
-using Domain.Interfaces;
+using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Users;
 using MediatR;
 
 namespace Application.Entities.Core.Products.Features.Commands;
@@ -12,7 +13,10 @@ public class DeleteProduct
         public Guid Id { get; set; }
     }
 
-    public class Handler(IRepository<Product> repository, ICurrentUserService currentUser)
+    public class Handler(
+        IRepository<Product> repository, 
+        ICurrentUserService currentUser
+    )
         : IRequestHandler<Command, Result<Unit>>
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)

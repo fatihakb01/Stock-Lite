@@ -1,0 +1,11 @@
+using Domain.Entities.Derived;
+using Domain.Enums;
+
+namespace Domain.Interfaces.Repositories;
+
+public interface ISalesAggregateRepository : IRepository<SalesAggregate>
+{
+    Task InsertSalesAggregatesAsync(Guid companyId, IEnumerable<Guid>? productIds = null, Period? periodType = null);
+    Task UpdateSalesAggregatesAsync(Guid companyId, IEnumerable<Guid>? productIds = null, Period? periodType = null);
+    Task<IEnumerable<SalesAggregate>> GetByProductIdAsync(Guid productId, Period periodType);
+}
