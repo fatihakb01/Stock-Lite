@@ -380,8 +380,9 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int?>("PeriodType")
-                        .HasColumnType("int");
+                    b.Property<string>("PeriodType")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("Source")
                         .HasColumnType("nvarchar(max)");

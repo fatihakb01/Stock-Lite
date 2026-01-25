@@ -20,6 +20,10 @@ public class ScheduledJobConfiguration : IEntityTypeConfiguration<ScheduledJob>
         builder.Property(x => x.JobType)
             .IsRequired();
 
+        builder.Property(x => x.PeriodType)
+            .HasConversion<string>()
+            .HasMaxLength(10);
+
         builder.Property(x => x.IsArchived)
             .IsRequired();
 

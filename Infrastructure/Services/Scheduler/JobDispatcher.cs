@@ -2,8 +2,8 @@ using Domain.Entities.Core;
 using Domain.Enums;
 using Domain.Interfaces.Services.Scheduler;
 using Domain.Interfaces.Services.Scheduler.Calculations;
+using Domain.Interfaces.Services.Scheduler.Imports;
 using Infrastructure.Context;
-using Infrastructure.Services.Scheduler.Imports;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,7 +50,7 @@ public class JobDispatcher(IServiceProvider provider, DataContext context) : IJo
         using var scope = _provider.CreateScope();
 
         var coordinator = scope.ServiceProvider
-            .GetRequiredService<ImportCoordinator>();
+            .GetRequiredService<IImportCoordinator>();
 
         await coordinator.RunAsync(
             job.ImportDataType.Value,

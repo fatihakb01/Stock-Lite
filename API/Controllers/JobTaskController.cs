@@ -1,6 +1,7 @@
 using Application.Entities.Core.JobTasks.DTOs;
 using Application.Entities.Core.JobTasks.Features.Commands;
 using Application.Entities.Core.JobTasks.Features.Queries;
+using Application.Entities.Core.ScheduledJobs.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +30,7 @@ public class JobTaskController(IMediator mediator) : BaseApiController(mediator)
     }
 
     [HttpGet("history")]
-    public async Task<ActionResult<List<JobTaskAndExecutionsDto>>> GetRecentHistory()
+    public async Task<ActionResult<List<JobExecutionDto>>> GetRecentHistory()
     {
         return HandleResult(await Mediator.Send(new GetRecentHistory.Query()));
     }
