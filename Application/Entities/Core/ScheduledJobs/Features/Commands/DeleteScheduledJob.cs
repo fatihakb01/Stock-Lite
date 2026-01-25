@@ -19,17 +19,15 @@ public class DeleteScheduledJob
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
-            var scheduledJobs = await repository.FindAsync(x =>
+            var scheduledJobs = await repository.ExistsAsync(x =>
                 x.Id == request.Id && x.JobTask.CompanyId == currentUser.CompanyId,
                 ct
             );
-            var scheduledJob = scheduledJobs.SingleOrDefault();
 
-            if (scheduledJob == null)
+            if (!scheduledJobs)
                 return Result<Unit>.Failure("ScheduledJob not found", 404);
 
-            repository.Remove(scheduledJob);
-
+            await repository.DeleteScheduledJobAsync(request.Id, ct);
             var result = await repository.SaveChangesAsync(ct);
             
             if (!result)

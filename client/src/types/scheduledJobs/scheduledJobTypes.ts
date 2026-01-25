@@ -15,6 +15,10 @@ export type ScheduledJob = {
     executionOrder: number
 };
 
+export type ReorderScheduledJobsDto = {
+    orderedScheduledJobIds: string[]
+};
+
 export type ScheduledJobExecution = {
   jobTaskName: string,
   scheduledJobName: string,

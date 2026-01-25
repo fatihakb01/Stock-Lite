@@ -23,9 +23,9 @@ public class GetJobTasks
         public async Task<Result<List<JobTaskDto>>> Handle(Query request, CancellationToken ct)
         {
             var jobTasks = await repository.FindAsync(x =>
-                x.CompanyId == currentUser.CompanyId && !x.IsArchived,
+                x.CompanyId == currentUser.CompanyId,
                 ct,
-                x => x.Jobs
+                x => x.Jobs.OrderBy(x => x.ExecutionOrder)
             );
 
             if (!jobTasks.Any())

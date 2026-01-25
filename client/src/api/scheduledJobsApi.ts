@@ -1,6 +1,7 @@
 import type {   
     CreateScheduledJobDto, 
     EditScheduledJobDto, 
+    ReorderScheduledJobsDto, 
     ScheduledJob,
     ScheduledJobExecution
 } from "../types/scheduledJobs/scheduledJobTypes";
@@ -18,6 +19,11 @@ export const GetScheduledJobHistory = async (id: string) : Promise<ScheduledJobE
 
 export const RunScheduledJob = async (id: string) : Promise<void> => {
     const res = await api.post(`/scheduledjob/${id}`);
+    return res.data;
+}
+
+export const ReorderScheduledJobs = async (dto: ReorderScheduledJobsDto) : Promise<void> => {
+    const res = await api.post('scheduledjob/order', dto);
     return res.data;
 }
 

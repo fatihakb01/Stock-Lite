@@ -24,10 +24,9 @@ public class GetJobTask
         {
             var jobTasks = await repository.FindAsync(x =>
                 x.Id == request.Id &&
-                x.CompanyId == currentUser.CompanyId && 
-                !x.IsArchived,
+                x.CompanyId == currentUser.CompanyId,
                 ct,
-                x => x.Jobs
+                x => x.Jobs.OrderBy(x => x.ExecutionOrder)
             );
 
             if (!jobTasks.Any())

@@ -22,13 +22,15 @@ public class RunScheduledJob
         public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
             var scheduledJobs = await repository.FindAsync(x =>
-                x.Id == request.Id && x.JobTask.CompanyId == currentUser.CompanyId,
+                x.Id == request.Id && 
+                x.JobTask.CompanyId == currentUser.CompanyId &&
+                !x.IsArchived,
                 ct,
                 x => x.JobTask
             );
 
             if (!scheduledJobs.Any())
-                return Result<Unit>.Failure("scheduledJob not found", 404);
+                return Result<Unit>.Failure("scheduledJob not found or archived", 404);
 
             var scheduledJob = scheduledJobs.SingleOrDefault()!;
 

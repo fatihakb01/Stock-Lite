@@ -78,6 +78,7 @@ export const useCreateJobTask = () => {
         mutationFn: (dto) => CreateJobTask(dto),
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ["jobtask"]});
+            queryClient.invalidateQueries({queryKey: ["jobtasks"]});
         }
     })
 }
@@ -89,6 +90,7 @@ export const useEditJobTask = (id: string | null) => {
         mutationFn: (dto) => EditJobTask(id!, dto),
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ["jobtask"]});
+            queryClient.invalidateQueries({queryKey: ["jobtasks"]});
         }
     })
 }
@@ -100,6 +102,7 @@ export const useDeleteJobTask = (id: string | null) => {
         mutationFn: () => DeleteJobTask(id!),
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ["jobtask"]});
+            queryClient.invalidateQueries({queryKey: ["jobtasks"]});
         }
     })
 }

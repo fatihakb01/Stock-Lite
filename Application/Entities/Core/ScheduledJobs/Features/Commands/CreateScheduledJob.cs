@@ -41,9 +41,9 @@ public class CreateScheduledJob
             scheduledJob.CreatedAt = DateTime.UtcNow;
             scheduledJob.CreatedBy = currentUser.Id;
 
-            await repository.AddAsync(scheduledJob, ct);
-
+            await repository.AddScheduledJobAsync(scheduledJob, ct);
             var result = await repository.SaveChangesAsync(ct);
+            
             if (!result)
                 return Result<ScheduledJobDto>.Failure("Failed to create ScheduledJob", 400);
 

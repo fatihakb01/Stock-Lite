@@ -6,6 +6,7 @@ import {
 import type { 
     CreateScheduledJobDto, 
     EditScheduledJobDto, 
+    ReorderScheduledJobsDto, 
     ScheduledJob,
     ScheduledJobExecution
 } from "../types/scheduledJobs/scheduledJobTypes"
@@ -15,6 +16,7 @@ import {
     EditScheduledJob, 
     GetScheduledJob, 
     GetScheduledJobHistory, 
+    ReorderScheduledJobs, 
     RunScheduledJob 
 } from "../api/scheduledJobsApi"
 
@@ -48,6 +50,18 @@ export const useRunScheduledJob = (id: string | null) => {
             queryClient.invalidateQueries({queryKey: ["product"]});
             queryClient.invalidateQueries({queryKey: ["purchaseforecast"]});
             queryClient.invalidateQueries({queryKey: ["salesaggregate"]});
+        }
+    })
+}
+
+export const useReorderScheduledJobs = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation<void, Error, ReorderScheduledJobsDto>({
+        mutationFn: (dto) => ReorderScheduledJobs(dto),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ["jobtask"]});
+            queryClient.invalidateQueries({queryKey: ["scheduledjob"]});
         }
     })
 }

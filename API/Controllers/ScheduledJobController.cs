@@ -30,6 +30,13 @@ public class ScheduledJobController(IMediator mediator) : BaseApiController(medi
     }
 
     [Authorize(Policy = "AdminOrSuperAdmin")]
+    [HttpPost("order")]
+    public async Task<ActionResult<Unit>> ReorderScheduledJobs([FromBody] ReorderScheduledJobsDto dto)
+    {
+        return HandleResult(await Mediator.Send(new ReorderScheduledJobs.Command { Dto = dto }));
+    }
+
+    [Authorize(Policy = "AdminOrSuperAdmin")]
     [HttpPost]
     public async Task<ActionResult<ScheduledJobDto>> CreateScheduledJob(
         [FromBody] CreateScheduledJobDto dto)
