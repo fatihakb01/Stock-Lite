@@ -2,14 +2,13 @@ import type
 { 
     CreateJobTaskDto, 
     EditJobTaskDto, 
-    JobExecution, 
     JobTask, 
-    JobTaskAndExecutions, 
-    JobTaskDetail
+    JobTaskDetail,
+    JobTaskExecution
 } from "../types/jobTasks/jobTaskTypes"
 import api from "./axios"
 
-export const GetJobTaskHistory = async (id: string) : Promise<JobTaskAndExecutions> => {
+export const GetJobTaskHistory = async (id: string) : Promise<JobTaskExecution[]> => {
     const res = await api.get(`/jobtask/history/${id}`);
     return res.data;
 }
@@ -24,7 +23,7 @@ export const GetJobTask =  async (id: string) : Promise<JobTaskDetail> => {
     return res.data;
 }
 
-export const GetRecentHistory = async () : Promise<JobExecution[]> => {
+export const GetRecentHistory = async () : Promise<JobTaskExecution[]> => {
     const res = await api.get('/jobtask/history');
     return res.data;
 }

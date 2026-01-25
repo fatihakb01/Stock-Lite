@@ -1,8 +1,8 @@
 import type {   
     CreateScheduledJobDto, 
     EditScheduledJobDto, 
-    ScheduledJob, 
-    ScheduledJobAndExecutions 
+    ScheduledJob,
+    ScheduledJobExecution
 } from "../types/scheduledJobs/scheduledJobTypes";
 import api from "./axios";
 
@@ -11,7 +11,7 @@ export const GetScheduledJob = async (id: string) : Promise<ScheduledJob> => {
     return res.data;
 }
 
-export const GetScheduledJobHistory = async (id: string) : Promise<ScheduledJobAndExecutions> => {
+export const GetScheduledJobHistory = async (id: string) : Promise<ScheduledJobExecution[]> => {
     const res = await api.get(`/scheduledjob/history/${id}`);
     return res.data;
 }

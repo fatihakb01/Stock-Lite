@@ -2,7 +2,7 @@ import { Stack, Typography, Button, Divider } from "@mui/material";
 import { useState } from "react";
 import { useRunScheduledJob, useScheduledJob, useScheduledJobHistory } from "../../../hooks/useScheduledJobs";
 import ScheduledJobEditForm from "../forms/ScheduledJobEditForm";
-import { statusMap } from "../../../types/jobTasks/jobExecutionStatusMap";
+import ExecutionTable from "../tables/ExecutionTable";
 
 export default function ScheduledJobDetails({ scheduledJobId }: { scheduledJobId: string }) {
   const { data, isLoading } = useScheduledJob(scheduledJobId);
@@ -66,17 +66,15 @@ export default function ScheduledJobDetails({ scheduledJobId }: { scheduledJobId
       </Stack>
 
       {showHistory && (
-        <>
-          <Divider />
-          {history?.jobExecutions.map(h => (
-            <Typography 
-              key={h.startedAt.toISOString()}
-              variant="caption"
-            >
-              {h.startedAt.toString()} — {h.finishedAt?.toString()} — {statusMap[h.status]} — {h.errorMessage}
-            </Typography>
-          ))}
-        </>
+      history && history.length > 0 ?
+        (
+          <>
+            <Divider />
+            <ExecutionTable rows={history}/> 
+          </>
+        ) : (
+          <Typography>No history available</Typography>
+        )
       )}
     </Stack>
   );

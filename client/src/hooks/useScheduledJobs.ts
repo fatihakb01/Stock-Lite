@@ -6,8 +6,8 @@ import {
 import type { 
     CreateScheduledJobDto, 
     EditScheduledJobDto, 
-    ScheduledJob, 
-    ScheduledJobAndExecutions 
+    ScheduledJob,
+    ScheduledJobExecution
 } from "../types/scheduledJobs/scheduledJobTypes"
 import { 
     CreateScheduledJob, 
@@ -27,8 +27,8 @@ export const useScheduledJob = (id: string | null) => {
 }
 
 export const useScheduledJobHistory = (id: string | null) => {
-    return useQuery<ScheduledJobAndExecutions>({
-        queryKey: ["scheduledjob", id],
+    return useQuery<ScheduledJobExecution[]>({
+        queryKey: ["scheduledjob-history", id],
         queryFn: () => GetScheduledJobHistory(id!),
         enabled: !!id
     })
@@ -41,6 +41,7 @@ export const useRunScheduledJob = (id: string | null) => {
         mutationFn: () => RunScheduledJob(id!),
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ["scheduledjob"]});
+            queryClient.invalidateQueries({queryKey: ["scheduledjob-history"]});
             queryClient.invalidateQueries({queryKey: ["confirmedorderaggregate"]});
             queryClient.invalidateQueries({queryKey: ["confirmedorder"]});
             queryClient.invalidateQueries({queryKey: ["forecast"]});

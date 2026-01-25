@@ -11,15 +11,18 @@ public class ScheduledJobRepository(DataContext context)
 {
     private readonly DataContext _context = context;
 
-    public async Task<ScheduledJob?> GetScheduledJobAndExecutionsAsync(
-        Guid scheduledJobId, CancellationToken ct)
+    public async Task<IReadOnlyList<JobExecution>> GetScheduledJobAndExecutionsAsync(
+        Guid scheduledJobId, Guid companyId, CancellationToken ct)
     {
-        return await _context.ScheduledJobs
-            .Include(x => x.JobExecutions
-                .OrderByDescending(x => x.StartedAt)
-                .Take(30)
+        return await _context.JobExecutions
+            .Where(e => e.ScheduledJobId == scheduledJobId &&
+                e.ScheduledJob.JobTask.CompanyId == companyId
             )
-            .SingleOrDefaultAsync(x => x.Id == scheduledJobId, ct);
+            .OrderByDescending(e => e.StartedAt)
+            .Take(30)
+            .Include(e => e.ScheduledJob)
+            .ThenInclude(e => e.JobTask)
+            .ToListAsync(ct);
     }
 
     public async Task<Dictionary<Guid, JobExecutionStatus>> GetLatestExecutionStatusByJobTaskAsync(

@@ -17,7 +17,7 @@ public class ScheduledJobController(IMediator mediator) : BaseApiController(medi
     }
 
     [HttpGet("history/{id}")]
-    public async Task<ActionResult<ScheduledJobAndExecutionsDto>> GetScheduledJobHistory(Guid id)
+    public async Task<ActionResult<IReadOnlyList<JobExecutionDto>>> GetScheduledJobHistory(Guid id)
     {
         return HandleResult(await Mediator.Send(new GetScheduledJobHistory.Query { Id = id }));
     }

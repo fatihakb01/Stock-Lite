@@ -5,11 +5,10 @@ import {
 } from "@tanstack/react-query"
 import type { 
     JobTaskDetail, 
-    JobTaskAndExecutions, 
     JobTask, 
     CreateJobTaskDto, 
     EditJobTaskDto, 
-    JobExecution
+    JobTaskExecution
 } from "../types/jobTasks/jobTaskTypes"
 import { 
     CreateJobTask, 
@@ -23,7 +22,7 @@ import {
 } from "../api/jobTasksApi"
 
 export const useJobTaskHistory = (id: string | null) => {
-    return useQuery<JobTaskAndExecutions>({
+    return useQuery<JobTaskExecution[]>({
         queryKey: ["jobtask-history", id],
         queryFn: () => GetJobTaskHistory(id!),
         enabled: !!id
@@ -46,7 +45,7 @@ export const useJobTask = (id: string | null) => {
 }
 
 export const useRecentHistory = () => {
-    return useQuery<JobExecution[]>({
+    return useQuery<JobTaskExecution[]>({
         queryKey: ["jobtask-recent-history"],
         queryFn: () => GetRecentHistory()
     })
@@ -59,6 +58,9 @@ export const useRunJobTask = (id: string | null) => {
         mutationFn: () => RunJobTask(id!),
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ["jobtask"]});
+            queryClient.invalidateQueries({queryKey: ["jobtasks"]});
+            queryClient.invalidateQueries({queryKey: ["jobtask-history"]});
+            queryClient.invalidateQueries({queryKey: ["jobtask-recent-history"]});
             queryClient.invalidateQueries({queryKey: ["confirmedorderaggregate"]});
             queryClient.invalidateQueries({queryKey: ["confirmedorder"]});
             queryClient.invalidateQueries({queryKey: ["forecast"]});

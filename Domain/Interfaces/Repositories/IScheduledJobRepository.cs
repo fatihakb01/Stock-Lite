@@ -5,8 +5,8 @@ namespace Domain.Interfaces.Repositories;
 
 public interface IScheduledJobRepository : IRepository<ScheduledJob>
 {
-    Task<ScheduledJob?> GetScheduledJobAndExecutionsAsync(
-        Guid scheduledJobId, CancellationToken ct
+    Task<IReadOnlyList<JobExecution>> GetScheduledJobAndExecutionsAsync(
+        Guid scheduledJobId, Guid companyId, CancellationToken ct
     );
     Task<Dictionary<Guid, JobExecutionStatus>> GetLatestExecutionStatusByJobTaskAsync(
         Guid jobTaskId, CancellationToken ct

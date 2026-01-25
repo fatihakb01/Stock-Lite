@@ -1,6 +1,5 @@
 using Application.Core;
 using Application.Entities.Core.ScheduledJobs.DTOs;
-using AutoMapper;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Users;
 using MediatR;
@@ -9,36 +8,36 @@ namespace Application.Entities.Core.ScheduledJobs.Features.Queries;
 
 public class GetScheduledJobHistory
 {
-    public class Query : IRequest<Result<ScheduledJobAndExecutionsDto>>
+    public class Query : IRequest<Result<IReadOnlyList<JobExecutionDto>>>
     {
         public Guid Id { get; set; }
     }
 
     public class Handler(
         IScheduledJobRepository repository,
-        IMapper mapper,
         ICurrentUserService currentUser
-    ) : IRequestHandler<Query, Result<ScheduledJobAndExecutionsDto>>
+    ) : IRequestHandler<Query, Result<IReadOnlyList<JobExecutionDto>>>
     {
-        public async Task<Result<ScheduledJobAndExecutionsDto>> Handle(Query request, CancellationToken ct)
+        public async Task<Result<IReadOnlyList<JobExecutionDto>>> Handle(Query request, CancellationToken ct)
         {
-            var scheduledJobs = await repository.FindAsync(x =>
-                x.Id == request.Id &&
-                x.JobTask.CompanyId == currentUser.CompanyId && 
-                !x.IsArchived,
-                ct
-            );
+            var executions = await repository
+                .GetScheduledJobAndExecutionsAsync(request.Id, currentUser.CompanyId, ct);
 
-            if (!scheduledJobs.Any())
-                return Result<ScheduledJobAndExecutionsDto>.Failure("scheduledJob not found", 404);
+            if (!executions.Any())
+                return Result<IReadOnlyList<JobExecutionDto>>
+                    .Failure("No executions found", 404);
 
-            var scheduledJobExecutions = await repository
-                .GetScheduledJobAndExecutionsAsync(request.Id, ct);
+            var dto = executions.Select(e => new JobExecutionDto
+            {
+                JobTaskName = e.ScheduledJob.JobTask.Name,
+                ScheduledJobName = e.ScheduledJob.Name,
+                Status = e.Status,
+                StartedAt = e.StartedAt,
+                FinishedAt = e.FinishedAt,
+                ErrorMessage = e.ErrorMessage
+            }).ToList();
 
-            var scheduledJobExecutionsDto = mapper
-                .Map<ScheduledJobAndExecutionsDto>(scheduledJobExecutions);
-
-            return Result<ScheduledJobAndExecutionsDto>.Success(scheduledJobExecutionsDto);
+            return Result<IReadOnlyList<JobExecutionDto>>.Success(dto);
         }
     }
 }

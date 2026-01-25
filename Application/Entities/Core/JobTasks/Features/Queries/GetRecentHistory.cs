@@ -1,6 +1,5 @@
 using Application.Core;
 using Application.Entities.Core.ScheduledJobs.DTOs;
-using AutoMapper;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Users;
 using MediatR;
@@ -16,20 +15,27 @@ public class GetRecentHistory
 
     public class Handler(
         IJobExecutionRepository repository,
-        ICurrentUserService currentUser,
-        IMapper mapper
+        ICurrentUserService currentUser
     ) : IRequestHandler<Query, Result<List<JobExecutionDto>>>
     {
         public async Task<Result<List<JobExecutionDto>>> Handle(Query request, CancellationToken ct)
         {
-            var jobExecutions = await repository.GetRecentExecutionAsync(currentUser.CompanyId, 30, ct);
+            var executions = await repository.GetRecentExecutionAsync(currentUser.CompanyId, 30, ct);
 
-            if (!jobExecutions.Any())
+            if (!executions.Any())
                 return Result<List<JobExecutionDto>>.Failure("JobExecutions not found", 404);
 
-            var jobExecutionDtos = mapper.Map<List<JobExecutionDto>>(jobExecutions);
+            var dto = executions.Select(e => new JobExecutionDto
+            {
+                JobTaskName = e.ScheduledJob.JobTask.Name,
+                ScheduledJobName = e.ScheduledJob.Name,
+                Status = e.Status,
+                StartedAt = e.StartedAt,
+                FinishedAt = e.FinishedAt,
+                ErrorMessage = e.ErrorMessage
+            }).ToList();
 
-            return Result<List<JobExecutionDto>>.Success(jobExecutionDtos);
+            return Result<List<JobExecutionDto>>.Success(dto);
         }
     }
 }

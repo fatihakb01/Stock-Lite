@@ -12,7 +12,7 @@ namespace API.Controllers;
 public class JobTaskController(IMediator mediator) : BaseApiController(mediator)
 {
     [HttpGet("history/{id}")]
-    public async Task<ActionResult<JobTaskAndExecutionsDto>> GetJobTaskHistory(Guid id)
+    public async Task<ActionResult<IReadOnlyList<JobExecutionDto>>> GetJobTaskHistory(Guid id)
     {
         return HandleResult(await Mediator.Send(new GetJobTaskHistory.Query { Id = id }));
     }
@@ -30,7 +30,7 @@ public class JobTaskController(IMediator mediator) : BaseApiController(mediator)
     }
 
     [HttpGet("history")]
-    public async Task<ActionResult<List<JobExecutionDto>>> GetRecentHistory()
+    public async Task<ActionResult<List<IReadOnlyList<JobExecutionDto>>>> GetRecentHistory()
     {
         return HandleResult(await Mediator.Send(new GetRecentHistory.Query()));
     }

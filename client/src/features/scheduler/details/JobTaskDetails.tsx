@@ -2,7 +2,7 @@ import { Stack, Typography, Button, Divider } from "@mui/material";
 import { useState } from "react";
 import { useJobTask, useJobTaskHistory, useRunJobTask } from "../../../hooks/useJobTasks";
 import JobTaskEditForm from "../forms/JobTaskEditForm";
-import { statusMap } from "../../../types/jobTasks/jobExecutionStatusMap";
+import ExecutionTable from "../tables/ExecutionTable";
 
 export default function JobTaskDetails({jobTaskId} : {jobTaskId: string;}) {
   const { data, isLoading } = useJobTask(jobTaskId);
@@ -66,20 +66,15 @@ export default function JobTaskDetails({jobTaskId} : {jobTaskId: string;}) {
       </Stack>
 
       {showHistory && (
-        <>
-          <Divider />
-
-          {history?.jobs.flatMap(job =>
-            job.jobExecutions.map(exec => (
-              <Typography
-                key={`${job.id}-${exec.startedAt.toString()}`}
-                variant="caption"
-              >
-                {exec.startedAt.toString()} — {exec.finishedAt?.toString()} — {statusMap[exec.status]} — {exec.errorMessage}
-              </Typography>
-            ))
-          )}
-        </>
+      history && history.length > 0 ?
+        (
+          <>
+            <Divider />
+            <ExecutionTable rows={history}/> 
+          </>
+        ) : (
+          <Typography>No history available</Typography>
+        )
       )}
     </Stack>
   );

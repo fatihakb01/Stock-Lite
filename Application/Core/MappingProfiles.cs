@@ -89,13 +89,11 @@ public class MappingProfiles : Profile
 
         // JobTask entity
         CreateMap<JobTask, JobTaskDto>();
-        CreateMap<JobTask, JobTaskAndExecutionsDto>();
         CreateMap<CreateJobTaskDto, JobTask>();
         CreateMap<EditJobTaskDto, JobTask>();
 
         // ScheduledJob entity
         CreateMap<ScheduledJob, ScheduledJobDto>();
-        CreateMap<ScheduledJob, ScheduledJobAndExecutionsDto>();
         CreateMap<CreateScheduledJobDto, ScheduledJob>();
         CreateMap<EditScheduledJobDto, ScheduledJob>();
 

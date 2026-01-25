@@ -1,6 +1,5 @@
 using Application.Core;
-using Application.Entities.Core.JobTasks.DTOs;
-using AutoMapper;
+using Application.Entities.Core.ScheduledJobs.DTOs;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Users;
 using MediatR;
@@ -9,28 +8,36 @@ namespace Application.Entities.Core.JobTasks.Features.Queries;
 
 public class GetJobTaskHistory
 {
-    public class Query : IRequest<Result<JobTaskAndExecutionsDto>>
+    public class Query : IRequest<Result<IReadOnlyList<JobExecutionDto>>>
     {
         public Guid Id { get; set; }
     }
 
     public class Handler(
         IJobTaskRepository repository,
-        ICurrentUserService currentUser,
-        IMapper mapper
-    ) : IRequestHandler<Query, Result<JobTaskAndExecutionsDto>>
+        ICurrentUserService currentUser
+    ) : IRequestHandler<Query, Result<IReadOnlyList<JobExecutionDto>>>
     {
-        public async Task<Result<JobTaskAndExecutionsDto>> Handle(Query request, CancellationToken ct)
+        public async Task<Result<IReadOnlyList<JobExecutionDto>>> Handle(Query request, CancellationToken ct)
         {
-            var jobTask = await repository
-                .GetJobAndExecutionsAsync(request.Id, ct);
+            var executions = await repository
+                .GetJobsAndExecutionsAsync(request.Id, currentUser.CompanyId, ct);
 
-            if (jobTask == null || jobTask.CompanyId != currentUser.CompanyId)
-                return Result<JobTaskAndExecutionsDto>.Failure("JobTask not found", 404);
+            if (!executions.Any())
+                return Result<IReadOnlyList<JobExecutionDto>>
+                    .Failure("No executions found", 404);
 
-            var jobTaskDto = mapper.Map<JobTaskAndExecutionsDto>(jobTask);
+            var dto = executions.Select(e => new JobExecutionDto
+            {
+                JobTaskName = e.ScheduledJob.JobTask.Name,
+                ScheduledJobName = e.ScheduledJob.Name,
+                Status = e.Status,
+                StartedAt = e.StartedAt,
+                FinishedAt = e.FinishedAt,
+                ErrorMessage = e.ErrorMessage
+            }).ToList();
 
-            return Result<JobTaskAndExecutionsDto>.Success(jobTaskDto);
+            return Result<IReadOnlyList<JobExecutionDto>>.Success(dto);
         }
     }
 }

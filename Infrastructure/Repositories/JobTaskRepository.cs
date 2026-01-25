@@ -6,18 +6,23 @@ using Microsoft.EntityFrameworkCore;
 namespace Infrastructure.Repositories;
 
 public class JobTaskRepository(DataContext context) 
-    : Repository<JobTask>(context), IJobTaskRepository
+    : Repository<JobTask>(context), IJobTaskRepository 
 {
     private readonly DataContext _context = context;
 
-    public async Task<JobTask?> GetJobAndExecutionsAsync(Guid jobTaskId, CancellationToken ct)
+    public async Task<IReadOnlyList<JobExecution>> GetJobsAndExecutionsAsync(
+        Guid jobTaskId,
+        Guid companyId,
+        CancellationToken ct)
     {
-        return await _context.JobTasks
-            .Include(x => x.Jobs)
-                .ThenInclude(x => x.JobExecutions
-                    .OrderByDescending(x => x.StartedAt)
-                    .Take(30)
-                )
-                .SingleOrDefaultAsync(x => x.Id == jobTaskId, ct);
+        return await _context.JobExecutions
+            .Where(e => e.ScheduledJob.JobTaskId == jobTaskId &&
+                e.ScheduledJob.JobTask.CompanyId == companyId
+            )
+            .OrderByDescending(e => e.StartedAt)
+            .Take(30)
+            .Include(e => e.ScheduledJob)
+                .ThenInclude(j => j.JobTask)
+            .ToListAsync(ct);
     }
 }
