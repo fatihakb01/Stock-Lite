@@ -1,19 +1,33 @@
-import { Stack, Typography, Button, Divider } from "@mui/material";
+import {
+  Stack,
+  Typography,
+  Button,
+  Divider
+} from "@mui/material";
 import { useState } from "react";
-import { useRunScheduledJob, useScheduledJob, useScheduledJobHistory } from "../../../hooks/useScheduledJobs";
+import {
+  useRunScheduledJob,
+  useScheduledJob,
+  useScheduledJobHistory
+} from "../../../hooks/useScheduledJobs";
 import ScheduledJobEditForm from "../forms/ScheduledJobEditForm";
 import ExecutionTable from "../tables/ExecutionTable";
 
 export default function ScheduledJobDetails({ scheduledJobId }: { scheduledJobId: string }) {
-  const { data, isLoading } = useScheduledJob(scheduledJobId);
+  const { data, isLoading, isError } = useScheduledJob(scheduledJobId);
   const runScheduledJob = useRunScheduledJob(scheduledJobId);
   const { data: history } = useScheduledJobHistory(scheduledJobId);
 
   const [isEditing, setIsEditing] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
 
-  if (isLoading || !data) {
+  
+  if (isLoading) {
     return <Typography>Loading scheduled job…</Typography>;
+  }
+
+  if (isError || !data) {
+    return <Typography>Scheduled job not found.</Typography>
   }
 
   if (isEditing) {
@@ -30,26 +44,43 @@ export default function ScheduledJobDetails({ scheduledJobId }: { scheduledJobId
     <Stack spacing={2}>
       <Typography variant="h6">{data.name}</Typography>
 
-      <Typography variant="body2" color="text.secondary">
-        {data.description || "No description"}
+      <Divider />
+
+      <Typography><strong>Description:</strong> {data.description || "—"}</Typography>
+      <Typography><strong>Job type:</strong> {data.jobType}</Typography>
+
+      {data.calculationType && (
+        <Typography><strong>Calculation type:</strong> {data.calculationType}</Typography>
+      )}
+
+      {data.importDataType && (
+        <Typography><strong>Import data type:</strong> {data.importDataType}</Typography>
+      )}
+
+      {data.periodType && (
+        <Typography><strong>Period type:</strong> {data.periodType}</Typography>
+      )}
+
+      {data.source && (
+        <Typography><strong>Source:</strong> {data.source}</Typography>
+      )}
+
+      {data.target && (
+        <Typography><strong>Target:</strong> {data.target}</Typography>
+      )}
+
+      <Typography>
+        <strong>Status:</strong> {data.isArchived ? "Archived" : "Active"}
       </Typography>
 
       <Divider />
-
-      <Typography variant="caption">
-        Execution order: {data.executionOrder}
-      </Typography>
-
-      <Typography variant="caption">
-        Source → Target: {data.source} → {data.target}
-      </Typography>
 
       <Stack direction="row" spacing={1}>
         <Button variant="contained" onClick={() => setIsEditing(true)}>
           Edit
         </Button>
 
-        <Button 
+        <Button
           variant="outlined"
           onClick={() => runScheduledJob.mutate()}
           disabled={runScheduledJob.isPending}
@@ -66,11 +97,10 @@ export default function ScheduledJobDetails({ scheduledJobId }: { scheduledJobId
       </Stack>
 
       {showHistory && (
-      history && history.length > 0 ?
-        (
+        history && history.length > 0 ? (
           <>
             <Divider />
-            <ExecutionTable rows={history}/> 
+            <ExecutionTable rows={history} />
           </>
         ) : (
           <Typography>No history available</Typography>

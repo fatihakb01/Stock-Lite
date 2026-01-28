@@ -47,11 +47,8 @@ export default function ConfirmEmailPage() {
             return;
           }
 
-          // Trigger password reset email
-          const email = data.email;
-
           resetPasswordMutation.mutate(
-            { email:  email}, 
+            { userId:  userId}, 
             {
               onSuccess: () => {
                 setMessage(

@@ -20,9 +20,9 @@ public class ResetPassword
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
-            var user = await userRepository.GetByEmailAsync(request.Dto.Email, ct);
+            var user = await userRepository.GetByIdAsync(request.Dto.UserId, ct);
             if (user == null)
-                return Result<Unit>.Failure("Email not found.", 404);
+                return Result<Unit>.Failure("User not found.", 404);
 
             var token = await userRepository.GeneratePasswordResetTokenAsync(user);
 

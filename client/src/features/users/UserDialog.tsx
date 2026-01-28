@@ -15,10 +15,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEditUser, useDeleteUser } from "../../hooks/useUsers";
 import { userSchema, type UserFormValues } from "./schemas/userSchema";
-import { roleMap } from "../../types/users/roleMap";
 import { useEffect, useState } from "react";
 import FormError from "../../components/forms/FormError";
 import FormSuccess from "../../components/forms/FormSuccess";
+import { roleMap } from "../../types/users/roleMap";
 
 export default function UserDialog({
   open,
@@ -38,7 +38,7 @@ export default function UserDialog({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const isSuperAdmin = currentUser && roleMap[Number(currentUser.role)] === "SuperAdmin";
+  const isSuperAdmin = currentUser && currentUser.role === "SuperAdmin";
   const sameUserSelected = user?.id === currentUser?.id;
 
   const { handleSubmit, reset, register, formState: { errors }} = useForm<UserFormValues>({
@@ -62,7 +62,7 @@ export default function UserDialog({
         userName: user.userName,
         email: user.email,
         phoneNumber: user.phoneNumber ?? "",
-        role: roleMap[Number(user.role)],
+        role: user.role,
       });
     }
   }, [user]);
@@ -192,7 +192,7 @@ export default function UserDialog({
                 {...register("role")}
                 error={!!errors.role}
                 helperText={errors.role?.message}
-                defaultValue={roleMap[Number(user.role)]}
+                defaultValue={user.role}
                 disabled={!isSuperAdmin || sameUserSelected}
               >
                 {Object.entries(roleMap).map(([label, value]) => (

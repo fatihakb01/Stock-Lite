@@ -51,6 +51,7 @@ export default function ResetPasswordPage() {
   }
 
   const onSubmit = (values: ChangePasswordFormValues) => {
+    debugger;
     setErrorMessage(null);
     setSuccessMessage(null);
 

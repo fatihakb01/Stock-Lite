@@ -7,6 +7,6 @@ public class ResetPasswordValidator : AbstractValidator<ForgotPasswordDto>
 {
     public ResetPasswordValidator()
     {
-        RuleFor(x => x.Email).NotEmpty().EmailAddress();
+        RuleFor(x => x.UserId).NotEmpty();
     }
 }

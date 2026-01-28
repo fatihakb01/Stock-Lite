@@ -1,19 +1,31 @@
-import { Stack, Button, TextField, Checkbox, FormControlLabel } from "@mui/material";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button
+} from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEditJobTask } from "../../../hooks/useJobTasks";
-import { jobTaskSchema, type JobTaskFormValues } from "../schemas/jobTaskSchema";
+import {
+  jobTaskSchema,
+  type JobTaskFormValues
+} from "../schemas/jobTaskSchema";
 import type { EditJobTaskDto, JobTaskDetail } from "../../../types/jobTasks/jobTaskTypes";
+import JobTaskForm from "./JobTaskForm";
 
 export default function JobTaskEditForm({
   jobTask,
   onCancel,
   onSaved
 }: {
-  jobTask: JobTaskDetail
-  onCancel: () => void
-  onSaved: () => void
+  jobTask: JobTaskDetail;
+  onCancel: () => void;
+  onSaved: () => void;
 }) {
+  const editJobTask = useEditJobTask(jobTask.id);
+
   const form = useForm<JobTaskFormValues>({
     resolver: zodResolver(jobTaskSchema),
     defaultValues: {
@@ -24,48 +36,43 @@ export default function JobTaskEditForm({
     }
   });
 
-  const editJobTask = useEditJobTask(jobTask.id);
-
-  const onSubmit = (values: JobTaskFormValues) => {
+  const onSubmit = async (values: JobTaskFormValues) => {
     const dto: EditJobTaskDto = {
-      ...values,
       jobTaskKey: jobTask.jobTaskKey,
+      name: values.name,
+      description: values.description,
+      isArchived: values.isArchived
     };
 
-    editJobTask.mutate(dto, {
-      onSuccess: onSaved
-    });
+    await editJobTask.mutateAsync(dto);
+    onSaved();
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-      <Stack spacing={2}>
-        <TextField
-          label="Name"
-          {...form.register("name")}
-        />
+    <Dialog open fullWidth onClose={onCancel}>
+      <form
+        onSubmit={form.handleSubmit(
+          onSubmit,
+          errors => console.log("EDIT JOBTASK ERRORS", errors)
+        )}
+      >
+        <DialogTitle>Edit job task</DialogTitle>
 
-        <TextField
-          label="Description"
-          {...form.register("description")}
-          multiline
-          rows={3}
-        />
+        <DialogContent>
+          <JobTaskForm mode="edit" form={form} />
+        </DialogContent>
 
-        <FormControlLabel
-          control={<Checkbox {...form.register("isArchived")} />}
-          label="Archived"
-        />
-
-        <Stack direction="row" spacing={1}>
-          <Button type="submit" variant="contained">
+        <DialogActions>
+          <Button onClick={onCancel}>Cancel</Button>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={editJobTask.isPending}
+          >
             Save
           </Button>
-          <Button onClick={onCancel}>
-            Cancel
-          </Button>
-        </Stack>
-      </Stack>
-    </form>
+        </DialogActions>
+      </form>
+    </Dialog>
   );
 }

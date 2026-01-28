@@ -3,16 +3,16 @@ import { useSortable } from "@dnd-kit/sortable";
 import { Box, Typography } from "@mui/material";
 
 type Props = {
-  id: string;
-  name: string;
-  // executionOrder: number;
-  onClick: () => void;
+  id: string
+  name: string
+  archived: boolean
+  onClick: () => void
 };
 
 export function SortableScheduledJobItem({
   id,
   name,
-  // executionOrder,
+  archived,
   onClick,
 }: Props) {
   const {
@@ -41,13 +41,11 @@ export function SortableScheduledJobItem({
         borderColor: "divider",
         borderRadius: 1,
         cursor: "grab",
-        bgcolor: "background.paper",
+        bgcolor: archived ? "background.transparent" : "background.paper",
       }}
     >
       <Typography fontWeight={500}>{name}</Typography>
-      {/* <Typography variant="caption">
-        Order: {executionOrder}
-      </Typography> */}
+      <Typography>{archived ?  "Archived job" : "Active job"}</Typography>
     </Box>
   );
 }

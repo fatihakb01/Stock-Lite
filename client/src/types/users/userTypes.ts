@@ -56,7 +56,8 @@ export type EditUserDto = {
 }
 
 export type ForgotPasswordDto = {
-  email: string
+  // email: string
+  userId: string
 }
 
 export type ChangePasswordDto = {

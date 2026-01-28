@@ -2,7 +2,6 @@ using Application.Core;
 using Application.Entities.Core.Users.DTOs;
 using AutoMapper;
 using Domain.Entities.Core;
-using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -32,6 +31,13 @@ public class EditUser
             if (user == null)
                 return Result<UserDto>.Failure("User not found.", 404);
 
+            bool containSpaces = string.IsNullOrWhiteSpace(dto.UserName)
+                || dto.UserName.Contains(' ')
+                || dto.UserName.Trim() != dto.UserName;
+
+            if (containSpaces)
+                return Result<UserDto>.Failure("Username not allowed to contain spaces", 400);
+
             // Detect if email is changing
             bool emailChanged = !string.Equals(user.Email, dto.Email, StringComparison.OrdinalIgnoreCase);
 
@@ -57,10 +63,6 @@ public class EditUser
             }
 
             mapper.Map(dto, user);
-
-            user.Role = Enum.TryParse<UserRole>(dto.Role, true, out var parsedRole)
-                ? parsedRole
-                : UserRole.User;
 
             var saved = await repository.SaveChangesAsync(cancellationToken);
             if (!saved)

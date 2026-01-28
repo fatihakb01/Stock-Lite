@@ -5,7 +5,6 @@ import UserDialog from "./UserDialog";
 import NewUserDialog from "./NewUserDialog";
 import { useState } from "react";
 import { useUsers, useCurrentUser } from "../../hooks/useUsers";
-import { roleMap } from "../../types/users/roleMap";
 
 export default function UsersPage() {
   const { data: currentUser } = useCurrentUser();
@@ -36,7 +35,7 @@ export default function UsersPage() {
         </Grid>
       )}
 
-      {currentUser && roleMap[Number(currentUser.role)] === "SuperAdmin" && (
+      {currentUser && currentUser.role === "SuperAdmin" && (
         <Fab
           color="primary"
           sx={{ position: "fixed", bottom: 32, right: 32 }}

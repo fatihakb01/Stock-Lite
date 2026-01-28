@@ -1,3 +1,5 @@
+import type { ScheduledJob } from "../scheduledJobs/scheduledJobTypes";
+
 export type JobTask = {
     id: string,
     jobTaskKey: string,
@@ -21,21 +23,7 @@ export type JobTaskDetail = {
     name: string,
     description: string,
     isArchived: boolean,
-    jobs: {
-        id: string,
-        isArchived: boolean,
-        createdAt: Date,
-        createdBy: string,
-        name: string,
-        description: string,
-        jobType: number,
-        calculationType: number,
-        importDataType: string,
-        periodType: string,
-        source: string,
-        target: string,
-        executionOrder: number
-    }[]
+    jobs: ScheduledJob[]
 };
 
 export type JobTaskExecution = {

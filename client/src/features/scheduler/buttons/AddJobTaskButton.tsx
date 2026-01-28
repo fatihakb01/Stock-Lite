@@ -4,29 +4,37 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
-  Stack,
-  TextField
+  DialogActions
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCreateJobTask } from "../../../hooks/useJobTasks";
-import { createJobTaskSchema, type CreateJobTaskFormValues } from "../schemas/jobTaskSchema";
+import {
+  jobTaskSchema,
+  type JobTaskFormValues
+} from "../schemas/jobTaskSchema";
+import JobTaskForm from "../forms/JobTaskForm";
 
 export default function AddJobTaskButton() {
   const [open, setOpen] = useState(false);
   const createJobTask = useCreateJobTask();
 
-  const form = useForm<CreateJobTaskFormValues>({
-    resolver: zodResolver(createJobTaskSchema),
+  const form = useForm<JobTaskFormValues>({
+    resolver: zodResolver(jobTaskSchema),
     defaultValues: {
+      jobTaskKey: "",
       name: "",
-      description: ""
+      description: "",
+      isArchived: false
     }
   });
 
-  const handleSubmit = async (values: CreateJobTaskFormValues) => {
-    await createJobTask.mutateAsync(values);
+  const onSubmit = async (values: JobTaskFormValues) => {
+    await createJobTask.mutateAsync({
+      jobTaskKey: values.jobTaskKey,
+      name: values.name,
+      description: values.description
+    });
     form.reset();
     setOpen(false);
   };
@@ -38,36 +46,29 @@ export default function AddJobTaskButton() {
       </Button>
 
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
-        <DialogTitle>Add job task</DialogTitle>
+        <form
+          onSubmit={form.handleSubmit(
+            onSubmit,
+            errors => console.log("CREATE JOBTASK ERRORS", errors)
+          )}
+        >
+          <DialogTitle>Add job task</DialogTitle>
 
-        <DialogContent>
-          <Stack spacing={2} mt={1}>
-            <TextField
-              label="Name"
-              {...form.register("name")}
-              error={!!form.formState.errors.name}
-              helperText={form.formState.errors.name?.message}
-            />
+          <DialogContent>
+            <JobTaskForm mode="create" form={form} />
+          </DialogContent>
 
-            <TextField
-              label="Description"
-              multiline
-              rows={3}
-              {...form.register("description")}
-            />
-          </Stack>
-        </DialogContent>
-
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={form.handleSubmit(handleSubmit)}
-            disabled={createJobTask.isPending}
-          >
-            Save
-          </Button>
-        </DialogActions>
+          <DialogActions>
+            <Button onClick={() => setOpen(false)}>Cancel</Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={createJobTask.isPending}
+            >
+              Save
+            </Button>
+          </DialogActions>
+        </form>
       </Dialog>
     </>
   );

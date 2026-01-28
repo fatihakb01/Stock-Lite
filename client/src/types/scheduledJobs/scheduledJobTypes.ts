@@ -38,7 +38,6 @@ export type CreateScheduledJobDto = {
     periodType?: string,
     source?: string,
     target?: string,
-    executionOrder: number,
 };
 
 export type EditScheduledJobDto = {
@@ -52,5 +51,4 @@ export type EditScheduledJobDto = {
     periodType?: string,
     source?: string,
     target?: string,
-    executionOrder: number,
 };

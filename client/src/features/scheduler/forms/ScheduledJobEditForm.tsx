@@ -1,9 +1,9 @@
 import {
-  Stack,
-  Button,
-  TextField,
-  Checkbox,
-  FormControlLabel
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,79 +12,67 @@ import {
   type ScheduledJobFormValues
 } from "../schemas/scheduledJobSchema";
 import { useEditScheduledJob } from "../../../hooks/useScheduledJobs";
-import type { EditScheduledJobDto, ScheduledJob } from "../../../types/scheduledJobs/scheduledJobTypes";
+import type { ScheduledJob, EditScheduledJobDto } from "../../../types/scheduledJobs/scheduledJobTypes";
+import ScheduledJobForm from "./ScheduledJobForm";
 
 export default function ScheduledJobEditForm({
   scheduledJob,
   onCancel,
   onSaved
 }: {
-  scheduledJob: ScheduledJob
-  onCancel: () => void
-  onSaved: () => void
+  scheduledJob: ScheduledJob;
+  onCancel: () => void;
+  onSaved: () => void;
 }) {
+  const editScheduledJob = useEditScheduledJob(scheduledJob.id);
+
   const form = useForm<ScheduledJobFormValues>({
     resolver: zodResolver(scheduledJobSchema),
     defaultValues: {
+      jobTaskKey: scheduledJob.jobTaskKey,
       name: scheduledJob.name,
-      description: scheduledJob.description,
+      description: scheduledJob.description || undefined,
       jobType: scheduledJob.jobType,
-      calculationType: scheduledJob.calculationType,
-      importDataType: scheduledJob.importDataType,
-      periodType: scheduledJob.periodType,
-      source: scheduledJob.source,
-      target: scheduledJob.target,
-      executionOrder: scheduledJob.executionOrder,
+      calculationType: scheduledJob.calculationType || undefined,
+      importDataType: scheduledJob.importDataType || undefined,
+      periodType: scheduledJob.periodType || undefined,
+      source: scheduledJob.source || undefined,
+      target: scheduledJob.target || undefined,
       isArchived: scheduledJob.isArchived
     }
   });
 
-  const editScheduledJob = useEditScheduledJob(scheduledJob.id);
-
-  const onSubmit = (values: ScheduledJobFormValues) => {
-    const dto: EditScheduledJobDto = {
-      jobTaskKey: scheduledJob.jobTaskKey,
-      ...values
-    };
-
-    editScheduledJob.mutate(dto, {
-      onSuccess: onSaved
-    });
+  const onSubmit = async (values: ScheduledJobFormValues) => {
+    const dto: EditScheduledJobDto = { ...values };
+    await editScheduledJob.mutateAsync(dto);
+    onSaved();
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-      <Stack spacing={2}>
-        <TextField label="Name" {...form.register("name")} />
+    <Dialog open fullWidth onClose={onCancel}>
+      <form
+        onSubmit={form.handleSubmit(
+          onSubmit,
+          errors => console.log("EDIT FORM ERRORS", errors)
+        )}
+      >
+        <DialogTitle>Edit scheduled job</DialogTitle>
 
-        <TextField
-          label="Description"
-          {...form.register("description")}
-          multiline
-          rows={3}
-        />
+        <DialogContent>
+          <ScheduledJobForm mode="edit" form={form} />
+        </DialogContent>
 
-        <TextField label="Source" {...form.register("source")} />
-        <TextField label="Target" {...form.register("target")} />
-
-        <TextField
-          label="Execution order"
-          type="number"
-          {...form.register("executionOrder", { valueAsNumber: true })}
-        />
-
-        <FormControlLabel
-          control={<Checkbox {...form.register("isArchived")} />}
-          label="Archived"
-        />
-
-        <Stack direction="row" spacing={1}>
-          <Button type="submit" variant="contained">
+        <DialogActions>
+          <Button onClick={onCancel}>Cancel</Button>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={editScheduledJob.isPending}
+          >
             Save
           </Button>
-          <Button onClick={onCancel}>Cancel</Button>
-        </Stack>
-      </Stack>
-    </form>
+        </DialogActions>
+      </form>
+    </Dialog>
   );
 }

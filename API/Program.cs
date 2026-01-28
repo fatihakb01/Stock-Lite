@@ -10,9 +10,6 @@ builder.Services.AddApiServices(builder.Configuration);
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 
-builder.Services.AddControllers();
-builder.Services.AddOpenApi();
-
 var app = builder.Build();
 
 await app.InitializeAndSeedDatabaseAsync();

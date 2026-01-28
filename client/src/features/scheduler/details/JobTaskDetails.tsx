@@ -44,6 +44,10 @@ export default function JobTaskDetails({jobTaskId} : {jobTaskId: string;}) {
         Jobs linked: {data.jobs.length}
       </Typography>
 
+      <Typography variant="caption">
+        Status: {data.isArchived ? "Archived" : "Active"}
+      </Typography>
+
       <Stack direction="row" spacing={1}>
         <Button variant="contained" onClick={() => setIsEditing(true)}>
           Edit

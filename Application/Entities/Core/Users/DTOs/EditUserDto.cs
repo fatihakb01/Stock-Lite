@@ -1,3 +1,5 @@
+using Domain.Enums;
+
 namespace Application.Entities.Core.Users.DTOs;
 
 public class EditUserDto
@@ -7,5 +9,5 @@ public class EditUserDto
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? PhoneNumber { get; set; }
-    public required string Role { get; set; }
+    public required UserRole Role { get; set; }
 }

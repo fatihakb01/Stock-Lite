@@ -24,8 +24,8 @@ export default function ExecutionTable({rows} : Props) {
                     <TableRow key={i}>
                         <TableCell>{row.jobTaskName}</TableCell>
                         <TableCell>{row.scheduledJobName}</TableCell>
-                        <TableCell>{row.startedAt ?? "-"}</TableCell>
-                        <TableCell>{row.finishedAt ?? "-"}</TableCell>
+                        <TableCell>{row.startedAt.replace("T", " ") ?? "-"}</TableCell>
+                        <TableCell>{row.finishedAt?.replace("T", " ") ?? "-"}</TableCell>
                         <TableCell>{ statusMap[row.status] }</TableCell>
                         <TableCell>{ row.errorMessage ?? "—" }</TableCell>
                     </TableRow>

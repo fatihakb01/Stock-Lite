@@ -24,8 +24,7 @@ public class GetScheduledJob
         {
             var scheduledJobs = await repository.FindAsync(x =>
                 x.Id == request.Id &&
-                x.JobTask.CompanyId == currentUser.CompanyId && 
-                !x.IsArchived,
+                x.JobTask.CompanyId == currentUser.CompanyId,
                 ct
             );
 

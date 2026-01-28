@@ -18,13 +18,20 @@ import Section from "../../../components/general/Section";
 import AddScheduledJobButton from "../buttons/AddScheduledJobButton";
 import { useReorderScheduledJobs } from "../../../hooks/useScheduledJobs";
 import { SortableScheduledJobItem } from "../item/SortableScheduledJobItem";
+import type { ScheduledJob } from "../../../types/scheduledJobs/scheduledJobTypes";
+import type { SchedulerSelection } from "../selector/useSchedulerSelection";
 
-export default function ScheduledJobList({ selected, onSelect }: any) {
+export default function ScheduledJobList({ 
+  selected, onSelect 
+} : {  
+  selected: SchedulerSelection
+  onSelect: (id: string) => void
+}) {
   const jobTaskId = selected?.type === "jobtask" ? selected.id : null;
-  const { data } = useJobTask(jobTaskId);
-  const reorderMutation = useReorderScheduledJobs();
 
-  const [jobs, setJobs] = useState<any[]>([]);
+  const { data, isLoading, isError } = useJobTask(jobTaskId);
+  const reorderMutation = useReorderScheduledJobs();
+  const [jobs, setJobs] = useState<ScheduledJob[]>([]);
 
   useEffect(() => {
     if (data?.jobs) {
@@ -61,9 +68,19 @@ export default function ScheduledJobList({ selected, onSelect }: any) {
     });
   };
 
+  if (isLoading || !data) {
+    return <Typography>Loading jobs...</Typography>
+  }
+
+  if (isError || !data) {
+    return <Typography>No jobs found.</Typography>
+  }
+  
+  const jobTaskKey = data && data.jobTaskKey;
+
   return (
     <Section title="Scheduled jobs">
-      <AddScheduledJobButton />
+      <AddScheduledJobButton jobTaskKey={jobTaskKey}/>
 
       <DndContext
         sensors={sensors}
@@ -80,7 +97,7 @@ export default function ScheduledJobList({ selected, onSelect }: any) {
                 key={job.id}
                 id={job.id}
                 name={job.name}
-                // executionOrder={job.executionOrder}
+                archived={job.isArchived}
                 onClick={() => onSelect(job.id)}
               />
             ))}

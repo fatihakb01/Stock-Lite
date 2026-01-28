@@ -7,8 +7,14 @@ public class RegisterUserValidator : AbstractValidator<RegisterUserDto>
 {
     public RegisterUserValidator()
     {
-        RuleFor(x => x.UserName).NotEmpty().MinimumLength(3).MaximumLength(30);
-        RuleFor(x => x.Email).NotEmpty().EmailAddress();
+        RuleFor(x => x.UserName)
+            .NotEmpty()
+            .MaximumLength(50);
+
+        RuleFor(x => x.Email)
+            .NotEmpty()
+            .EmailAddress();
+
         RuleFor(x => x.Password)
             .NotEmpty()
             .MinimumLength(6)
@@ -16,5 +22,21 @@ public class RegisterUserValidator : AbstractValidator<RegisterUserDto>
             .Matches("[a-z]").WithMessage("Password must contain at least one lowercase letter.")
             .Matches("[0-9]").WithMessage("Password must contain at least one number.")
             .Matches("[^a-zA-Z0-9]").WithMessage("Password must contain at least one special character.");
+
+        RuleFor(x => x.FirstName)
+            .MaximumLength(50)
+            .When(x => !string.IsNullOrWhiteSpace(x.FirstName));
+
+        RuleFor(x => x.LastName)
+            .MaximumLength(50)
+            .When(x => !string.IsNullOrWhiteSpace(x.LastName));
+
+        RuleFor(x => x.PhoneNumber)
+            .Matches(@"^\+?[0-9\s\-()]{7,20}$")
+            .WithMessage("Phone number format is invalid.")
+            .When(x => !string.IsNullOrWhiteSpace(x.PhoneNumber));
+
+        RuleFor(x => x.Role)
+            .NotEmpty();
     }
 }

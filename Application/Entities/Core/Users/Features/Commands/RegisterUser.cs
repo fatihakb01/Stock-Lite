@@ -2,7 +2,6 @@ using Application.Core;
 using Application.Entities.Core.Users.DTOs;
 using AutoMapper;
 using Domain.Entities.Core;
-using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Users;
 using MediatR;
@@ -33,12 +32,16 @@ public class RegisterUser
             if (existingUser != null)
                 return Result<UserDto>.Failure("Email is already registered.", 400);
 
+            // Only allow username without spaces
+            bool containSpaces = string.IsNullOrWhiteSpace(dto.UserName)
+                || dto.UserName.Contains(' ')
+                || dto.UserName.Trim() != dto.UserName;
+            if (containSpaces)
+                return Result<UserDto>.Failure("Username not allowed to contain spaces", 400);
+
             // Map DTO → Entity
             var user = mapper.Map<User>(dto);
             user.CompanyId = currentUser.CompanyId;
-            user.Role = Enum.TryParse<UserRole>(dto.Role, true, out var parsedRole)
-                ? parsedRole
-                : UserRole.User;
 
             // Create user in Identity
             var result = await userRepository.CreateAsync(user, dto.Password);

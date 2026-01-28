@@ -4,29 +4,39 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
-  Stack,
-  TextField
+  DialogActions
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCreateScheduledJob } from "../../../hooks/useScheduledJobs";
-import { createScheduledJobSchema, type CreateScheduledJobFormValues } from "../schemas/scheduledJobSchema";
+import {
+  scheduledJobSchema,
+  type ScheduledJobFormValues
+} from "../schemas/scheduledJobSchema";
+import ScheduledJobForm from "../forms/ScheduledJobForm";
 
-export default function AddScheduledJobButton() {
+export default function AddScheduledJobButton({ jobTaskKey }: { jobTaskKey: string }) {
   const [open, setOpen] = useState(false);
   const createScheduledJob = useCreateScheduledJob();
 
-  const form = useForm<CreateScheduledJobFormValues>({
-    resolver: zodResolver(createScheduledJobSchema),
+  const form = useForm<ScheduledJobFormValues>({
+    resolver: zodResolver(scheduledJobSchema),
     defaultValues: {
+      jobTaskKey,
       name: "",
-      executionOrder: 1,
-      description: ""
+      description: undefined,
+      jobType: "",
+      calculationType: undefined,
+      importDataType: undefined,
+      periodType: undefined,
+      source: undefined,
+      target: undefined,
+      isArchived: false
     }
   });
 
-  const handleSubmit = async (values: CreateScheduledJobFormValues) => {
+  const onSubmit = async (values: ScheduledJobFormValues) => {
+    console.log("SUBMIT VALUES", values);
     await createScheduledJob.mutateAsync(values);
     form.reset();
     setOpen(false);
@@ -39,44 +49,29 @@ export default function AddScheduledJobButton() {
       </Button>
 
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
-        <DialogTitle>Add scheduled job</DialogTitle>
+        <form
+          onSubmit={form.handleSubmit(
+            onSubmit,
+            errors => console.log("FORM ERRORS", errors)
+          )}
+        >
+          <DialogTitle>Add scheduled job</DialogTitle>
 
-        <DialogContent>
-          <Stack spacing={2} mt={1}>
-            <TextField
-              label="Name"
-              {...form.register("name")}
-              error={!!form.formState.errors.name}
-              helperText={form.formState.errors.name?.message}
-            />
+          <DialogContent>
+            <ScheduledJobForm mode="create" form={form} />
+          </DialogContent>
 
-            <TextField
-              label="Execution order"
-              type="number"
-              {...form.register("executionOrder", { valueAsNumber: true })}
-              error={!!form.formState.errors.executionOrder}
-              helperText={form.formState.errors.executionOrder?.message}
-            />
-
-            <TextField
-              label="Description"
-              multiline
-              rows={3}
-              {...form.register("description")}
-            />
-          </Stack>
-        </DialogContent>
-
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={form.handleSubmit(handleSubmit)}
-            disabled={createScheduledJob.isPending}
-          >
-            Save
-          </Button>
-        </DialogActions>
+          <DialogActions>
+            <Button onClick={() => setOpen(false)}>Cancel</Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={createScheduledJob.isPending}
+            >
+              Save
+            </Button>
+          </DialogActions>
+        </form>
       </Dialog>
     </>
   );
