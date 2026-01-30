@@ -1,18 +1,18 @@
 import type { JobTaskExecution } from "../../../types/jobTasks/jobTaskTypes";
 import { Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
-import { statusMap } from "../../../types/jobTasks/jobExecutionStatusMap";
 
 interface Props {
     rows: JobTaskExecution[]
+    full: boolean
 }
 
-export default function ExecutionTable({rows} : Props) {
+export default function ExecutionTable({ rows, full } : Props) {
     return (
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell>JobTask Name</TableCell>
-              <TableCell>ScheduledJob Name</TableCell>
+              {full && (<TableCell>JobTask Name</TableCell>)}
+              {full && (<TableCell>ScheduledJob Name</TableCell>)}
               <TableCell>Started</TableCell>
               <TableCell>Finished</TableCell>
               <TableCell>Status</TableCell>
@@ -22,12 +22,19 @@ export default function ExecutionTable({rows} : Props) {
             <TableBody>
                 {rows?.map((row, i) => (
                     <TableRow key={i}>
-                        <TableCell>{row.jobTaskName}</TableCell>
-                        <TableCell>{row.scheduledJobName}</TableCell>
+                        {full && (<TableCell>{row.jobTaskName}</TableCell>)}
+                        {full && (<TableCell>{row.scheduledJobName}</TableCell>)}
                         <TableCell>{row.startedAt.replace("T", " ") ?? "-"}</TableCell>
                         <TableCell>{row.finishedAt?.replace("T", " ") ?? "-"}</TableCell>
-                        <TableCell>{ statusMap[row.status] }</TableCell>
-                        <TableCell>{ row.errorMessage ?? "—" }</TableCell>
+                        <TableCell>{ row.status }</TableCell>
+                        <TableCell   
+                            sx={{
+                            whiteSpace: "normal",
+                            wordBreak: "break-word",
+                            maxWidth: full ? "100%" : 300,
+                        }}>
+                            {row.errorMessage ?? "—"}
+                        </TableCell>
                     </TableRow>
                 ))}
             </TableBody>

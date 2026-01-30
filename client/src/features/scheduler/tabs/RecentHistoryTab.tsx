@@ -4,6 +4,7 @@ import ExecutionTable from "../tables/ExecutionTable";
 
 export default function RecentHistoryTab() {
   const { data, isLoading } = useRecentHistory();
+  const showAll = true;
 
   if (isLoading) {
     return <Typography>Loading execution history…</Typography>;
@@ -16,7 +17,7 @@ export default function RecentHistoryTab() {
   return (
     (data && data.length > 0 ?
       (
-        <ExecutionTable rows={data}/> 
+        <ExecutionTable rows={ data } full={ showAll }/> 
       ) : (
         <Typography>No history available</Typography>
       )

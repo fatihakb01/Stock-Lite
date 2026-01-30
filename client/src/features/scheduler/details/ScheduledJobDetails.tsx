@@ -2,7 +2,8 @@ import {
   Stack,
   Typography,
   Button,
-  Divider
+  Divider,
+  CircularProgress
 } from "@mui/material";
 import { useState } from "react";
 import {
@@ -17,14 +18,14 @@ import type { User } from "../../../types/users/userTypes";
 
 export default function ScheduledJobDetails({ scheduledJobId, user } : 
   { scheduledJobId: string, user: User }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const showAll = false;
+
   const { data, isLoading, isError } = useScheduledJob(scheduledJobId);
   const runScheduledJob = useRunScheduledJob(scheduledJobId);
   const deleteScheduledJob = useDeleteScheduledJob(scheduledJobId);
-  const { data: history } = useScheduledJobHistory(scheduledJobId);
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
-
+  const { data: history } = useScheduledJobHistory(scheduledJobId, showHistory);
   
   if (isLoading) {
     return <Typography>Loading scheduled job…</Typography>;
@@ -50,7 +51,15 @@ export default function ScheduledJobDetails({ scheduledJobId, user } :
 
       <Divider />
 
-      <Typography><strong>Description:</strong> {data.description || "—"}</Typography>
+      <Typography
+        sx={{
+          whiteSpace: "normal",
+          wordBreak: "break-word",
+          maxWidth: 500
+        }}
+      >
+        <strong>Description:</strong> {data.description || "—"}
+      </Typography>
       <Typography><strong>Job type:</strong> {data.jobType}</Typography>
 
       {data.calculationType && (
@@ -91,7 +100,7 @@ export default function ScheduledJobDetails({ scheduledJobId, user } :
             onClick={() => runScheduledJob.mutate()}
             disabled={runScheduledJob.isPending}
           >
-              Run scheduled job
+            Run scheduled job
           </Button>
 
           <Button
@@ -111,13 +120,15 @@ export default function ScheduledJobDetails({ scheduledJobId, user } :
         >
           {showHistory ? "Hide history" : "Show history"}
         </Button>
+
+        {runScheduledJob.isPending && <CircularProgress size={20} />}
       </Stack>
 
       {showHistory && (
         history && history.length > 0 ? (
           <>
             <Divider />
-            <ExecutionTable rows={history} />
+            <ExecutionTable rows={history} full={showAll}/>
           </>
         ) : (
           <Typography>No history available</Typography>

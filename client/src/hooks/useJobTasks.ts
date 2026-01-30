@@ -21,11 +21,11 @@ import {
     RunJobTask 
 } from "../api/jobTasksApi"
 
-export const useJobTaskHistory = (id: string | null) => {
+export const useJobTaskHistory = (id: string | null, enabled: boolean) => {
     return useQuery<JobTaskExecution[]>({
         queryKey: ["jobtask-history", id],
         queryFn: () => GetJobTaskHistory(id!),
-        enabled: !!id
+        enabled: !!id && enabled
     });
 }
 

@@ -28,11 +28,11 @@ export const useScheduledJob = (id: string | null) => {
     })
 }
 
-export const useScheduledJobHistory = (id: string | null) => {
+export const useScheduledJobHistory = (id: string | null, enabled: boolean) => {
     return useQuery<ScheduledJobExecution[]>({
         queryKey: ["scheduledjob-history", id],
         queryFn: () => GetScheduledJobHistory(id!),
-        enabled: !!id
+        enabled: !!id && enabled
     })
 }
 

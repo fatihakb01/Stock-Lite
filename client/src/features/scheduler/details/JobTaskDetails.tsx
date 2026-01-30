@@ -1,4 +1,4 @@
-import { Stack, Typography, Button, Divider } from "@mui/material";
+import { Stack, Typography, Button, Divider, CircularProgress } from "@mui/material";
 import { useState } from "react";
 import { useDeleteJobTask, useJobTask, useJobTaskHistory, useRunJobTask } from "../../../hooks/useJobTasks";
 import JobTaskEditForm from "../forms/JobTaskEditForm";
@@ -6,13 +6,14 @@ import ExecutionTable from "../tables/ExecutionTable";
 import type { User } from "../../../types/users/userTypes";
 
 export default function JobTaskDetails({ jobTaskId, user } : { jobTaskId: string, user: User }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const showAll = false;
+
   const { data, isLoading } = useJobTask(jobTaskId);
   const runJobTask = useRunJobTask(jobTaskId);
   const deleteJobTask = useDeleteJobTask(jobTaskId);
-  const { data: history } = useJobTaskHistory(jobTaskId);
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
+  const { data: history } = useJobTaskHistory(jobTaskId, showHistory);
 
   if (isLoading || !data) {
     return <Typography>Loading job task…</Typography>;
@@ -32,7 +33,15 @@ export default function JobTaskDetails({ jobTaskId, user } : { jobTaskId: string
     <Stack spacing={2}>
       <Typography variant="h6">{data.name}</Typography>
 
-      <Typography variant="body2" color="text.secondary">
+      <Typography 
+        variant="body2" 
+        color="text.secondary" 
+        sx={{
+          whiteSpace: "normal",
+          wordBreak: "break-word",
+          maxWidth: 500
+        }}
+      >
         {data.description || "No description"}
       </Typography>
 
@@ -82,6 +91,8 @@ export default function JobTaskDetails({ jobTaskId, user } : { jobTaskId: string
         >
           {showHistory ? "Hide history" : "Show history"}
         </Button>
+
+        {runJobTask.isPending && <CircularProgress size={20} />}
       </Stack>
 
       {showHistory && (
@@ -89,7 +100,7 @@ export default function JobTaskDetails({ jobTaskId, user } : { jobTaskId: string
         (
           <>
             <Divider />
-            <ExecutionTable rows={history}/> 
+            <ExecutionTable rows={history} full={showAll}/> 
           </>
         ) : (
           <Typography>No history available</Typography>

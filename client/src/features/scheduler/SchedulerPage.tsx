@@ -8,10 +8,10 @@ export default function SchedulerPage() {
   const [tab, setTab] = useState(0);
 
   return (
-    <Box>
+    <Box sx={{m:"auto"}}>
       <Tabs value={tab} onChange={(_, v) => setTab(v)}>
-        <Tab label="Scheduler overview" />
-        <Tab label="Job execution history" />
+        <Tab label="Scheduler overview" sx={{ml:"auto"}}/>
+        <Tab label="Job execution history" sx={{mr:"auto"}}/>
       </Tabs>
 
       <TabPanel value={tab} index={0}>
