@@ -2,9 +2,11 @@ import { Typography, Stack } from "@mui/material";
 import JobTaskDetails from "../details/JobTaskDetails";
 import ScheduledJobDetails from "../details/ScheduledJobDetails";
 import type { SchedulerSelection } from "../selector/useSchedulerSelection";
+import type { User } from "../../../types/users/userTypes";
 
-export default function SchedulerDetailPanel({ selection }: {
-  selection: SchedulerSelection
+export default function SchedulerDetailPanel({ selection, user }: {
+  selection: SchedulerSelection,
+  user: User
 }) {
   if (!selection) {
     return <Typography>Select a job task or scheduled job</Typography>;
@@ -13,11 +15,11 @@ export default function SchedulerDetailPanel({ selection }: {
   return (
     <Stack spacing={2}>
       {selection.type === "jobtask" && (
-        <JobTaskDetails jobTaskId={selection.jobTaskId} />
+        <JobTaskDetails jobTaskId={selection.jobTaskId} user={user} />
       )}
 
       {selection.type === "scheduledjob" && (
-        <ScheduledJobDetails scheduledJobId={selection.scheduledJobId} />
+        <ScheduledJobDetails scheduledJobId={selection.scheduledJobId} user={user} />
       )}
     </Stack>
   );

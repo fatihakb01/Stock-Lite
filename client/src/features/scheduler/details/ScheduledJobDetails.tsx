@@ -12,8 +12,10 @@ import {
 } from "../../../hooks/useScheduledJobs";
 import ScheduledJobEditForm from "../forms/ScheduledJobEditForm";
 import ExecutionTable from "../tables/ExecutionTable";
+import type { User } from "../../../types/users/userTypes";
 
-export default function ScheduledJobDetails({ scheduledJobId }: { scheduledJobId: string }) {
+export default function ScheduledJobDetails({ scheduledJobId, user } : 
+  { scheduledJobId: string, user: User }) {
   const { data, isLoading, isError } = useScheduledJob(scheduledJobId);
   const runScheduledJob = useRunScheduledJob(scheduledJobId);
   const { data: history } = useScheduledJobHistory(scheduledJobId);
@@ -76,17 +78,19 @@ export default function ScheduledJobDetails({ scheduledJobId }: { scheduledJobId
       <Divider />
 
       <Stack direction="row" spacing={1}>
-        <Button variant="contained" onClick={() => setIsEditing(true)}>
-          Edit
-        </Button>
-
-        <Button
-          variant="outlined"
-          onClick={() => runScheduledJob.mutate()}
-          disabled={runScheduledJob.isPending}
-        >
-          Run scheduled job
-        </Button>
+        {user && user.role === "SuperAdmin" && (
+        <>
+          <Button variant="contained" onClick={() => setIsEditing(true)}>
+            Edit
+          </Button><Button
+            variant="outlined"
+            onClick={() => runScheduledJob.mutate()}
+            disabled={runScheduledJob.isPending}
+          >
+              Run scheduled job
+            </Button>
+        </>
+        )}
 
         <Button
           variant="text"

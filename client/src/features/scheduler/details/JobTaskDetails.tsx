@@ -3,8 +3,9 @@ import { useState } from "react";
 import { useJobTask, useJobTaskHistory, useRunJobTask } from "../../../hooks/useJobTasks";
 import JobTaskEditForm from "../forms/JobTaskEditForm";
 import ExecutionTable from "../tables/ExecutionTable";
+import type { User } from "../../../types/users/userTypes";
 
-export default function JobTaskDetails({jobTaskId} : {jobTaskId: string;}) {
+export default function JobTaskDetails({ jobTaskId, user } : { jobTaskId: string, user: User }) {
   const { data, isLoading } = useJobTask(jobTaskId);
   const runJobTask = useRunJobTask(jobTaskId);
   const { data: history } = useJobTaskHistory(jobTaskId);
@@ -49,17 +50,19 @@ export default function JobTaskDetails({jobTaskId} : {jobTaskId: string;}) {
       </Typography>
 
       <Stack direction="row" spacing={1}>
-        <Button variant="contained" onClick={() => setIsEditing(true)}>
-          Edit
-        </Button>
-
-        <Button 
-          variant="outlined"
-          onClick={() => runJobTask.mutate()}
-          disabled={runJobTask.isPending}
-        >
-          Run job task
-        </Button>
+        {user && user.role === "SuperAdmin" && (
+          <>
+            <Button variant="contained" onClick={() => setIsEditing(true)}>
+              Edit
+            </Button><Button
+              variant="outlined"
+              onClick={() => runJobTask.mutate()}
+              disabled={runJobTask.isPending}
+            >
+                Run job task
+              </Button>
+          </>
+        )}
 
         <Button
           variant="text"

@@ -20,13 +20,15 @@ import { useReorderScheduledJobs } from "../../../hooks/useScheduledJobs";
 import { SortableScheduledJobItem } from "../item/SortableScheduledJobItem";
 import type { ScheduledJob } from "../../../types/scheduledJobs/scheduledJobTypes";
 import type { SchedulerSelection } from "../selector/useSchedulerSelection";
+import type { User } from "../../../types/users/userTypes";
 
-export default function ScheduledJobList({ 
-  selected, onSelect 
-} : {  
+type Props = {
   selected: SchedulerSelection
   onSelect: (jobTaskId: string, scheduledJobId: string) => void
-}) {
+  user: User
+}
+
+export default function ScheduledJobList({ selected, onSelect, user } : Props) {
   const jobTaskId =
   selected?.type === "jobtask"
     ? selected.jobTaskId
@@ -85,7 +87,9 @@ export default function ScheduledJobList({
 
   return (
     <Section title="Scheduled jobs">
-      <AddScheduledJobButton jobTaskKey={jobTaskKey}/>
+      {user && user.role === "SuperAdmin" && (
+        <AddScheduledJobButton jobTaskKey={jobTaskKey}/>
+      )}
 
       <DndContext
         sensors={sensors}

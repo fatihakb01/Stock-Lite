@@ -3,9 +3,11 @@ import { useSchedulerSelection } from "../selector/useSchedulerSelection";
 import JobTaskList from "../segments/JobTaskList";
 import ScheduledJobList from "../segments/ScheduledJobList";
 import SchedulerDetailPanel from "../segments/SchedulerDetailPanel";
+import { useCurrentUser } from "../../../hooks/useUsers";
 
 export default function SchedulerOverviewTab() {
   const selection = useSchedulerSelection();
+  const { data: currentUser } = useCurrentUser();
 
   return (
     <Grid container spacing={2}>
@@ -15,6 +17,7 @@ export default function SchedulerOverviewTab() {
           <JobTaskList
             selected={selection.selection}
             onSelect={selection.selectJobTask}
+            user={currentUser!}
           />
         </Paper>
       </Grid>
@@ -25,6 +28,7 @@ export default function SchedulerOverviewTab() {
           <ScheduledJobList
             selected={selection.selection}
             onSelect={selection.selectScheduledJob}
+            user={currentUser!}
           />
         </Paper>
       </Grid>
@@ -32,7 +36,7 @@ export default function SchedulerOverviewTab() {
       {/* RIGHT: Details */}
       <Grid sx={{xs:5}}>
         <Paper sx={{ p: 2, height: "100%" }}>
-          <SchedulerDetailPanel selection={selection.selection} />
+          <SchedulerDetailPanel selection={selection.selection} user={currentUser!} />
         </Paper>
       </Grid>
     </Grid>

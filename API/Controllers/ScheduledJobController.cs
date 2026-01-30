@@ -22,21 +22,21 @@ public class ScheduledJobController(IMediator mediator) : BaseApiController(medi
         return HandleResult(await Mediator.Send(new GetScheduledJobHistory.Query { Id = id }));
     }
 
-    [Authorize(Policy = "AdminOrSuperAdmin")]
+    [Authorize(Policy = "SuperAdminOnly")]
     [HttpPost("{id}")]
     public async Task<ActionResult<Unit>> RunScheduledJob(Guid id)
     {
         return HandleResult(await Mediator.Send(new RunScheduledJob.Command { Id = id }));
     }
 
-    [Authorize(Policy = "AdminOrSuperAdmin")]
+    [Authorize(Policy = "SuperAdminOnly")]
     [HttpPost("order")]
     public async Task<ActionResult<Unit>> ReorderScheduledJobs([FromBody] ReorderScheduledJobsDto dto)
     {
         return HandleResult(await Mediator.Send(new ReorderScheduledJobs.Command { Dto = dto }));
     }
 
-    [Authorize(Policy = "AdminOrSuperAdmin")]
+    [Authorize(Policy = "SuperAdminOnly")]
     [HttpPost]
     public async Task<ActionResult<ScheduledJobDto>> CreateScheduledJob(
         [FromBody] CreateScheduledJobDto dto)
@@ -48,7 +48,7 @@ public class ScheduledJobController(IMediator mediator) : BaseApiController(medi
         );
     }
 
-    [Authorize(Policy = "AdminOrSuperAdmin")]
+    [Authorize(Policy = "SuperAdminOnly")]
     [HttpPut("{id}")]
     public async Task<ActionResult<ScheduledJobDto>> EditScheduledJob(
         Guid id,
