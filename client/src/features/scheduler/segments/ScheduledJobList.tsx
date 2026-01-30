@@ -25,9 +25,14 @@ export default function ScheduledJobList({
   selected, onSelect 
 } : {  
   selected: SchedulerSelection
-  onSelect: (id: string) => void
+  onSelect: (jobTaskId: string, scheduledJobId: string) => void
 }) {
-  const jobTaskId = selected?.type === "jobtask" ? selected.id : null;
+  const jobTaskId =
+  selected?.type === "jobtask"
+    ? selected.jobTaskId
+    : selected?.type === "scheduledjob"
+    ? selected.jobTaskId
+    : null;
 
   const { data, isLoading, isError } = useJobTask(jobTaskId);
   const reorderMutation = useReorderScheduledJobs();
@@ -98,7 +103,7 @@ export default function ScheduledJobList({
                 id={job.id}
                 name={job.name}
                 archived={job.isArchived}
-                onClick={() => onSelect(job.id)}
+                onClick={() => onSelect(jobTaskId, job.id)}
               />
             ))}
           </Stack>

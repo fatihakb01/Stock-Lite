@@ -59,6 +59,7 @@ export const useRunJobTask = (id: string | null) => {
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ["jobtask"]});
             queryClient.invalidateQueries({queryKey: ["jobtasks"]});
+            queryClient.invalidateQueries({queryKey: ["scheduledjob"]});
             queryClient.invalidateQueries({queryKey: ["jobtask-history"]});
             queryClient.invalidateQueries({queryKey: ["jobtask-recent-history"]});
             queryClient.invalidateQueries({queryKey: ["confirmedorderaggregate"]});
@@ -79,6 +80,7 @@ export const useCreateJobTask = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ["jobtask"]});
             queryClient.invalidateQueries({queryKey: ["jobtasks"]});
+            queryClient.invalidateQueries({queryKey: ["scheduledjob"]});
         }
     })
 }
@@ -91,6 +93,7 @@ export const useEditJobTask = (id: string | null) => {
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ["jobtask"]});
             queryClient.invalidateQueries({queryKey: ["jobtasks"]});
+            queryClient.invalidateQueries({queryKey: ["scheduledjob"]});
         }
     })
 }
@@ -103,6 +106,7 @@ export const useDeleteJobTask = (id: string | null) => {
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ["jobtask"]});
             queryClient.invalidateQueries({queryKey: ["jobtasks"]});
+            queryClient.invalidateQueries({queryKey: ["scheduledjob"]});
         }
     })
 }

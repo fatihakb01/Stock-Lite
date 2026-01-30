@@ -13,11 +13,11 @@ export default function SchedulerDetailPanel({ selection }: {
   return (
     <Stack spacing={2}>
       {selection.type === "jobtask" && (
-        <JobTaskDetails jobTaskId={selection.id} />
+        <JobTaskDetails jobTaskId={selection.jobTaskId} />
       )}
 
       {selection.type === "scheduledjob" && (
-        <ScheduledJobDetails scheduledJobId={selection.id} />
+        <ScheduledJobDetails scheduledJobId={selection.scheduledJobId} />
       )}
     </Stack>
   );

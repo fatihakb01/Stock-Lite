@@ -1,8 +1,8 @@
 import { useState } from "react";
 
 export type SchedulerSelection =
-  | { type: "jobtask"; id: string }
-  | { type: "scheduledjob"; id: string }
+  | { type: "jobtask"; jobTaskId: string }
+  | { type: "scheduledjob"; jobTaskId: string; scheduledJobId: string }
   | null;
 
 export function useSchedulerSelection() {
@@ -10,10 +10,17 @@ export function useSchedulerSelection() {
 
   return {
     selection,
-    selectJobTask: (id: string) =>
-      setSelection({ type: "jobtask", id }),
-    selectScheduledJob: (id: string) =>
-      setSelection({ type: "scheduledjob", id }),
+
+    selectJobTask: (jobTaskId: string) =>
+      setSelection({ type: "jobtask", jobTaskId }),
+
+    selectScheduledJob: (jobTaskId: string, scheduledJobId: string) =>
+      setSelection({
+        type: "scheduledjob",
+        jobTaskId,
+        scheduledJobId,
+      }),
+
     clearSelection: () => setSelection(null),
   };
 }

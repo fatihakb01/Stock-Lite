@@ -42,6 +42,8 @@ export const useRunScheduledJob = (id: string | null) => {
     return useMutation<void>({
         mutationFn: () => RunScheduledJob(id!),
         onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ["jobtasks"]});
+            queryClient.invalidateQueries({queryKey: ["jobtask"]});
             queryClient.invalidateQueries({queryKey: ["scheduledjob"]});
             queryClient.invalidateQueries({queryKey: ["scheduledjob-history"]});
             queryClient.invalidateQueries({queryKey: ["confirmedorderaggregate"]});
@@ -60,6 +62,7 @@ export const useReorderScheduledJobs = () => {
     return useMutation<void, Error, ReorderScheduledJobsDto>({
         mutationFn: (dto) => ReorderScheduledJobs(dto),
         onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ["jobtasks"]});
             queryClient.invalidateQueries({queryKey: ["jobtask"]});
             queryClient.invalidateQueries({queryKey: ["scheduledjob"]});
         }
@@ -72,6 +75,7 @@ export const useCreateScheduledJob = () => {
     return useMutation<ScheduledJob, Error, CreateScheduledJobDto>({
         mutationFn: (dto) => CreateScheduledJob(dto),
         onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ["jobtasks"]});
             queryClient.invalidateQueries({queryKey: ["jobtask"]});
             queryClient.invalidateQueries({queryKey: ["scheduledjob"]});
         }

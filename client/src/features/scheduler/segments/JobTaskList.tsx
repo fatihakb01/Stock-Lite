@@ -9,7 +9,7 @@ export default function JobTaskList({
   onSelect
 }: {
   selected: SchedulerSelection
-  onSelect: (id: string) => void
+  onSelect: (jobTaskId: string) => void
 }) {
   const { data, isLoading } = useJobTasks();
 
@@ -25,7 +25,7 @@ export default function JobTaskList({
           {data?.map(task => (
             <ListItemButton
               key={task.id}
-              selected={selected?.type === "jobtask" && selected.id === task.id}
+              selected={selected?.type === "jobtask" && selected.jobTaskId === task.id}
               onClick={() => onSelect(task.id)}
             >
               <Typography>{task.name}</Typography>
