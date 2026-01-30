@@ -1,6 +1,6 @@
 import { Stack, Typography, Button, Divider } from "@mui/material";
 import { useState } from "react";
-import { useJobTask, useJobTaskHistory, useRunJobTask } from "../../../hooks/useJobTasks";
+import { useDeleteJobTask, useJobTask, useJobTaskHistory, useRunJobTask } from "../../../hooks/useJobTasks";
 import JobTaskEditForm from "../forms/JobTaskEditForm";
 import ExecutionTable from "../tables/ExecutionTable";
 import type { User } from "../../../types/users/userTypes";
@@ -8,6 +8,7 @@ import type { User } from "../../../types/users/userTypes";
 export default function JobTaskDetails({ jobTaskId, user } : { jobTaskId: string, user: User }) {
   const { data, isLoading } = useJobTask(jobTaskId);
   const runJobTask = useRunJobTask(jobTaskId);
+  const deleteJobTask = useDeleteJobTask(jobTaskId);
   const { data: history } = useJobTaskHistory(jobTaskId);
 
   const [isEditing, setIsEditing] = useState(false);
@@ -54,18 +55,29 @@ export default function JobTaskDetails({ jobTaskId, user } : { jobTaskId: string
           <>
             <Button variant="contained" onClick={() => setIsEditing(true)}>
               Edit
-            </Button><Button
-              variant="outlined"
+            </Button>
+            
+            <Button
+              variant="contained"
               onClick={() => runJobTask.mutate()}
               disabled={runJobTask.isPending}
             >
                 Run job task
-              </Button>
+            </Button>
+
+            <Button
+              sx={{ bgcolor:"red" }}
+              variant="contained"
+              onClick={() => deleteJobTask.mutate()}
+              disabled={deleteJobTask.isPending}
+            >
+              Delete job task
+            </Button>
           </>
         )}
 
         <Button
-          variant="text"
+          variant="contained"
           onClick={() => setShowHistory(v => !v)}
         >
           {showHistory ? "Hide history" : "Show history"}

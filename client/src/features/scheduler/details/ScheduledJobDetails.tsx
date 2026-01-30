@@ -6,6 +6,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import {
+  useDeleteScheduledJob,
   useRunScheduledJob,
   useScheduledJob,
   useScheduledJobHistory
@@ -18,6 +19,7 @@ export default function ScheduledJobDetails({ scheduledJobId, user } :
   { scheduledJobId: string, user: User }) {
   const { data, isLoading, isError } = useScheduledJob(scheduledJobId);
   const runScheduledJob = useRunScheduledJob(scheduledJobId);
+  const deleteScheduledJob = useDeleteScheduledJob(scheduledJobId);
   const { data: history } = useScheduledJobHistory(scheduledJobId);
 
   const [isEditing, setIsEditing] = useState(false);
@@ -82,18 +84,29 @@ export default function ScheduledJobDetails({ scheduledJobId, user } :
         <>
           <Button variant="contained" onClick={() => setIsEditing(true)}>
             Edit
-          </Button><Button
-            variant="outlined"
+          </Button>
+
+          <Button
+            variant="contained"
             onClick={() => runScheduledJob.mutate()}
             disabled={runScheduledJob.isPending}
           >
               Run scheduled job
-            </Button>
+          </Button>
+
+          <Button
+            sx={{ bgcolor:"red" }}
+            variant="contained"
+            onClick={() => deleteScheduledJob.mutate()}
+            disabled={deleteScheduledJob.isPending}
+          >
+            Delete scheduled job
+          </Button>
         </>
         )}
 
         <Button
-          variant="text"
+          variant="contained"
           onClick={() => setShowHistory(v => !v)}
         >
           {showHistory ? "Hide history" : "Show history"}
