@@ -25,15 +25,18 @@ public class GetScheduledJob
             var scheduledJobs = await repository.FindAsync(x =>
                 x.Id == request.Id &&
                 x.JobTask.CompanyId == currentUser.CompanyId,
-                ct
+                ct,
+                x => x.JobTask
             );
 
             if (!scheduledJobs.Any())
                 return Result<ScheduledJobDto>.Failure("scheduledJob not found", 404);
 
-            var jobTaskDtos = mapper.Map<ScheduledJobDto>(scheduledJobs.SingleOrDefault());
+            var scheduledJob = scheduledJobs.SingleOrDefault();
+            var scheduledJobDto = mapper.Map<ScheduledJobDto>(scheduledJob);
+            scheduledJobDto.JobTaskKey = scheduledJob!.JobTask.JobTaskKey;
 
-            return Result<ScheduledJobDto>.Success(jobTaskDtos);
+            return Result<ScheduledJobDto>.Success(scheduledJobDto);
         }
     }
 }

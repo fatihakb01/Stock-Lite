@@ -7,7 +7,7 @@ export const scheduledJobSchema = z.object({
   jobType: z.string(),
   calculationType: z.string().optional(),
   importDataType: z.string().optional(),
-  periodType: z.string().optional(),
+  periodType: z.string().transform(v => v === "" ? undefined : v).optional(),
   source: z.string().optional(),
   target: z.string().optional(),
   isArchived: z.boolean()
@@ -28,13 +28,6 @@ export const scheduledJobSchema = z.object({
         ctx.addIssue({
           path: ["calculationType"],
           message: "Calculation type is required",
-          code: "custom",
-        });
-      }
-      if (!data.periodType) {
-        ctx.addIssue({
-          path: ["periodType"],
-          message: "Period type is required",
           code: "custom",
         });
       }

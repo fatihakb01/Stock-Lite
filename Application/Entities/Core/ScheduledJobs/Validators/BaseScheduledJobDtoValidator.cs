@@ -27,9 +27,6 @@ public class BaseScheduledJobDtoValidator : AbstractValidator<BaseScheduledJobDt
             .MaximumLength(200)
                 .WithMessage("Description can only have a maximum of 200 characters");
 
-        RuleFor(x => x.ExecutionOrder)
-            .GreaterThanOrEqualTo(0);
-
         RuleFor(x => x.JobType)
             .NotNull()
                 .WithMessage(jobTypeMessage);

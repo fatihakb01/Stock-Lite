@@ -35,20 +35,19 @@ export type CreateScheduledJobDto = {
     jobType: string,
     calculationType?: string,
     importDataType?: string,
-    periodType?: string,
+    periodType?: string | unknown,
     source?: string,
     target?: string,
 };
 
 export type EditScheduledJobDto = {
-    jobTaskKey: string,
     isArchived: boolean,
     name: string,
     description?: string,
     jobType: string,
     calculationType?: string,
     importDataType?: string,
-    periodType?: string,
+    periodType?: string | unknown,
     source?: string,
     target?: string,
 };

@@ -44,19 +44,7 @@ public class EditScheduledJob
                 return Result<ScheduledJobDto>.Failure("JobTaskKey not found", 404);
 
             var jobTaskId = jobTasks.Select(x => x.Id).SingleOrDefault();
-
-            var scheduledJobPositionExist = await repository.ExistsAsync(x =>
-                x.Id != request.Id &&
-                x.JobTaskId == jobTaskId && 
-                x.ExecutionOrder == dto.ExecutionOrder,
-                ct
-            );
-
-            if (scheduledJobPositionExist)
-                return Result<ScheduledJobDto>.Failure("Not allowed to use an existing ExecutionOrder.", 404);
-
             scheduledJob.JobTaskId = jobTaskId;
-
             mapper.Map(dto, scheduledJob);
 
             var result = await repository.SaveChangesAsync(ct);
