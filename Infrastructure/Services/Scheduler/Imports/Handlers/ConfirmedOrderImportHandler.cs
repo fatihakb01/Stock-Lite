@@ -18,7 +18,10 @@ public class ConfirmedOrderImportHandler(DataContext context) : IImportHandler
     public async Task ImportAsync(Stream file, Guid companyId, CancellationToken ct)
     {
         using var reader = new StreamReader(file);
-        using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+        using var csv = new CsvReader(reader, new CsvHelper.Configuration.CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            Delimiter = ";"
+        });
 
         using var dataTable = new DataTable();
         dataTable.Columns.Add("CompanyId", typeof(Guid));

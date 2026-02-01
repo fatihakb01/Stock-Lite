@@ -37,7 +37,7 @@ public class JobRunnerService(
         catch (Exception ex)
         {
             execution.Status = JobExecutionStatus.Failed;
-            execution.ErrorMessage = ex.ToString();
+            execution.ErrorMessage = ex.ToString()[..4000];
             job.Result = JobRunResult.Failed;
 
             return job.Result;

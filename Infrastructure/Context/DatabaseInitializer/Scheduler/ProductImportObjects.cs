@@ -26,6 +26,7 @@ public class ProductImportObjects
                 Price DECIMAL(18,2) NOT NULL,
                 Description NVARCHAR(MAX) NULL,
                 IsActive BIT NOT NULL,
+                CreatedAt DATETIME NULL,
                 LeadTimeDays INT NULL,
                 MinimumOrderQuantity INT NULL,
                 OrderIncrementQuantity INT NULL,
@@ -58,7 +59,8 @@ public class ProductImportObjects
                 Name,
                 Price,
                 Description,
-                IsActive
+                IsActive,
+                CreatedAt
             )
             SELECT
                 NEWID(),
@@ -67,7 +69,8 @@ public class ProductImportObjects
                 s.Name,
                 s.Price,
                 ISNULL(s.Description, ''),
-                ISNULL(s.IsActive, 1)
+                ISNULL(s.IsActive, 1),
+                GETDATE()
             FROM dbo.StagingProducts s
             WHERE s.CompanyId = @CompanyId
             AND NOT EXISTS (
@@ -83,7 +86,8 @@ public class ProductImportObjects
                 p.Name = s.Name,
                 p.Price = s.Price,
                 p.Description = ISNULL(s.Description, ''),
-                p.IsActive = ISNULL(s.IsActive, 1)
+                p.IsActive = ISNULL(s.IsActive, 1),
+                p.CreatedAt = ISNULL(s.CreatedAt, GETDATE())
             FROM Products p
             JOIN dbo.StagingProducts s
                 ON s.CompanyId = p.CompanyId

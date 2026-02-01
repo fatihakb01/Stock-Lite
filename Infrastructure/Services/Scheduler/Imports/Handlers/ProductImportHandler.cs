@@ -18,7 +18,10 @@ public class ProductImportHandler(DataContext context) : IImportHandler
     public async Task ImportAsync(Stream file, Guid companyId, CancellationToken ct)
     {
         using var reader = new StreamReader(file);
-        using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+        using var csv = new CsvReader(reader, new CsvHelper.Configuration.CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            Delimiter = ";"
+        });
 
         using var dataTable = new DataTable();
         dataTable.Columns.Add("CompanyId", typeof(Guid));
@@ -27,6 +30,7 @@ public class ProductImportHandler(DataContext context) : IImportHandler
         dataTable.Columns.Add("Price", typeof(decimal));
         dataTable.Columns.Add("Description", typeof(string));
         dataTable.Columns.Add("IsActive", typeof(bool));
+        dataTable.Columns.Add("CreatedAt", typeof(DateTime));
         dataTable.Columns.Add("LeadTimeDays", typeof(int));
         dataTable.Columns.Add("MinimumOrderQuantity", typeof(int));
         dataTable.Columns.Add("OrderIncrementQuantity", typeof(int));
@@ -42,6 +46,7 @@ public class ProductImportHandler(DataContext context) : IImportHandler
                 r.Price,
                 r.Description ?? "",
                 r.IsActive ?? true,
+                DateTime.UtcNow,
                 r.LeadTimeDays,
                 r.MinimumOrderQuantity,
                 r.OrderIncrementQuantity,
