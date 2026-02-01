@@ -3,5 +3,6 @@ namespace Domain.Enums;
 public enum JobRunResult
 {
     Succeeded = 0,
-    Failed = 1
+    Failed = 1,
+    Unknown = 2
 }

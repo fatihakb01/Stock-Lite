@@ -30,13 +30,17 @@ public class JobRunnerService(
         {
             await _dispatcher.DispatchAsync(job, ct);
             execution.Status = JobExecutionStatus.Succeeded;
-            return JobRunResult.Succeeded;
+            job.Result = JobRunResult.Succeeded;
+            
+            return job.Result;
         }
         catch (Exception ex)
         {
             execution.Status = JobExecutionStatus.Failed;
             execution.ErrorMessage = ex.ToString();
-            return JobRunResult.Failed;
+            job.Result = JobRunResult.Failed;
+
+            return job.Result;
         }
         finally
         {

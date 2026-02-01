@@ -27,6 +27,9 @@ public class ScheduledJobConfiguration : IEntityTypeConfiguration<ScheduledJob>
         builder.Property(x => x.IsArchived)
             .IsRequired();
 
+        builder.Property(x => x.Result)
+            .IsRequired();
+
         builder.HasIndex(x => new { x.JobTaskId, x.ExecutionOrder })
             .IsUnique();
 

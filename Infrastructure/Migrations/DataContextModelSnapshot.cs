@@ -384,6 +384,9 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
+                    b.Property<int>("Result")
+                        .HasColumnType("int");
+
                     b.Property<string>("Source")
                         .HasColumnType("nvarchar(max)");
 

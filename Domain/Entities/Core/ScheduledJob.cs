@@ -23,6 +23,8 @@ public class ScheduledJob
     public Guid JobTaskId { get; set; }
     public required JobTask JobTask { get; set; }
 
+    public JobRunResult Result { get; set; } = JobRunResult.Unknown;
+
     public int ExecutionOrder { get; set; }  
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

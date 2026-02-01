@@ -1,5 +1,4 @@
 using Domain.Entities.Core;
-using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
@@ -81,27 +80,5 @@ public class ScheduledJobRepository(DataContext context)
             var job = jobs.Single(j => j.Id == orderedScheduledJobIds[i]);
             job.ExecutionOrder = i;
         }
-    }
-
-    public async Task<Dictionary<Guid, JobExecutionStatus>> GetLatestExecutionStatusByJobTaskAsync(
-        Guid jobTaskId, CancellationToken ct)
-    {
-        return await _context.JobExecutions
-            .Where(x => x.ScheduledJob.JobTaskId == jobTaskId)
-            .GroupBy(x => x.ScheduledJobId)
-            .Select(g => g
-                .OrderByDescending(x => x.StartedAt)
-                .Select(x => new
-                {
-                    x.ScheduledJobId,
-                    x.Status
-                })
-                .First()
-            )
-            .ToDictionaryAsync(
-                x => x.ScheduledJobId,
-                x => x.Status,
-                ct
-            );
     }
 }

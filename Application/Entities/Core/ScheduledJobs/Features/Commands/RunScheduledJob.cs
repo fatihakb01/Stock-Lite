@@ -1,4 +1,5 @@
 using Application.Core;
+using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Scheduler;
 using Domain.Interfaces.Services.Users;
@@ -35,6 +36,8 @@ public class RunScheduledJob
             var scheduledJob = scheduledJobs.SingleOrDefault()!;
 
             await jobRunnerService.RunAsync(scheduledJob, ct);
+            scheduledJob.Result = JobRunResult.Unknown;
+            await repository.SaveChangesAsync(ct);
 
             return Result<Unit>.Success(Unit.Value);
         }

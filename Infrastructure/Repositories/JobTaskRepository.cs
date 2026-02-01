@@ -1,4 +1,5 @@
 using Domain.Entities.Core;
+using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
@@ -24,5 +25,47 @@ public class JobTaskRepository(DataContext context)
             .Include(e => e.ScheduledJob)
                 .ThenInclude(j => j.JobTask)
             .ToListAsync(ct);
+    }
+
+    public async Task<Dictionary<Guid, JobRunResult>> GetScheduledJobResultByJobTaskAsync(
+        Guid jobTaskId, CancellationToken ct)
+    {
+        return await _context.ScheduledJobs
+            .Where(x => x.JobTaskId == jobTaskId)
+            .GroupBy(x => x.Id)
+            .Select(g => g
+                .Select(x => new
+                {
+                    x.Id,
+                    x.Result
+                })
+                .First()
+            )
+            .ToDictionaryAsync(
+                x => x.Id,
+                x => x.Result,
+                ct
+            );
+    }
+
+    public async Task ResetScheduledJobResultByJobTaskAsync(Guid jobTaskId, CancellationToken ct)
+    {
+        var jobs = _context.ScheduledJobs
+            .Where(x => x.JobTaskId == jobTaskId)
+            .ToList();
+
+        var succeededJobs = _context.ScheduledJobs
+            .Where(x => x.JobTaskId == jobTaskId && x.Result == JobRunResult.Succeeded)
+            .ToList();
+
+        if (jobs.Count != succeededJobs.Count)
+            return;
+
+        foreach (var job in jobs)
+        {
+            job.Result = JobRunResult.Unknown;
+        }
+
+        await _context.SaveChangesAsync(ct);
     }
 }

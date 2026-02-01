@@ -12,25 +12,25 @@ public class JobTaskRunnerService(
 {
     public async Task RunAsync(Guid jobTaskId, CancellationToken ct)
     {
-        var tasks = await jobTaskRepo.FindAsync(x =>
-            x.Id == jobTaskId, 
+        var task = await jobTaskRepo.GetByIdAsync(jobTaskId, ct);
+
+        if (task == null)
+            throw new InvalidOperationException("JobTask not found.");
+
+        var jobs = await scheduledJobRepo.FindAsync(x => 
+            x.JobTaskId == task.Id, 
             ct
         );
 
-        if (!tasks.Any())
-            throw new InvalidOperationException("JobTask not found.");
+        jobs = jobs.OrderBy(x => x.ExecutionOrder);
 
-        var jobs = tasks.SingleOrDefault()!.Jobs
-            .Where(x => !x.IsArchived)
-            .OrderBy(x => x.ExecutionOrder);
-
-        var lastExecutionStatuses =await scheduledJobRepo
-            .GetLatestExecutionStatusByJobTaskAsync(jobTaskId, ct);
+        var lastExecutionStatuses = await jobTaskRepo
+            .GetScheduledJobResultByJobTaskAsync(jobTaskId, ct);
 
         foreach (var job in jobs)
         {
             if (lastExecutionStatuses.TryGetValue(job.Id, out var status) &&
-                status == JobExecutionStatus.Succeeded)
+                status == JobRunResult.Succeeded)
             {
                 continue;
             }
@@ -42,5 +42,7 @@ public class JobTaskRunnerService(
                 break;
             }
         }    
+
+        await jobTaskRepo.ResetScheduledJobResultByJobTaskAsync(jobTaskId, ct);
     }
 }
