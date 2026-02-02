@@ -932,7 +932,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.Core.ScheduledJob", "ScheduledJob")
                         .WithMany("JobExecutions")
                         .HasForeignKey("ScheduledJobId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("ScheduledJob");

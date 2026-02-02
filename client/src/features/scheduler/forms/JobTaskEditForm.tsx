@@ -38,7 +38,7 @@ export default function JobTaskEditForm({
 
   const onSubmit = async (values: JobTaskFormValues) => {
     const dto: EditJobTaskDto = {
-      jobTaskKey: jobTask.jobTaskKey,
+      jobTaskKey: values.jobTaskKey,
       name: values.name,
       description: values.description,
       isArchived: values.isArchived

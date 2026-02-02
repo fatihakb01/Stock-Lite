@@ -65,6 +65,6 @@ public class ScheduledJobConfiguration : IEntityTypeConfiguration<ScheduledJob>
         builder.HasMany(x => x.JobExecutions)
             .WithOne(j => j.ScheduledJob)
             .HasForeignKey(j => j.ScheduledJobId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
