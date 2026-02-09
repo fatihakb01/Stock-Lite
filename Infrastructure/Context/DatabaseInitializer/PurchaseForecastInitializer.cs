@@ -83,16 +83,34 @@ public static class PurchaseForecastInitializer
         logger.LogInformation("Ensuring dbo.InventorySnapshot view exists...");
 
         var sql = @"
-        CREATE OR ALTER VIEW dbo.InventorySnapshot AS
-        SELECT
-            p.Id AS ProductId,
-            ISNULL(SUM(pol.ReceivedQuantity), 0)
-            - ISNULL(SUM(tli.Quantity), 0) AS QuantityOnHand
-        FROM Products p
-        LEFT JOIN PurchaseOrderLineItem pol ON pol.ProductId = p.Id
-        LEFT JOIN PurchaseOrder po ON po.Id = pol.PurchaseOrderId AND po.Status IN (2,3)
-        LEFT JOIN TransactionLineItems tli ON tli.ProductId = p.Id
-        GROUP BY p.Id;
+        CREATE OR ALTER VIEW [dbo].[InventorySnapshot] AS
+		WITH AggregatedFilfilledPOs AS (
+			SELECT
+				p.Id AS ProductId,
+				ISNULL(SUM(pol.ReceivedQuantity), 0) AS TotalReceivedQuantity
+			FROM Products p
+			JOIN PurchaseOrderLineItem pol ON pol.ProductId = p.Id
+			JOIN PurchaseOrder po ON po.Id = pol.PurchaseOrderId AND po.Status IN (2, 3)
+			GROUP BY p.Id
+		),
+		AggregatedTransactions AS (
+			SELECT
+				p.Id AS ProductId,
+				ISNULL(SUM(tli.Quantity), 0) AS TotalSoldQuantity
+			FROM Products p
+			JOIN TransactionLineItems tli ON p.Id = tli.ProductId
+			GROUP BY p.Id
+		),
+		Result AS (
+			SELECT 
+				t.ProductId AS ProductId,
+				ISNULL(TotalReceivedQuantity, 0) - ISNULL(TotalSoldQuantity,0) AS QuantityOnHand
+			FROM Products p
+			LEFT JOIN AggregatedFilfilledPOs po ON p.Id = po.ProductId
+			LEFT JOIN AggregatedTransactions t ON p.Id = t.ProductId
+		)
+
+		SELECT * FROM Result
         ";
 
         await context.Database.ExecuteSqlRawAsync(sql);

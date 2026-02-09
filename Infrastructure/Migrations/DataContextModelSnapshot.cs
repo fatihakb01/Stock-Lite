@@ -186,7 +186,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("CompanyId");
 
-                    b.HasIndex("JobTaskKey")
+                    b.HasIndex("JobTaskKey", "CompanyId")
                         .IsUnique();
 
                     b.ToTable("JobTasks");

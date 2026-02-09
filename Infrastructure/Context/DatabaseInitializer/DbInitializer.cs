@@ -17,6 +17,7 @@ namespace Infrastructure.Context.DatabaseInitializer
             await PurchaseForecastInitializer.InitializeAsync(context, logger);
             await StockLevelInitializer.InitializeAsync(context, logger);   
             await SchedulerImportInitializer.InitializeAsync(context, logger);
+            await DataSeederInitializer.InitializeAsync(context, logger);
         }
     }
 }

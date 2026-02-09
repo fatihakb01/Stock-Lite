@@ -10,7 +10,7 @@ public class JobTaskConfiguration : IEntityTypeConfiguration<JobTask>
     {
         builder.HasKey(x => x.Id);
 
-        builder.HasIndex(x => x.JobTaskKey)
+        builder.HasIndex(x => new { x.JobTaskKey, x.CompanyId })
             .IsUnique();
 
         builder.Property(x => x.JobTaskKey)

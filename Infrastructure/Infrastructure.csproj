@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Context\DatabaseInitializer\Scheduler\" />
-    <Folder Include="Context\SeedData\Data\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 

@@ -1,6 +1,5 @@
 using Infrastructure.Context;
 using Infrastructure.Context.DatabaseInitializer;
-using Infrastructure.Context.SeedData.Core;
 
 namespace API.Extensions;
 
@@ -23,11 +22,6 @@ public static class DatabaseInitializationExtensions
         catch (Exception ex)
         {
             logger.LogError(ex, "Database initialization failed.");
-        }
-
-        if (app.Environment.IsDevelopment())
-        {
-            await DataSeeder.SeedAsync(context, config);
         }
     }
 }

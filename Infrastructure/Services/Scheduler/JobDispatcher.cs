@@ -100,10 +100,10 @@ public class JobDispatcher(IServiceProvider provider, DataContext context) : IJo
                 break;
 
             case StandardCalculationType.PurchaseForecasts:
-                var confirmedorderaggregates =
-                    scope.ServiceProvider.GetRequiredService<IConfirmedOrderAggregateCalculation>();
+                var purchaseForecasts =
+                    scope.ServiceProvider.GetRequiredService<IPurchaseForecastCalculation>();
 
-                await confirmedorderaggregates.RunAsync(companyId, null, period, ct);
+                await purchaseForecasts.RunAsync(companyId, null, ct);
                 break;
             default:
                 throw new InvalidOperationException(
