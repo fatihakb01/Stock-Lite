@@ -239,173 +239,185 @@ public static class PurchaseForecastInitializer
         logger.LogInformation("Ensuring dbo.UpdatePurchaseForecasts stored procedure exists...");
 
         var sql = @"
-        CREATE OR ALTER PROCEDURE dbo.UpdatePurchaseForecasts
+        CREATE OR ALTER PROCEDURE [dbo].[UpdatePurchaseForecasts]
             @CompanyId UNIQUEIDENTIFIER,
             @ProductIds dbo.GuidList READONLY
         AS
         BEGIN
             SET NOCOUNT ON;
 
-            WITH BaseData AS (
-                SELECT
-                    wf.ProductId,
-                    wf.WeekStartDate,
-                    wf.WeekEndDate,
-                    wf.WeekIndex,
-                    wf.ForecastQuantity,
-					inv.QuantityOnHand,
-                    ISNULL(wc.QuantityCommitted, 0) AS QuantityCommitted,
-					ISNULL(wo.QuantityOnOrder, 0) AS QuantityOnOrder,
-					CASE
-						WHEN ISNULL(wc.QuantityCommitted, 0) > wf.ForecastQuantity
-							THEN ISNULL(wc.QuantityCommitted, 0)
-						ELSE CAST(wf.ForecastQuantity AS FLOAT)
-					END AS EffectiveDemand,
-                    pol.SafetyStock,
-                    pol.MinimumOrderQuantity AS MOQ,
-                    pol.OrderIncrementQuantity AS OrderIncrement
-                FROM Products p
-                JOIN WeeklyForecastAgg wf ON wf.ProductId = p.Id
-                JOIN ProductInventoryPolicies pol ON pol.ProductId = p.Id
-				JOIN InventorySnapshot inv ON inv.ProductId = p.Id
-				INNER JOIN PurchaseForecasts pf
-					ON pf.ProductId = p.Id
-					AND pf.WeekStartDate = wf.WeekStartDate
-                LEFT JOIN WeeklyCommittedAgg wc
-                    ON wc.ProductId = p.Id
-					AND wc.WeekStartDate = wf.WeekStartDate
-				LEFT JOIN WeeklyOpenPurchaseOrdersAgg wo
-					ON wo.ProductId = p.Id
-					AND wo.WeekStartDate = wf.WeekStartDate
-                WHERE p.CompanyId = @CompanyId
+            -- Prepare Base Data
+            SELECT
+                wf.ProductId,
+                wf.WeekStartDate,
+                wf.WeekEndDate,
+                wf.WeekIndex,
+                wf.WeekIndex + CEILING(pol.LeadTimeDays / 7.0) AS ArrivalWeekIndex,
+                wf.ForecastQuantity,
+
+                inv.QuantityOnHand,
+                ISNULL(wc.QuantityCommitted, 0) AS QuantityCommitted,
+                ISNULL(wo.QuantityOnOrder, 0) AS QuantityOnOrder,
+
+                CASE
+                    WHEN ISNULL(wc.QuantityCommitted, 0) > CAST(wf.ForecastQuantity AS FLOAT)
+                        THEN ISNULL(wc.QuantityCommitted, 0)
+                    ELSE CAST(wf.ForecastQuantity AS FLOAT)
+                END AS EffectiveDemand,
+
+                pol.SafetyStock,
+                pol.MinimumOrderQuantity AS MOQ,
+                pol.OrderIncrementQuantity AS OrderIncrement,
+                CEILING(pol.LeadTimeDays / 7.0) AS LeadTimeWeeks
+            INTO #Plan
+            FROM Products p
+            JOIN WeeklyForecastAgg wf ON wf.ProductId = p.Id
+            JOIN ProductInventoryPolicies pol ON pol.ProductId = p.Id
+            JOIN InventorySnapshot inv ON inv.ProductId = p.Id
+            LEFT JOIN WeeklyCommittedAgg wc
+                ON wc.ProductId = p.Id
+                AND wc.WeekStartDate = wf.WeekStartDate
+            LEFT JOIN WeeklyOpenPurchaseOrdersAgg wo
+                ON wo.ProductId = p.Id
+                AND wo.WeekStartDate = wf.WeekStartDate
+            WHERE p.CompanyId = @CompanyId
                 AND (
                     NOT EXISTS (SELECT 1 FROM @ProductIds)
                     OR p.Id IN (SELECT Id FROM @ProductIds)
                 )
-            ), Seed AS (
+
+            -- Add planning columns
+            ALTER TABLE #Plan ADD
+                ProjectedStock DECIMAL(15,2) NULL,
+                NetDemandDuringLeadTime FLOAT NOT NULL DEFAULT 0,
+                RecommendedOrderQuantity INT NOT NULL DEFAULT 0,
+                ArrivingFromRecommendations INT NOT NULL DEFAULT 0;
+
+            -- Calculate net demand during lead time
+            WITH LeadTimeDemand AS (
                 SELECT
-                    b.ProductId,
-                    b.WeekStartDate,
-                    b.WeekEndDate,
-                    b.WeekIndex,
-                    b.ForecastQuantity,
-                    b.QuantityCommitted,
-                    b.QuantityOnOrder,
-                    b.SafetyStock,
-                    b.MOQ,
-                    b.OrderIncrement,
-
-                    -- Initial projected stock
-					b.QuantityOnHand
-					+ ISNULL(b.QuantityOnOrder, 0)
-					- b.EffectiveDemand
-					AS ProjectedStock,
-
-                    CAST(
-                        CASE
-                            WHEN b.QuantityOnHand + ISNULL(b.QuantityOnOrder, 0) - b.ForecastQuantity < b.SafetyStock
-                            THEN
-                                CASE
-                                    WHEN b.MOQ <= 0 OR b.OrderIncrement <= 0 THEN 0
-                                    WHEN CEILING((b.SafetyStock - (b.QuantityOnHand + ISNULL(b.QuantityOnOrder, 0) - b.ForecastQuantity))
-                                        / b.OrderIncrement) * b.OrderIncrement < b.MOQ
-                                    THEN b.MOQ
-                                    ELSE CEILING((b.SafetyStock - (b.QuantityOnHand + ISNULL(b.QuantityOnOrder, 0) - b.ForecastQuantity))
-                                        / b.OrderIncrement) * b.OrderIncrement
-                                END
-                            ELSE 0
-                        END AS INT
-                    ) AS RecommendedOrderQuantity,
-
-                    CAST(
-                        CASE
-                            WHEN b.QuantityOnHand + ISNULL(b.QuantityOnOrder, 0) - b.ForecastQuantity < b.SafetyStock
-                            THEN 1 ELSE 0
-                        END AS BIT
-                    ) AS NeedsReorder
-                FROM BaseData b
-                WHERE b.WeekIndex = 0
-            ), RecursivePlan AS (
-                -- Anchor
-                SELECT * FROM Seed
-
-                UNION ALL
-
-                -- Recursive step
-                SELECT
-                    b.ProductId,
-                    b.WeekStartDate,
-                    b.WeekEndDate,
-                    b.WeekIndex,
-                    b.ForecastQuantity,
-                    b.QuantityCommitted,
-                    rp.QuantityOnOrder,
-                    b.SafetyStock,
-                    b.MOQ,
-                    b.OrderIncrement,
-
-                    -- Projected stock rolls forward
-					rp.ProjectedStock
-					+ rp.RecommendedOrderQuantity
-					+ ISNULL(b.QuantityOnOrder, 0)
-					- b.EffectiveDemand
-					AS ProjectedStock,
-
-
-                    -- Recommended order
-                    CAST(
-                        CASE
-                            WHEN rp.ProjectedStock + rp.RecommendedOrderQuantity - b.ForecastQuantity < b.SafetyStock
-                            THEN
-                                CASE
-                                    WHEN b.MOQ <= 0 OR b.OrderIncrement <= 0 THEN 0
-                                    WHEN CEILING(
-                                        (b.SafetyStock - (rp.ProjectedStock + rp.RecommendedOrderQuantity - b.ForecastQuantity))
-                                        / b.OrderIncrement
-                                    ) * b.OrderIncrement < b.MOQ
-                                    THEN b.MOQ
-                                    ELSE CEILING(
-                                        (b.SafetyStock - (rp.ProjectedStock + rp.RecommendedOrderQuantity - b.ForecastQuantity))
-                                        / b.OrderIncrement
-                                    ) * b.OrderIncrement
-                                END
-                            ELSE 0
-                        END AS INT
-                    ) AS RecommendedOrderQuantity,
-
-                    CAST(
-                        CASE
-                            WHEN rp.ProjectedStock + rp.RecommendedOrderQuantity - b.ForecastQuantity < b.SafetyStock
-                            THEN 1 ELSE 0
-                        END AS BIT
-                    ) AS NeedsReorder
-                FROM RecursivePlan rp
-                JOIN BaseData b
-                ON b.ProductId = rp.ProductId
-                AND b.WeekIndex = rp.WeekIndex + 1
+                    b1.ProductId,
+                    b1.WeekIndex,
+                    GREATEST(
+                        SUM(b2.EffectiveDemand) - 
+                        SUM(b2.QuantityOnOrder), 
+                        0
+                    ) AS NetDemandDuringLeadTime
+                FROM #Plan b1
+                JOIN #Plan b2
+                ON b2.ProductId = b1.ProductId
+                AND b2.WeekIndex > b1.WeekIndex
+                AND b2.WeekIndex <= b1.WeekIndex + b1.LeadTimeWeeks
+                GROUP BY
+                    b1.ProductId,
+                    b1.WeekIndex
             )
+            UPDATE p
+            SET p.NetDemandDuringLeadTime = l.NetDemandDuringLeadTime
+            FROM LeadTimeDemand l
+            INNER JOIN #Plan p	
+                ON l.ProductId = p.ProductId
+                AND l.WeekIndex = p.WeekIndex
+
+            -- Seed ProjectedStock in week 0
+            UPDATE #Plan
+            SET ProjectedStock =
+                QuantityOnHand
+                + QuantityOnOrder
+                - EffectiveDemand
+            WHERE WeekIndex = 0;
+
+
+            -- Iterate week by week
+            DECLARE @Week INT = 0;
+            DECLARE @MaxWeek INT = (SELECT MAX(WeekIndex) FROM #Plan);
+
+            WHILE @Week <= @MaxWeek
+            BEGIN
+
+                -- Apply arrivals from previous recommendations
+                UPDATE p
+                SET p.ArrivingFromRecommendations = ISNULL(a.ArrivingQty, 0)
+                FROM #Plan p
+                LEFT JOIN (
+                    SELECT
+                        ProductId,
+                        WeekIndex + LeadTimeWeeks AS ArrivalWeekIndex,
+                        SUM(RecommendedOrderQuantity) AS ArrivingQty
+                    FROM #Plan
+                    WHERE RecommendedOrderQuantity > 0
+                    GROUP BY
+                        ProductId,
+                        WeekIndex + LeadTimeWeeks
+                ) a
+                    ON a.ProductId = p.ProductId
+                AND a.ArrivalWeekIndex = p.WeekIndex
+                WHERE p.WeekIndex = @Week;
+
+                -- Calculate projected stock
+                UPDATE p
+                SET p.ProjectedStock =
+                    prev.ProjectedStock
+                    + p.QuantityOnOrder
+                    + p.ArrivingFromRecommendations
+                    - p.EffectiveDemand
+                FROM #Plan p
+                JOIN #Plan prev
+					ON prev.WeekIndex = p.WeekIndex - 1
+					AND p.ProductId = prev.ProductId
+                WHERE p.WeekIndex = @Week;
+
+                -- Decide whether to order
+                UPDATE p
+                SET RecommendedOrderQuantity =
+                    CASE
+                        WHEN p.ProjectedStock - ISNULL(p.NetDemandDuringLeadTime, 0) < p.SafetyStock
+                        THEN
+                            CASE
+                                WHEN p.MOQ <= 0 OR p.OrderIncrement <= 0 THEN 0
+                                WHEN CEILING(
+                                    (p.SafetyStock
+                                    - (p.ProjectedStock - p.NetDemandDuringLeadTime))
+                                    / p.OrderIncrement
+                                ) * p.OrderIncrement < p.MOQ
+                                THEN p.MOQ
+                                ELSE CEILING(
+                                    (p.SafetyStock
+                                    - (p.ProjectedStock - p.NetDemandDuringLeadTime))
+                                    / p.OrderIncrement
+                                ) * p.OrderIncrement
+                            END
+                        ELSE 0
+                    END
+                FROM #Plan p
+                WHERE p.WeekIndex = @Week;
+
+                SET @Week += 1;
+            END
 
             UPDATE pf
             SET
-                pf.ForecastQuantity = r.ForecastQuantity,
-                pf.QuantityCommitted = r.QuantityCommitted,
-                pf.QuantityOnOrder = r.QuantityOnOrder,
-                pf.ProjectedStock = r.ProjectedStock,
-                pf.NeedsReorder = r.NeedsReorder,
-                pf.RecommendedOrderQuantity = r.RecommendedOrderQuantity,
+                pf.ForecastQuantity = p.ForecastQuantity,
+                pf.QuantityCommitted = p.QuantityCommitted,
+                pf.QuantityOnOrder = p.QuantityOnOrder,
+                pf.ProjectedStock = p.ProjectedStock,
+                pf.NeedsReorder = CASE WHEN p.RecommendedOrderQuantity > 0 THEN 1 ELSE 0 END,
+                pf.RecommendedOrderQuantity = p.RecommendedOrderQuantity,
                 pf.RecommendedOrderDate = 
                     CASE 
-                        WHEN r.NeedsReorder = 1 AND r.WeekStartDate < CONVERT(date, SYSUTCDATETIME())
+                        WHEN p.RecommendedOrderQuantity > 0 AND p.WeekStartDate < CONVERT(date, SYSUTCDATETIME())
                             THEN CONVERT(date, SYSUTCDATETIME())
-                        WHEN r.NeedsReorder = 1 AND r.WeekStartDate >= CONVERT(date, SYSUTCDATETIME())
-                            THEN r.WeekStartDate
+                        WHEN p.RecommendedOrderQuantity > 0 AND p.WeekStartDate >= CONVERT(date, SYSUTCDATETIME())
+                            THEN p.WeekStartDate
                     END,
                 pf.CalculatedAt = SYSUTCDATETIME()
             FROM PurchaseForecasts pf
-            INNER JOIN RecursivePlan r
-                ON r.ProductId = pf.ProductId
-                AND r.WeekStartDate = pf.WeekStartDate
-            OPTION (MAXRECURSION 1000);
+            INNER JOIN #Plan p
+                ON p.ProductId = pf.ProductId
+                AND p.WeekStartDate = pf.WeekStartDate
+
+            DROP TABLE #Plan
+
         END
         ";
 
