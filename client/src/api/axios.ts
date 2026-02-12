@@ -46,7 +46,8 @@ api.interceptors.response.use(
         break;
 
       case 401:
-        toast.error("Unauthorized");
+        toast.error("Session expired. Please sign in again.");
+        localStorage.removeItem("token");
         break;
 
       case 403:
