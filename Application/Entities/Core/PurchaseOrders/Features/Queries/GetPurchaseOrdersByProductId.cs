@@ -33,6 +33,8 @@ public class GetPurchaseOrdersByProductId
                 po => po.LineItems.Where(li => li.ProductId == request.ProductId)
             );
 
+            purchaseOrders = purchaseOrders.OrderByDescending(po => po.OrderDate);
+
             if (!purchaseOrders.Any())
                 return Result<List<PurchaseOrderDto>>.Failure("No purchase orders found for this product", 404);
 

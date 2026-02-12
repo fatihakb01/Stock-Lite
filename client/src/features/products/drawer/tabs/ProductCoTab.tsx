@@ -5,7 +5,6 @@ import {
 } from "@mui/material";
 import { useConfirmedOrders } from "../../../../hooks/useConfirmedOrders";
 import OrderLineLookupTable from "../tables/OrderLineLookupTable";
-import { coStatusMap } from "../../../../types/confirmedOrders/coStatusMap";
 
 interface ProductCoTabProps {
   productId: string | null;
@@ -22,7 +21,7 @@ export default function ProductCoTab({ productId }: ProductCoTabProps) {
   const rows = data.flatMap(co =>
     co.lineItems.map(li => ({
       orderNumber: co.orderNumber,
-      status: coStatusMap[Number(co.status)],
+      status: co.status,
       orderDate: new Date(co.orderDate).toLocaleDateString(),
       expectedDate: new Date(co.expectedDeliveryDate).toLocaleDateString(),
       receivedDate: co.receivedDate == null ? '-' : new Date(co.receivedDate).toLocaleDateString(),

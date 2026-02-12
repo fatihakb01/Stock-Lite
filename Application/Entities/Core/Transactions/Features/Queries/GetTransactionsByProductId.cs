@@ -26,10 +26,13 @@ public class GetTransactionsByProductId
             var transactions = await repository.FindAsync(
                 t =>
                     t.CompanyId == currentUser.CompanyId &&
-                    t.LineItems.Any(li => li.ProductId == request.ProductId),
+                    t.LineItems
+                        .Any(li => li.ProductId == request.ProductId),
                 ct,
                 t => t.LineItems.Where(li => li.ProductId == request.ProductId)
             );
+
+            transactions = transactions.OrderByDescending(t => t.TransactionDate);
 
             if (!transactions.Any())
                 return Result<List<TransactionDto>>.Failure("No transactions found for this product", 404);

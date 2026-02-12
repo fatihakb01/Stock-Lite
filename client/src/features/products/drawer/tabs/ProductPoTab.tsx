@@ -5,7 +5,6 @@ import {
 } from "@mui/material";
 import { usePurchaseOrders } from "../../../../hooks/usePurchaseOrders";
 import OrderLineLookupTable from "../tables/OrderLineLookupTable";
-import { poStatusMap } from "../../../../types/purchaseOrders/poStatusMap";
 
 interface ProductPoTabProps {
   productId: string | null;
@@ -22,7 +21,7 @@ export default function ProductPoTab({ productId }: ProductPoTabProps) {
   const rows = data.flatMap(po =>
     po.lineItems.map(li => ({
       orderNumber: po.orderNumber,
-      status: poStatusMap[Number(po.status)],
+      status: po.status,
       orderDate: new Date(po.orderDate).toLocaleDateString(),
       expectedDate: new Date(po.expectedDeliveryDate).toLocaleDateString(),
       receivedDate: po.receivedDate == null ? '-' : new Date(po.receivedDate).toLocaleDateString(),

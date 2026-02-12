@@ -31,6 +31,8 @@ public class GetConfirmedOrdersByProductId
                 co => co.LineItems.Where(li => li.ProductId == request.ProductId)
             );
 
+            confirmedOrders = confirmedOrders.OrderByDescending(co => co.OrderDate);
+
             if (!confirmedOrders.Any())
                 return Result<List<ConfirmedOrderDto>>.Failure("No confirmed orders found for this product", 404);
 
