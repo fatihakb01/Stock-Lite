@@ -41,7 +41,7 @@ export default function ProductOverviewTab({ product }: Props) {
       {/* --- Product Header --- */}
       <Box>
         <Typography variant="h5" fontWeight="bold">
-          {product.name || "N/A"}
+          {product.name || "No Name"}
         </Typography>
         <Stack direction="row" spacing={2} alignItems="center">
           <Typography color="text.secondary">
@@ -55,11 +55,11 @@ export default function ProductOverviewTab({ product }: Props) {
           />
         </Stack>
         <Typography mt={1}>
-          Price: <strong>${product.price.toFixed(2) || "N/A"}</strong>
+          Price: <strong>${product.price.toFixed(2) || 0.00}</strong>
         </Typography>
         {product.description && (
           <Typography mt={1} color="text.secondary">
-            {product.description || "N/A"}
+            {product.description || ""}
           </Typography>
         )}
       </Box>
@@ -70,7 +70,7 @@ export default function ProductOverviewTab({ product }: Props) {
           <Paper sx={{ p: 2 }}>
             <Typography color="text.secondary">Forecast Quantity</Typography>
             <Typography variant="h6">
-              {stock.forecastQuantity || "N/A"}
+              {stock.forecastQuantity || 0}
             </Typography>
           </Paper>
         </Grid>
@@ -80,7 +80,7 @@ export default function ProductOverviewTab({ product }: Props) {
               Projected stock @ Lead Time
             </Typography>
             <Typography variant="h6">
-              {stock.netStockPosition || "N/A"}
+              {stock.netStockPosition || 0}
             </Typography>
           </Paper>
         </Grid>
@@ -118,23 +118,23 @@ export default function ProductOverviewTab({ product }: Props) {
           <Stack spacing={1}>
             <InfoRow
               label="Quantity on hand"
-              value={stock.quantityOnHand || "N/A"}
+              value={stock.quantityOnHand || 0}
             />
             <InfoRow
               label="Quantity on order"
-              value={stock.quantityOnOrder || "N/A"}
+              value={stock.quantityOnOrder || 0}
             />
             <InfoRow
               label="Quantity committed"
-              value={stock.quantityCommitted || "N/A"}
+              value={stock.quantityCommitted || 0}
             />
             <InfoRow
               label="Reorder point"
-              value={stock.reorderPoint || "N/A"}
+              value={stock.reorderPoint || 0}
             />
             <InfoRow
               label="Recommended order qty"
-              value={stock.recommendedOrderQuantity || "N/A"}
+              value={stock.recommendedOrderQuantity || 0}
             />
           </Stack>
         </Paper>
@@ -146,23 +146,23 @@ export default function ProductOverviewTab({ product }: Props) {
           <Stack spacing={1}>
             <InfoRow
               label="Lead time (days)"
-              value={policy.leadTimeDays || "N/A"}
+              value={policy.leadTimeDays || 0}
             />
             <InfoRow
               label="Safety stock"
-              value={policy.safetyStock || "N/A"}
+              value={policy.safetyStock || 0}
             />
             <InfoRow
               label="MOQ"
-              value={policy.minimumOrderQuantity || "N/A"}
+              value={policy.minimumOrderQuantity || 0}
             />
             <InfoRow
               label="Order increment"
-              value={policy.orderIncrementQuantity || "N/A"}
+              value={policy.orderIncrementQuantity || 0}
             />
             <InfoRow
               label="Stock adjustment"
-              value={policy.stockAdjustment || "N/A"}
+              value={policy.stockAdjustment || 0}
             />
           </Stack>
         </Paper>
