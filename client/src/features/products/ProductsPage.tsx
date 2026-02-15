@@ -1,13 +1,45 @@
 import { useState } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { useProducts } from "../../hooks/useProducts";
-import type { Product } from "./productTypes";
+import type { Product } from "../../types/products/productTypes";
 import ProductDetailDrawer from "./drawer/ProductDetailDrawer";
+import { useNavigate, useSearchParams } from "react-router-dom";
+
+function Filter({ filter } : { filter: string }) {
+  const navigate = useNavigate();
+
+  return (
+    <FormControl sx={{ width: 300 }}>
+      <InputLabel>Filter</InputLabel>
+      <Select
+        value={filter}
+        label="Filter"
+        onChange={(e) => {
+          const value = e.target.value;
+          if (value === "") {
+            navigate("/products");
+          } else {
+            navigate(`/products?filter=${value}`);
+          }
+        }}
+      >
+        <MenuItem value="">All Products</MenuItem>
+        <MenuItem value="BelowSafetyStock">Below Safety Stock</MenuItem>
+        <MenuItem value="WithRecommendedOrders">With Recommended Orders</MenuItem>
+        <MenuItem value="WithoutStockAtLeadTime">Without Stock at Lead Time</MenuItem>
+        <MenuItem value="WithoutForecast">Without Forecast</MenuItem>
+      </Select>
+    </FormControl>
+  )
+}
 
 export default function ProductsPage() {
   // Retrieve products data
-  const { data: products, isLoading, isError } = useProducts();
+  const [searchParams] = useSearchParams();
+  const filter = searchParams.get("filter") ?? "";
+
+  const { data: products } = useProducts(filter);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // Define the columns for the DataGrid
@@ -28,9 +60,6 @@ export default function ProductsPage() {
     },
   ];
 
-  if (isLoading) return <Typography>Loading products...</Typography>;
-  if (isError) return <Typography color="error">Failed to load products.</Typography>;
-
   return (
     <Box
       sx={{
@@ -43,6 +72,18 @@ export default function ProductsPage() {
         p: 2,
       }}
     >
+      {/* Filter on top */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          px: 5,
+          mb: 2,
+        }}
+      >
+        <Filter filter={filter} />
+      </Box>
+
       {/* DataGrid Table */}
       <Box flex={1}>
         <Typography variant="h5" mb={2} ml={5}>

@@ -1,3 +1,5 @@
+using Domain.Entities.Derived;
+
 namespace Domain.Entities.Core;
 
 public class Company
@@ -17,4 +19,5 @@ public class Company
     public ICollection<PurchaseOrder> PurchaseOrders { get; set; } = new List<PurchaseOrder>();
     public ICollection<ConfirmedOrder> ConfirmedOrders { get; set; } = new List<ConfirmedOrder>();
     public ICollection<JobTask> JobTasks { get; set; } = new List<JobTask>();
+    public ProductKpi? ProductKpi { get; set; }
 }

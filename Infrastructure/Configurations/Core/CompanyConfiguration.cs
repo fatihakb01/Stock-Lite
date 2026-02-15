@@ -1,4 +1,5 @@
 using Domain.Entities.Core;
+using Domain.Entities.Derived;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -52,6 +53,11 @@ public class CompanyConfiguration : IEntityTypeConfiguration<Company>
         builder.HasMany(b => b.JobTasks)
             .WithOne(j => j.Company)
             .HasForeignKey(j => j.CompanyId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(b => b.ProductKpi)
+            .WithOne(k => k.Company)
+            .HasForeignKey<ProductKpi>(k => k.CompanyId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

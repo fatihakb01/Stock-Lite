@@ -86,6 +86,7 @@ public static class DependencyInjection
         services.AddScoped<IConfirmedOrderAggregateRepository, ConfirmedOrderAggregateRepository>();
         services.AddScoped<IPurchaseForecastRepository, PurchaseForecastRepository>();
         services.AddScoped<IStockLevelRepository, StockLevelRepository>();
+        services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IJobTaskRepository, JobTaskRepository>();
         services.AddScoped<IScheduledJobRepository, ScheduledJobRepository>();

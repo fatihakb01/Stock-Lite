@@ -631,6 +631,44 @@ namespace Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Domain.Entities.Derived.ProductKpi", b =>
+                {
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("BelowSafetyStockCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("RecommendedOrdersCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<bool>("SchedulerFailed")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("TotalProductCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("WithoutForecastCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("WithoutStockAtLeadTimeCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.HasKey("CompanyId");
+
+                    b.ToTable("ProductKpis");
+                });
+
             modelBuilder.Entity("Domain.Entities.Derived.PurchaseForecast", b =>
                 {
                     b.Property<Guid>("ProductId")
@@ -1075,6 +1113,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Derived.ProductKpi", b =>
+                {
+                    b.HasOne("Domain.Entities.Core.Company", "Company")
+                        .WithOne("ProductKpi")
+                        .HasForeignKey("Domain.Entities.Derived.ProductKpi", "CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+                });
+
             modelBuilder.Entity("Domain.Entities.Derived.PurchaseForecast", b =>
                 {
                     b.HasOne("Domain.Entities.Core.Product", "Product")
@@ -1164,6 +1213,8 @@ namespace Infrastructure.Migrations
                     b.Navigation("ConfirmedOrders");
 
                     b.Navigation("JobTasks");
+
+                    b.Navigation("ProductKpi");
 
                     b.Navigation("Products");
 

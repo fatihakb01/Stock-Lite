@@ -1,5 +1,4 @@
 using Domain.Entities.Core;
-using Domain.Enums;
 
 namespace Domain.Interfaces.Repositories;
 

@@ -8,7 +8,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import SalesAndForecastChart from "../chart/SalesAndForecastChart";
-import { type ProductDetail } from "../../productTypes"; 
+import { type ProductDetail } from "../../../../types/products/productTypes"; 
 import { useSalesAggregates } from "../../../../hooks/useSalesAggregates";
 import { useForecasts } from "../../../../hooks/useForecasts";
 import { useConfirmedOrderAggregates } from "../../../../hooks/useConfirmedOrderAggregates";

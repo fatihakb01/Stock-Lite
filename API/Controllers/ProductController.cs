@@ -1,6 +1,7 @@
 using Application.Entities.Core.Products.DTOs;
 using Application.Entities.Core.Products.Features.Commands;
 using Application.Entities.Core.Products.Features.Queries;
+using Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,10 +18,16 @@ public class ProductController(IMediator mediator) : BaseApiController(mediator)
     }
 
     [HttpGet]
-    public async Task<ActionResult<ProductListDto>> GetProducts()
+    public async Task<ActionResult<ProductListDto>> GetProducts([FromQuery] ProductFilter? filter)
     {
-        return HandleResult(await Mediator.Send(new GetProducts.Query { }));
+        return HandleResult(await Mediator.Send(new GetProducts.Query { Filter = filter }));
     }    
+
+    [HttpGet("kpis")]
+    public async Task<ActionResult<ProductKpiDto>> GetProductKpis()
+    {
+        return HandleResult(await Mediator.Send(new GetProductKpis.Query()));
+    }
     
     [Authorize(Policy = "AdminOrSuperAdmin")]
     [HttpPost]

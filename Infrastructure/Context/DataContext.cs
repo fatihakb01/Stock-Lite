@@ -26,6 +26,7 @@ public class DataContext(DbContextOptions<DataContext> options)
     public DbSet<JobTask> JobTasks { get; set; }
     public DbSet<ScheduledJob> ScheduledJobs { get; set; }
     public DbSet<JobExecution> JobExecutions { get; set; }
+    public DbSet<ProductKpi> ProductKpis { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

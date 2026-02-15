@@ -34,3 +34,12 @@ export type ProductDetail = {
         stockAdjustment: number
     }
 }
+
+export type ProductKpi = {
+    schedulerFailed: boolean,
+    totalProductCount: number,
+    belowSafetyStockCount: number,
+    recommendedOrdersCount: number,
+    withoutStockAtLeadTimeCount: number,
+    withoutForecastCount: number
+}
