@@ -59,20 +59,22 @@ public static class PurchaseForecastInitializer
 
         var sql = @"
         CREATE OR ALTER VIEW dbo.WeeklyCommittedAgg AS
-        SELECT
+		SELECT
             col.ProductId,
-            DATEADD(
-                WEEK,
-                DATEDIFF(WEEK, 0, co.ExpectedDeliveryDate),
-                0
-            ) AS WeekStartDate,
-            SUM(col.Quantity - ISNULL(col.SoldQuantity, 0)) AS QuantityCommitted
+			DATEADD(DAY,
+					-((DATEPART(WEEKDAY, co.ExpectedDeliveryDate) + @@DATEFIRST - 2) % 7),
+					CAST(co.ExpectedDeliveryDate AS date)
+			) AS WeekStartDate,
+            SUM(col.Quantity - col.SoldQuantity) AS QuantityCommitted
         FROM ConfirmedOrderLineItem col
         JOIN ConfirmedOrder co ON co.Id = col.ConfirmedOrderId
         WHERE co.Status IN (0, 1)
         GROUP BY
             col.ProductId,
-            DATEADD(WEEK, DATEDIFF(WEEK, 0, co.ExpectedDeliveryDate), 0);
+			DATEADD(DAY,
+					-((DATEPART(WEEKDAY, co.ExpectedDeliveryDate) + @@DATEFIRST - 2) % 7),
+					CAST(co.ExpectedDeliveryDate AS date)
+			)
         ";
 
         await context.Database.ExecuteSqlRawAsync(sql);
@@ -124,22 +126,20 @@ public static class PurchaseForecastInitializer
         CREATE OR ALTER VIEW dbo.WeeklyOpenPurchaseOrdersAgg AS
         SELECT
             pol.ProductId,
-            DATEADD(
-                WEEK,
-                DATEDIFF(WEEK, 0, po.ExpectedDeliveryDate),
-                0
-            ) AS WeekStartDate,
+			DATEADD(DAY,
+					-((DATEPART(WEEKDAY, po.ExpectedDeliveryDate) + @@DATEFIRST - 2) % 7),
+					CAST(po.ExpectedDeliveryDate AS date)
+			) AS WeekStartDate,
             SUM(pol.Quantity - ISNULL(pol.ReceivedQuantity, 0)) AS QuantityOnOrder
         FROM PurchaseOrderLineItem pol
         JOIN PurchaseOrder po ON po.Id = pol.PurchaseOrderId
         WHERE po.Status IN (0,1,2)  
         GROUP BY
             pol.ProductId,
-            DATEADD(
-                WEEK,
-                DATEDIFF(WEEK, 0, po.ExpectedDeliveryDate),
-                0
-            );
+			DATEADD(DAY,
+					-((DATEPART(WEEKDAY, po.ExpectedDeliveryDate) + @@DATEFIRST - 2) % 7),
+					CAST(po.ExpectedDeliveryDate AS date)
+			)
         ";
 
         await context.Database.ExecuteSqlRawAsync(sql);

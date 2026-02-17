@@ -15,7 +15,7 @@ public static class StockLevelInitializer
     private static async Task CreatePfcWithinLeadTimeAgg(DataContext context, ILogger logger)
     {
         var sql = @"
-        CREATE OR ALTER VIEW dbo.PurchaseForecastWithinLeadTimeAgg
+        CREATE OR ALTER VIEW [dbo].[PurchaseForecastWithinLeadTimeAgg]
         AS
         WITH ForecastWindow AS (
             SELECT
@@ -60,19 +60,19 @@ public static class StockLevelInitializer
             SELECT
                 wf.ProductId,
                 wf.WeekIndex,
-                wf.ProjectedStock,
-                wf.RecommendedOrderQuantity,
-                wf.QuantityCommitted,
-                wf.QuantityOnOrder,
+                wf.ProjectedStock * (wf.OverlapDays / 7.0) AS WeightedProjectedStock,
+                wf.RecommendedOrderQuantity * (wf.OverlapDays / 7.0) AS WeightedRecommendedOrderQuantity,
+                wf.QuantityCommitted * (wf.OverlapDays / 7.0) AS WeightedQuantityCommitted,
+                wf.QuantityOnOrder * (wf.OverlapDays / 7.0) AS WeightedQuantityOnOrder,
 
                 -- Weighted forecast
                 wf.ForecastQuantity * (wf.OverlapDays / 7.0) AS WeightedForecastQuantity,
 
                 -- Effective demand based on weighted forecast
                 CASE
-                    WHEN wf.ForecastQuantity * (wf.OverlapDays / 7.0) > wf.QuantityCommitted
+                    WHEN wf.ForecastQuantity * (wf.OverlapDays / 7.0) > wf.QuantityCommitted * (wf.OverlapDays / 7.0)
                     THEN wf.ForecastQuantity * (wf.OverlapDays / 7.0)
-                    ELSE wf.QuantityCommitted
+                    ELSE wf.QuantityCommitted * (wf.OverlapDays / 7.0)
                 END AS EffectiveDemand,
 
                 ROW_NUMBER() OVER (
@@ -83,12 +83,12 @@ public static class StockLevelInitializer
         )
         SELECT
             ProductId,
-            SUM(RecommendedOrderQuantity)        AS RecommendedOrderQuantity,
-            SUM(QuantityCommitted)               AS QuantityCommitted,
-            SUM(QuantityOnOrder)                 AS QuantityOnOrder,
-            SUM(WeightedForecastQuantity)        AS ForecastQuantity,
-            SUM(EffectiveDemand)                 AS EffectiveDemand,
-            MAX(CASE WHEN rn = 1 THEN ProjectedStock END) AS ProjectedStockAtLeadTime
+            SUM(WeightedRecommendedOrderQuantity)        AS RecommendedOrderQuantity,
+            SUM(WeightedQuantityCommitted)               AS QuantityCommitted,
+            SUM(WeightedQuantityOnOrder)                 AS QuantityOnOrder,
+            SUM(WeightedForecastQuantity)				 AS ForecastQuantity,
+            SUM(EffectiveDemand)						 AS EffectiveDemand,
+            MAX(CASE WHEN rn = 1 THEN WeightedProjectedStock END) AS ProjectedStockAtLeadTime
         FROM RankedForecast
         GROUP BY ProductId;
         ";
