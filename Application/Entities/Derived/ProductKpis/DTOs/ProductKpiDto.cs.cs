@@ -1,4 +1,4 @@
-namespace Application.Entities.Core.Products.DTOs;
+namespace Application.Entities.Derived.ProductKpis.DTOs;
 
 public class ProductKpiDto
 {

@@ -34,6 +34,7 @@
     <Folder Include="Entities\Derived\ConfirmedOrderAggregates\Features\" />
     <Folder Include="Entities\Derived\ConfirmedOrderAggregates\Features\Commands\" />
     <Folder Include="Entities\Derived\ConfirmedOrderAggregates\Features\Queries\" />
+    <Folder Include="Entities\Derived\ProductKpis\Features\Commands\" />
     <Folder Include="Entities\Derived\PurchaseForecasts\" />
     <Folder Include="Entities\Derived\PurchaseForecasts\DTOs\" />
     <Folder Include="Entities\Derived\PurchaseForecasts\Features\" />

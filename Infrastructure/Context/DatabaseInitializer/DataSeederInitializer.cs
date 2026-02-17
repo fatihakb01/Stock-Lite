@@ -256,7 +256,7 @@ public static class DataSeederInitializer
 			@phoneNumber,
 			@address
 		*/
-        ALTER   PROCEDURE [dbo].[CreateCompany]
+        CREATE OR ALTER PROCEDURE [dbo].[CreateCompany]
             @name NVARCHAR(100),
             @email NVARCHAR(255),
 			@userName NVARCHAR(50),
@@ -269,7 +269,8 @@ public static class DataSeederInitializer
 			DECLARE 
 				@CompanyId UNIQUEIDENTIFIER  = NEWID(),
 				@JobTaskOne UNIQUEIDENTIFIER = NEWID(),
-				@JobTaskTwo UNIQUEIDENTIFIER = NEWID()
+				@JobTaskTwo UNIQUEIDENTIFIER = NEWID(),
+				@CreatedAt DATETIME = GETDATE()
 
 			-- Create new company
             INSERT INTO Companies (
@@ -363,15 +364,16 @@ public static class DataSeederInitializer
 				Result
 			)
 			VALUES
-			(NEWID(),'Import Confirmed Orders','','0','','2','','C:\CSharp\Data\Master\confirmedorders.csv',NULL,'1','0',@JobTaskOne,'3','2026-02-01 16:02:07.5050004','977F28AF-B824-45CB-808F-FB02D2D76635','2'),
-			(NEWID(),'Import Purchase Orders','','0','','3','','C:\CSharp\Data\Master\purchaseorders.csv',NULL,'1','0',@JobTaskOne,'2','2026-02-01 16:01:38.7564204','977F28AF-B824-45CB-808F-FB02D2D76635','2'),
-			(NEWID(),'Import Transactions','','0','','1','','C:\CSharp\Data\Master\transactions.csv',NULL,'1','0',@JobTaskOne,'1','2026-02-01 16:00:51.3587564','977F28AF-B824-45CB-808F-FB02D2D76635','2'),
-			(NEWID(),'Import Products','','0','','0','','C:\CSharp\Data\Master\products.csv',NULL,'1','0',@JobTaskOne,'0','2026-02-01 16:00:11.9901764','977F28AF-B824-45CB-808F-FB02D2D76635','2'),
-			(NEWID(),'Calculate purchase forecast','','1','4','','','',NULL,'1','0',@JobTaskTwo,'3','2026-02-01 17:03:53.9061343','977F28AF-B824-45CB-808F-FB02D2D76635','2'),
-			(NEWID(),'Calculate confirmed demand','','1','1','','','',NULL,'1','0',@JobTaskTwo,'2','2026-02-01 17:08:29.0224054','977F28AF-B824-45CB-808F-FB02D2D76635','2'),
-			(NEWID(),'Calculate forecast','','1','2','','','',NULL,'1','0',@JobTaskTwo,'1','2026-02-01 17:08:04.8936963','977F28AF-B824-45CB-808F-FB02D2D76635','2'),
-			(NEWID(),'Calculate stock levels','','1','0','','','',NULL,'1','0',@JobTaskTwo,'4','2026-02-01 17:08:52.4878067','977F28AF-B824-45CB-808F-FB02D2D76635','2'),
-			(NEWID(),'Calculate sales','','1','3','','','',NULL,'1','0',@JobTaskTwo,'0','2026-02-01 17:07:42.5067452','977F28AF-B824-45CB-808F-FB02D2D76635','2')
+			(NEWID(),'Import Confirmed Orders','','0','','2','','C:\CSharp\Data\Master\confirmedorders.csv',NULL,'1','0',@JobTaskOne,'3',@CreatedAt,'977F28AF-B824-45CB-808F-FB02D2D76635','2'),
+			(NEWID(),'Import Purchase Orders','','0','','3','','C:\CSharp\Data\Master\purchaseorders.csv',NULL,'1','0',@JobTaskOne,'2',@CreatedAt,'977F28AF-B824-45CB-808F-FB02D2D76635','2'),
+			(NEWID(),'Import Transactions','','0','','1','','C:\CSharp\Data\Master\transactions.csv',NULL,'1','0',@JobTaskOne,'1',@CreatedAt,'977F28AF-B824-45CB-808F-FB02D2D76635','2'),
+			(NEWID(),'Import Products','','0','','0','','C:\CSharp\Data\Master\products.csv',NULL,'1','0',@JobTaskOne,'0',@CreatedAt,'977F28AF-B824-45CB-808F-FB02D2D76635','2'),
+			(NEWID(),'Calculate purchase forecast','','1','4','','','',NULL,'1','0',@JobTaskTwo,'3',@CreatedAt,'977F28AF-B824-45CB-808F-FB02D2D76635','2'),
+			(NEWID(),'Calculate confirmed demand','','1','1','','','',NULL,'1','0',@JobTaskTwo,'2',@CreatedAt,'977F28AF-B824-45CB-808F-FB02D2D76635','2'),
+			(NEWID(),'Calculate forecast','','1','2','','','',NULL,'1','0',@JobTaskTwo,'1',@CreatedAt,'977F28AF-B824-45CB-808F-FB02D2D76635','2'),
+			(NEWID(),'Calculate stock levels','','1','0','','','',NULL,'1','0',@JobTaskTwo,'4',@CreatedAt,'977F28AF-B824-45CB-808F-FB02D2D76635','2'),
+			(NEWID(),'Calculate sales','','1','3','','','',NULL,'1','0',@JobTaskTwo,'0',@CreatedAt,'977F28AF-B824-45CB-808F-FB02D2D76635','2'),
+			(NEWID(),'Calculate product KPIs','','1','5',NULL,NULL,NULL,NULL,'1','0',@JobTaskTwo,'5',@CreatedAt,'977F28AF-B824-45CB-808F-FB02D2D76635','2')
         END
         ";
 

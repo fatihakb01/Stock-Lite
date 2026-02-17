@@ -1,18 +1,18 @@
 using Application.Core;
-using Application.Entities.Core.Products.DTOs;
+using Application.Entities.Derived.ProductKpis.DTOs;
 using AutoMapper;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 
-namespace Application.Entities.Core.Products.Features.Queries;
+namespace Application.Entities.Derived.ProductKpis.Features.Queries;
 
 public class GetProductKpis
 {
     public class Query : IRequest<Result<ProductKpiDto>> { }
 
     public class Handler(
-        IProductRepository repository, 
+        IProductKpiRepository repository, 
         ICurrentUserService currentUser,
         IMapper mapper
     ) : IRequestHandler<Query, Result<ProductKpiDto>>

@@ -105,6 +105,14 @@ public class JobDispatcher(IServiceProvider provider, DataContext context) : IJo
 
                 await purchaseForecasts.RunAsync(companyId, null, ct);
                 break;
+
+            case StandardCalculationType.ProductKpis:
+                var productKpi =
+                    scope.ServiceProvider.GetRequiredService<IProductKpiCalculation>();
+
+                await productKpi.RunAsync(companyId, ct);
+                break;
+                
             default:
                 throw new InvalidOperationException(
                     $"CalculationType is required for job {job.Id}"

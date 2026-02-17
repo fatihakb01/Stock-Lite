@@ -3,44 +3,38 @@ import { useProductKpi } from "../../hooks/useProducts";
 import { useNavigate } from "react-router-dom";
 
 export default function HomePage() {
-  const { data: data, isLoading, isError } = useProductKpi();
+  const { data: data } = useProductKpi();
   const navigate = useNavigate();
-
-  if (isLoading)
-    return <Typography>Loading...</Typography>
-
-  if (isError)
-    return <Typography>Product KPIs not found.</Typography>
 
   const kpis = [
     { 
       label: "Total Products", 
-      value: data?.totalProductCount, 
+      value: data?.totalProductCount || 0, 
       filter: "" 
     },
     { 
       label: "Products Below Safety Stock", 
-      value: data?.belowSafetyStockCount, 
+      value: data?.belowSafetyStockCount || 0, 
       filter: "BelowSafetyStock" 
     },
     { 
       label: "Products With Recommended Orders", 
-      value: data?.recommendedOrdersCount, 
+      value: data?.recommendedOrdersCount || 0, 
       filter: "WithRecommendedOrders" 
     },
     { 
       label: "Products Without Stock at Lead Time", 
-      value: data?.withoutStockAtLeadTimeCount, 
+      value: data?.withoutStockAtLeadTimeCount || 0, 
       filter: "WithoutStockAtLeadTime" 
     },
     { 
       label: "Products Without Forecast", 
-      value: data?.withoutForecastCount, 
+      value: data?.withoutForecastCount || 0, 
       filter: "WithoutForecast" 
     },
     { 
       label: "Scheduler succesful?", 
-      value: data?.schedulerFailed ? "❌" : "✅", 
+      value: (data?.schedulerFailed || false) ? "❌" : "✅", 
       filter: "FailedJobs" 
     }
   ];

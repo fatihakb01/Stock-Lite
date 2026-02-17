@@ -6,5 +6,6 @@ public enum StandardCalculationType
     ConfirmedOrderAggregates = 1,
     Forecasts = 2,
     SalesAggregates = 3,
-    PurchaseForecasts = 4
+    PurchaseForecasts = 4,
+    ProductKpis = 5
 }

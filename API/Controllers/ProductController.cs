@@ -22,12 +22,6 @@ public class ProductController(IMediator mediator) : BaseApiController(mediator)
     {
         return HandleResult(await Mediator.Send(new GetProducts.Query { Filter = filter }));
     }    
-
-    [HttpGet("kpis")]
-    public async Task<ActionResult<ProductKpiDto>> GetProductKpis()
-    {
-        return HandleResult(await Mediator.Send(new GetProductKpis.Query()));
-    }
     
     [Authorize(Policy = "AdminOrSuperAdmin")]
     [HttpPost]

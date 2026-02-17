@@ -87,6 +87,7 @@ public static class DependencyInjection
         services.AddScoped<IPurchaseForecastRepository, PurchaseForecastRepository>();
         services.AddScoped<IStockLevelRepository, StockLevelRepository>();
         services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IProductKpiRepository, ProductKpiRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IJobTaskRepository, JobTaskRepository>();
         services.AddScoped<IScheduledJobRepository, ScheduledJobRepository>();
@@ -103,6 +104,7 @@ public static class DependencyInjection
         services.AddScoped<IPurchaseForecastCalculation, PurchaseForecastCalculation>();
         services.AddScoped<IForecastCalculation, ForecastCalculation>();
         services.AddScoped<IConfirmedOrderAggregateCalculation, ConfirmedOrderAggregateCalculation>();
+        services.AddScoped<IProductKpiCalculation, ProductKpiCalculation>();
 
         services.AddScoped<IImportHandler, ProductImportHandler>();
         services.AddScoped<IImportHandler, TransactionImportHandler>();

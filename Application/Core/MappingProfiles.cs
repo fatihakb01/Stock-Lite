@@ -15,6 +15,7 @@ using Application.Entities.Derived.StockLevels.DTOs;
 using Application.Entities.Derived.PurchaseForecasts.DTOs;
 using Application.Entities.Core.JobTasks.DTOs;
 using Application.Entities.Core.ScheduledJobs.DTOs;
+using Application.Entities.Derived.ProductKpis.DTOs;
 
 namespace Application.Core;
 
