@@ -22,6 +22,7 @@ public class DataContext(DbContextOptions<DataContext> options)
     public DbSet<PurchaseForecast> PurchaseForecasts { get; set; }
     public DbSet<SalesAggregate> SalesAggregates { get; set; }
     public DbSet<Forecast> Forecasts { get; set; }
+    public DbSet<Seasonality> Seasonality { get; set; }
     public DbSet<ConfirmedOrderAggregate> ConfirmedOrderAggregates { get; set; }
     public DbSet<JobTask> JobTasks { get; set; }
     public DbSet<ScheduledJob> ScheduledJobs { get; set; }

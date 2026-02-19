@@ -40,6 +40,11 @@
     <Folder Include="Entities\Derived\PurchaseForecasts\Features\" />
     <Folder Include="Entities\Derived\PurchaseForecasts\Features\Commands\" />
     <Folder Include="Entities\Derived\PurchaseForecasts\Features\Queries\" />
+    <Folder Include="Entities\Derived\Seasonality\" />
+    <Folder Include="Entities\Derived\Seasonality\DTOs\" />
+    <Folder Include="Entities\Derived\Seasonality\Features\" />
+    <Folder Include="Entities\Derived\Seasonality\Features\Commands\" />
+    <Folder Include="Entities\Derived\Seasonality\Features\Queries\" />
     <Folder Include="Entities\Derived\StockLevels\" />
     <Folder Include="Entities\Derived\StockLevels\DTOs\" />
     <Folder Include="Entities\Derived\StockLevels\Features\" />

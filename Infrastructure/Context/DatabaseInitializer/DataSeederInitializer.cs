@@ -664,14 +664,14 @@ public static class DataSeederInitializer
 			SELECT
 				p.Id AS ProductId,
 				NEWID() AS TransactionGuidId,
-				CONCAT('T-', FORMAT(ROW_NUMBER() OVER (ORDER BY p.Id, n.n), 'D8')) AS TransactionId,
-				DATEADD(DAY, -n.n % 365, SYSUTCDATETIME()) AS TransactionDate,
-				CASE WHEN n.n % 2 = 0 THEN 'Card' ELSE 'Cash' END AS PaymentMethod,
+				CONCAT('T-', FORMAT(ROW_NUMBER() OVER (ORDER BY p.Id, ABS(CHECKSUM(NEWID()))), 'D8')) AS TransactionId,
+				DATEADD(DAY, -ABS(CHECKSUM(NEWID())) % 1095, SYSUTCDATETIME()) AS TransactionDate,
+				CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'Card' ELSE 'Cash' END AS PaymentMethod,
 				NULL AS Notes,
 				0 AS TotalAmount
 			INTO #Tran_Source
 			FROM Products p
-			JOIN #Numbers n ON n.n < @NumberOfTransactions;
+			JOIN #Numbers n ON n.n < 50;
 
 			INSERT INTO Transactions (
 				Id,

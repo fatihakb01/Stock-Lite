@@ -83,6 +83,7 @@ public static class DependencyInjection
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<ISalesAggregateRepository, SalesAggregateRepository>();
         services.AddScoped<IForecastRepository, ForecastRepository>();
+        services.AddScoped<ISeasonalityRepository, SeasonalityRepository>();
         services.AddScoped<IConfirmedOrderAggregateRepository, ConfirmedOrderAggregateRepository>();
         services.AddScoped<IPurchaseForecastRepository, PurchaseForecastRepository>();
         services.AddScoped<IStockLevelRepository, StockLevelRepository>();
@@ -103,6 +104,7 @@ public static class DependencyInjection
         services.AddScoped<ISalesAggregateCalculation, SalesAggregateCalculation>();
         services.AddScoped<IPurchaseForecastCalculation, PurchaseForecastCalculation>();
         services.AddScoped<IForecastCalculation, ForecastCalculation>();
+        services.AddScoped<ISeasonalityCalculation, SeasonalityCalculation>();
         services.AddScoped<IConfirmedOrderAggregateCalculation, ConfirmedOrderAggregateCalculation>();
         services.AddScoped<IProductKpiCalculation, ProductKpiCalculation>();
 

@@ -134,7 +134,7 @@ namespace Infrastructure.Context.DatabaseInitializer
                     SELECT 'Monthly' AS PeriodType, DATEFROMPARTS(YEAR(DATEADD(MONTH, -v.number, SYSUTCDATETIME())), MONTH(DATEADD(MONTH, -v.number, SYSUTCDATETIME())), 1) AS PeriodStartDate
                     FROM master.dbo.spt_values v
                     WHERE v.type = 'P' 
-					AND v.number BETWEEN 0 AND 11
+					AND v.number BETWEEN 0 AND 35
                 )
                 INSERT INTO SalesAggregates (ProductId, PeriodType, PeriodStartDate, PeriodEndDate, TotalQuantity, TotalRevenue)
                 SELECT 
@@ -344,7 +344,7 @@ namespace Infrastructure.Context.DatabaseInitializer
 					DATEFROMPARTS(YEAR(DATEADD(MONTH, -v.number, SYSUTCDATETIME())), MONTH(DATEADD(MONTH, -v.number, SYSUTCDATETIME())), 1) AS PeriodStartDate
                     FROM master.dbo.spt_values v
                     WHERE v.type = 'P' 
-					AND v.number BETWEEN 0 AND 11
+					AND v.number BETWEEN 0 AND 35
                 ),		
 				MonthlyProducts AS (
 					SELECT 

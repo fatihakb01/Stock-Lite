@@ -16,6 +16,7 @@ using Application.Entities.Derived.PurchaseForecasts.DTOs;
 using Application.Entities.Core.JobTasks.DTOs;
 using Application.Entities.Core.ScheduledJobs.DTOs;
 using Application.Entities.Derived.ProductKpis.DTOs;
+using Application.Entities.Derived.Seasonality.DTOs;
 
 namespace Application.Core;
 
@@ -75,6 +76,9 @@ public class MappingProfiles : Profile
 
         // Forecast entity
         CreateMap<Forecast, ForecastDto>();
+
+        // Seasonality entity
+        CreateMap<Seasonality, SeasonalityDto>();
 
         // PurchaseForecast entity
         CreateMap<PurchaseForecast, PurchaseForecastDto>();

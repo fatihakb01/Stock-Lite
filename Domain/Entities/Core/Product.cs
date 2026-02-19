@@ -22,6 +22,7 @@ public class Product
     public ICollection<PurchaseForecast> PurchaseForecasts { get; set; } = new List<PurchaseForecast>();
     public ICollection<SalesAggregate> SalesAggregates { get; set; } = new List<SalesAggregate>();
     public ICollection<Forecast> Forecasts { get; set; } = new List<Forecast>();
+    public ICollection<Seasonality> Seasonality { get; set; } = new List<Seasonality>();
     public ICollection<ConfirmedOrderAggregate> ConfirmedOrderAggregates { get; set; } = new List<ConfirmedOrderAggregate>();
     public ICollection<TransactionLineItem> TransactionLineItems { get; set; } = new List<TransactionLineItem>();
     public ICollection<PurchaseOrderLineItem> PurchaseOrderLineItem { get; set; } = new List<PurchaseOrderLineItem>();

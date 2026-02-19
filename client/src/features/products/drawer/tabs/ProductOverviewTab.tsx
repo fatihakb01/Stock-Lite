@@ -70,7 +70,7 @@ export default function ProductOverviewTab({ product }: Props) {
           <Paper sx={{ p: 2 }}>
             <Typography color="text.secondary">Forecast Quantity</Typography>
             <Typography variant="h6">
-              {stock.forecastQuantity || 0}
+              {(stock && stock.forecastQuantity) || 0}
             </Typography>
           </Paper>
         </Grid>
@@ -80,7 +80,7 @@ export default function ProductOverviewTab({ product }: Props) {
               Projected stock @ Lead Time
             </Typography>
             <Typography variant="h6">
-              {stock.netStockPosition || 0}
+              {(stock && stock.netStockPosition) || 0}
             </Typography>
           </Paper>
         </Grid>
@@ -88,28 +88,26 @@ export default function ProductOverviewTab({ product }: Props) {
           <Paper sx={{ p: 2 }}>
             <Typography color="text.secondary">Reorder</Typography>
             <Chip
-              label={stock.needsReorder ? "Yes" : "No"}
-              color={stock.needsReorder ? "error" : "success"}
+              label={(stock && stock.needsReorder) ? "Yes" : "No"}
+              color={(stock && stock.needsReorder) ? "error" : "success"}
               variant="outlined"
             />
           </Paper>
         </Grid>
       </Grid>
-
+      
       {/* --- Sales & Forecast Chart --- */}
       <Section title="Sales & Forecast">
         {(isLoadingSales || isLoadingForecast || isLoadingCO) && (
           <CircularProgress size={24} />
         )}
-        {sales && forecast && confirmedOrders && (
-          <SalesAndForecastChart
-            sales={sales}
-            forecast={forecast}
-            confirmedOrder={confirmedOrders}
-            periodType={periodType}
-            onPeriodTypeChange={setPeriodType}
-          />
-        )}
+        <SalesAndForecastChart
+          sales={sales || []}
+          forecast={forecast || []}
+          confirmedOrder={confirmedOrders || []}
+          periodType={periodType}
+          onPeriodTypeChange={setPeriodType}
+        />
       </Section>
 
       {/* --- Stock Levels --- */}
@@ -118,23 +116,23 @@ export default function ProductOverviewTab({ product }: Props) {
           <Stack spacing={1}>
             <InfoRow
               label="Quantity on hand"
-              value={stock.quantityOnHand || 0}
+              value={(stock && stock.quantityOnHand) ?? 0}
             />
             <InfoRow
               label="Quantity on order"
-              value={stock.quantityOnOrder || 0}
+              value={(stock && stock.quantityOnOrder) || 0}
             />
             <InfoRow
               label="Quantity committed"
-              value={stock.quantityCommitted || 0}
+              value={(stock && stock.quantityCommitted) || 0}
             />
             <InfoRow
               label="Reorder point"
-              value={stock.reorderPoint || 0}
+              value={(stock && stock.reorderPoint) || 0}
             />
             <InfoRow
               label="Recommended order qty"
-              value={stock.recommendedOrderQuantity || 0}
+              value={(stock && stock.recommendedOrderQuantity) || 0}
             />
           </Stack>
         </Paper>

@@ -752,6 +752,25 @@ namespace Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Domain.Entities.Derived.Seasonality", b =>
+                {
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("PeriodStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("Factor")
+                        .HasColumnType("decimal(4,2)");
+
+                    b.HasKey("ProductId", "PeriodStartDate");
+
+                    b.ToTable("Seasonality", t =>
+                        {
+                            t.HasCheckConstraint("CK_Seasonality_Factor", "[Factor] >= 0 AND [Factor] <= 12");
+                        });
+                });
+
             modelBuilder.Entity("Domain.Entities.Derived.StockLevel", b =>
                 {
                     b.Property<Guid>("ProductId")
@@ -1146,6 +1165,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Derived.Seasonality", b =>
+                {
+                    b.HasOne("Domain.Entities.Core.Product", "Product")
+                        .WithMany("Seasonality")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Domain.Entities.Derived.StockLevel", b =>
                 {
                     b.HasOne("Domain.Entities.Core.Product", "Product")
@@ -1250,6 +1280,8 @@ namespace Infrastructure.Migrations
                     b.Navigation("PurchaseOrderLineItem");
 
                     b.Navigation("SalesAggregates");
+
+                    b.Navigation("Seasonality");
 
                     b.Navigation("StockLevel");
 

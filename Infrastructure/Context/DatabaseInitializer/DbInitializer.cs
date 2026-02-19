@@ -12,6 +12,7 @@ namespace Infrastructure.Context.DatabaseInitializer
 
             await UserDefinedTypesInitializer.InitializeAsync(context, logger);
             await SalesAggregatesInitializer.InitializeAsync(context, logger);
+            await SeasonalityInitializer.InitializeAsync(context, logger);
             await ForecastsInitializer.InitializeAsync(context, logger);          
             await ConfirmedOrderAggregatesInitializer.InitializeAsync(context, logger); 
             await PurchaseForecastInitializer.InitializeAsync(context, logger);

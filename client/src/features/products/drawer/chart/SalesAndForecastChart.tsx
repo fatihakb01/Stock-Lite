@@ -52,51 +52,58 @@ export default function SalesAndForecastChart({
       new Date(date).getTime();
 
     // Sales
-    for (const s of sales) {
-      const key = getKey(s.periodStartDate);
-      map.set(key, {
-        date: new Date(s.periodStartDate),
-        salesQuantity: s.totalQuantity,
-        salesRevenue: s.totalRevenue,
-        forecastQuantity: 0,
-        forecastRevenue: 0,
-        confirmedQuantity: 0,
-        confirmedRevenue: 0,
-      });
+    if (sales && sales.length > 0) {
+      for (const s of sales) {
+        const key = getKey(s.periodStartDate);
+        map.set(key, {
+          date: new Date(s.periodStartDate),
+          salesQuantity: s.totalQuantity,
+          salesRevenue: s.totalRevenue,
+          forecastQuantity: 0,
+          forecastRevenue: 0,
+          confirmedQuantity: 0,
+          confirmedRevenue: 0,
+        });
+      }
     }
 
     // Forecast
-    for (const f of forecast) {
-      const key = getKey(f.periodStartDate);
-      const row = map.get(key) ?? {
-        date: new Date(f.periodStartDate),
-        salesQuantity: 0,
-        salesRevenue: 0,
-        confirmedQuantity: 0,
-        confirmedRevenue: 0,
-      };
+    if (forecast && forecast.length > 0) {
+      for (const f of forecast) {
+        const key = getKey(f.periodStartDate);
+        const row = map.get(key) ?? {
+          date: new Date(f.periodStartDate),
+          salesQuantity: 0,
+          salesRevenue: 0,
+          confirmedQuantity: 0,
+          confirmedRevenue: 0,
+        };
+      
 
-      row.forecastQuantity = f.predictedQuantity;
-      row.forecastRevenue = f.predictedRevenue;
+        row.forecastQuantity = f.predictedQuantity;
+        row.forecastRevenue = f.predictedRevenue;
 
-      map.set(key, row);
+        map.set(key, row);
+      }
     }
 
     // Confirmed
-    for (const c of confirmedOrder) {
-      const key = getKey(c.periodStartDate);
-      const row = map.get(key) ?? {
-        date: new Date(c.periodStartDate),
-        salesQuantity: 0,
-        salesRevenue: 0,
-        forecastQuantity: 0,
-        forecastRevenue: 0,
-      };
+    if (confirmedOrder && confirmedOrder.length > 0) {
+      for (const c of confirmedOrder) {
+        const key = getKey(c.periodStartDate);
+        const row = map.get(key) ?? {
+          date: new Date(c.periodStartDate),
+          salesQuantity: 0,
+          salesRevenue: 0,
+          forecastQuantity: 0,
+          forecastRevenue: 0,
+        };
 
-      row.confirmedQuantity = c.totalConfirmedQuantity;
-      row.confirmedRevenue = c.totalConfirmedRevenue;
+        row.confirmedQuantity = c.totalConfirmedQuantity;
+        row.confirmedRevenue = c.totalConfirmedRevenue;
 
-      map.set(key, row);
+        map.set(key, row);
+      }
     }
 
     // DERIVED VALUES 

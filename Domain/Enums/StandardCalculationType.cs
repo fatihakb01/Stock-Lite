@@ -7,5 +7,6 @@ public enum StandardCalculationType
     Forecasts = 2,
     SalesAggregates = 3,
     PurchaseForecasts = 4,
-    ProductKpis = 5
+    ProductKpis = 5,
+    Seasonality = 6
 }

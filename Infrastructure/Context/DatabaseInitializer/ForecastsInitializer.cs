@@ -303,13 +303,16 @@ namespace Infrastructure.Context.DatabaseInitializer
                     GROUP BY sa.ProductId
                 )
                 UPDATE f
-                SET f.PredictedQuantity = ISNULL(fm.AvgQty, 0),
-                    f.PredictedRevenue = ISNULL(fm.AvgRev, 0),
+                SET f.PredictedQuantity = ISNULL(fm.AvgQty, 0) * s.Factor,
+                    f.PredictedRevenue = ISNULL(fm.AvgRev, 0) * s.Factor,
                     f.Confidence = 0.50
                 FROM Forecasts f
                 JOIN ForecastMonthly fm 
 					ON fm.ProductId = f.ProductId
 				    AND f.PeriodType = 'Monthly'
+				JOIN Seasonality s
+					ON s.ProductId = f.ProductId
+					AND s.PeriodStartDate = f.PeriodStartDate
             END
             ";
 

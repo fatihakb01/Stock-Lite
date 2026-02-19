@@ -112,6 +112,13 @@ public class JobDispatcher(IServiceProvider provider, DataContext context) : IJo
 
                 await productKpi.RunAsync(companyId, ct);
                 break;
+
+            case StandardCalculationType.Seasonality:
+                var seasonality =
+                    scope.ServiceProvider.GetRequiredService<ISeasonalityCalculation>();
+
+                await seasonality.RunAsync(companyId, null, ct);
+                break;
                 
             default:
                 throw new InvalidOperationException(
