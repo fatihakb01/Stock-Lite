@@ -36,7 +36,7 @@ public class EditScheduledJob
             var dto = request.EditScheduledJobDto;
 
             var jobTasks = await jobTaskRepo.FindAsync(x =>
-                x.JobTaskKey == dto.JobTaskKey,
+                x.JobTaskKey == dto.JobTaskKey && x.CompanyId == currentUser.CompanyId,
                 ct
             );
 
