@@ -61,7 +61,7 @@ public static class StockLevelInitializer
                 wf.ProductId,
                 wf.WeekIndex,
                 wf.ProjectedStock * (wf.OverlapDays / 7.0) AS WeightedProjectedStock,
-                wf.RecommendedOrderQuantity * (wf.OverlapDays / 7.0) AS WeightedRecommendedOrderQuantity,
+                wf.RecommendedOrderQuantity,
                 wf.QuantityCommitted * (wf.OverlapDays / 7.0) AS WeightedQuantityCommitted,
                 wf.QuantityOnOrder * (wf.OverlapDays / 7.0) AS WeightedQuantityOnOrder,
 
@@ -83,12 +83,12 @@ public static class StockLevelInitializer
         )
         SELECT
             ProductId,
-            SUM(WeightedRecommendedOrderQuantity)        AS RecommendedOrderQuantity,
-            SUM(WeightedQuantityCommitted)               AS QuantityCommitted,
-            SUM(WeightedQuantityOnOrder)                 AS QuantityOnOrder,
-            SUM(WeightedForecastQuantity)				 AS ForecastQuantity,
-            SUM(EffectiveDemand)						 AS EffectiveDemand,
-            MAX(CASE WHEN rn = 1 THEN WeightedProjectedStock END) AS ProjectedStockAtLeadTime
+            MAX(CASE WHEN WeekIndex = 0 THEN RecommendedOrderQuantity END)          AS RecommendedOrderQuantity,
+            SUM(WeightedQuantityCommitted)											AS QuantityCommitted,
+            SUM(WeightedQuantityOnOrder)											AS QuantityOnOrder,
+            SUM(WeightedForecastQuantity)											AS ForecastQuantity,
+            SUM(EffectiveDemand)													AS EffectiveDemand,
+            MAX(CASE WHEN rn = 1 THEN WeightedProjectedStock END)					AS ProjectedStockAtLeadTime
         FROM RankedForecast
         GROUP BY ProductId;
         ";
