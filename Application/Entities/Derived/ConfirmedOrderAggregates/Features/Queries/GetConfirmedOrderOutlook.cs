@@ -19,7 +19,7 @@ public class GetConfirmedOrderOutlook
 
     public class Handler(
         IConfirmedOrderAggregateRepository aggregateRepo,
-        IRepository<Product> productRepo,
+        IProductRepository productRepo,
         IMapper mapper,
         ICurrentUserService currentUser
     ) : IRequestHandler<Query, Result<List<ConfirmedOrderAggregateDto>>>
@@ -32,12 +32,12 @@ public class GetConfirmedOrderOutlook
                     400
                 );
 
-            var products = await productRepo.FindAsync(
+            var products = await productRepo.ExistsAsync(
                 x => x.Id == request.ProductId && x.CompanyId == currentUser.CompanyId,
                 ct
             );
 
-            if (products == null || !products.Any())
+            if (!products)
                 return Result<List<ConfirmedOrderAggregateDto>>.Failure(
                     "Product not found for this company",
                     404

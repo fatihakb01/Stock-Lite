@@ -16,7 +16,7 @@ public class CreateProduct
     }
 
     public class Handler(
-        IRepository<Product> repository, 
+        IProductRepository repository, 
         IMapper mapper,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<ProductListDto>>

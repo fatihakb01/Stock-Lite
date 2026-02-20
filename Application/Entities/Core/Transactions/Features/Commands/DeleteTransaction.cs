@@ -20,13 +20,12 @@ public class DeleteTransaction
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
-            var transactions = await repository.FindAsync(x =>
-                x.Id == request.Id && x.CompanyId == currentUser.CompanyId, 
+            var transaction = await repository.SingleOrDefaultAsync(x =>
+                x.Id == request.Id && 
+                x.CompanyId == currentUser.CompanyId, 
                 ct,
                 t => t.LineItems
             );
-
-            var transaction = transactions.SingleOrDefault();
 
             if (transaction == null)
                 return Result<Unit>.Failure("Transaction not found", 404);

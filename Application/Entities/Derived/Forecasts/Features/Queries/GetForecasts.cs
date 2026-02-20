@@ -1,7 +1,6 @@
 using Application.Core;
 using Application.Entities.Derived.Forecasts.DTOs;
 using AutoMapper;
-using Domain.Entities.Core;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Users;
@@ -19,7 +18,7 @@ public class GetForecasts
 
     public class Handler(
         IForecastRepository forecastRepo, 
-        IRepository<Product> productRepo,
+        IProductRepository productRepo,
         IMapper mapper,
         ICurrentUserService currentUser
     ) : IRequestHandler<Query, Result<List<ForecastDto>>>
@@ -29,17 +28,17 @@ public class GetForecasts
             if (!Enum.TryParse<Period>(request.PeriodType, true, out var parsedPeriod))
                 return Result<List<ForecastDto>>.Failure($"Invalid period type: {request.PeriodType}", 400);
             
-            var products = await productRepo.FindAsync(x =>
+            var products = await productRepo.ExistsAsync(x =>
                 x.Id == request.ProductId && x.CompanyId == currentUser.CompanyId,
                 ct
             );
             
-            if (products == null || !products.Any())
+            if (!products)
                 return Result<List<ForecastDto>>.Failure($"Product not found for this company", 404);
 
             var forecast = await forecastRepo.GetForecastByProductAsync(request.ProductId, parsedPeriod);
 
-            if (forecast == null || !forecast.Any())
+            if (!forecast.Any())
                 return Result<List<ForecastDto>>.Failure("No history available", 404);
 
             var forecastDto = mapper.Map<List<ForecastDto>>(forecast);

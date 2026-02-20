@@ -27,7 +27,8 @@ public class CreatePurchaseOrder
             var dto = request.CreatePurchaseOrderDto;
 
             var orderNumberExist = await repository.ExistsAsync(x =>
-                x.OrderNumber == dto.OrderNumber && x.CompanyId == currentUser.CompanyId,
+                x.OrderNumber == dto.OrderNumber && 
+                x.CompanyId == currentUser.CompanyId,
                 ct
             );
 

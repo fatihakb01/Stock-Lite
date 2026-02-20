@@ -17,7 +17,7 @@ public class CreateTransaction
 
     public class Handler(
         IRepository<Transaction> transactionRepo, 
-        IRepository<Product> productRepo,
+        IProductRepository productRepo,
         IMapper mapper,
         ICurrentUserService currentUser
     )
@@ -32,17 +32,19 @@ public class CreateTransaction
                 .Distinct()
                 .ToList();
 
-            var validProductIds = await productRepo.FindSelectAsync(
-                p => productIds.Contains(p.Id) && p.CompanyId == currentUser.CompanyId,
-                p => p.Id,
+            var validProductCount = await productRepo.CountAsync(
+                p => productIds.Contains(p.Id) && 
+                p.CompanyId == currentUser.CompanyId,
                 ct
             );
 
-            if (validProductIds.Count() != productIds.Count)
-                return Result<TransactionDto>.Failure("One or more products do not belong to your company", 400);
+            if (validProductCount != productIds.Count)
+                return Result<TransactionDto>
+                    .Failure("One or more products do not belong to your company", 400);
 
             var transactionIdExist = await transactionRepo.ExistsAsync(x =>
-                x.TransactionId == dto.TransactionId && x.CompanyId == currentUser.CompanyId,
+                x.TransactionId == dto.TransactionId && 
+                x.CompanyId == currentUser.CompanyId,
                 ct
             );
 

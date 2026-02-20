@@ -27,14 +27,13 @@ public class ReceivePurchaseOrder
         {
             var dto = request.ReceivePurchaseOrderDto;
 
-            var pos = await poRepository.FindAsync(
-                po => po.Id == request.PurchaseOrderId
-                   && po.CompanyId == currentUser.CompanyId,
+            var po = await poRepository.SingleOrDefaultAsync(po => 
+                po.Id == request.PurchaseOrderId && 
+                po.CompanyId == currentUser.CompanyId,
                 ct,
                 po => po.LineItems
             );
 
-            var po = pos.SingleOrDefault();
             if (po == null)
                 return Result<Unit>.Failure("Purchase order not found", 404);
 

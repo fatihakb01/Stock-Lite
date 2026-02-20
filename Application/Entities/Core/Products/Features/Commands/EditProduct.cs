@@ -1,7 +1,6 @@
 using Application.Core;
 using Application.Entities.Core.Products.DTOs;
 using AutoMapper;
-using Domain.Entities.Core;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Users;
 using MediatR;
@@ -17,7 +16,7 @@ public class EditProduct
     }
 
     public class Handler(
-        IRepository<Product> repository, 
+        IProductRepository repository, 
         IMapper mapper,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<ProductListDto>>
@@ -26,11 +25,10 @@ public class EditProduct
         {
             var dto = request.ProductDto;
 
-            var products = await repository.FindAsync(x => 
+            var product = await repository.SingleOrDefaultAsync(x => 
                 x.Id == request.Id && x.CompanyId == currentUser.CompanyId, 
                 ct
             );
-            var product = products.SingleOrDefault();
 
             if (product == null)
                 return Result<ProductListDto>.Failure("Product not found", 404);

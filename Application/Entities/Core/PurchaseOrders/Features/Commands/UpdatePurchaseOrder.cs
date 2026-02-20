@@ -37,12 +37,12 @@ public class UpdatePurchaseOrder
             if (orderNumberExist)
                 return Result<PurchaseOrderDto>.Failure("Order number must be unique", 400);
 
-            var pos = await poRepository.FindAsync(
-                po => po.Id == request.PurchaseOrderId && po.CompanyId == currentUser.CompanyId,
+            var po = await poRepository.SingleOrDefaultAsync(po => 
+                po.Id == request.PurchaseOrderId && 
+                po.CompanyId == currentUser.CompanyId,
                 ct,
                 po => po.LineItems
             );
-            var po = pos.SingleOrDefault();
             
             if (po == null)
                 return Result<PurchaseOrderDto>.Failure("Purchase order not found", 404);

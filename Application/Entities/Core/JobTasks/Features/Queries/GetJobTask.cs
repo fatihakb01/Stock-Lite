@@ -22,17 +22,17 @@ public class GetJobTask
     {
         public async Task<Result<JobTaskDto>> Handle(Query request, CancellationToken ct)
         {
-            var jobTasks = await repository.FindAsync(x =>
+            var jobTask = await repository.SingleOrDefaultAsync(x =>
                 x.Id == request.Id &&
                 x.CompanyId == currentUser.CompanyId,
                 ct,
                 x => x.Jobs.OrderBy(x => x.ExecutionOrder)
             );
 
-            if (!jobTasks.Any())
+            if (jobTask == null)
                 return Result<JobTaskDto>.Failure("JobTasks not found", 404);
 
-            var jobTaskDtos = mapper.Map<JobTaskDto>(jobTasks.SingleOrDefault());
+            var jobTaskDtos = mapper.Map<JobTaskDto>(jobTask);
 
             return Result<JobTaskDto>.Success(jobTaskDtos);
         }

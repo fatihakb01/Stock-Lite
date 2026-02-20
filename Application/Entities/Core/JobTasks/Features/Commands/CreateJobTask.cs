@@ -26,7 +26,8 @@ public class CreateJobTask
             var dto = request.CreateJobTaskDto;
 
             var jobTaskKeyExist = await repository.ExistsAsync(x =>
-                x.JobTaskKey == dto.JobTaskKey,
+                x.JobTaskKey == dto.JobTaskKey && 
+                x.CompanyId == currentUser.CompanyId,
                 ct
             );
 

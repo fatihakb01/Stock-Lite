@@ -3,6 +3,7 @@ using Application.Entities.Core.Users.DTOs;
 using AutoMapper;
 using Domain.Entities.Core;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Users;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 
@@ -20,11 +21,21 @@ public class EditUser
         IUserRepository userRepository,
         IRepository<User> repository,
         IMapper mapper,
-        IConfiguration config
+        IConfiguration config,
+        ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<UserDto>>
     {
         public async Task<Result<UserDto>> Handle(Command request, CancellationToken cancellationToken)
         {
+            var userFromSameCompany = await repository.ExistsAsync(x =>
+                x.Id == request.Id.ToString() &&
+                x.CompanyId == currentUser.CompanyId,
+                cancellationToken
+            );
+
+            if (!userFromSameCompany)
+                return Result<UserDto>.Failure("Not allowed to edit user from another company", 400);
+
             var dto = request.EditUserDto;
 
             var user = await userRepository.GetByIdAsync(request.Id, cancellationToken);

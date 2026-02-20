@@ -24,7 +24,8 @@ public class GetSeasonality
         public async Task<Result<List<SeasonalityDto>>> Handle(Query request, CancellationToken ct)
         {
             var products = await productRepo.ExistsAsync(x =>
-                x.Id == request.ProductId && x.CompanyId == currentUser.CompanyId,
+                x.Id == request.ProductId && 
+                x.CompanyId == currentUser.CompanyId,
                 ct
             );
             

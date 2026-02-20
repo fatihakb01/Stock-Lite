@@ -1,5 +1,4 @@
 using Application.Core;
-using Domain.Entities.Core;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Users;
 using MediatR;
@@ -14,18 +13,17 @@ public class DeleteProduct
     }
 
     public class Handler(
-        IRepository<Product> repository, 
+        IProductRepository repository, 
         ICurrentUserService currentUser
     )
         : IRequestHandler<Command, Result<Unit>>
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
-            var products = await repository.FindAsync(x => 
+            var product = await repository.SingleOrDefaultAsync(x => 
                 x.Id == request.Id && x.CompanyId == currentUser.CompanyId, 
                 ct
             );
-            var product = products.SingleOrDefault();
 
             if (product == null)
                 return Result<Unit>.Failure("Product not found", 404);

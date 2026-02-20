@@ -22,19 +22,18 @@ public class GetScheduledJob
     {
         public async Task<Result<ScheduledJobDto>> Handle(Query request, CancellationToken ct)
         {
-            var scheduledJobs = await repository.FindAsync(x =>
+            var scheduledJob = await repository.SingleOrDefaultAsync(x =>
                 x.Id == request.Id &&
                 x.JobTask.CompanyId == currentUser.CompanyId,
                 ct,
                 x => x.JobTask
             );
 
-            if (!scheduledJobs.Any())
+            if (scheduledJob == null)
                 return Result<ScheduledJobDto>.Failure("scheduledJob not found", 404);
 
-            var scheduledJob = scheduledJobs.SingleOrDefault();
             var scheduledJobDto = mapper.Map<ScheduledJobDto>(scheduledJob);
-            scheduledJobDto.JobTaskKey = scheduledJob!.JobTask.JobTaskKey;
+            scheduledJobDto.JobTaskKey = scheduledJob.JobTask.JobTaskKey;
 
             return Result<ScheduledJobDto>.Success(scheduledJobDto);
         }

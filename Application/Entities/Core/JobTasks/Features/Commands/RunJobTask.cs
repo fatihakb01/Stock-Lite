@@ -21,12 +21,12 @@ public class RunJobTask
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
-            var jobTasks = await repository.FindAsync(x =>
+            var jobTask = await repository.ExistsAsync(x =>
                 x.Id == request.Id && x.CompanyId == currentUser.CompanyId,
                 ct
             );
 
-            if (!jobTasks.Any())
+            if (!jobTask)
                 return Result<Unit>.Failure("JobTask not found", 404);
 
             await jobTaskRunnerService.RunAsync(request.Id, ct);

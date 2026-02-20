@@ -27,13 +27,12 @@ public class UpdateConfirmedOrder
         {
             var dto = request.ConfirmedOrderDto;
 
-            var orders = await repository.FindAsync(x =>
+            var order = await repository.SingleOrDefaultAsync(x =>
                 x.Id == request.Id && x.CompanyId == currentUser.CompanyId,
                 ct,
                 o => o.LineItems
             );
 
-            var order = orders.SingleOrDefault();
             if (order == null)
                 return Result<ConfirmedOrderDto>.Failure("Confirmed order not found", 404);
 

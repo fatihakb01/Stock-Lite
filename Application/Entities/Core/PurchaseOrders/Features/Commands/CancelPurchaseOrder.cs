@@ -23,12 +23,12 @@ public class CancelPurchaseOrder
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
-            var pos = await poRepository.FindAsync(
-                po => po.Id == request.Id && po.CompanyId == currentUser.CompanyId,
+            var po = await poRepository.SingleOrDefaultAsync(po => 
+                po.Id == request.Id && 
+                po.CompanyId == currentUser.CompanyId,
                 ct,
                 po => po.LineItems
             );
-            var po = pos.SingleOrDefault();
 
             if (po == null)
                 return Result<Unit>.Failure("Purchase order not found", 404);

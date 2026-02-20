@@ -25,12 +25,10 @@ public class EditCompany
         {
             var dto = request.CompanyDto;
 
-            var companies = await repository.FindAsync(x =>
+            var company = await repository.SingleOrDefaultAsync(x =>
                 x.Id == currentUser.CompanyId, 
                 ct
             );
-
-            var company = companies.SingleOrDefault();
 
             if (company == null)
                 return Result<CompanyDto>.Failure("Company not found", 404);

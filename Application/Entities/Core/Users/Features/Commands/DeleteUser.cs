@@ -1,6 +1,7 @@
 using Application.Core;
 using Domain.Entities.Core;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Users;
 using MediatR;
 
 namespace Application.Entities.Core.Users.Features.Commands;
@@ -14,11 +15,21 @@ public class DeleteUser
 
     public class Handler(
         IRepository<User> repository, 
-        IUserRepository userRepository
+        IUserRepository userRepository,
+        ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<Unit>>
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
+            var userFromSameCompany = await repository.ExistsAsync(x =>
+                x.Id == request.Id.ToString() &&
+                x.CompanyId == currentUser.CompanyId,
+                cancellationToken
+            );
+
+            if (!userFromSameCompany)
+                return Result<Unit>.Failure("Not allowed to delete user from another company", 400);
+
             var user = await userRepository.GetByIdAsync(request.Id, cancellationToken);
 
             if (user == null)

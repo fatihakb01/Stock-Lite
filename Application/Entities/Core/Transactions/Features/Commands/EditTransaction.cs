@@ -18,7 +18,7 @@ public class EditTransaction
 
     public class Handler(
         IRepository<Transaction> transactionRepo, 
-        IRepository<Product> productRepo,
+        IProductRepository productRepo,
         IMapper mapper,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<TransactionDto>>
@@ -32,22 +32,21 @@ public class EditTransaction
                 .Distinct()
                 .ToList();
 
-            var validProductIds = await productRepo.FindSelectAsync(
-                p => productIds.Contains(p.Id) && p.CompanyId == currentUser.CompanyId,
-                p => p.Id,
+            var validProductCount = await productRepo.CountAsync(
+                p => productIds.Contains(p.Id) && 
+                p.CompanyId == currentUser.CompanyId,
                 ct
             );
 
-            if (validProductIds.Count() != productIds.Count)
+            if (validProductCount != productIds.Count)
                 return Result<TransactionDto>.Failure("One or more products do not belong to your company", 400);
 
-            var transactions = await transactionRepo.FindAsync(x =>
-                x.Id == request.Id && x.CompanyId == currentUser.CompanyId, 
+            var transaction = await transactionRepo.SingleOrDefaultAsync(x =>
+                x.Id == request.Id && 
+                x.CompanyId == currentUser.CompanyId, 
                 ct,
                 t => t.LineItems
             );
-
-            var transaction = transactions.SingleOrDefault();
 
             if (transaction == null)
                 return Result<TransactionDto>.Failure("Transaction not found", 404);

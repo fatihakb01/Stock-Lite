@@ -25,13 +25,12 @@ public class ReceiveConfirmedOrder
         {
             var dto = request.ReceiveDto;
 
-            var orders = await repository.FindAsync(x =>
+            var order = await repository.SingleOrDefaultAsync(x =>
                 x.Id == request.Id && x.CompanyId == currentUser.CompanyId,
                 ct,
                 o => o.LineItems
             );
 
-            var order = orders.SingleOrDefault();
             if (order == null)
                 return Result<Unit>.Failure("Confirmed order not found", 404);
 

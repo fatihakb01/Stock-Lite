@@ -24,12 +24,13 @@ public class GetStockLevel
     {
         public async Task<Result<StockLevelDto>> Handle(Query request, CancellationToken ct)
         {
-            var products = await productRepo.FindAsync(x =>
-                x.Id == request.ProductId && x.CompanyId == currentUser.CompanyId,
+            var products = await productRepo.ExistsAsync(x =>
+                x.Id == request.ProductId && 
+                x.CompanyId == currentUser.CompanyId,
                 ct
             );
 
-            if (!products.Any())
+            if (!products)
                 return Result<StockLevelDto>.Failure($"Product not found for this company", 404);
 
             var stockLevel = await stockLevelRepo.GetByProductAsync(request.ProductId);

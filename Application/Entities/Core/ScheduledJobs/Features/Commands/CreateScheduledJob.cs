@@ -28,15 +28,16 @@ public class CreateScheduledJob
 
             var scheduledJob = mapper.Map<ScheduledJob>(dto);
 
-            var jobTasks = await jobTaskRepository.FindAsync(x =>
-                x.JobTaskKey == dto.JobTaskKey && currentUser.CompanyId == x.CompanyId,
+            var jobTask = await jobTaskRepository.SingleOrDefaultAsync(x =>
+                x.JobTaskKey == dto.JobTaskKey && 
+                currentUser.CompanyId == x.CompanyId,
                 ct
             );
 
-            if (!jobTasks.Any())
+            if (jobTask == null)
                 return Result<ScheduledJobDto>.Failure("No JobTask found for this ScheduledJob", 404);
 
-            scheduledJob.JobTaskId = jobTasks.SingleOrDefault()!.Id;
+            scheduledJob.JobTaskId = jobTask.Id;
             scheduledJob.IsArchived = false;
             scheduledJob.CreatedAt = DateTime.UtcNow;
             scheduledJob.CreatedBy = currentUser.Id;

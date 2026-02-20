@@ -22,9 +22,12 @@ public class GetCompany
     )
         : IRequestHandler<Query, Result<CompanyDto>>
     {
-        public async Task<Result<CompanyDto>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Result<CompanyDto>> Handle(Query request, CancellationToken ct)
         {
-            var company = await repository.GetByIdAsync(currentUser.CompanyId, cancellationToken);
+            var company = await repository.SingleOrDefaultAsync(c =>
+                c.Id == currentUser.CompanyId, 
+                ct
+            );
 
             if (company == null)
                 return Result<CompanyDto>.Failure("Company not found", 404);

@@ -23,11 +23,10 @@ public class EditJobTask
     {
         public async Task<Result<JobTaskDto>> Handle(Command request, CancellationToken ct)
         {
-            var jobTasks = await repository.FindAsync(x =>
+            var jobTask = await repository.SingleOrDefaultAsync(x =>
                 x.Id == request.Id && x.CompanyId == currentUser.CompanyId,
                 ct
             );
-            var jobTask = jobTasks.SingleOrDefault();
 
             if (jobTask == null)
                 return Result<JobTaskDto>.Failure("JobTask not found", 404);

@@ -29,17 +29,18 @@ public class GetSalesTrend
             if (!Enum.TryParse<Period>(request.PeriodType, true, out var parsedPeriod))
                 return Result<List<SalesAggregateDto>>.Failure($"Invalid period type: {request.PeriodType}", 400);
 
-            var products = await productRepo.FindAsync(x =>
-                x.Id == request.ProductId && x.CompanyId == currentUser.CompanyId,
+            var products = await productRepo.ExistsAsync(x =>
+                x.Id == request.ProductId && 
+                x.CompanyId == currentUser.CompanyId,
                 ct
             );
             
-            if (products == null || !products.Any())
+            if (!products)
                 return Result<List<SalesAggregateDto>>.Failure($"Product not found for this company", 404);
 
             var salesAggregate = await salesaggregateRepo.GetByProductIdAsync(request.ProductId, parsedPeriod);
 
-            if (salesAggregate == null || !salesAggregate.Any())
+            if (!salesAggregate.Any())
                 return Result<List<SalesAggregateDto>>.Failure("No history available", 404);
 
             var salesAggregateDto = mapper.Map<List<SalesAggregateDto>>(salesAggregate);

@@ -22,11 +22,6 @@ public class Repository<T>(DataContext context)
         return await context.Set<T>().FindAsync([id], cancellationToken);
     }
 
-    public async Task<List<T>> GetAllAsync(CancellationToken cancellationToken)
-    {
-        return await context.Set<T>().ToListAsync(cancellationToken);
-    }
-
     public void Remove(T entity)
     {
         context.Set<T>().Remove(entity);
@@ -42,6 +37,24 @@ public class Repository<T>(DataContext context)
         return await context.SaveChangesAsync(cancellationToken) > 0;
     }
 
+    public async Task<T?> SingleOrDefaultAsync(
+        Expression<Func<T, bool>> predicate,
+        CancellationToken cancellationToken,
+        params Expression<Func<T, object>>[]? includes)
+    {
+        IQueryable<T> query = context.Set<T>();
+
+        if (includes != null)
+        {
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+        }
+
+        return await query.SingleOrDefaultAsync(predicate, cancellationToken);
+    }
+
     public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken, params Expression<Func<T, object>>[]? includes)
     {
         IQueryable<T> query = context.Set<T>().Where(predicate);
@@ -55,11 +68,8 @@ public class Repository<T>(DataContext context)
         return await query.ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<TResult>> FindSelectAsync<TResult>(Expression<Func<T, bool>> predicate, Expression<Func<T, TResult>> selector, CancellationToken cancellationToken)
+    public async Task<int> CountAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken)
     {
-        return await context.Set<T>()
-            .Where(predicate)
-            .Select(selector)
-            .ToListAsync(cancellationToken);
+        return await context.Set<T>().Where(predicate).CountAsync(cancellationToken);
     }
 }

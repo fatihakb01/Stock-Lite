@@ -26,7 +26,7 @@ public class GetPurchaseOrders
                 po => po.LineItems
             );
 
-            if (pos == null || !pos.Any())
+            if (!pos.Any())
                 return Result<List<PurchaseOrderDto>>.Failure("Purchase Order not found", 404);
 
             var resultDto = mapper.Map<List<PurchaseOrderDto>>(pos);

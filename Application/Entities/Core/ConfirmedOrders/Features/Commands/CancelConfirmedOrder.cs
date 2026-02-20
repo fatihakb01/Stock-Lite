@@ -21,13 +21,12 @@ public class CancelConfirmedOrder
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
-            var orders = await repository.FindAsync(
+            var order = await repository.SingleOrDefaultAsync(
                 co => co.Id == request.Id && co.CompanyId == currentUser.CompanyId,
                 ct,
                 co => co.LineItems
             );
 
-            var order = orders.SingleOrDefault();
             if (order == null)
                 return Result<Unit>.Failure("Confirmed order not found", 404);
 
