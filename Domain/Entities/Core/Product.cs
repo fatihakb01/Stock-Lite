@@ -27,4 +27,5 @@ public class Product
     public ICollection<TransactionLineItem> TransactionLineItems { get; set; } = new List<TransactionLineItem>();
     public ICollection<PurchaseOrderLineItem> PurchaseOrderLineItem { get; set; } = new List<PurchaseOrderLineItem>();
     public ICollection<ConfirmedOrderLineItem> ConfirmedOrderLineItem { get; set; } = new List<ConfirmedOrderLineItem>();
+    public ICollection<UserDefinedField> UserDefinedFields { get; set; } = new List<UserDefinedField>();
 }

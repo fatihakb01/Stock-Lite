@@ -28,6 +28,7 @@ public class DataContext(DbContextOptions<DataContext> options)
     public DbSet<ScheduledJob> ScheduledJobs { get; set; }
     public DbSet<JobExecution> JobExecutions { get; set; }
     public DbSet<ProductKpi> ProductKpis { get; set; }
+    public DbSet<UserDefinedField> UserDefinedFields { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

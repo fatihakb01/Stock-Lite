@@ -12,5 +12,6 @@ public class SchedulerImportInitializer
         await ProductImportObjects.InitializeAsync(context, logger);
         await PurchaseOrderImportObjects.InitializeAsync(context, logger);
         await TransactionImportObjects.InitializeAsync(context, logger);
+        await UserDefinedFieldImportObjects.InitializeAsync(context, logger);
     }
 }

@@ -112,6 +112,7 @@ public static class DependencyInjection
         services.AddScoped<IImportHandler, TransactionImportHandler>();
         services.AddScoped<IImportHandler, ConfirmedOrderImportHandler>();
         services.AddScoped<IImportHandler, PurchaseOrderImportHandler>();
+        services.AddScoped<IImportHandler, UserDefinedFieldImportHandler>();
 
         services.AddScoped<IImportCoordinator, ImportCoordinator>();
 

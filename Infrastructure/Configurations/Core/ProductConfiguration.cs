@@ -82,6 +82,11 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
                .HasForeignKey(l => l.ProductId)
                .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasMany(p => p.UserDefinedFields)
+               .WithOne(u => u.Product)
+               .HasForeignKey(u => u.ProductId)
+               .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasIndex(p => new { p.CompanyId, p.SKU }).IsUnique();
         builder.HasIndex(p => new { p.CompanyId, p.Name }).IsUnique();
     }

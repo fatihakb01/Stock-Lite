@@ -17,6 +17,7 @@ using Application.Entities.Core.JobTasks.DTOs;
 using Application.Entities.Core.ScheduledJobs.DTOs;
 using Application.Entities.Derived.ProductKpis.DTOs;
 using Application.Entities.Derived.Seasonality.DTOs;
+using Application.Entities.Core.UserDefinedFields.DTOs;
 
 namespace Application.Core;
 
@@ -105,5 +106,8 @@ public class MappingProfiles : Profile
 
         // JobExecution entity
         CreateMap<JobExecution, JobExecutionDto>();
+
+        // UserDefinedField entity
+        CreateMap<UserDefinedField, UserDefinedFieldDto>();
     }
 }

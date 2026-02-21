@@ -566,6 +566,22 @@ namespace Infrastructure.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Entities.Core.UserDefinedField", b =>
+                {
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Key")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ProductId", "Key");
+
+                    b.ToTable("UserDefinedFields");
+                });
+
             modelBuilder.Entity("Domain.Entities.Derived.ConfirmedOrderAggregate", b =>
                 {
                     b.Property<Guid>("ProductId")
@@ -1110,6 +1126,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("Company");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Core.UserDefinedField", b =>
+                {
+                    b.HasOne("Domain.Entities.Core.Product", "Product")
+                        .WithMany("UserDefinedFields")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Domain.Entities.Derived.ConfirmedOrderAggregate", b =>
                 {
                     b.HasOne("Domain.Entities.Core.Product", "Product")
@@ -1286,6 +1313,8 @@ namespace Infrastructure.Migrations
                     b.Navigation("StockLevel");
 
                     b.Navigation("TransactionLineItems");
+
+                    b.Navigation("UserDefinedFields");
                 });
 
             modelBuilder.Entity("Domain.Entities.Core.PurchaseOrder", b =>

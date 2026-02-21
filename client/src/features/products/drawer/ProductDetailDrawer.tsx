@@ -10,6 +10,7 @@ import ProductPoTab from "./tabs/ProductPoTab";
 import ProductPfcTab from "./tabs/ProductPfcTab";
 import ProductCoTab from "./tabs/ProductCoTab";
 import DrawerResizeHandle from "./handle/DrawerResizeHandle";
+import ProductUdfTab from "./tabs/ProductUdfTab";
 
 interface ProductDetailDrawerProps {
   productId: string | null;
@@ -65,6 +66,7 @@ export default function ProductDetailDrawer({
         <Tab label="Purchase Orders" />
         <Tab label="Purchase Forecast" />
         <Tab label="Confirmed Orders" />
+        <Tab label="Additional Information" />
       </Tabs>
 
 
@@ -102,6 +104,10 @@ export default function ProductDetailDrawer({
 
           <TabPanel value={tab} index={4}>
             <ProductCoTab productId={product.id} />
+          </TabPanel>
+
+          <TabPanel value={tab} index={5}>
+            <ProductUdfTab productId={product.id} />
           </TabPanel>
         </>
       )}
