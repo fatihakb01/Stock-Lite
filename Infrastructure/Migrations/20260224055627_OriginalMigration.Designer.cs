@@ -12,15 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260117093449_SchedulerLogic")]
-    partial class SchedulerLogic
+    [Migration("20260224055627_OriginalMigration")]
+    partial class OriginalMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.8")
+                .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -132,8 +132,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ErrorMessage")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<DateTime?>("FinishedAt")
                         .HasColumnType("datetime2");
@@ -168,11 +168,6 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("CompanyId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CronExpression")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<string>("Description")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
@@ -194,7 +189,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("CompanyId");
 
-                    b.HasIndex("JobTaskKey")
+                    b.HasIndex("JobTaskKey", "CompanyId")
                         .IsUnique();
 
                     b.ToTable("JobTasks");
@@ -388,7 +383,11 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int?>("PeriodType")
+                    b.Property<string>("PeriodType")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<int>("Result")
                         .HasColumnType("int");
 
                     b.Property<string>("Source")
@@ -570,6 +569,22 @@ namespace Infrastructure.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Entities.Core.UserDefinedField", b =>
+                {
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Key")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ProductId", "Key");
+
+                    b.ToTable("UserDefinedFields");
+                });
+
             modelBuilder.Entity("Domain.Entities.Derived.ConfirmedOrderAggregate", b =>
                 {
                     b.Property<Guid>("ProductId")
@@ -633,6 +648,44 @@ namespace Infrastructure.Migrations
 
                             t.HasCheckConstraint("CK_Forecast_Period_Start_End_Date", "[PeriodStartDate] <= [PeriodEndDate]");
                         });
+                });
+
+            modelBuilder.Entity("Domain.Entities.Derived.ProductKpi", b =>
+                {
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("BelowSafetyStockCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("RecommendedOrdersCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<bool>("SchedulerFailed")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("TotalProductCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("WithoutForecastCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("WithoutStockAtLeadTimeCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.HasKey("CompanyId");
+
+                    b.ToTable("ProductKpis");
                 });
 
             modelBuilder.Entity("Domain.Entities.Derived.PurchaseForecast", b =>
@@ -715,6 +768,25 @@ namespace Infrastructure.Migrations
                             t.HasCheckConstraint("CK_SalesAggregate_Period_Start_End_Date", "[PeriodStartDate] <= [PeriodEndDate]");
 
                             t.HasCheckConstraint("CK_SalesAggregate_Total_Quantity", "[TotalQuantity] >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("Domain.Entities.Derived.Seasonality", b =>
+                {
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("PeriodStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("Factor")
+                        .HasColumnType("decimal(4,2)");
+
+                    b.HasKey("ProductId", "PeriodStartDate");
+
+                    b.ToTable("Seasonality", t =>
+                        {
+                            t.HasCheckConstraint("CK_Seasonality_Factor", "[Factor] >= 0 AND [Factor] <= 12");
                         });
                 });
 
@@ -936,7 +1008,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.Core.ScheduledJob", "ScheduledJob")
                         .WithMany("JobExecutions")
                         .HasForeignKey("ScheduledJobId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("ScheduledJob");
@@ -1057,6 +1129,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("Company");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Core.UserDefinedField", b =>
+                {
+                    b.HasOne("Domain.Entities.Core.Product", "Product")
+                        .WithMany("UserDefinedFields")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Domain.Entities.Derived.ConfirmedOrderAggregate", b =>
                 {
                     b.HasOne("Domain.Entities.Core.Product", "Product")
@@ -1079,6 +1162,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Derived.ProductKpi", b =>
+                {
+                    b.HasOne("Domain.Entities.Core.Company", "Company")
+                        .WithOne("ProductKpi")
+                        .HasForeignKey("Domain.Entities.Derived.ProductKpi", "CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+                });
+
             modelBuilder.Entity("Domain.Entities.Derived.PurchaseForecast", b =>
                 {
                     b.HasOne("Domain.Entities.Core.Product", "Product")
@@ -1094,6 +1188,17 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Domain.Entities.Core.Product", "Product")
                         .WithMany("SalesAggregates")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Derived.Seasonality", b =>
+                {
+                    b.HasOne("Domain.Entities.Core.Product", "Product")
+                        .WithMany("Seasonality")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1169,6 +1274,8 @@ namespace Infrastructure.Migrations
 
                     b.Navigation("JobTasks");
 
+                    b.Navigation("ProductKpi");
+
                     b.Navigation("Products");
 
                     b.Navigation("PurchaseOrders");
@@ -1204,9 +1311,13 @@ namespace Infrastructure.Migrations
 
                     b.Navigation("SalesAggregates");
 
+                    b.Navigation("Seasonality");
+
                     b.Navigation("StockLevel");
 
                     b.Navigation("TransactionLineItems");
+
+                    b.Navigation("UserDefinedFields");
                 });
 
             modelBuilder.Entity("Domain.Entities.Core.PurchaseOrder", b =>

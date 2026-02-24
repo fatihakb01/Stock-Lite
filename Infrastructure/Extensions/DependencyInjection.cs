@@ -30,8 +30,8 @@ public static class DependencyInjection
     {
         // --- Database ---
         services.AddDbContext<DataContext>(options =>
-            options.UseSqlServer(config.GetConnectionString("DefaultConnection"), 
-                opt => opt.CommandTimeout(900))
+            options.UseSqlServer(config.GetConnectionString("DefaultConnection"),
+                opt => opt.CommandTimeout(900).EnableRetryOnFailure())
         );
 
         // --- Identity ---

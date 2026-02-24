@@ -8,7 +8,7 @@ namespace Infrastructure.Context.DatabaseInitializer
     {
         public static async Task InitializeAsync(DataContext context, ILogger logger)
         {
-            await context.Database.MigrateAsync();
+            //await context.Database.MigrateAsync();
 
             await UserDefinedTypesInitializer.InitializeAsync(context, logger);
             await SalesAggregatesInitializer.InitializeAsync(context, logger);
