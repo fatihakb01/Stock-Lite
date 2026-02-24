@@ -78,17 +78,23 @@ public static class StockLevelInitializer
                 ROW_NUMBER() OVER (
                     PARTITION BY wf.ProductId
                     ORDER BY wf.WeekIndex DESC
-                ) AS rn
+                ) AS ProjectedStockRowNumber,
+
+                ROW_NUMBER() OVER (
+                    PARTITION BY wf.ProductId
+                    ORDER BY wf.WeekIndex ASC
+                ) AS RecommendedOrderQuantityRowNumber
             FROM WeightedForecast wf
         )
+
         SELECT
             ProductId,
-            MAX(CASE WHEN WeekIndex = 0 THEN RecommendedOrderQuantity END)          AS RecommendedOrderQuantity,
-            SUM(WeightedQuantityCommitted)											AS QuantityCommitted,
-            SUM(WeightedQuantityOnOrder)											AS QuantityOnOrder,
-            SUM(WeightedForecastQuantity)											AS ForecastQuantity,
-            SUM(EffectiveDemand)													AS EffectiveDemand,
-            MAX(CASE WHEN rn = 1 THEN WeightedProjectedStock END)					AS ProjectedStockAtLeadTime
+            MAX(CASE WHEN RecommendedOrderQuantityRowNumber = 1 THEN RecommendedOrderQuantity END)	AS RecommendedOrderQuantity,
+            SUM(WeightedQuantityCommitted)															AS QuantityCommitted,
+            SUM(WeightedQuantityOnOrder)															AS QuantityOnOrder,
+            SUM(WeightedForecastQuantity)															AS ForecastQuantity,
+            SUM(EffectiveDemand)																	AS EffectiveDemand,
+            MAX(CASE WHEN ProjectedStockRowNumber = 1 THEN WeightedProjectedStock END)				AS ProjectedStockAtLeadTime
         FROM RankedForecast
         GROUP BY ProductId;
         ";
