@@ -85,7 +85,7 @@ Create `API/appsettings.Development.json`:
 ```
 
 **🔐 Important Notes**
-- Replace `YOUR_SECRET_KEY_HERE` with a secure random string.
+- Replace `YOUR_SECRET_KEY_HERE` with a secure random string (at least 32 characters).
 - Replace `YOUR_RESEND_API_KEY` with your actual API key from Resend.
 - Update email addresses as needed.
 - You can create a Resend account and generate an API key here: [Resend](https://resend.com/docs)

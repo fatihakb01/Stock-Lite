@@ -105,7 +105,7 @@ public static class PurchaseForecastInitializer
 		),
 		Result AS (
 			SELECT 
-				t.ProductId AS ProductId,
+				p.Id AS ProductId,
 				ISNULL(TotalReceivedQuantity, 0) - ISNULL(TotalSoldQuantity,0) AS QuantityOnHand
 			FROM Products p
 			LEFT JOIN AggregatedFilfilledPOs po ON p.Id = po.ProductId

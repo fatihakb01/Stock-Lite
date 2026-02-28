@@ -268,6 +268,7 @@ public static class DataSeederInitializer
 
 			DECLARE 
 				@CompanyId UNIQUEIDENTIFIER  = NEWID(),
+				@UserId UNIQUEIDENTIFIER = NEWID(),
 				@JobTaskOne UNIQUEIDENTIFIER = NEWID(),
 				@JobTaskTwo UNIQUEIDENTIFIER = NEWID(),
 				@CreatedAt DATETIME = GETDATE()
@@ -312,7 +313,7 @@ public static class DataSeederInitializer
 				LockoutEnabled
 			)
 			SELECT 
-				NEWID(),
+				@UserId,
 				0,
 				GETDATE(),
 				1,
@@ -364,16 +365,18 @@ public static class DataSeederInitializer
 				Result
 			)
 			VALUES
-			(NEWID(),'Import Confirmed Orders','','0','','2','','C:\CSharp\Data\Master\confirmedorders.csv',NULL,'1','0',@JobTaskOne,'3',@CreatedAt,'977F28AF-B824-45CB-808F-FB02D2D76635','2'),
-			(NEWID(),'Import Purchase Orders','','0','','3','','C:\CSharp\Data\Master\purchaseorders.csv',NULL,'1','0',@JobTaskOne,'2',@CreatedAt,'977F28AF-B824-45CB-808F-FB02D2D76635','2'),
-			(NEWID(),'Import Transactions','','0','','1','','C:\CSharp\Data\Master\transactions.csv',NULL,'1','0',@JobTaskOne,'1',@CreatedAt,'977F28AF-B824-45CB-808F-FB02D2D76635','2'),
-			(NEWID(),'Import Products','','0','','0','','C:\CSharp\Data\Master\products.csv',NULL,'1','0',@JobTaskOne,'0',@CreatedAt,'977F28AF-B824-45CB-808F-FB02D2D76635','2'),
-			(NEWID(),'Calculate purchase forecast','','1','4','','','',NULL,'1','0',@JobTaskTwo,'3',@CreatedAt,'977F28AF-B824-45CB-808F-FB02D2D76635','2'),
-			(NEWID(),'Calculate confirmed demand','','1','1','','','',NULL,'1','0',@JobTaskTwo,'2',@CreatedAt,'977F28AF-B824-45CB-808F-FB02D2D76635','2'),
-			(NEWID(),'Calculate forecast','','1','2','','','',NULL,'1','0',@JobTaskTwo,'1',@CreatedAt,'977F28AF-B824-45CB-808F-FB02D2D76635','2'),
-			(NEWID(),'Calculate stock levels','','1','0','','','',NULL,'1','0',@JobTaskTwo,'4',@CreatedAt,'977F28AF-B824-45CB-808F-FB02D2D76635','2'),
-			(NEWID(),'Calculate sales','','1','3','','','',NULL,'1','0',@JobTaskTwo,'0',@CreatedAt,'977F28AF-B824-45CB-808F-FB02D2D76635','2'),
-			(NEWID(),'Calculate product KPIs','','1','5',NULL,NULL,NULL,NULL,'1','0',@JobTaskTwo,'5',@CreatedAt,'977F28AF-B824-45CB-808F-FB02D2D76635','2')
+			(NEWID(),'Import User Defined Fields','','0',NULL,'4',NULL,'C:\CSharp\Data\Master\udf.csv',NULL,'1','0',@JobTaskOne,'4',@CreatedAt,@UserId,'2'),
+			(NEWID(),'Import Confirmed Orders','','0',NULL,'2',NULL,'C:\CSharp\Data\Master\confirmedorders.csv',NULL,'1','0',@JobTaskOne,'3',@CreatedAt,@UserId,'2'),
+			(NEWID(),'Import Purchase Orders','','0',NULL,'3',NULL,'C:\CSharp\Data\Master\purchaseorders.csv',NULL,'1','0',@JobTaskOne,'2',@CreatedAt,@UserId,'2'),
+			(NEWID(),'Import Transactions','','0',NULL,'1',NULL,'C:\CSharp\Data\Master\transactions.csv',NULL,'1','0',@JobTaskOne,'1',@CreatedAt,@UserId,'2'),
+			(NEWID(),'Import Products','','0',NULL,'0',NULL,'C:\CSharp\Data\Master\products.csv',NULL,'1','0',@JobTaskOne,'0',@CreatedAt,@UserId,'2'),
+			(NEWID(),'Calculate purchase forecast','','1','4',NULL,NULL,NULL,NULL,'1','0',@JobTaskTwo,'4',@CreatedAt,@UserId,'2'),
+			(NEWID(),'Calculate confirmed demand','','1','1',NULL,NULL,NULL,NULL,'1','0',@JobTaskTwo,'3',@CreatedAt,@UserId,'2'),
+			(NEWID(),'Calculate forecast','','1','2',NULL,NULL,NULL,NULL,'1','0',@JobTaskTwo,'2',@CreatedAt,@UserId,'2'),
+			(NEWID(),'Calculate stock levels','','1','0',NULL,NULL,NULL,NULL,'1','0',@JobTaskTwo,'5',@CreatedAt,@UserId,'2'),
+			(NEWID(),'Calculate sales','','1','3',NULL,NULL,NULL,NULL,'1','0',@JobTaskTwo,'0',@CreatedAt,@UserId,'2'),
+			(NEWID(),'Calculate product KPIs','','1','5',NULL,NULL,NULL,NULL,'1','0',@JobTaskTwo,'6',@CreatedAt,@UserId,'2'),
+			(NEWID(),'Calculate seasonality','','1','6',NULL,NULL,NULL,NULL,'1','0',@JobTaskTwo,'1',@CreatedAt,@UserId, '2')
         END
         ";
 

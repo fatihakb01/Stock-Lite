@@ -120,6 +120,7 @@ public static class StockLevelInitializer
                 QuantityOnOrder,
                 QuantityCommitted,
                 NetStockPosition,
+                ForecastQuantity,
                 ReorderPoint,
                 NeedsReorder,
                 RecommendedOrderQuantity,
@@ -127,6 +128,7 @@ public static class StockLevelInitializer
             )
             SELECT
                 p.Id,
+                0,
                 0,
                 0,
                 0,
