@@ -159,8 +159,8 @@ BEGIN TRAN
 			@companyId,
 			1,
 			1000,
-			75,
-			10,
+			25,
+			5,
 			50
 
 COMMIT TRAN
