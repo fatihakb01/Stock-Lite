@@ -5,12 +5,12 @@ This guide explains how to run Stock-Lite locally for development purposes.
 ## Prerequisites
 
 Make sure you have the following installed:
-- .NET 10 SDK
-- Node.js (version v24.11.0)
-- npm (version 11.8.0)
-- Optional: Docker (version 28.5.1)
+- [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
+- [Node.js](https://nodejs.org/en/download)
+- [Docker](https://docs.docker.com/desktop)
 
 You can verify installations using:
+
 ```bash
 dotnet --version
 node --version
@@ -26,7 +26,72 @@ cd Stock-Lite
 
 ## Backend Setup (API)
 
-Restore & Build
+### 1 Configuration Setup
+
+Before running the API, you must manually create configuration files.
+
+The following files are excluded from Git for security reasons:
+- `API/appsettings.json`
+- `API/appsettings.Development.json`
+
+Navigate to the API folder and create both files.
+
+**appsettings.json**
+
+Create `API/appsettings.json`:
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+}
+```
+
+**appsettings.Development.json**
+
+Create `API/appsettings.Development.json`:
+
+```json
+{
+  "Jwt": {
+    "Key": "YOUR_SECRET_KEY_HERE",
+    "Issuer": "https://localhost:5001",
+    "Audience": "https://localhost:3000",
+    "ExpireMinutes": 60
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Information"
+    }
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=127.0.0.1,1433;Database=StockLite;User Id=SA;Password=Password@1;TrustServerCertificate=True;"
+  },
+  "Resend": {
+    "ApiKey": "YOUR_RESEND_API_KEY",
+    "Email": {
+      "From": "no-reply@yourdomain.com",
+      "To": "your-email@example.com"
+    }
+  },
+  "ClientAppUrl": "https://localhost:3000"
+}
+```
+
+**🔐 Important Notes**
+- Replace `YOUR_SECRET_KEY_HERE` with a secure random string.
+- Replace `YOUR_RESEND_API_KEY` with your actual API key from Resend.
+- Update email addresses as needed.
+- You can create a Resend account and generate an API key here: [Resend](https://resend.com/docs)
+
+### 2 Restore & Build
+
 ```bash
 dotnet build
 ```
@@ -61,6 +126,12 @@ dotnet watch run
 The API should now be running locally.
 
 ## Frontend Setup (Client)
+
+First, create a `client/.env.development` file:
+
+```bash
+VITE_API_URL=https://localhost:5001/api
+```
 
 Navigate to the client folder:
 ```bash
