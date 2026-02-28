@@ -92,6 +92,13 @@ Create `API/appsettings.Development.json`:
 
 ### 2 Restore & Build
 
+First, make sure that the back-end certificate is trusted by running the following command:
+```bash
+dotnet dev-certs https --clean
+dotnet dev-certs https --trust
+```
+
+Next, build the project:
 ```bash
 dotnet build
 ```
@@ -104,14 +111,14 @@ dotnet tool install --global dotnet-ef
 
 ## Database Setup
 
+First, start the Docker container:
+```bash
+docker compose up -d
+```
+
 Before running the project for the first time, update the database:
 ```bash
 dotnet ef database update --project Infrastructure --startup-project API
-```
-
-Start the Docker container:
-```bash
-docker compose up -d
 ```
 
 Navigate to the API project:
@@ -124,6 +131,40 @@ Run the API. From the API folder:
 dotnet watch run
 ```
 The API should now be running locally.
+
+To set up an environment, run the following SQL code in the database:
+```sql
+BEGIN TRAN
+
+		DECLARE @name NVARCHAR(100) = 'Test Company',
+				@email NVARCHAR(255) = 'test@test.com',
+				@userName NVARCHAR(50) = 'Vatos01',
+				@isActive BIT = 1,
+				@phoneNumber NVARCHAR(20) = '+31612345678',
+				@address NVARCHAR(250) = 'Test street 123',
+				@companyId UNIQUEIDENTIFIER
+
+		-- Set-up the environment
+		EXEC [dbo].[CreateCompany]
+			@name,
+			@email,
+			@isActive,
+			@phoneNumber,
+			@address
+		
+		-- If you want seed data in your system
+		SELECT @companyId = Id FROM Companies WHERE Name = 'Test Company'
+
+		EXEC [dbo].[SeedData]
+			@companyId,
+			1,
+			1000,
+			75,
+			10,
+			50
+
+COMMIT TRAN
+```
 
 ## Frontend Setup (Client)
 

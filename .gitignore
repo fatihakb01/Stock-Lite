@@ -5,6 +5,7 @@
 
 # dotenv files
 .env
+.env.development
 
 # ignore notes
 front-end-log.txt
