@@ -1,4 +1,4 @@
-import { Box, Grid, Typography, Fab, CircularProgress } from "@mui/material";
+import { Box, Typography, Fab, CircularProgress } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import UserCard from "./UserCard";
 import UserDialog from "./UserDialog";
@@ -26,13 +26,17 @@ export default function UsersPage() {
           <CircularProgress />
         </Box>
       ) : (
-        <Grid container spacing={2}>
+        <Box
+          display="grid"
+          gridTemplateColumns="repeat(4, 1fr)"
+          gap={2}
+        >
           {users?.map((user) => (
-            <Grid key={user.id} size={{xs: 12, sm: 6, md: 4, lg: 3}}>
+            <Box key={user.id}>
               <UserCard user={user} onClick={() => setSelectedUserId(user.id)} />
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
       )}
 
       {currentUser && currentUser.role === "SuperAdmin" && (
