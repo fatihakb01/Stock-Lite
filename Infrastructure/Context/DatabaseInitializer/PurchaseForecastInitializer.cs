@@ -298,11 +298,8 @@ public static class PurchaseForecastInitializer
                 SELECT
                     b1.ProductId,
                     b1.WeekIndex,
-                    GREATEST(
-                        SUM(b2.EffectiveDemand) - 
-                        SUM(b2.QuantityOnOrder), 
-                        0
-                    ) AS NetDemandDuringLeadTime
+                    SUM(b2.EffectiveDemand) - 
+                    SUM(b2.QuantityOnOrder) AS NetDemandDuringLeadTime
                 FROM #Plan b1
                 JOIN #Plan b2
                 ON b2.ProductId = b1.ProductId
