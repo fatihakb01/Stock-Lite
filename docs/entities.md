@@ -83,6 +83,7 @@ Relationship
 Allows dynamic/custom fields per product.
 
 Relationship
+- Many UserDefinedFields → 1 Company
 - Many UserDefinedFields → 1 Product
 
 ### 🧾 Transactions (Sales)

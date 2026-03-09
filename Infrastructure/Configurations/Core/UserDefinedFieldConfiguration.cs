@@ -8,7 +8,7 @@ public class UserDefinedFieldConfiguration : IEntityTypeConfiguration<UserDefine
 {
     public void Configure(EntityTypeBuilder<UserDefinedField> builder)
     {
-        builder.HasKey(u => new { u.ProductId, u.Key });
+        builder.HasKey(u => new { u.ProductId, u.CompanyId, u.Key });
 
         builder.HasOne(u => u.Product)
                .WithMany(p => p.UserDefinedFields)

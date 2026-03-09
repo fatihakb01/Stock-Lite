@@ -46,18 +46,21 @@ public class UserDefinedFieldImportObjects
             INSERT INTO UserDefinedFields (
                 [ProductId],
                 [Key],
-                [Value]
+                [Value],
+                CompanyId
             )
             SELECT
                 p.Id,
                 [Key],
-                [Value]
+                [Value],
+                @CompanyId
             FROM StagingUserDefinedFields s
             INNER JOIN Products p ON p.SKU = s.SKU
             WHERE NOT EXISTS (
                 SELECT 1
                 FROM UserDefinedFields u
                 WHERE u.ProductId = p.Id
+                AND u.CompanyId = @CompanyId
                 AND u.[Key] = s.[Key]
             );
 
@@ -70,6 +73,7 @@ public class UserDefinedFieldImportObjects
                 ON p.SKU = s.SKU
             INNER JOIN UserDefinedFields u 
                 ON u.ProductId = p.Id
+                AND u.CompanyId = @CompanyId
                 AND u.[Key] = s.[Key];
 
             -- Reset staging table

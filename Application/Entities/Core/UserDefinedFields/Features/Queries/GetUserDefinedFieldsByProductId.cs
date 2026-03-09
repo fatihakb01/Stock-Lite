@@ -25,7 +25,7 @@ public class GetUserDefinedFieldsByProductId
         {
             var udfs = await repository.FindAsync(x => 
                 x.ProductId == request.ProductId &&
-                x.Product.CompanyId == currentUser.CompanyId,
+                x.CompanyId == currentUser.CompanyId,
                 ct
             );
 
