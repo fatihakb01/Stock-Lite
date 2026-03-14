@@ -26,5 +26,10 @@ public class JobExecutionConfiguration : IEntityTypeConfiguration<JobExecution>
             .WithMany(j => j.JobExecutions)
             .HasForeignKey(j => j.ScheduledJobId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.JobTaskExecution)
+            .WithMany(j => j.JobExecutions)
+            .HasForeignKey(j => j.JobTaskExecutionId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

@@ -23,10 +23,17 @@ public class ScheduledJobController(IMediator mediator) : BaseApiController(medi
     }
 
     [Authorize(Policy = "SuperAdminOnly")]
-    [HttpPost("{id}")]
+    [HttpPost("run/{id}")]
     public async Task<ActionResult<Unit>> RunScheduledJob(Guid id)
     {
         return HandleResult(await Mediator.Send(new RunScheduledJob.Command { Id = id }));
+    }
+
+    [Authorize(Policy = "SuperAdminOnly")]
+    [HttpPost("clean/{id}")]
+    public async Task<ActionResult<Unit>> CleanScheduledJob(Guid id)
+    {
+        return HandleResult(await Mediator.Send(new CleanScheduledJob.Command { Id = id }));
     }
 
     [Authorize(Policy = "SuperAdminOnly")]

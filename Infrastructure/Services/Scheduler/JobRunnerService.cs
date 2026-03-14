@@ -13,12 +13,14 @@ public class JobRunnerService(
     private readonly IJobExecutionRepository _executionRepo = executionRepo;
     private readonly IJobDispatcher _dispatcher = dispatcher;
 
-    public async Task<JobRunResult> RunAsync(ScheduledJob job, CancellationToken ct)
+    public async Task<JobRunResult> RunAsync(ScheduledJob job, JobTaskExecution jobTaskExecution, CancellationToken ct)
     {
         var execution = new JobExecution
         {
             ScheduledJobId = job.Id,
             ScheduledJob = job,
+            JobTaskExecutionId = jobTaskExecution.Id,
+            JobTaskExecution = jobTaskExecution,
             StartedAt = DateTime.UtcNow,
             Status = JobExecutionStatus.Running
         };
@@ -37,7 +39,7 @@ public class JobRunnerService(
         catch (Exception ex)
         {
             execution.Status = JobExecutionStatus.Failed;
-            execution.ErrorMessage = ex.ToString()[..4000];
+            execution.ErrorMessage = ex.ToString()[..^1];
             job.Result = JobRunResult.Failed;
 
             return job.Result;

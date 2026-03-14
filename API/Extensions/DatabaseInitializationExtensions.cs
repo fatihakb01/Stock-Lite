@@ -12,7 +12,6 @@ public static class DatabaseInitializationExtensions
         var services = scope.ServiceProvider;
         var context = services.GetRequiredService<DataContext>();
         var logger = services.GetRequiredService<ILogger<Program>>();
-        var config = services.GetRequiredService<IConfiguration>();
 
         try
         {

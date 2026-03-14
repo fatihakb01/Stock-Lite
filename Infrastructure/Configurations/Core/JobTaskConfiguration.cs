@@ -27,9 +27,26 @@ public class JobTaskConfiguration : IEntityTypeConfiguration<JobTask>
         builder.Property(x => x.IsArchived)
             .IsRequired();
 
-        // builder.Property(x => x.CronExpression)
-        //     .IsRequired()
-        //     .HasMaxLength(100);
+        builder.Property(x => x.IsRunning)
+            .IsRequired();
+
+        builder.Property(x => x.ScheduledAt)
+            .IsRequired();
+
+        builder.Property(x => x.Retries)
+            .IsRequired();
+
+        builder.Property(x => x.MaxRetries)
+            .IsRequired();
+
+        builder.Property(x => x.RetryDelayMinutes)
+            .IsRequired();
+
+        builder.Property(x => x.PeriodType)
+            .IsRequired();
+
+        builder.Property(x => x.Result)
+            .IsRequired();
 
         builder.HasMany(x => x.Jobs)
             .WithOne(j => j.JobTask)
@@ -40,5 +57,10 @@ public class JobTaskConfiguration : IEntityTypeConfiguration<JobTask>
             .WithMany(j => j.JobTasks)
             .HasForeignKey(j => j.CompanyId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(x => x.Executions)
+            .WithOne(x => x.JobTask)
+            .HasForeignKey(x => x.JobTaskId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

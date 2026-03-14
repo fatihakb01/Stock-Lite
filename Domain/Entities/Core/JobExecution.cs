@@ -9,6 +9,9 @@ public class JobExecution
     public Guid ScheduledJobId { get; set; }
     public required ScheduledJob ScheduledJob { get; set; }
 
+    public Guid JobTaskExecutionId { get; set; }
+    public required JobTaskExecution JobTaskExecution { get; set; }
+
     public JobExecutionStatus Status { get; set; } = JobExecutionStatus.Pending;
 
     public DateTime StartedAt { get; set; }

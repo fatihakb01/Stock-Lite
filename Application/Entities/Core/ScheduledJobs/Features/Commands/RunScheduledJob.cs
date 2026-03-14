@@ -1,4 +1,5 @@
 using Application.Core;
+using Domain.Entities.Core;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Scheduler;
@@ -33,7 +34,17 @@ public class RunScheduledJob
             if (scheduledJob == null)
                 return Result<Unit>.Failure("scheduledJob not found or archived", 404);
 
-            await jobRunnerService.RunAsync(scheduledJob, ct);
+            var jobTaskExecution = new JobTaskExecution
+            {
+                JobTaskId = scheduledJob.JobTaskId,
+                JobTask = scheduledJob.JobTask,
+                ScheduledAt = scheduledJob.JobTask.ScheduledAt,
+                StartedAt = DateTime.UtcNow,
+                Status = JobExecutionStatus.Running,
+                TriggerType = JobTriggerType.Manual
+            };
+
+            await jobRunnerService.RunAsync(scheduledJob, jobTaskExecution, ct);
             scheduledJob.Result = JobRunResult.Unknown;
             await repository.SaveChangesAsync(ct);
 

@@ -1,6 +1,13 @@
+using Domain.Entities.Core;
+using Domain.Enums;
+
 namespace Domain.Interfaces.Services.Scheduler;
 
 public interface IJobTaskRunnerService
 {
-    Task RunAsync(Guid jobTaskId, CancellationToken ct);
+    Task<JobRunResult> RunAsync(
+        JobTask jobTask, 
+        JobTriggerType triggerType, 
+        CancellationToken ct
+    );
 }

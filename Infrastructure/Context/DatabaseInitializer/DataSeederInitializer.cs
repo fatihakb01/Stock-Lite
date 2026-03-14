@@ -271,7 +271,8 @@ public static class DataSeederInitializer
 				@UserId UNIQUEIDENTIFIER = NEWID(),
 				@JobTaskOne UNIQUEIDENTIFIER = NEWID(),
 				@JobTaskTwo UNIQUEIDENTIFIER = NEWID(),
-				@CreatedAt DATETIME = GETDATE()
+				@CreatedAt DATETIME = GETDATE(),
+				@ScheduledAt DATETIME = DATEADD(DAY,1,GETDATE())
 
 			-- Create new company
             INSERT INTO Companies (
@@ -339,11 +340,16 @@ public static class DataSeederInitializer
 				Description,
 				AllowManualTrigger,
 				IsArchived,
-				CompanyId
+				CompanyId,
+				PeriodType,
+				ScheduledAt,
+				NextRunAt,
+				RetryDelayMinutes,
+				MaxRetries
 			)
 			VALUES 
-			(@JobTaskOne,'JT-1','Import Job Task','',1,0,@CompanyId),
-			(@JobTaskTwo,'JT-2','Calculation Jobs','',1,0,@CompanyId)
+			(@JobTaskOne,'JT-1','Import Job Task','',1,0,@CompanyId,0,@ScheduledAt,@ScheduledAt,10,1),
+			(@JobTaskTwo,'JT-2','Calculation Jobs','',1,0,@CompanyId,0,@ScheduledAt,@ScheduledAt,10,1)
 
 			-- Create ScheduledJobs
 			INSERT INTO ScheduledJobs (
@@ -496,9 +502,9 @@ public static class DataSeederInitializer
         CREATE OR ALTER PROCEDURE [dbo].[SeedData]
         @CompanyId UNIQUEIDENTIFIER,
 		@EnsurePositiveStock BIT = 1,
-        @NumberOfProducts INT = 100000,
-        @NumberOfPOs INT = 75,
-        @NumberOfCOs INT = 25,
+        @NumberOfProducts INT = 1000,
+        @NumberOfPOs INT = 1,
+        @NumberOfCOs INT = 1,
         @NumberOfTransactions INT = 50
         AS
         BEGIN

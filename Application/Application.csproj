@@ -24,8 +24,6 @@
     <Folder Include="Entities\Core\ConfirmedOrders\Validators\" />
     <Folder Include="Entities\Core\PurchaseOrders\Features\Commands\" />
     <Folder Include="Entities\Core\PurchaseOrders\Validators\" />
-    <Folder Include="Entities\Core\JobTasks\DTOs\" />
-    <Folder Include="Entities\Core\JobTasks\Features\Commands\" />
     <Folder Include="Entities\Core\JobTasks\Validators\" />
     <Folder Include="Entities\Core\ScheduledJobs\DTOs\" />
     <Folder Include="Entities\Core\ScheduledJobs\Features\Queries\" />

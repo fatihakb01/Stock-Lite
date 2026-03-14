@@ -1,3 +1,4 @@
+using Domain.Entities.Core;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Scheduler;
@@ -5,44 +6,50 @@ using Domain.Interfaces.Services.Scheduler;
 namespace Infrastructure.Services.Scheduler;
 
 public class JobTaskRunnerService(
-    IJobTaskRepository jobTaskRepo,
-    IScheduledJobRepository scheduledJobRepo,
-    IJobRunnerService jobRunner
-) : IJobTaskRunnerService
+        IJobTaskExecutionRepository executionRepo,
+        IJobTaskDispatcher dispatcher
+    ) : IJobTaskRunnerService
 {
-    public async Task RunAsync(Guid jobTaskId, CancellationToken ct)
+    private readonly IJobTaskExecutionRepository _executionRepo = executionRepo;
+    private readonly IJobTaskDispatcher _dispatcher = dispatcher;
+
+    public async Task<JobRunResult> RunAsync(JobTask jobTask, JobTriggerType triggerType, CancellationToken ct)
     {
-        var task = await jobTaskRepo.GetByIdAsync(jobTaskId, ct);
 
-        if (task == null)
-            throw new InvalidOperationException("JobTask not found.");
-
-        var jobs = await scheduledJobRepo.FindAsync(x => 
-            x.JobTaskId == task.Id, 
-            ct
-        );
-
-        jobs = jobs.OrderBy(x => x.ExecutionOrder);
-
-        var lastExecutionStatuses = await jobTaskRepo
-            .GetScheduledJobResultByJobTaskAsync(jobTaskId, ct);
-
-        foreach (var job in jobs)
+        var execution = new JobTaskExecution
         {
-            if (lastExecutionStatuses.TryGetValue(job.Id, out var status) &&
-                status == JobRunResult.Succeeded)
-            {
-                continue;
-            }
+            JobTaskId = jobTask.Id,
+            JobTask = jobTask,
+            ScheduledAt = jobTask.ScheduledAt,
+            StartedAt = DateTime.UtcNow,
+            Status = JobExecutionStatus.Running,
+            TriggerType = triggerType
+        };
 
-            var result = await jobRunner.RunAsync(job, ct);
+        await _executionRepo.AddAsync(execution, ct);
+        await _executionRepo.SaveChangesAsync(ct);  
 
-            if (result == JobRunResult.Failed)
-            {
-                break;
-            }
-        }    
+        try
+        {
+            await _dispatcher.DispatchAsync(jobTask, execution, ct);
+            execution.Status = JobExecutionStatus.Succeeded;
+            jobTask.Result = JobRunResult.Succeeded;
 
-        await jobTaskRepo.ResetScheduledJobResultByJobTaskAsync(jobTaskId, ct);
+            return jobTask.Result;
+        }
+        catch (Exception ex)
+        {
+            execution.Status = JobExecutionStatus.Failed;
+            execution.ErrorMessage = ex.ToString()[..^1];
+            jobTask.Result = JobRunResult.Failed;
+
+            return jobTask.Result;
+        }
+        finally
+        {
+            execution.FinishedAt = DateTime.UtcNow;
+            _executionRepo.Update(execution);
+            await _executionRepo.SaveChangesAsync(ct);
+        }
     }
 }

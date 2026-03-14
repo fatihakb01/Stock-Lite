@@ -10,8 +10,28 @@ public interface IJobTaskRepository : IRepository<JobTask>
         Guid companyId,
         CancellationToken ct
     );
-    Task<Dictionary<Guid, JobRunResult>> GetScheduledJobResultByJobTaskAsync(
-        Guid jobTaskId, CancellationToken ct
+    Task<List<JobTask>> GetDueTasksAsync(
+        DateTime now, 
+        CancellationToken ct
     );
-    Task ResetScheduledJobResultByJobTaskAsync(Guid jobTaskId, CancellationToken ct);
+    Task<Dictionary<Guid, JobRunResult>> GetScheduledJobResultByJobTaskAsync(
+        Guid jobTaskId, 
+        CancellationToken ct
+    );
+    Task ResetScheduledJobResultByJobTaskAsync(
+        Guid jobTaskId, 
+        CancellationToken ct
+    );
+    Task ResetJobTaskResultByJobTaskAsync(
+        Guid jobTaskId, 
+        CancellationToken ct
+    );
+    Task<bool> TryLockTaskAsync(
+        Guid taskId, 
+        DateTime now
+    );
+    Task CleanJobTask(
+        Guid taskId,
+        CancellationToken ct
+    );
 }

@@ -19,6 +19,7 @@ using Infrastructure.Services.Users;
 using Domain.Interfaces.Services.Users;
 using Infrastructure.Services.Scheduler.Imports;
 using Infrastructure.Services.Scheduler;
+using Microsoft.Extensions.Hosting;
 
 namespace Infrastructure.Extensions;
 
@@ -93,6 +94,7 @@ public static class DependencyInjection
         services.AddScoped<IJobTaskRepository, JobTaskRepository>();
         services.AddScoped<IScheduledJobRepository, ScheduledJobRepository>();
         services.AddScoped<IJobExecutionRepository, JobExecutionRepository>();
+        services.AddScoped<IJobTaskExecutionRepository, JobTaskExecutionRepository>();
 
         // --- Internal Services ---
         services.AddScoped<ITokenService, TokenService>();
@@ -118,7 +120,9 @@ public static class DependencyInjection
 
         services.AddScoped<IJobDispatcher, JobDispatcher>();
         services.AddScoped<IJobRunnerService, JobRunnerService>();
+        services.AddScoped<IJobTaskDispatcher, JobTaskDispatcher>();
         services.AddScoped<IJobTaskRunnerService, JobTaskRunnerService>();
+        services.AddHostedService<SchedulerWorker>();
 
         // --- External Services ---
         services.AddOptions();

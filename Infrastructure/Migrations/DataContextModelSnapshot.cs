@@ -135,6 +135,9 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime?>("FinishedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid>("JobTaskExecutionId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("ScheduledJobId")
                         .HasColumnType("uniqueidentifier");
 
@@ -145,6 +148,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("JobTaskExecutionId");
 
                     b.HasIndex("ScheduledJobId", "StartedAt");
 
@@ -172,15 +177,42 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsArchived")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsRunning")
+                        .HasColumnType("bit");
+
                     b.Property<string>("JobTaskKey")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<DateTime?>("LastStartedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MaxRetries")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("NextRunAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PeriodType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Result")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Retries")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RetryDelayMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ScheduledAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -190,6 +222,43 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("JobTasks");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Core.JobTaskExecution", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<DateTime?>("FinishedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("JobTaskId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ScheduledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TriggerType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobTaskId", "StartedAt");
+
+                    b.HasIndex("JobTaskId", "Status");
+
+                    b.ToTable("JobTaskExecutions");
                 });
 
             modelBuilder.Entity("Domain.Entities.Core.Product", b =>
@@ -1005,11 +1074,19 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Core.JobExecution", b =>
                 {
+                    b.HasOne("Domain.Entities.Core.JobTaskExecution", "JobTaskExecution")
+                        .WithMany("JobExecutions")
+                        .HasForeignKey("JobTaskExecutionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("Domain.Entities.Core.ScheduledJob", "ScheduledJob")
                         .WithMany("JobExecutions")
                         .HasForeignKey("ScheduledJobId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("JobTaskExecution");
 
                     b.Navigation("ScheduledJob");
                 });
@@ -1023,6 +1100,17 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Core.JobTaskExecution", b =>
+                {
+                    b.HasOne("Domain.Entities.Core.JobTask", "JobTask")
+                        .WithMany("Executions")
+                        .HasForeignKey("JobTaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("JobTask");
                 });
 
             modelBuilder.Entity("Domain.Entities.Core.Product", b =>
@@ -1292,7 +1380,14 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Core.JobTask", b =>
                 {
+                    b.Navigation("Executions");
+
                     b.Navigation("Jobs");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Core.JobTaskExecution", b =>
+                {
+                    b.Navigation("JobExecutions");
                 });
 
             modelBuilder.Entity("Domain.Entities.Core.Product", b =>

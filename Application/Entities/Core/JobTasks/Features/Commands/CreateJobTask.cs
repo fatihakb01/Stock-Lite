@@ -36,6 +36,7 @@ public class CreateJobTask
 
             var jobTask = mapper.Map<JobTask>(dto);
             jobTask.CompanyId = currentUser.CompanyId;
+            jobTask.NextRunAt = dto.ScheduledAt;
 
             await repository.AddAsync(jobTask, ct);
             

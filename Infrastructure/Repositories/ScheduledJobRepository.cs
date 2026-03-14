@@ -81,4 +81,36 @@ public class ScheduledJobRepository(DataContext context)
             job.ExecutionOrder = i;
         }
     }
+
+    public async Task CleanScheduledJobs(Guid taskId, CancellationToken ct)
+    {
+        await _context.Database.ExecuteSqlRawAsync(
+            """
+            UPDATE s
+            SET Result = 2
+            FROM ScheduledJobs s
+            INNER JOIN JobTasks j ON j.Id = s.JobTaskId
+            WHERE j.Id = {0}
+            AND Result <> 2
+            """,
+            taskId
+        );
+
+        await _context.SaveChangesAsync(ct);
+    }
+
+    public async Task CleanScheduledJob(Guid jobId, CancellationToken ct)
+    {
+        await _context.Database.ExecuteSqlRawAsync(
+            """
+            UPDATE ScheduledJobs
+            SET Result = 2,
+            WHERE Id = {0}
+            AND Result <> 2
+            """,
+            jobId
+        );
+
+        await _context.SaveChangesAsync(ct);
+    }
 }
