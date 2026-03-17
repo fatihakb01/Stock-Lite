@@ -25,6 +25,10 @@ export default function AddJobTaskButton() {
       jobTaskKey: "",
       name: "",
       description: "",
+      scheduledAt: "",
+      periodType: "",
+      maxRetries: 1,
+      retryDelayMinutes: 1,
       isArchived: false
     }
   });
@@ -33,7 +37,11 @@ export default function AddJobTaskButton() {
     await createJobTask.mutateAsync({
       jobTaskKey: values.jobTaskKey,
       name: values.name,
-      description: values.description
+      description: values.description,
+      scheduledAt: values.scheduledAt,
+      periodType: values.periodType,
+      maxRetries: values.maxRetries,
+      retryDelayMinutes: values.retryDelayMinutes
     });
     form.reset();
     setOpen(false);

@@ -59,7 +59,8 @@ namespace Infrastructure.Services.Scheduler
             else
             {
                 jobTask.Retries = 0;
-                jobTask.NextRunAt = CalculateNextRun(jobTask.NextRunAt ?? jobTask.ScheduledAt, jobTask.PeriodType);
+                jobTask.NextRunAt = CalculateNextRun(jobTask.ScheduledAt, jobTask.PeriodType);
+                jobTask.ScheduledAt = CalculateNextRun(jobTask.ScheduledAt, jobTask.PeriodType);
 
                 await _jobTaskRepo.ResetScheduledJobResultByJobTaskAsync(jobTask.Id, ct);
                 await _jobTaskRepo.ResetJobTaskResultByJobTaskAsync(jobTask.Id, ct);

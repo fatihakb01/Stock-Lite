@@ -7,6 +7,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import {
+    useCleanScheduledJob,
   useDeleteScheduledJob,
   useRunScheduledJob,
   useScheduledJob,
@@ -24,6 +25,7 @@ export default function ScheduledJobDetails({ scheduledJobId, user } :
 
   const { data, isLoading, isError } = useScheduledJob(scheduledJobId);
   const runScheduledJob = useRunScheduledJob(scheduledJobId);
+  const cleanScheduledJob = useCleanScheduledJob(scheduledJobId);
   const deleteScheduledJob = useDeleteScheduledJob(scheduledJobId);
   const { data: history } = useScheduledJobHistory(scheduledJobId, showHistory);
   
@@ -101,6 +103,14 @@ export default function ScheduledJobDetails({ scheduledJobId, user } :
             disabled={runScheduledJob.isPending}
           >
             Run scheduled job
+          </Button>
+
+          <Button
+              variant="contained"
+              onClick={() => cleanScheduledJob.mutate()}
+              disabled={cleanScheduledJob.isPending}
+          >
+              Clean scheduled job
           </Button>
 
           <Button

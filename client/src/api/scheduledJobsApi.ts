@@ -18,7 +18,12 @@ export const GetScheduledJobHistory = async (id: string) : Promise<ScheduledJobE
 }
 
 export const RunScheduledJob = async (id: string) : Promise<void> => {
-    const res = await api.post(`/scheduledjob/${id}`);
+    const res = await api.post(`/scheduledjob/run/${id}`);
+    return res.data;
+}
+
+export const CleanScheduledJob = async (id: string): Promise<void> => {
+    const res = await api.post(`/scheduledjob/clean/${id}`);
     return res.data;
 }
 

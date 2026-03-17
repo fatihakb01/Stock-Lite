@@ -3,7 +3,7 @@ import { z } from "zod";
 export const scheduledJobSchema = z.object({
   jobTaskKey: z.string().min(1),
   name: z.string().min(1),
-  description: z.string().optional(),
+  description: z.string().max(200).optional(),
   jobType: z.string(),
   calculationType: z.string().optional(),
   importDataType: z.string().optional(),

@@ -32,6 +32,7 @@ public class EditJobTask
                 return Result<JobTaskDto>.Failure("JobTask not found", 404);
 
             var dto = request.EditJobTaskDto;
+            dto.ScheduledAt = dto.NextRunAt ?? dto.ScheduledAt;
 
             mapper.Map(dto, jobTask);
 

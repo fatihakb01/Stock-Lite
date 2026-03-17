@@ -38,7 +38,6 @@ public class RunScheduledJob
             {
                 JobTaskId = scheduledJob.JobTaskId,
                 JobTask = scheduledJob.JobTask,
-                ScheduledAt = scheduledJob.JobTask.ScheduledAt,
                 StartedAt = DateTime.UtcNow,
                 Status = JobExecutionStatus.Running,
                 TriggerType = JobTriggerType.Manual

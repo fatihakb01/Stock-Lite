@@ -32,6 +32,11 @@ export default function JobTaskEditForm({
       jobTaskKey: jobTask.jobTaskKey,
       name: jobTask.name,
       description: jobTask.description,
+      nextRunAt: jobTask.nextRunAt ?? jobTask.scheduledAt,
+      scheduledAt: jobTask.nextRunAt ?? jobTask.scheduledAt,
+      periodType: jobTask.periodType,
+      maxRetries: jobTask.maxRetries,
+      retryDelayMinutes: jobTask.retryDelayMinutes,
       isArchived: jobTask.isArchived
     }
   });
@@ -41,6 +46,11 @@ export default function JobTaskEditForm({
       jobTaskKey: values.jobTaskKey,
       name: values.name,
       description: values.description,
+      nextRunAt: values.nextRunAt ?? values.scheduledAt,
+      scheduledAt: values.nextRunAt ?? values.scheduledAt,
+      periodType: values.periodType,
+      maxRetries: values.maxRetries,
+      retryDelayMinutes: values.retryDelayMinutes,
       isArchived: values.isArchived
     };
 

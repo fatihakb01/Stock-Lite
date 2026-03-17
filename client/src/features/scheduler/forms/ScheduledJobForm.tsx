@@ -63,6 +63,8 @@ export default function ScheduledJobForm({
         multiline
         rows={3}
         {...form.register("description")}
+        error={!!form.formState.errors.description}
+        helperText={form.formState.errors.description?.message}
       />
 
       <TextField

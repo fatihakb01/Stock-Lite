@@ -5,6 +5,11 @@ export type JobTask = {
     jobTaskKey: string,
     name: string,
     description: string,
+    scheduledAt: string,
+    nextRunAt?: string,
+    periodType: string,
+    maxRetries: number,
+    retryDelayMinutes: number,
     isArchived: boolean,
     jobs: {
         id: string,
@@ -22,6 +27,11 @@ export type JobTaskDetail = {
     jobTaskKey: string,
     name: string,
     description: string,
+    scheduledAt: string,
+    nextRunAt?: string,
+    periodType: string,
+    maxRetries: number,
+    retryDelayMinutes: number,
     isArchived: boolean,
     jobs: ScheduledJob[]
 };
@@ -29,6 +39,7 @@ export type JobTaskDetail = {
 export type JobTaskExecution = {
   jobTaskName: string,
   scheduledJobName: string,
+  triggerType: number,
   status: number;          
   startedAt: string;
   finishedAt: string;
@@ -38,12 +49,21 @@ export type JobTaskExecution = {
 export type CreateJobTaskDto = {
     jobTaskKey: string,
     name: string,
-    description?: string
+    description?: string,
+    scheduledAt?: string,
+    periodType: string,
+    maxRetries: number,
+    retryDelayMinutes: number
 };
 
 export type EditJobTaskDto = {
     jobTaskKey: string,
     isArchived: boolean,
     name: string,
-    description?: string
+    description?: string,
+    scheduledAt?: string,
+    nextRunAt?: string,
+    periodType: string,
+    maxRetries: number,
+    retryDelayMinutes: number
 };

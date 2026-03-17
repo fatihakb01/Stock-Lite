@@ -29,7 +29,11 @@ export const GetRecentHistory = async () : Promise<JobTaskExecution[]> => {
 }
 
 export const RunJobTask = async (id: string) : Promise<void> => {
-    await api.post(`jobtask/${id}`);
+    await api.post(`jobtask/run/${id}`);
+}
+
+export const CleanJobTask = async (id: string): Promise<void> => {
+    await api.post(`jobtask/clean/${id}`);
 }
 
 export const CreateJobTask = async (dto: CreateJobTaskDto) : Promise<JobTask> => {

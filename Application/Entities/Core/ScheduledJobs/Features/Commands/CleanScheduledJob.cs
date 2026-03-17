@@ -23,13 +23,13 @@ namespace Application.Entities.Core.ScheduledJobs.Features.Commands
                     x.Id == request.Id &&
                     x.JobTask.CompanyId == currentUser.CompanyId,
                     ct,
-                    x => x.JobTaskId
+                    x => x.JobTask
                 );
 
                 if (scheduledJob == null)
                     return Result<Unit>.Failure("ScheduledJob not found", 404);
 
-                await scheduledJobRepository.CleanScheduledJob(scheduledJob.JobTaskId, ct);
+                await scheduledJobRepository.CleanScheduledJob(scheduledJob.JobTask.Id, ct);
 
                 return Result<Unit>.Success(Unit.Value);
             }

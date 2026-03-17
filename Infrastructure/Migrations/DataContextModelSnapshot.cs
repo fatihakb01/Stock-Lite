@@ -129,8 +129,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ErrorMessage")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
+                        .HasColumnType("nvarchar(MAX)");
 
                     b.Property<DateTime?>("FinishedAt")
                         .HasColumnType("datetime2");
@@ -145,6 +144,9 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TriggerType")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -231,17 +233,13 @@ namespace Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ErrorMessage")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
+                        .HasColumnType("nvarchar(MAX)");
 
                     b.Property<DateTime?>("FinishedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("JobTaskId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("ScheduledAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("StartedAt")
                         .HasColumnType("datetime2");

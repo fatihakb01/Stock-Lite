@@ -13,6 +13,7 @@ export default function ExecutionTable({ rows, full } : Props) {
             <TableRow>
               {full && (<TableCell>JobTask Name</TableCell>)}
               {full && (<TableCell>ScheduledJob Name</TableCell>)}
+              {full && (<TableCell>Trigger Type</TableCell>)}
               <TableCell>Started</TableCell>
               <TableCell>Finished</TableCell>
               <TableCell>Status</TableCell>
@@ -24,6 +25,7 @@ export default function ExecutionTable({ rows, full } : Props) {
                     <TableRow key={i}>
                         {full && (<TableCell>{row.jobTaskName}</TableCell>)}
                         {full && (<TableCell>{row.scheduledJobName}</TableCell>)}
+                        {full && (<TableCell>{row.triggerType}</TableCell>)}
                         <TableCell>{row.startedAt.replace("T", " ") ?? "-"}</TableCell>
                         <TableCell>{row.finishedAt?.replace("T", " ") ?? "-"}</TableCell>
                         <TableCell>{ row.status }</TableCell>

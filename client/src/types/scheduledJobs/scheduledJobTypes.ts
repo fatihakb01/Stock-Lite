@@ -22,6 +22,7 @@ export type ReorderScheduledJobsDto = {
 export type ScheduledJobExecution = {
   jobTaskName: string,
   scheduledJobName: string,
+  triggerType: number,
   status: number;          
   startedAt: string;
   finishedAt: string;

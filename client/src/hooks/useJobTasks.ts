@@ -11,6 +11,7 @@ import type {
     JobTaskExecution
 } from "../types/jobTasks/jobTaskTypes"
 import { 
+    CleanJobTask,
     CreateJobTask, 
     DeleteJobTask, 
     EditJobTask, 
@@ -68,6 +69,19 @@ export const useRunJobTask = (id: string | null) => {
             queryClient.invalidateQueries({queryKey: ["product"]});
             queryClient.invalidateQueries({queryKey: ["purchaseforecast"]});
             queryClient.invalidateQueries({queryKey: ["salesaggregate"]});
+        }
+    })
+}
+
+export const useCleanJobTask = (id: string | null) => {
+    const queryClient = useQueryClient();
+
+    return useMutation<void>({
+        mutationFn: () => CleanJobTask(id!),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["jobtask"] });
+            queryClient.invalidateQueries({ queryKey: ["jobtasks"] });
+            queryClient.invalidateQueries({ queryKey: ["scheduledjob"] });
         }
     })
 }

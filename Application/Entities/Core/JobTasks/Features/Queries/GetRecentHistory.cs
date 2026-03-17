@@ -30,6 +30,7 @@ public class GetRecentHistory
                 JobTaskName = e.ScheduledJob.JobTask.Name,
                 ScheduledJobName = e.ScheduledJob.Name,
                 Status = e.Status,
+                TriggerType = e.TriggerType,
                 StartedAt = e.StartedAt,
                 FinishedAt = e.FinishedAt,
                 ErrorMessage = e.ErrorMessage

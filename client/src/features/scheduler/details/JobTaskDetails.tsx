@@ -1,6 +1,6 @@
 import { Stack, Typography, Button, Divider, CircularProgress } from "@mui/material";
 import { useState } from "react";
-import { useDeleteJobTask, useJobTask, useJobTaskHistory, useRunJobTask } from "../../../hooks/useJobTasks";
+import { useCleanJobTask, useDeleteJobTask, useJobTask, useJobTaskHistory, useRunJobTask } from "../../../hooks/useJobTasks";
 import JobTaskEditForm from "../forms/JobTaskEditForm";
 import ExecutionTable from "../tables/ExecutionTable";
 import type { User } from "../../../types/users/userTypes";
@@ -12,6 +12,7 @@ export default function JobTaskDetails({ jobTaskId, user } : { jobTaskId: string
 
   const { data, isLoading } = useJobTask(jobTaskId);
   const runJobTask = useRunJobTask(jobTaskId);
+  const cleanJobTask = useCleanJobTask(jobTaskId);
   const deleteJobTask = useDeleteJobTask(jobTaskId);
   const { data: history } = useJobTaskHistory(jobTaskId, showHistory);
 
@@ -56,6 +57,22 @@ export default function JobTaskDetails({ jobTaskId, user } : { jobTaskId: string
       </Typography>
 
       <Typography variant="caption">
+        Scheduled at: {data.nextRunAt?.replace("T", " ") ?? data.scheduledAt.replace("T", " ")}
+      </Typography>
+
+      <Typography variant="caption">
+          Period type: {data.periodType}
+      </Typography>
+
+      <Typography variant="caption">
+          Maximum retries: {data.maxRetries}
+      </Typography>
+
+      <Typography variant="caption">
+          Retry delay minutes: {data.retryDelayMinutes}
+      </Typography>
+
+      <Typography variant="caption">
         Status: {data.isArchived ? "Archived" : "Active"}
       </Typography>
 
@@ -72,6 +89,14 @@ export default function JobTaskDetails({ jobTaskId, user } : { jobTaskId: string
               disabled={runJobTask.isPending}
             >
                 Run job task
+            </Button>
+
+            <Button
+                variant="contained"
+                onClick={() => cleanJobTask.mutate()}
+                disabled={cleanJobTask.isPending}
+            >
+                Clean job task
             </Button>
 
             <Button

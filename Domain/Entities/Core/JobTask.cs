@@ -19,7 +19,7 @@ public class JobTask
     public DateTime? NextRunAt { get; set; }
 
     public int Retries { get; set; } = 0;
-    public int MaxRetries { get; set; } = 0;
+    public int MaxRetries { get; set; } = 1;
     public int RetryDelayMinutes { get; set; } = 10;
 
     public Period PeriodType { get; set; }

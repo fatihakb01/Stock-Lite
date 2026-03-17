@@ -13,6 +13,7 @@ public class JobExecution
     public required JobTaskExecution JobTaskExecution { get; set; }
 
     public JobExecutionStatus Status { get; set; } = JobExecutionStatus.Pending;
+    public JobTriggerType TriggerType { get; set; }
 
     public DateTime StartedAt { get; set; }
     public DateTime? FinishedAt { get; set; }

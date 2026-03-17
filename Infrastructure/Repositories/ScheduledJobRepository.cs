@@ -87,11 +87,11 @@ public class ScheduledJobRepository(DataContext context)
         await _context.Database.ExecuteSqlRawAsync(
             """
             UPDATE s
-            SET Result = 2
+            SET s.Result = 2
             FROM ScheduledJobs s
             INNER JOIN JobTasks j ON j.Id = s.JobTaskId
             WHERE j.Id = {0}
-            AND Result <> 2
+            AND s.Result <> 2
             """,
             taskId
         );
@@ -104,7 +104,7 @@ public class ScheduledJobRepository(DataContext context)
         await _context.Database.ExecuteSqlRawAsync(
             """
             UPDATE ScheduledJobs
-            SET Result = 2,
+            SET Result = 2
             WHERE Id = {0}
             AND Result <> 2
             """,

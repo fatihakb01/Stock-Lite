@@ -22,7 +22,8 @@ public class JobRunnerService(
             JobTaskExecutionId = jobTaskExecution.Id,
             JobTaskExecution = jobTaskExecution,
             StartedAt = DateTime.UtcNow,
-            Status = JobExecutionStatus.Running
+            Status = JobExecutionStatus.Running,
+            TriggerType = jobTaskExecution.TriggerType
         };
 
         await _executionRepo.AddAsync(execution, ct);

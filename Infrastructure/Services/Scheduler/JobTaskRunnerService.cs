@@ -20,7 +20,6 @@ public class JobTaskRunnerService(
         {
             JobTaskId = jobTask.Id,
             JobTask = jobTask,
-            ScheduledAt = jobTask.ScheduledAt,
             StartedAt = DateTime.UtcNow,
             Status = JobExecutionStatus.Running,
             TriggerType = triggerType

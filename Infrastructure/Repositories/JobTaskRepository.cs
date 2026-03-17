@@ -129,7 +129,8 @@ public class JobTaskRepository(DataContext context)
             """
             UPDATE JobTasks
             SET IsRunning = 0,
-                Retries = 0
+                Retries = 0,
+                Result = 2
             WHERE Id = {0}
             """,
             taskId

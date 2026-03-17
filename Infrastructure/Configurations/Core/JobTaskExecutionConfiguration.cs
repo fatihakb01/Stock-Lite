@@ -16,14 +16,11 @@ namespace Infrastructure.Configurations.Core
             builder.Property(x => x.TriggerType)
                 .IsRequired();
 
-            builder.Property(x => x.ScheduledAt)
-                .IsRequired();
-
             builder.Property(x => x.StartedAt)
                 .IsRequired();
 
             builder.Property(x => x.ErrorMessage)
-                .HasMaxLength(4000);
+                .HasColumnType("nvarchar(MAX)");
 
             builder.HasIndex(x => new { x.JobTaskId, x.Status });
             builder.HasIndex(x => new { x.JobTaskId, x.StartedAt });

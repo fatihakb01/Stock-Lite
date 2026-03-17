@@ -11,6 +11,7 @@ import type {
     ScheduledJobExecution
 } from "../types/scheduledJobs/scheduledJobTypes"
 import { 
+    CleanScheduledJob,
     CreateScheduledJob, 
     DeleteScheduledJob, 
     EditScheduledJob, 
@@ -52,6 +53,19 @@ export const useRunScheduledJob = (id: string | null) => {
             queryClient.invalidateQueries({queryKey: ["product"]});
             queryClient.invalidateQueries({queryKey: ["purchaseforecast"]});
             queryClient.invalidateQueries({queryKey: ["salesaggregate"]});
+        }
+    })
+}
+
+export const useCleanScheduledJob = (id: string | null) => {
+    const queryClient = useQueryClient();
+
+    return useMutation<void>({
+        mutationFn: () => CleanScheduledJob(id!),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["jobtasks"] });
+            queryClient.invalidateQueries({ queryKey: ["jobtask"] });
+            queryClient.invalidateQueries({ queryKey: ["scheduledjob"] });
         }
     })
 }

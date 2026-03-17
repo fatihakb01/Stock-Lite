@@ -9,8 +9,9 @@ public class BaseJobTaskDto
     public string? Description { get; set; }
 
     public DateTime ScheduledAt { get; set; }
+    public DateTime? NextRunAt { get; set; }
     public Period PeriodType { get; set; }
 
-    public int Retries { get; set; } = 0;
-    public int RetryDelayMinutes { get; set; } = 10;
+    public int MaxRetries { get; set; }
+    public int RetryDelayMinutes { get; set; }
 }
