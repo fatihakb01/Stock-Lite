@@ -10,6 +10,7 @@ import { useWatch } from "react-hook-form";
 import { periodTypeMap } from "../../../types/scheduledJobs/periodTypeMap";
 import type { JobTaskFormValues } from "../schemas/jobTaskSchema";
 import { useEffect } from "react";
+import BasicDateTimePicker from "../../../components/fields/BasicDateTimePicker";
 
 type Props = {
     mode: "create" | "edit";
@@ -59,20 +60,18 @@ export default function JobTaskForm({ mode, form }: Props) {
             />
 
             {mode === "create" && (
-                <TextField
+                <BasicDateTimePicker
+                    name="scheduledAt"
+                    control={form.control}
                     label="Scheduled At"
-                    {...form.register("scheduledAt")}
-                    error={!!form.formState.errors.scheduledAt}
-                    helperText={form.formState.errors.scheduledAt?.message}
                 />
             )}
 
             {mode === "edit" && (
-                <TextField
+                <BasicDateTimePicker
+                    name="nextRunAt"
+                    control={form.control}
                     label="Next Run At"
-                    {...form.register("nextRunAt")}
-                    error={!!form.formState.errors.nextRunAt}
-                    helperText={form.formState.errors.nextRunAt?.message}
                 />
             )}
 
