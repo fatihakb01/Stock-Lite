@@ -9,9 +9,9 @@ export const jobTaskSchema = z.object({
     description: z.string().max(200).optional(),
     scheduledAt: z.string().optional(),
     nextRunAt: z.string().optional(),
-    periodType: z.string(),
-    maxRetries: z.number().min(1),
-    retryDelayMinutes: z.number().min(1),
+    periodType: z.string().optional(),
+    maxRetries: z.number().optional(),
+    retryDelayMinutes: z.number().optional(),
     isArchived: z.boolean()
 });
 

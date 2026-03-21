@@ -103,10 +103,19 @@ public class ScheduledJobRepository(DataContext context)
     {
         await _context.Database.ExecuteSqlRawAsync(
             """
+            DECLARE @jobTaskId UNIQUEIDENTIFIER;
+
+            SELECT @jobTaskId = JobTaskId FROM ScheduledJobs WHERE Id = {0};
+
             UPDATE ScheduledJobs
             SET Result = 2
             WHERE Id = {0}
-            AND Result <> 2
+            AND Result <> 2;
+
+            UPDATE JobTasks
+            SET Retries = 0
+            WHERE Id = @jobTaskId
+            AND Retries <> 0;
             """,
             jobId
         );

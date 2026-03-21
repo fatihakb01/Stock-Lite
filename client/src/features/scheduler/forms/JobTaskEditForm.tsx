@@ -31,31 +31,33 @@ export default function JobTaskEditForm({
     defaultValues: {
       jobTaskKey: jobTask.jobTaskKey,
       name: jobTask.name,
-      description: jobTask.description,
-      nextRunAt: jobTask.nextRunAt ?? jobTask.scheduledAt,
-      scheduledAt: jobTask.nextRunAt ?? jobTask.scheduledAt,
-      periodType: jobTask.periodType,
-      maxRetries: jobTask.maxRetries,
-      retryDelayMinutes: jobTask.retryDelayMinutes,
+      description: jobTask.description || undefined,
+      nextRunAt: jobTask.nextRunAt || jobTask.scheduledAt || undefined,
+      scheduledAt: undefined,
+      periodType: jobTask.periodType || undefined,
+      maxRetries: jobTask.maxRetries || undefined,
+      retryDelayMinutes: jobTask.retryDelayMinutes || undefined,
       isArchived: jobTask.isArchived
     }
   });
 
-  const onSubmit = async (values: JobTaskFormValues) => {
-    const dto: EditJobTaskDto = {
-      jobTaskKey: values.jobTaskKey,
-      name: values.name,
-      description: values.description,
-      nextRunAt: values.nextRunAt ?? values.scheduledAt,
-      scheduledAt: values.nextRunAt ?? values.scheduledAt,
-      periodType: values.periodType,
-      maxRetries: values.maxRetries,
-      retryDelayMinutes: values.retryDelayMinutes,
-      isArchived: values.isArchived
-    };
+    const onSubmit = async (values: JobTaskFormValues) => {
+      const nextRunAt = values.nextRunAt || undefined;
 
-    await editJobTask.mutateAsync(dto);
-    onSaved();
+      const dto: EditJobTaskDto = {
+        jobTaskKey: values.jobTaskKey,
+        name: values.name,
+        description: values.description || undefined,
+        nextRunAt: nextRunAt,
+        scheduledAt: nextRunAt,
+        periodType: values.periodType || undefined,
+        maxRetries: values.maxRetries || undefined,
+        retryDelayMinutes: values.retryDelayMinutes || undefined,
+        isArchived: values.isArchived
+      };
+      
+      await editJobTask.mutateAsync(dto);
+      onSaved();
   };
 
   return (

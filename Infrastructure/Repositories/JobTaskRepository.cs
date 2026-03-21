@@ -33,9 +33,10 @@ public class JobTaskRepository(DataContext context)
         return await _context.JobTasks
             .Where(x =>
                 !x.IsArchived &&
+                !x.AllowManualTriggerOnly &&
                 (
                     !x.IsRunning ||
-                    x.LastStartedAt < now.AddMinutes(-x.RetryDelayMinutes)
+                    x.LastStartedAt < now.AddMinutes(-(x.RetryDelayMinutes ?? 1 ))
                 ) &&
                 x.Retries < x.MaxRetries &&
                 x.NextRunAt != null &&

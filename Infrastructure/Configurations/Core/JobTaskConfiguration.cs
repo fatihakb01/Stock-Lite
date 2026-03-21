@@ -24,25 +24,13 @@ public class JobTaskConfiguration : IEntityTypeConfiguration<JobTask>
         builder.Property(x => x.Description)
             .HasMaxLength(200);
 
+        builder.Property(x => x.AllowManualTriggerOnly)
+            .IsRequired();
+
         builder.Property(x => x.IsArchived)
             .IsRequired();
 
         builder.Property(x => x.IsRunning)
-            .IsRequired();
-
-        builder.Property(x => x.ScheduledAt)
-            .IsRequired();
-
-        builder.Property(x => x.Retries)
-            .IsRequired();
-
-        builder.Property(x => x.MaxRetries)
-            .IsRequired();
-
-        builder.Property(x => x.RetryDelayMinutes)
-            .IsRequired();
-
-        builder.Property(x => x.PeriodType)
             .IsRequired();
 
         builder.Property(x => x.Result)

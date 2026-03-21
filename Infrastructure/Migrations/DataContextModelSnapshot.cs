@@ -166,7 +166,7 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("AllowManualTrigger")
+                    b.Property<bool>("AllowManualTriggerOnly")
                         .HasColumnType("bit");
 
                     b.Property<Guid>("CompanyId")
@@ -190,7 +190,7 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime?>("LastStartedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("MaxRetries")
+                    b.Property<int?>("MaxRetries")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -201,19 +201,19 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime?>("NextRunAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("PeriodType")
+                    b.Property<int?>("PeriodType")
                         .HasColumnType("int");
 
                     b.Property<int>("Result")
                         .HasColumnType("int");
 
-                    b.Property<int>("Retries")
+                    b.Property<int?>("Retries")
                         .HasColumnType("int");
 
-                    b.Property<int>("RetryDelayMinutes")
+                    b.Property<int?>("RetryDelayMinutes")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("ScheduledAt")
+                    b.Property<DateTime?>("ScheduledAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");

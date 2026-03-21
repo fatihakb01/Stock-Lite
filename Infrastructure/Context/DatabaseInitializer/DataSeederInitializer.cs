@@ -338,7 +338,7 @@ public static class DataSeederInitializer
 				JobTaskKey,
 				Name,
 				Description,
-				AllowManualTrigger,
+				AllowManualTriggerOnly,
 				IsArchived,
 				CompanyId,
 				PeriodType,
@@ -348,8 +348,8 @@ public static class DataSeederInitializer
 				MaxRetries
 			)
 			VALUES 
-			(@JobTaskOne,'JT-1','Import Job Task','',1,0,@CompanyId,0,@ScheduledAt,@ScheduledAt,10,1),
-			(@JobTaskTwo,'JT-2','Calculation Jobs','',1,0,@CompanyId,0,@ScheduledAt,@ScheduledAt,10,1)
+			(@JobTaskOne,'JT-1','Import Job Task','',0,0,@CompanyId,0,@ScheduledAt,@ScheduledAt,10,1),
+			(@JobTaskTwo,'JT-2','Calculation Jobs','',0,0,@CompanyId,0,@ScheduledAt,@ScheduledAt,10,1)
 
 			-- Create ScheduledJobs
 			INSERT INTO ScheduledJobs (

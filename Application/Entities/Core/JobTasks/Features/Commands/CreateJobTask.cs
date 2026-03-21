@@ -36,7 +36,16 @@ public class CreateJobTask
 
             var jobTask = mapper.Map<JobTask>(dto);
             jobTask.CompanyId = currentUser.CompanyId;
-            jobTask.NextRunAt = dto.ScheduledAt;
+            jobTask.AllowManualTriggerOnly = dto.ScheduledAt == null;
+            
+            if (dto.ScheduledAt != null)
+            {
+                jobTask.NextRunAt = dto.ScheduledAt;
+                jobTask.Retries = 0;
+                jobTask.MaxRetries = dto.MaxRetries ?? 1;
+                jobTask.RetryDelayMinutes = dto.RetryDelayMinutes ?? 1;
+                jobTask.PeriodType = dto.PeriodType;
+            }
 
             await repository.AddAsync(jobTask, ct);
             

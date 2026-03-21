@@ -56,21 +56,31 @@ export default function JobTaskDetails({ jobTaskId, user } : { jobTaskId: string
         Jobs linked: {data.jobs.length}
       </Typography>
 
-      <Typography variant="caption">
-        Scheduled at: {data.nextRunAt?.replace("T", " ") ?? data.scheduledAt.replace("T", " ")}
-      </Typography>
+      { (data && (data.nextRunAt || data.scheduledAt) ? (
+          <Typography variant="caption">
+            Scheduled at: {data.nextRunAt?.replace("T", " ") ?? data.scheduledAt?.replace("T", " ")}
+          </Typography>
+      ) : (
+          <Typography variant="caption">
+              Manual task
+          </Typography>      
+      ))}
 
-      <Typography variant="caption">
-          Period type: {data.periodType}
-      </Typography>
+      {(data && (data.nextRunAt || data.scheduledAt) && (
+        <>
+          <Typography variant="caption">
+              Period type: {data.periodType}
+          </Typography>
 
-      <Typography variant="caption">
-          Maximum retries: {data.maxRetries}
-      </Typography>
+          <Typography variant="caption">
+              Maximum retries: {data.maxRetries}
+          </Typography>
 
-      <Typography variant="caption">
-          Retry delay minutes: {data.retryDelayMinutes}
-      </Typography>
+          <Typography variant="caption">
+              Retry delay minutes: {data.retryDelayMinutes}
+          </Typography>
+        </>
+      ))}
 
       <Typography variant="caption">
         Status: {data.isArchived ? "Archived" : "Active"}

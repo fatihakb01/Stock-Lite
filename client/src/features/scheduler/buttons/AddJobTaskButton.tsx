@@ -24,11 +24,11 @@ export default function AddJobTaskButton() {
     defaultValues: {
       jobTaskKey: "",
       name: "",
-      description: "",
       scheduledAt: "",
-      periodType: "",
-      maxRetries: 1,
-      retryDelayMinutes: 1,
+      description: "",
+      periodType: undefined,
+      maxRetries: undefined,
+      retryDelayMinutes: undefined,
       isArchived: false
     }
   });
@@ -38,10 +38,10 @@ export default function AddJobTaskButton() {
       jobTaskKey: values.jobTaskKey,
       name: values.name,
       description: values.description,
-      scheduledAt: values.scheduledAt,
-      periodType: values.periodType,
-      maxRetries: values.maxRetries,
-      retryDelayMinutes: values.retryDelayMinutes
+      scheduledAt: values.scheduledAt || undefined,
+      periodType: values.periodType || undefined,
+      maxRetries: values.maxRetries || undefined,
+      retryDelayMinutes: values.retryDelayMinutes || undefined
     });
     form.reset();
     setOpen(false);

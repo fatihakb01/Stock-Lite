@@ -10,19 +10,19 @@ public class JobTask
     public required string Name { get; set; }
     public string? Description { get; set; }
 
-    public bool AllowManualTrigger { get; set; } = true;
+    public bool AllowManualTriggerOnly { get; set; }
     public bool IsArchived { get; set; }
     public bool IsRunning { get; set; } = false;
 
-    public DateTime ScheduledAt { get; set; }
+    public DateTime? ScheduledAt { get; set; }
     public DateTime? LastStartedAt { get; set; }
     public DateTime? NextRunAt { get; set; }
 
-    public int Retries { get; set; } = 0;
-    public int MaxRetries { get; set; } = 1;
-    public int RetryDelayMinutes { get; set; } = 10;
+    public int? Retries { get; set; }
+    public int? MaxRetries { get; set; }
+    public int? RetryDelayMinutes { get; set; }
 
-    public Period PeriodType { get; set; }
+    public Period? PeriodType { get; set; }
     public JobRunResult Result { get; set; } = JobRunResult.Unknown;
 
     public Guid CompanyId { get; set; }

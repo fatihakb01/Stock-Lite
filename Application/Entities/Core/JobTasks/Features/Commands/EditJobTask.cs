@@ -33,7 +33,8 @@ public class EditJobTask
 
             var dto = request.EditJobTaskDto;
             dto.ScheduledAt = dto.NextRunAt ?? dto.ScheduledAt;
-
+            jobTask.AllowManualTriggerOnly = dto.ScheduledAt == null;
+            jobTask.Retries = dto.NextRunAt != null ? 0 : null;
             mapper.Map(dto, jobTask);
 
             var result = await repository.SaveChangesAsync(ct);

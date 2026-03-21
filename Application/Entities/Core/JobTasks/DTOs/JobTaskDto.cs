@@ -6,5 +6,6 @@ public class JobTaskDto : BaseJobTaskDto
 {
     public Guid Id { get; set; }
     public bool IsArchived { get; set; }
+    public bool AllowManualTriggerOnly { get; set; }
     public ICollection<ScheduledJobDto> Jobs { get; set; } = new List<ScheduledJobDto>();
 }
