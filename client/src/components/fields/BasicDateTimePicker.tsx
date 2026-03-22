@@ -32,6 +32,9 @@ export default function BasicDateTimePicker<T extends FieldValues>({
                                 fullWidth: true,
                                 error: !!fieldState.error,
                                 helperText: fieldState.error?.message
+                            },
+                            field: {
+                                clearable: true
                             }
                         }}
                     />

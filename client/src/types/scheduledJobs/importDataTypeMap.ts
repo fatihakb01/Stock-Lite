@@ -3,7 +3,8 @@ export const importDataTypeMap: Record<number, string> = {
     1: "Transactions",
     2: "ConfirmedOrders",
     3: "PurchaseOrders",
-    4: "UserDefinedFields"
+    4: "UserDefinedFields",
+    5: "None"
 };
 
 export const reverseImportDataTypeMap: Record<string, number> = {
@@ -11,5 +12,6 @@ export const reverseImportDataTypeMap: Record<string, number> = {
     Transactions: 1,
     ConfirmedOrders: 2,
     PurchaseOrders: 3,
-    UserDefinedFields: 4
+    UserDefinedFields: 4,
+    None: 5
 };

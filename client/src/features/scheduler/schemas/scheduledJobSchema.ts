@@ -7,14 +7,14 @@ export const scheduledJobSchema = z.object({
   jobType: z.string(),
   calculationType: z.string().optional(),
   importDataType: z.string().optional(),
-  periodType: z.string().transform(v => v === "" ? undefined : v).optional(),
+  periodType: z.string().optional(),
   source: z.string().optional(),
   target: z.string().optional(),
   isArchived: z.boolean()
 }).superRefine((data, ctx) => {
   switch (data.jobType) {
     case "Import":
-      if (!data.importDataType) {
+      if (!data.importDataType || data.importDataType === "None") {
         ctx.addIssue({
           path: ["importDataType"],
           message: "Import data type is required",
@@ -24,7 +24,7 @@ export const scheduledJobSchema = z.object({
       break;
 
     case "StandardCalculation":
-      if (!data.calculationType) {
+      if (!data.calculationType || data.calculationType === "None") {
         ctx.addIssue({
           path: ["calculationType"],
           message: "Calculation type is required",

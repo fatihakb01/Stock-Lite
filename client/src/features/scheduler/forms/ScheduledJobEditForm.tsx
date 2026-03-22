@@ -43,7 +43,23 @@ export default function ScheduledJobEditForm({
   });
 
   const onSubmit = async (values: ScheduledJobFormValues) => {
-    const dto: EditScheduledJobDto = { ...values };
+    const calculationType = values.calculationType === "None" ? undefined : values.calculationType;
+    const importDataType = values.importDataType === "None" ? undefined : values.importDataType;
+    const periodType = values.periodType === "None" ? undefined : values.periodType;
+
+    const dto: EditScheduledJobDto = {
+        jobTaskKey: scheduledJob.jobTaskKey,
+        name: values.name,
+        description: values.description,
+        jobType: values.jobType,
+        calculationType: calculationType || undefined,
+        importDataType: importDataType || undefined,
+        periodType: periodType || undefined,
+        source: values.source,
+        target: values.target,
+        isArchived: values.isArchived
+    };
+
     await editScheduledJob.mutateAsync(dto);
     onSaved();
   };
@@ -53,7 +69,7 @@ export default function ScheduledJobEditForm({
       <form
         onSubmit={form.handleSubmit(
           onSubmit,
-          errors => console.log("EDIT FORM ERRORS", errors)
+          errors => console.log("EDIT SCHEDULEDJOB ERRORS", errors)
         )}
       >
         <DialogTitle>Edit scheduled job</DialogTitle>

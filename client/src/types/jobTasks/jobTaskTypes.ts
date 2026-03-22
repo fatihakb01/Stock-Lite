@@ -2,25 +2,7 @@ import type { ScheduledJob } from "../scheduledJobs/scheduledJobTypes";
 
 export type JobTask = {
     id: string,
-    jobTaskKey: string,
-    name: string,
-    description: string,
-    scheduledAt?: string,
-    nextRunAt?: string,
-    periodType?: string,
-    maxRetries?: number,
-    retryDelayMinutes?: number,
-    isArchived: boolean,
-    allowManualTriggerOnly: boolean,
-    jobs: {
-        id: string,
-        isArchived: boolean,
-        jobType: number,
-        calculationType: number,
-        importDataType: string,
-        periodType: string,
-        executionOrder: number
-    }[]
+    name: string
 };
 
 export type JobTaskDetail = {
@@ -44,8 +26,8 @@ export type JobTaskExecution = {
   triggerType: number,
   status: number;          
   startedAt: string;
-  finishedAt: string;
-  errorMessage: string;
+  finishedAt?: string;
+  errorMessage?: string;
 };
 
 export type CreateJobTaskDto = {

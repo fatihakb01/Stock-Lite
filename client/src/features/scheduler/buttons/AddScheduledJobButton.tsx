@@ -22,7 +22,7 @@ export default function AddScheduledJobButton({ jobTaskKey }: { jobTaskKey: stri
   const form = useForm<ScheduledJobFormValues>({
     resolver: zodResolver(scheduledJobSchema),
     defaultValues: {
-      jobTaskKey,
+      jobTaskKey: jobTaskKey,
       name: "",
       description: undefined,
       jobType: "",
@@ -36,8 +36,21 @@ export default function AddScheduledJobButton({ jobTaskKey }: { jobTaskKey: stri
   });
 
   const onSubmit = async (values: ScheduledJobFormValues) => {
-    console.log("SUBMIT VALUES", values);
-    await createScheduledJob.mutateAsync(values);
+    const calculationType = values.calculationType === "None" ? undefined : values.calculationType;
+    const importDataType = values.importDataType === "None" ? undefined : values.importDataType;
+    const periodType = values.periodType === "None" ? undefined : values.periodType;
+
+    await createScheduledJob.mutateAsync({
+        jobTaskKey: jobTaskKey,
+        name: values.name,
+        description: values.description,
+        jobType: values.jobType,
+        calculationType: calculationType,
+        importDataType: importDataType,
+        periodType: periodType || undefined,
+        source: values.source,
+        target: values.target
+    });
     form.reset();
     setOpen(false);
   };
@@ -52,7 +65,7 @@ export default function AddScheduledJobButton({ jobTaskKey }: { jobTaskKey: stri
         <form
           onSubmit={form.handleSubmit(
             onSubmit,
-            errors => console.log("FORM ERRORS", errors)
+            errors => console.log("CREATE SCHEDULEDJOB ERRORS", errors)
           )}
         >
           <DialogTitle>Add scheduled job</DialogTitle>

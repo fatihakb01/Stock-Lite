@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCreateJobTask } from "../../../hooks/useJobTasks";
 import {
-  jobTaskSchema,
+    jobTaskSchema,
   type JobTaskFormValues
 } from "../schemas/jobTaskSchema";
 import JobTaskForm from "../forms/JobTaskForm";
@@ -34,12 +34,14 @@ export default function AddJobTaskButton() {
   });
 
   const onSubmit = async (values: JobTaskFormValues) => {
+    const periodType = values.periodType === "None" ? undefined : values.periodType;
+
     await createJobTask.mutateAsync({
       jobTaskKey: values.jobTaskKey,
       name: values.name,
       description: values.description,
       scheduledAt: values.scheduledAt || undefined,
-      periodType: values.periodType || undefined,
+      periodType: periodType || undefined,
       maxRetries: values.maxRetries || undefined,
       retryDelayMinutes: values.retryDelayMinutes || undefined
     });

@@ -5,7 +5,8 @@ export const calculationTypeMap: Record<number, string> = {
     3: "SalesAggregates",
     4: "PurchaseForecasts",
     5: "ProductKpis",
-    6: "Seasonality"
+    6: "Seasonality",
+    7: "None"
 };
 
 export const reverseCalculationTypeMap: Record<string, number> = {
@@ -15,5 +16,6 @@ export const reverseCalculationTypeMap: Record<string, number> = {
     SalesAggregates: 3,
     PurchaseForecasts: 4,
     ProductKpis: 5,
-    Seasonality: 6
+    Seasonality: 6,
+    None: 7
 };

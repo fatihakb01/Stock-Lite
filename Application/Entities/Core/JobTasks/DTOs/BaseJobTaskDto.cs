@@ -9,7 +9,6 @@ public class BaseJobTaskDto
     public string? Description { get; set; }
 
     public DateTime? ScheduledAt { get; set; }
-    public DateTime? NextRunAt { get; set; }
     public Period? PeriodType { get; set; }
 
     public int? MaxRetries { get; set; }

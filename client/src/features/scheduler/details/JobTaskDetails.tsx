@@ -56,14 +56,14 @@ export default function JobTaskDetails({ jobTaskId, user } : { jobTaskId: string
         Jobs linked: {data.jobs.length}
       </Typography>
 
-      { (data && (data.nextRunAt || data.scheduledAt) ? (
-          <Typography variant="caption">
-            Scheduled at: {data.nextRunAt?.replace("T", " ") ?? data.scheduledAt?.replace("T", " ")}
-          </Typography>
-      ) : (
+      {(data && data.allowManualTriggerOnly ? (
           <Typography variant="caption">
               Manual task
-          </Typography>      
+          </Typography>   
+      ) : (
+          <Typography variant="caption">
+              Scheduled at: {data.nextRunAt?.replace("T", " ") ?? data.scheduledAt?.replace("T", " ")}
+          </Typography>    
       ))}
 
       {(data && (data.nextRunAt || data.scheduledAt) && (

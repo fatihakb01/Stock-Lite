@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEditJobTask } from "../../../hooks/useJobTasks";
 import {
-  jobTaskSchema,
+    jobTaskSchema,
   type JobTaskFormValues
 } from "../schemas/jobTaskSchema";
 import type { EditJobTaskDto, JobTaskDetail } from "../../../types/jobTasks/jobTaskTypes";
@@ -43,6 +43,7 @@ export default function JobTaskEditForm({
 
     const onSubmit = async (values: JobTaskFormValues) => {
       const nextRunAt = values.nextRunAt || undefined;
+      const periodType = values.periodType === "None" ? undefined : values.periodType;
 
       const dto: EditJobTaskDto = {
         jobTaskKey: values.jobTaskKey,
@@ -50,7 +51,7 @@ export default function JobTaskEditForm({
         description: values.description || undefined,
         nextRunAt: nextRunAt,
         scheduledAt: nextRunAt,
-        periodType: values.periodType || undefined,
+        periodType: periodType || undefined,
         maxRetries: values.maxRetries || undefined,
         retryDelayMinutes: values.retryDelayMinutes || undefined,
         isArchived: values.isArchived

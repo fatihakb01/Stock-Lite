@@ -9,7 +9,7 @@ namespace Application.Entities.Core.JobTasks.Features.Queries;
 
 public class GetJobTask
 {
-    public class Query : IRequest<Result<JobTaskDto>>
+    public class Query : IRequest<Result<JobTaskDetailDto>>
     {
         public Guid Id { get; set; }
     }
@@ -18,9 +18,9 @@ public class GetJobTask
         IJobTaskRepository repository,
         IMapper mapper,
         ICurrentUserService currentUser
-    ) : IRequestHandler<Query, Result<JobTaskDto>>
+    ) : IRequestHandler<Query, Result<JobTaskDetailDto>>
     {
-        public async Task<Result<JobTaskDto>> Handle(Query request, CancellationToken ct)
+        public async Task<Result<JobTaskDetailDto>> Handle(Query request, CancellationToken ct)
         {
             var jobTask = await repository.SingleOrDefaultAsync(x =>
                 x.Id == request.Id &&
@@ -30,11 +30,11 @@ public class GetJobTask
             );
 
             if (jobTask == null)
-                return Result<JobTaskDto>.Failure("JobTasks not found", 404);
+                return Result<JobTaskDetailDto>.Failure("JobTasks not found", 404);
 
-            var jobTaskDtos = mapper.Map<JobTaskDto>(jobTask);
+            var jobTaskDtos = mapper.Map<JobTaskDetailDto>(jobTask);
 
-            return Result<JobTaskDto>.Success(jobTaskDtos);
+            return Result<JobTaskDetailDto>.Success(jobTaskDtos);
         }
     }
 }

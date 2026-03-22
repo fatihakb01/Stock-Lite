@@ -24,7 +24,7 @@ public class JobTaskController(IMediator mediator) : BaseApiController(mediator)
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<JobTaskDto>> GetJobTask(Guid id)
+    public async Task<ActionResult<JobTaskDetailDto>> GetJobTask(Guid id)
     {
         return HandleResult(await Mediator.Send(new GetJobTask.Query{ Id = id }));
     }
@@ -51,14 +51,14 @@ public class JobTaskController(IMediator mediator) : BaseApiController(mediator)
 
     [Authorize(Policy = "SuperAdminOnly")]
     [HttpPost]
-    public async Task<ActionResult<JobTaskDto>> CreateJobTask([FromBody] CreateJobTaskDto dto)
+    public async Task<ActionResult<JobTaskDetailDto>> CreateJobTask([FromBody] CreateJobTaskDto dto)
     {
         return HandleResult(await Mediator.Send(new CreateJobTask.Command { CreateJobTaskDto = dto }));
     }
 
     [Authorize(Policy = "SuperAdminOnly")]
     [HttpPut("{id}")]
-    public async Task<ActionResult<JobTaskDto>> EditJobTask(
+    public async Task<ActionResult<JobTaskDetailDto>> EditJobTask(
         Guid id,
         [FromBody] EditJobTaskDto dto
     )

@@ -96,6 +96,7 @@ public class MappingProfiles : Profile
 
         // JobTask entity
         CreateMap<JobTask, JobTaskDto>();
+        CreateMap<JobTask, JobTaskDetailDto>();
         CreateMap<CreateJobTaskDto, JobTask>();
         CreateMap<EditJobTaskDto, JobTask>();
 

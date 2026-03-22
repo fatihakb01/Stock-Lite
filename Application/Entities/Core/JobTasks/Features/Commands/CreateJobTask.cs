@@ -10,7 +10,7 @@ namespace Application.Entities.Core.JobTasks.Features.Commands;
 
 public class CreateJobTask
 {
-    public class Command : IRequest<Result<JobTaskDto>>
+    public class Command : IRequest<Result<JobTaskDetailDto>>
     {
         public required CreateJobTaskDto CreateJobTaskDto { get; set; }
     }
@@ -19,9 +19,9 @@ public class CreateJobTask
         IJobTaskRepository repository,
         IMapper mapper,
         ICurrentUserService currentUser
-    ) : IRequestHandler<Command, Result<JobTaskDto>>
+    ) : IRequestHandler<Command, Result<JobTaskDetailDto>>
     {
-        public async Task<Result<JobTaskDto>> Handle(Command request, CancellationToken ct)
+        public async Task<Result<JobTaskDetailDto>> Handle(Command request, CancellationToken ct)
         {
             var dto = request.CreateJobTaskDto;
 
@@ -32,7 +32,7 @@ public class CreateJobTask
             );
 
             if (jobTaskKeyExist)
-                return Result<JobTaskDto>.Failure("JobTaskKey must be unique", 400);
+                return Result<JobTaskDetailDto>.Failure("JobTaskKey must be unique", 400);
 
             var jobTask = mapper.Map<JobTask>(dto);
             jobTask.CompanyId = currentUser.CompanyId;
@@ -51,11 +51,11 @@ public class CreateJobTask
             
             var result = await repository.SaveChangesAsync(ct);
             if (!result)
-                return Result<JobTaskDto>.Failure("Failed to create JobTask", 400);
+                return Result<JobTaskDetailDto>.Failure("Failed to create JobTask", 400);
 
-            var createdJobTaskDto = mapper.Map<JobTaskDto>(jobTask);
+            var createdJobTaskDto = mapper.Map<JobTaskDetailDto>(jobTask);
 
-            return Result<JobTaskDto>.Success(createdJobTaskDto);
+            return Result<JobTaskDetailDto>.Success(createdJobTaskDto);
         }
     }
 }

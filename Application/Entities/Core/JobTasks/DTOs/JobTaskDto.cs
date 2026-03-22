@@ -1,11 +1,8 @@
-using Application.Entities.Core.ScheduledJobs.DTOs;
-
-namespace Application.Entities.Core.JobTasks.DTOs;
-
-public class JobTaskDto : BaseJobTaskDto
+﻿namespace Application.Entities.Core.JobTasks.DTOs
 {
-    public Guid Id { get; set; }
-    public bool IsArchived { get; set; }
-    public bool AllowManualTriggerOnly { get; set; }
-    public ICollection<ScheduledJobDto> Jobs { get; set; } = new List<ScheduledJobDto>();
+    public class JobTaskDto
+    {
+        public Guid Id { get; set; }
+        public required string Name { get; set; }
+    }
 }

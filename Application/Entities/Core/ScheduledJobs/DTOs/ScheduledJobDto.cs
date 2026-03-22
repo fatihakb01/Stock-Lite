@@ -6,6 +6,4 @@ public class ScheduledJobDto : BaseScheduledJobDto
     public required string JobTaskKey { get; set; }
     public bool IsArchived { get; set; }
     public int ExecutionOrder { get; set; }  
-    public DateTime CreatedAt { get; set; }
-    public Guid CreatedBy { get; set; }
 }

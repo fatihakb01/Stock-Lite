@@ -9,7 +9,7 @@ namespace Application.Entities.Core.JobTasks.Features.Commands;
 
 public class EditJobTask
 {
-    public class Command : IRequest<Result<JobTaskDto>>
+    public class Command : IRequest<Result<JobTaskDetailDto>>
     {
         public Guid Id { get; set; }
         public required EditJobTaskDto EditJobTaskDto { get; set; }
@@ -19,9 +19,9 @@ public class EditJobTask
         IJobTaskRepository repository, 
         IMapper mapper,
         ICurrentUserService currentUser
-    ) : IRequestHandler<Command, Result<JobTaskDto>>
+    ) : IRequestHandler<Command, Result<JobTaskDetailDto>>
     {
-        public async Task<Result<JobTaskDto>> Handle(Command request, CancellationToken ct)
+        public async Task<Result<JobTaskDetailDto>> Handle(Command request, CancellationToken ct)
         {
             var jobTask = await repository.SingleOrDefaultAsync(x =>
                 x.Id == request.Id && x.CompanyId == currentUser.CompanyId,
@@ -29,7 +29,7 @@ public class EditJobTask
             );
 
             if (jobTask == null)
-                return Result<JobTaskDto>.Failure("JobTask not found", 404);
+                return Result<JobTaskDetailDto>.Failure("JobTask not found", 404);
 
             var dto = request.EditJobTaskDto;
             dto.ScheduledAt = dto.NextRunAt ?? dto.ScheduledAt;
@@ -39,11 +39,11 @@ public class EditJobTask
 
             var result = await repository.SaveChangesAsync(ct);
             if (!result)
-                return Result<JobTaskDto>.Failure("Failed to update JobTask", 400);
+                return Result<JobTaskDetailDto>.Failure("Failed to update JobTask", 400);
 
-            var updatedJobTask = mapper.Map<JobTaskDto>(jobTask);
+            var updatedJobTask = mapper.Map<JobTaskDetailDto>(jobTask);
 
-            return Result<JobTaskDto>.Success(updatedJobTask);
+            return Result<JobTaskDetailDto>.Success(updatedJobTask);
         }
     }
 }
