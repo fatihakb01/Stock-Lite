@@ -2,7 +2,8 @@ import type { ScheduledJob } from "../scheduledJobs/scheduledJobTypes";
 
 export type JobTask = {
     id: string,
-    name: string
+    name: string,
+    result: string
 };
 
 export type JobTaskDetail = {

@@ -1,8 +1,11 @@
-﻿namespace Application.Entities.Core.JobTasks.DTOs
+﻿using Domain.Enums;
+
+namespace Application.Entities.Core.JobTasks.DTOs
 {
     public class JobTaskDto
     {
         public Guid Id { get; set; }
         public required string Name { get; set; }
+        public JobExecutionStatus Result { get; set; }
     }
 }

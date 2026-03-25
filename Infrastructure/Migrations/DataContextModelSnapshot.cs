@@ -179,9 +179,6 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsArchived")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsRunning")
-                        .HasColumnType("bit");
-
                     b.Property<string>("JobTaskKey")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -732,8 +729,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasDefaultValue(0);
 
-                    b.Property<bool>("SchedulerFailed")
-                        .HasColumnType("bit");
+                    b.Property<int>("SchedulerStatus")
+                        .HasColumnType("int");
 
                     b.Property<int>("TotalProductCount")
                         .ValueGeneratedOnAdd()

@@ -35,7 +35,7 @@ public class JobTaskRepository(DataContext context)
                 !x.IsArchived &&
                 !x.AllowManualTriggerOnly &&
                 (
-                    !x.IsRunning ||
+                    x.Result != JobExecutionStatus.Running ||
                     x.LastStartedAt < now.AddMinutes(-(x.RetryDelayMinutes ?? 1 ))
                 ) &&
                 x.Retries < x.MaxRetries &&
@@ -44,7 +44,7 @@ public class JobTaskRepository(DataContext context)
             .ToListAsync(ct);
     }
 
-    public async Task<Dictionary<Guid, JobRunResult>> GetScheduledJobResultByJobTaskAsync(
+    public async Task<Dictionary<Guid, JobExecutionStatus>> GetScheduledJobResultByJobTaskAsync(
         Guid jobTaskId, CancellationToken ct)
     {
         return await _context.ScheduledJobs
@@ -72,7 +72,7 @@ public class JobTaskRepository(DataContext context)
             .ToList();
 
         var succeededJobs = _context.ScheduledJobs
-            .Where(x => x.JobTaskId == jobTaskId && x.Result == JobRunResult.Succeeded)
+            .Where(x => x.JobTaskId == jobTaskId && x.Result == JobExecutionStatus.Succeeded)
             .ToList();
 
         if (jobs.Count != succeededJobs.Count)
@@ -80,7 +80,7 @@ public class JobTaskRepository(DataContext context)
 
         foreach (var job in jobs)
         {
-            job.Result = JobRunResult.Unknown;
+            job.Result = JobExecutionStatus.Pending;
         }
 
         await _context.SaveChangesAsync(ct);
@@ -93,7 +93,7 @@ public class JobTaskRepository(DataContext context)
             .ToList();
 
         var succeededJobTasks = _context.JobTasks
-            .Where(x => x.Id == jobTaskId && x.Result == JobRunResult.Succeeded)
+            .Where(x => x.Id == jobTaskId && x.Result == JobExecutionStatus.Pending)
             .ToList();
 
         if (jobTasks.Count != succeededJobTasks.Count)
@@ -101,7 +101,7 @@ public class JobTaskRepository(DataContext context)
 
         foreach (var jobTask in jobTasks)
         {
-            jobTask.Result = JobRunResult.Unknown;
+            jobTask.Result = JobExecutionStatus.Pending;
         }
 
         await _context.SaveChangesAsync(ct);
@@ -112,10 +112,10 @@ public class JobTaskRepository(DataContext context)
         var affected = await _context.Database.ExecuteSqlRawAsync(
             """
             UPDATE JobTasks
-            SET IsRunning = 1,
+            SET Result = 1,
                 LastStartedAt = {0}
             WHERE Id = {1}
-            AND IsRunning = 0
+            AND Result <> 1
             """,
             now,
             taskId
@@ -129,9 +129,8 @@ public class JobTaskRepository(DataContext context)
         await _context.Database.ExecuteSqlRawAsync(
             """
             UPDATE JobTasks
-            SET IsRunning = 0,
-                Retries = 0,
-                Result = 2
+            SET Retries = 0,
+                Result = 0
             WHERE Id = {0}
             """,
             taskId

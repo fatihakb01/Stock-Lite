@@ -3,24 +3,32 @@ import { useState } from "react";
 import TabPanel from "../../components/tabs/TabPanel";
 import SchedulerOverviewTab from "./tabs/SchedulerOverviewTab";
 import RecentHistoryTab from "./tabs/RecentHistoryTab";
+import SchedulerStatusBadge from "./chips/SchedulerStatusBadge";
+import { useSchedulerStatus } from "../../hooks/useProductKpis";
 
 export default function SchedulerPage() {
-  const [tab, setTab] = useState(0);
+    const [tab, setTab] = useState(0);
+    const { data: schedulerStatus } = useSchedulerStatus();
 
-  return (
-    <Box sx={{m:"auto"}}>
-      <Tabs value={tab} onChange={(_, v) => setTab(v)}>
-        <Tab label="Scheduler overview" sx={{ml:"auto"}}/>
-        <Tab label="Job execution history" sx={{mr:"auto"}}/>
-      </Tabs>
+    return (
+        <Box sx={{ m: "auto" }}>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ flexGrow: 1 }}>
+                    <Tab label="Scheduler overview" sx={{ ml: "auto" }} />
+                    <Tab label="Job execution history" sx={{ mr: "auto" }} />
+                </Tabs>
+                <Box sx={{ pr: 2 }}>
+                    <SchedulerStatusBadge status={schedulerStatus} label={"Scheduler"} />
+                </Box>
+            </Box>
 
-      <TabPanel value={tab} index={0}>
-        <SchedulerOverviewTab />
-      </TabPanel>
+            <TabPanel value={tab} index={0}>
+                <SchedulerOverviewTab />
+            </TabPanel>
 
-      <TabPanel value={tab} index={1}>
-        <RecentHistoryTab />
-      </TabPanel>
-    </Box>
-  );
+            <TabPanel value={tab} index={1}>
+                <RecentHistoryTab />
+            </TabPanel>
+        </Box>
+    );
 }

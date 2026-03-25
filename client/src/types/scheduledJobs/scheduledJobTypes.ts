@@ -1,6 +1,7 @@
 export type ScheduledJob = {
     jobTaskKey: string,
     id: string,
+    result: string,
     isArchived: boolean,
     name: string,
     description?: string,

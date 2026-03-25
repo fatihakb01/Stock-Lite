@@ -46,13 +46,6 @@ export const useRunScheduledJob = (id: string | null) => {
             queryClient.invalidateQueries({queryKey: ["jobtasks"]});
             queryClient.invalidateQueries({queryKey: ["jobtask"]});
             queryClient.invalidateQueries({queryKey: ["scheduledjob"]});
-            queryClient.invalidateQueries({queryKey: ["scheduledjob-history"]});
-            queryClient.invalidateQueries({queryKey: ["confirmedorderaggregate"]});
-            queryClient.invalidateQueries({queryKey: ["confirmedorder"]});
-            queryClient.invalidateQueries({queryKey: ["forecast"]});
-            queryClient.invalidateQueries({queryKey: ["product"]});
-            queryClient.invalidateQueries({queryKey: ["purchaseforecast"]});
-            queryClient.invalidateQueries({queryKey: ["salesaggregate"]});
         }
     })
 }

@@ -1,9 +1,10 @@
-import { Stack, List, ListItemButton, Typography } from "@mui/material";
+import { Stack, List, ListItemButton, Typography, Box } from "@mui/material";
 import { useJobTasks } from "../../../hooks/useJobTasks";
 import Section from "../../../components/general/Section";
 import type { SchedulerSelection } from "../selector/useSchedulerSelection";
 import AddJobTaskButton from "../buttons/AddJobTaskButton";
 import type { User } from "../../../types/users/userTypes";
+import SchedulerStatusBadge from "../chips/SchedulerStatusBadge";
 
 type Props = {
   selected: SchedulerSelection
@@ -31,7 +32,10 @@ export default function JobTaskList({ selected, onSelect, user } : Props) {
               selected={selected?.type === "jobtask" && selected.jobTaskId === task.id}
               onClick={() => onSelect(task.id)}
             >
-              <Typography>{task.name}</Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%" }}>
+                  <Typography>{task.name}</Typography>
+                  <SchedulerStatusBadge status={task.result} label={"Task"} />
+              </Box>
             </ListItemButton>
           ))}
         </List>

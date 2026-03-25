@@ -1,10 +1,12 @@
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
 import { Box, Typography } from "@mui/material";
+import SchedulerStatusBadge from "../chips/SchedulerStatusBadge";
 
 type Props = {
   id: string
   name: string
+  result: string
   archived: boolean
   onClick: () => void
 };
@@ -12,6 +14,7 @@ type Props = {
 export function SortableScheduledJobItem({
   id,
   name,
+  result,
   archived,
   onClick,
 }: Props) {
@@ -46,6 +49,7 @@ export function SortableScheduledJobItem({
     >
       <Typography fontWeight={500}>{name}</Typography>
       <Typography>{archived ?  "Archived job" : "Active job"}</Typography>
+      <SchedulerStatusBadge status={result} label={"Job"} />
     </Box>
   );
 }

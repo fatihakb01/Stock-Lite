@@ -2,6 +2,7 @@ using Domain.Entities.Derived;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using Infrastructure.Context;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
@@ -21,9 +22,33 @@ public class ProductKpiRepository(DataContext context)
         return productKpi;
     }
 
+    public async Task<JobExecutionStatus> GetSchedulerStatus(Guid companyId, CancellationToken ct)
+    {
+        var schedulerStatus = await _context.Database
+            .SqlQueryRaw<int>(
+                @"
+            SELECT TOP 1 s.Result AS Value
+            FROM ScheduledJobs s
+            INNER JOIN JobTasks j ON j.Id = s.JobTaskId
+            WHERE j.CompanyId = @companyId
+            ORDER BY
+                CASE s.Result
+                    WHEN 3 THEN 1  -- failed
+                    WHEN 1 THEN 2  -- running
+                    WHEN 0 THEN 4  -- pending
+                    WHEN 2 THEN 3  -- succeeded
+                    ELSE 5
+                END
+            ",
+                new SqlParameter("@companyId", companyId)
+            ).SingleOrDefaultAsync(ct);
+
+        return (JobExecutionStatus) schedulerStatus;
+    }
+
     public async Task UpdateProductKpis(Guid companyId, CancellationToken ct)
     {
-        var schedulerFailed = await FailedScheduledJobsPresent(companyId, ct);
+        var schedulerStatus = await GetSchedulerStatus(companyId, ct);
         var totalProducts = await GetProductsCount(companyId, ct);
         var belowSafetyStock = await GetProductsBelowSafetyStockCount(companyId, ct);
         var recommendedOrders = await GetProductsWithRecommendedOrdersCount(companyId, ct);
@@ -33,7 +58,7 @@ public class ProductKpiRepository(DataContext context)
 
         var productKpi = new ProductKpi()
         {
-            SchedulerFailed = schedulerFailed,
+            SchedulerStatus = schedulerStatus,
             TotalProductCount = totalProducts,
             BelowSafetyStockCount = belowSafetyStock,
             RecommendedOrdersCount = recommendedOrders,
@@ -44,11 +69,10 @@ public class ProductKpiRepository(DataContext context)
         };
 
         var productKpiExist = await _context.ProductKpis.AnyAsync(k => k.CompanyId == companyId, ct);
+        if (productKpiExist)
+            _context.ProductKpis.Remove(productKpi);
 
-        if (!productKpiExist)
-            await _context.AddAsync(productKpi, ct);
-        else 
-            _context.Update(productKpi);
+        await _context.AddAsync(productKpi, ct);
 
         var result = await _context.SaveChangesAsync(ct);
 
@@ -56,15 +80,36 @@ public class ProductKpiRepository(DataContext context)
             throw new InvalidOperationException("Could not update ProductKpi."); 
     }
 
-    private async Task<bool> FailedScheduledJobsPresent(Guid companyId, CancellationToken ct)
+    public async Task UpdateSchedulerStatus(Guid companyId, CancellationToken ct)
     {
-        return await _context.ScheduledJobs
-            .Include(s => s.JobTask)
-            .Where(s => 
-                s.JobTask.CompanyId == companyId && 
-                s.Result == JobRunResult.Failed
-            )
-            .AnyAsync(ct);
+        var schedulerStatus = await GetSchedulerStatus(companyId, ct);
+
+        var productKpi = await _context.ProductKpis
+            .SingleOrDefaultAsync(k => k.CompanyId == companyId, ct);
+
+        if (productKpi == null)
+        {
+            var company = await _context.Companies
+                .SingleOrDefaultAsync(c => c.Id == companyId, ct);
+
+            productKpi = new ProductKpi
+            {
+                SchedulerStatus = schedulerStatus,
+                CompanyId = companyId,
+                Company = company!
+            };
+
+            await _context.AddAsync(productKpi, ct);
+        }
+        else
+        {
+            productKpi.SchedulerStatus = schedulerStatus;
+        }
+
+        var result = await _context.SaveChangesAsync(ct);
+
+        if (result == 0)
+            throw new InvalidOperationException("Could not update ProductKpi.");
     }
 
     private async Task<int> GetProductsCount(Guid companyId, CancellationToken ct)

@@ -12,7 +12,6 @@ public class JobTask
 
     public bool AllowManualTriggerOnly { get; set; }
     public bool IsArchived { get; set; }
-    public bool IsRunning { get; set; } = false;
 
     public DateTime? ScheduledAt { get; set; }
     public DateTime? LastStartedAt { get; set; }
@@ -23,7 +22,7 @@ public class JobTask
     public int? RetryDelayMinutes { get; set; }
 
     public Period? PeriodType { get; set; }
-    public JobRunResult Result { get; set; } = JobRunResult.Unknown;
+    public JobExecutionStatus Result { get; set; } = JobExecutionStatus.Pending;
 
     public Guid CompanyId { get; set; }
     public required Company Company { get; set; }

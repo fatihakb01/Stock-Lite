@@ -17,8 +17,8 @@ namespace Infrastructure.Services.Scheduler
 
         public async Task DispatchAsync(JobTask jobTask, JobTaskExecution jobTaskExecution, CancellationToken ct)
         {
+            jobTask.Result = JobExecutionStatus.Running;
             jobTask.LastStartedAt = DateTime.UtcNow;
-            jobTask.IsRunning = true;
 
             var jobs = await _scheduledJobRepo.FindAsync(x =>
                  x.JobTaskId == jobTask.Id,
@@ -34,14 +34,14 @@ namespace Infrastructure.Services.Scheduler
             foreach (var job in jobs)
             {
                 if (lastExecutionStatuses.TryGetValue(job.Id, out var status) &&
-                    status == JobRunResult.Succeeded)
+                    status == JobExecutionStatus.Succeeded)
                 {
                     continue;
                 }
 
                 var result = await _jobRunnerService.RunAsync(job, jobTaskExecution, ct);
 
-                if (result == JobRunResult.Failed)
+                if (result == JobExecutionStatus.Failed)
                 {
                     jobTask.Retries++;
                     failed = true;
@@ -70,8 +70,6 @@ namespace Infrastructure.Services.Scheduler
                 await _jobTaskRepo.ResetScheduledJobResultByJobTaskAsync(jobTask.Id, ct);
                 await _jobTaskRepo.ResetJobTaskResultByJobTaskAsync(jobTask.Id, ct);
             }
-
-            jobTask.IsRunning = false;
 
             _jobTaskRepo.Update(jobTask);
 

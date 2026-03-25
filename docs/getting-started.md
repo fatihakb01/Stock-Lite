@@ -136,33 +136,28 @@ To set up an environment, run the following SQL code in the database:
 ```sql
 BEGIN TRAN
 
-		DECLARE @name NVARCHAR(100) = 'Test Company',
-				@email NVARCHAR(255) = 'test@test.com',
-				@userName NVARCHAR(50) = 'Vatos01',
-				@isActive BIT = 1,
-				@phoneNumber NVARCHAR(20) = '+31612345678',
-				@address NVARCHAR(250) = 'Test street 123',
-				@companyId UNIQUEIDENTIFIER
-
-		-- Set-up the environment
-		EXEC [dbo].[CreateCompany]
-			@name,
-			@email,
-			@isActive,
-			@phoneNumber,
-			@address
-		
-		-- If you want seed data in your system
-		SELECT @companyId = Id FROM Companies WHERE Name = 'Test Company'
-
-		EXEC [dbo].[SeedData]
-			@companyId,
-			1,
-			1000,
-			25,
-			5,
-			50
-
+    DECLARE @name NVARCHAR(100) = 'Test Company',
+    		@email NVARCHAR(255) = 'test@test.com',
+    		@userName NVARCHAR(50) = 'TestUser',
+    		@isActive BIT = 1,
+    		@phoneNumber NVARCHAR(20) = '+31612345678',
+    		@address NVARCHAR(250) = 'Test street 123',
+    		@companyId UNIQUEIDENTIFIER
+    
+    -- Set-up the environment
+    EXEC [dbo].[CreateCompany]
+    	@name,
+    	@email,
+    	@userName,
+    	@isActive,
+    	@phoneNumber,
+    	@address
+    
+    -- If you want seed data in your system
+    SELECT @companyId = Id FROM Companies WHERE Name = @name
+    
+    EXEC [dbo].[SeedData] @companyId
+    
 COMMIT TRAN
 ```
 

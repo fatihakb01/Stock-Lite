@@ -11,7 +11,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 
-import { Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useJobTask } from "../../../hooks/useJobTasks";
 import Section from "../../../components/general/Section";
@@ -91,28 +91,31 @@ export default function ScheduledJobList({ selected, onSelect, user } : Props) {
         <AddScheduledJobButton jobTaskKey={jobTaskKey}/>
       )}
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={jobs.map(j => j.id)}
-          strategy={verticalListSortingStrategy}
+      <Box mt={2}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
         >
-          <Stack spacing={1}>
-            {jobs.map(job => (
-              <SortableScheduledJobItem
-                key={job.id}
-                id={job.id}
-                name={job.name}
-                archived={job.isArchived}
-                onClick={() => onSelect(jobTaskId, job.id)}
-              />
-            ))}
-          </Stack>
-        </SortableContext>
-      </DndContext>
+          <SortableContext
+            items={jobs.map(j => j.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <Stack spacing={1}>
+              {jobs.map(job => (
+                <SortableScheduledJobItem
+                  key={job.id}
+                  id={job.id}
+                  name={job.name}
+                  result={job.result}
+                  archived={job.isArchived}
+                  onClick={() => onSelect(jobTaskId, job.id)}
+                />
+              ))}
+            </Stack>
+          </SortableContext>
+        </DndContext>
+      </Box>
     </Section>
   );
 }

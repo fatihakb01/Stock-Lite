@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { getProducts, getProduct, getProductKpi } from "../api/productsApi";
-import type { Product, ProductDetail, ProductKpi } from "../types/products/productTypes";
+import { getProducts, getProduct } from "../api/productsApi";
+import type { Product, ProductDetail } from "../types/products/productTypes";
 
 export const useProducts = (filter?: string) => {
   return useQuery<Product[]>({
@@ -17,10 +17,3 @@ export const useProduct = (id: string | null) => {
     enabled: !!id
   });
 };
-
-export const useProductKpi = () => {
-  return useQuery<ProductKpi>({
-    queryKey: ["product-kpis"],
-    queryFn: () => getProductKpi()
-  })
-}

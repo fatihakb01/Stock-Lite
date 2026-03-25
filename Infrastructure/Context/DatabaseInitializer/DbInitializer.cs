@@ -28,8 +28,8 @@ namespace Infrastructure.Context.DatabaseInitializer
 
             var sql = @"
             UPDATE JobTasks
-            SET IsRunning = 0
-            WHERE IsRunning = 1
+            SET Result = 0
+            WHERE Result = 1
             ";
 
             await context.Database.ExecuteSqlRawAsync(sql);

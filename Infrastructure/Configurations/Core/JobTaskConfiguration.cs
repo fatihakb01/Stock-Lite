@@ -30,9 +30,6 @@ public class JobTaskConfiguration : IEntityTypeConfiguration<JobTask>
         builder.Property(x => x.IsArchived)
             .IsRequired();
 
-        builder.Property(x => x.IsRunning)
-            .IsRequired();
-
         builder.Property(x => x.Result)
             .IsRequired();
 

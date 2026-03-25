@@ -14,7 +14,7 @@ public interface IJobTaskRepository : IRepository<JobTask>
         DateTime now, 
         CancellationToken ct
     );
-    Task<Dictionary<Guid, JobRunResult>> GetScheduledJobResultByJobTaskAsync(
+    Task<Dictionary<Guid, JobExecutionStatus>> GetScheduledJobResultByJobTaskAsync(
         Guid jobTaskId, 
         CancellationToken ct
     );

@@ -23,7 +23,7 @@ public class ScheduledJob
     public Guid JobTaskId { get; set; }
     public required JobTask JobTask { get; set; }
 
-    public JobRunResult Result { get; set; } = JobRunResult.Unknown;
+    public JobExecutionStatus Result { get; set; } = JobExecutionStatus.Pending;
 
     public int ExecutionOrder { get; set; }  
 

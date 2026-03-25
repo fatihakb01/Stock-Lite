@@ -1,10 +1,11 @@
 using Domain.Entities.Core;
+using Domain.Enums;
 
 namespace Domain.Entities.Derived;
 
 public class ProductKpi
 {
-    public bool SchedulerFailed { get; set; }
+    public JobExecutionStatus SchedulerStatus { get; set; }
     public int TotalProductCount { get; set; }
     public int BelowSafetyStockCount { get; set; }
     public int RecommendedOrdersCount { get; set; }

@@ -1,5 +1,5 @@
 import api from "./axios";
-import type { Product, ProductDetail, ProductKpi } from "../types/products/productTypes";
+import type { Product, ProductDetail } from "../types/products/productTypes";
 
 export const getProducts = async (filter?: string): Promise<Product[]> => {
   const url = 

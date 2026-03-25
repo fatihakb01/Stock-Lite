@@ -5,5 +5,5 @@ namespace Domain.Interfaces.Services.Scheduler;
 
 public interface IJobRunnerService
 {
-    Task<JobRunResult> RunAsync(ScheduledJob job, JobTaskExecution jobTaskExecution, CancellationToken ct);
+    Task<JobExecutionStatus> RunAsync(ScheduledJob job, JobTaskExecution jobTaskExecution, CancellationToken ct);
 }

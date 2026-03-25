@@ -13,7 +13,7 @@ public class JobTaskRunnerService(
     private readonly IJobTaskExecutionRepository _executionRepo = executionRepo;
     private readonly IJobTaskDispatcher _dispatcher = dispatcher;
 
-    public async Task<JobRunResult> RunAsync(JobTask jobTask, JobTriggerType triggerType, CancellationToken ct)
+    public async Task<JobExecutionStatus> RunAsync(JobTask jobTask, JobTriggerType triggerType, CancellationToken ct)
     {
 
         var execution = new JobTaskExecution
@@ -32,7 +32,7 @@ public class JobTaskRunnerService(
         {
             await _dispatcher.DispatchAsync(jobTask, execution, ct);
             execution.Status = JobExecutionStatus.Succeeded;
-            jobTask.Result = JobRunResult.Succeeded;
+            jobTask.Result = JobExecutionStatus.Succeeded;
 
             return jobTask.Result;
         }
@@ -40,7 +40,7 @@ public class JobTaskRunnerService(
         {
             execution.Status = JobExecutionStatus.Failed;
             execution.ErrorMessage = ex.ToString()[..^1];
-            jobTask.Result = JobRunResult.Failed;
+            jobTask.Result = JobExecutionStatus.Failed;
 
             return jobTask.Result;
         }

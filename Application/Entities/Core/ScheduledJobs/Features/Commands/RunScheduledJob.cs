@@ -44,7 +44,7 @@ public class RunScheduledJob
             };
 
             await jobRunnerService.RunAsync(scheduledJob, jobTaskExecution, ct);
-            scheduledJob.Result = JobRunResult.Unknown;
+            scheduledJob.Result = JobExecutionStatus.Pending;
             await repository.SaveChangesAsync(ct);
 
             return Result<Unit>.Success(Unit.Value);

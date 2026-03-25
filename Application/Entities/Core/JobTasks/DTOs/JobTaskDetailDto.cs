@@ -1,4 +1,5 @@
 using Application.Entities.Core.ScheduledJobs.DTOs;
+using Domain.Enums;
 
 namespace Application.Entities.Core.JobTasks.DTOs;
 
@@ -8,5 +9,6 @@ public class JobTaskDetailDto : BaseJobTaskDto
     public DateTime? NextRunAt { get; set; }
     public bool IsArchived { get; set; }
     public bool AllowManualTriggerOnly { get; set; }
+    public JobExecutionStatus Result { get; set; }
     public ICollection<ScheduledJobDto> Jobs { get; set; } = new List<ScheduledJobDto>();
 }

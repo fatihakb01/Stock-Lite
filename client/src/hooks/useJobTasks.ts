@@ -58,17 +58,9 @@ export const useRunJobTask = (id: string | null) => {
     return useMutation<void>({
         mutationFn: () => RunJobTask(id!),
         onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ["jobtask"]});
-            queryClient.invalidateQueries({queryKey: ["jobtasks"]});
-            queryClient.invalidateQueries({queryKey: ["scheduledjob"]});
-            queryClient.invalidateQueries({queryKey: ["jobtask-history"]});
-            queryClient.invalidateQueries({queryKey: ["jobtask-recent-history"]});
-            queryClient.invalidateQueries({queryKey: ["confirmedorderaggregate"]});
-            queryClient.invalidateQueries({queryKey: ["confirmedorder"]});
-            queryClient.invalidateQueries({queryKey: ["forecast"]});
-            queryClient.invalidateQueries({queryKey: ["product"]});
-            queryClient.invalidateQueries({queryKey: ["purchaseforecast"]});
-            queryClient.invalidateQueries({queryKey: ["salesaggregate"]});
+            queryClient.invalidateQueries({ queryKey: ["jobtask"] });
+            queryClient.invalidateQueries({ queryKey: ["jobtasks"] });
+            queryClient.invalidateQueries({ queryKey: ["scheduledjob"] });
         }
     })
 }

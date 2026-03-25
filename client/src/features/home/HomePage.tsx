@@ -1,9 +1,11 @@
 import { Box, Typography, Card, CardContent } from "@mui/material";
-import { useProductKpi } from "../../hooks/useProducts";
 import { useNavigate } from "react-router-dom";
+import { useProductKpi, useSchedulerStatus } from "../../hooks/useProductKpis";
+import SchedulerStatusBadge from "../scheduler/chips/SchedulerStatusBadge";
 
 export default function HomePage() {
   const { data: data } = useProductKpi();
+  const { data: schedulerStatus } = useSchedulerStatus();
   const navigate = useNavigate();
 
   const kpis = [
@@ -33,9 +35,9 @@ export default function HomePage() {
       filter: "WithoutForecast" 
     },
     { 
-      label: "Scheduler succesful?", 
-      value: (data?.schedulerFailed || false) ? "❌" : "✅", 
-      filter: "FailedJobs" 
+      label: "Scheduler Status", 
+      value: data?.schedulerStatus, 
+      filter: "SchedulerStatus" 
     }
   ];
 
@@ -71,33 +73,29 @@ export default function HomePage() {
       >
         {kpis.map((kpi) => (
           <Card
-            key={kpi.label}
-            onClick={() => {
-              if (!kpi.filter) {
-                navigate("/products");
-              } else {
-                if (kpi.filter !== "FailedJobs") {
-                  navigate(`/products?filter=${kpi.filter}`);
-                }
-              }
-            }}
-            sx={{
-              cursor: "pointer",
-              transition: "0.2s",
-              "&:hover": {
-                boxShadow: 6,
-                transform: "translateY(-2px)",
-              },
-            }}
+              key={kpi.label}
+              onClick={() => {
+                  if (!kpi.filter) navigate("/products");
+                  else if (kpi.filter !== "SchedulerStatus") navigate(`/products?filter=${kpi.filter}`);
+              }}
+              sx={{
+                  cursor: "pointer",
+                  transition: "0.2s",
+                  "&:hover": { boxShadow: 6, transform: "translateY(-2px)" },
+              }}
           >
             <CardContent>
               <Typography variant="body2" color="text.secondary">
-                {kpi.label}
+                  {kpi.label}
               </Typography>
-
-              <Typography variant="h4" mt={1}>
-                {kpi.value}
-              </Typography>
+              
+              <Box mt={1}>
+                  {kpi.filter === "SchedulerStatus" ? (
+                      <SchedulerStatusBadge status={schedulerStatus} label={"Scheduler"} />
+                  ) : (
+                      <Typography variant="h4">{kpi.value}</Typography>
+                  )}
+              </Box>
             </CardContent>
           </Card>
         ))}
