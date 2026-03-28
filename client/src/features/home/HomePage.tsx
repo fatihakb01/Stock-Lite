@@ -77,6 +77,7 @@ export default function HomePage() {
               onClick={() => {
                   if (!kpi.filter) navigate("/products");
                   else if (kpi.filter !== "SchedulerStatus") navigate(`/products?filter=${kpi.filter}`);
+                  else if (kpi.filter === "SchedulerStatus") navigate('/scheduler');
               }}
               sx={{
                   cursor: "pointer",
