@@ -2,11 +2,11 @@ import { Typography, Stack } from "@mui/material";
 import JobTaskDetails from "../details/JobTaskDetails";
 import ScheduledJobDetails from "../details/ScheduledJobDetails";
 import type { SchedulerSelection } from "../selector/useSchedulerSelection";
-import type { User } from "../../../types/users/userTypes";
+import type { CurrentUser } from "../../../types/users/userTypes";
 
 export default function SchedulerDetailPanel({ selection, user }: {
   selection: SchedulerSelection,
-  user: User
+  user: CurrentUser
 }) {
   if (!selection) {
     return <Typography>Select a job task or scheduled job</Typography>;

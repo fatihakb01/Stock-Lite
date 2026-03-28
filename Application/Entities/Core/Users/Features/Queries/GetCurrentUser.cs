@@ -9,23 +9,23 @@ namespace Application.Entities.Core.Users.Features.Queries;
 
 public class GetCurrentUser
 {
-    public class Query : IRequest<Result<UserDto>> { }
+    public class Query : IRequest<Result<CurrentUserDto>> { }
 
     public class Handler(
         IUserRepository userRepository,
         IMapper mapper,
         ICurrentUserService currentUser
-    ) : IRequestHandler<Query, Result<UserDto>>
+    ) : IRequestHandler<Query, Result<CurrentUserDto>>
     {
-        public async Task<Result<UserDto>> Handle(Query request, CancellationToken ct)
+        public async Task<Result<CurrentUserDto>> Handle(Query request, CancellationToken ct)
         {
             var user = await userRepository.GetByIdAsync(currentUser.Id, ct);
             if (user == null)
-                return Result<UserDto>.Failure("User not found.", 404);
+                return Result<CurrentUserDto>.Failure("User not found.", 404);
 
-            var userDto = mapper.Map<UserDto>(user);
+            var currentUserDto = mapper.Map<CurrentUserDto>(user);
 
-            return Result<UserDto>.Success(userDto);
+            return Result<CurrentUserDto>.Success(currentUserDto);
         }
     }
 }

@@ -88,6 +88,7 @@ public class MappingProfiles : Profile
         CreateMap<StockLevel, StockLevelDto>();
 
         // User entity
+        CreateMap<User, CurrentUserDto>();
         CreateMap<User, UserDto>();
         CreateMap<RegisterUserDto, User>();
         CreateMap<LoginUserDto, User>();

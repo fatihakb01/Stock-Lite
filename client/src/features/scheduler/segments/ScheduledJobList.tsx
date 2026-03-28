@@ -20,12 +20,12 @@ import { useReorderScheduledJobs } from "../../../hooks/useScheduledJobs";
 import { SortableScheduledJobItem } from "../item/SortableScheduledJobItem";
 import type { ScheduledJob } from "../../../types/scheduledJobs/scheduledJobTypes";
 import type { SchedulerSelection } from "../selector/useSchedulerSelection";
-import type { User } from "../../../types/users/userTypes";
+import type { CurrentUser } from "../../../types/users/userTypes";
 
 type Props = {
   selected: SchedulerSelection
   onSelect: (jobTaskId: string, scheduledJobId: string) => void
-  user: User
+  user: CurrentUser
 }
 
 export default function ScheduledJobList({ selected, onSelect, user } : Props) {

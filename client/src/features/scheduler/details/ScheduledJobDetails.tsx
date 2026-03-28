@@ -15,10 +15,10 @@ import {
 } from "../../../hooks/useScheduledJobs";
 import ScheduledJobEditForm from "../forms/ScheduledJobEditForm";
 import ExecutionTable from "../tables/ExecutionTable";
-import type { User } from "../../../types/users/userTypes";
+import type { CurrentUser } from "../../../types/users/userTypes";
 
 export default function ScheduledJobDetails({ scheduledJobId, user } : 
-  { scheduledJobId: string, user: User }) {
+  { scheduledJobId: string, user: CurrentUser }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const showAll = false;

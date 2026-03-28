@@ -3,13 +3,13 @@ import { useJobTasks } from "../../../hooks/useJobTasks";
 import Section from "../../../components/general/Section";
 import type { SchedulerSelection } from "../selector/useSchedulerSelection";
 import AddJobTaskButton from "../buttons/AddJobTaskButton";
-import type { User } from "../../../types/users/userTypes";
+import type { CurrentUser } from "../../../types/users/userTypes";
 import SchedulerStatusBadge from "../chips/SchedulerStatusBadge";
 
 type Props = {
   selected: SchedulerSelection
   onSelect: (jobTaskId: string) => void
-  user: User
+  user: CurrentUser
 }
 
 export default function JobTaskList({ selected, onSelect, user } : Props) {

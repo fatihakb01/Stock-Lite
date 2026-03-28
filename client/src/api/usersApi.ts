@@ -8,7 +8,8 @@ import type {
   ChangePasswordDto,
   ConfirmEmailDto,
   EditUserDto,
-  ConfirmEmailResult
+  ConfirmEmailResult,
+  CurrentUser
 } from "../types/users/userTypes";
 
 // LOGIN
@@ -51,7 +52,7 @@ export const changePassword = async (data: ChangePasswordDto): Promise<void> => 
 };
 
 // GET CURRENT USER
-export const getCurrentUser = async (): Promise<User> => {
+export const getCurrentUser = async (): Promise<CurrentUser> => {
   const res = await api.get("/user/current");
   return res.data;
 };

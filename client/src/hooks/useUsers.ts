@@ -21,7 +21,8 @@ import type {
   User,
   AuthResponse,
   EditUserDto,
-  ConfirmEmailResult
+  ConfirmEmailResult,
+  CurrentUser
 } from "../types/users/userTypes";
 
 // LOGIN
@@ -69,7 +70,7 @@ export const useDeleteUser = (id: string | null) => {
 
 // CURRENT USER
 export const useCurrentUser = () => {
-  return useQuery<User>({
+  return useQuery<CurrentUser>({
     queryKey: ["currentUser"],
     queryFn: getCurrentUser,
   });

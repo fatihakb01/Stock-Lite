@@ -37,7 +37,7 @@ public class UserController(IMediator mediator) : BaseApiController(mediator)
     }
 
     [HttpPost("confirm-email")]
-    public async Task<ActionResult<UserDto>> ConfirmEmail([FromBody] ConfirmEmailDto dto)
+    public async Task<ActionResult<ConfirmEmailResult>> ConfirmEmail([FromBody] ConfirmEmailDto dto)
     {
         return HandleResult(await Mediator.Send(new ConfirmEmail.Command { Dto = dto }));
     }
@@ -63,7 +63,7 @@ public class UserController(IMediator mediator) : BaseApiController(mediator)
 
     [Authorize]
     [HttpGet("current")]
-    public async Task<ActionResult<UserDto>> GetCurrentUser()
+    public async Task<ActionResult<CurrentUserDto>> GetCurrentUser()
     {
         return HandleResult(await Mediator.Send(new GetCurrentUser.Query()));
     }

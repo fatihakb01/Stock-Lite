@@ -3,9 +3,9 @@ import { useState } from "react";
 import { useCleanJobTask, useDeleteJobTask, useJobTask, useJobTaskHistory, useRunJobTask } from "../../../hooks/useJobTasks";
 import JobTaskEditForm from "../forms/JobTaskEditForm";
 import ExecutionTable from "../tables/ExecutionTable";
-import type { User } from "../../../types/users/userTypes";
+import type { CurrentUser } from "../../../types/users/userTypes";
 
-export default function JobTaskDetails({ jobTaskId, user } : { jobTaskId: string, user: User }) {
+export default function JobTaskDetails({ jobTaskId, user } : { jobTaskId: string, user: CurrentUser }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const showAll = false;

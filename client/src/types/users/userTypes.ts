@@ -13,6 +13,12 @@ export type User = {
     companyId: string
 }
 
+export type CurrentUser = {
+    id: string
+    companyId: string
+    role: string
+}
+
 export type LoginDto = {
   email: string
   password: string
