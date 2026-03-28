@@ -17,40 +17,46 @@ namespace Infrastructure.Services.Scheduler
 
         public async Task DispatchAsync(JobTask jobTask, JobTaskExecution jobTaskExecution, CancellationToken ct)
         {
-            jobTask.Result = JobExecutionStatus.Running;
             jobTask.LastStartedAt = DateTime.UtcNow;
 
             var jobs = await _scheduledJobRepo.FindAsync(x =>
-                 x.JobTaskId == jobTask.Id,
+                 x.JobTaskId == jobTask.Id && 
+                 !x.IsArchived && 
+                 x.Result != JobExecutionStatus.Succeeded,
                  ct
              );
             jobs = jobs.OrderBy(x => x.ExecutionOrder);
-
-            var lastExecutionStatuses = await _jobTaskRepo
-                .GetScheduledJobResultByJobTaskAsync(jobTask.Id, ct);
 
             bool failed = false;
 
             foreach (var job in jobs)
             {
-                if (lastExecutionStatuses.TryGetValue(job.Id, out var status) &&
-                    status == JobExecutionStatus.Succeeded)
-                {
-                    continue;
-                }
+                var locked = await _scheduledJobRepo.TryLockTaskAsync(job.Id);
 
-                var result = await _jobRunnerService.RunAsync(job, jobTaskExecution, ct);
-
-                if (result == JobExecutionStatus.Failed)
+                if (locked)
                 {
-                    jobTask.Retries++;
-                    failed = true;
-                    break;
+                    var result = await _jobRunnerService.RunAsync(job, jobTaskExecution, ct);
+
+                    if (result == JobExecutionStatus.Failed)
+                    {
+                        failed = true;
+                        job.Result = JobExecutionStatus.Failed;
+                        await _scheduledJobRepo.SaveChangesAsync(ct);
+                        break;
+                    }
+                    else 
+                    {
+                        job.Result = JobExecutionStatus.Succeeded;
+                        await _scheduledJobRepo.SaveChangesAsync(ct);
+                    }
                 }
             }
 
             if (failed)
             {
+                jobTask.Retries++;
+                jobTask.Result = JobExecutionStatus.Failed;
+
                 if (jobTask.Retries < jobTask.MaxRetries)
                 {
                     int retryDelayMinutes = jobTask.RetryDelayMinutes ?? 1;
@@ -60,6 +66,7 @@ namespace Infrastructure.Services.Scheduler
             else
             {
                 jobTask.Retries = 0;
+                jobTask.Result = JobExecutionStatus.Succeeded;
 
                 if (!jobTask.AllowManualTriggerOnly)
                 {
@@ -67,11 +74,9 @@ namespace Infrastructure.Services.Scheduler
                     jobTask.ScheduledAt = CalculateNextRun(jobTask.ScheduledAt, jobTask.PeriodType);
                 }
 
-                await _jobTaskRepo.ResetScheduledJobResultByJobTaskAsync(jobTask.Id, ct);
-                await _jobTaskRepo.ResetJobTaskResultByJobTaskAsync(jobTask.Id, ct);
+                await _jobTaskRepo.SaveChangesAsync(ct);
+                await _jobTaskRepo.ResetScheduler(jobTask.CompanyId, ct);
             }
-
-            _jobTaskRepo.Update(jobTask);
 
             await _jobTaskRepo.SaveChangesAsync(ct);
         }

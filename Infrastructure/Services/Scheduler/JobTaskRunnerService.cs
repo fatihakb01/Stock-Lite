@@ -6,12 +6,14 @@ using Domain.Interfaces.Services.Scheduler;
 namespace Infrastructure.Services.Scheduler;
 
 public class JobTaskRunnerService(
-        IJobTaskExecutionRepository executionRepo,
-        IJobTaskDispatcher dispatcher
-    ) : IJobTaskRunnerService
+    IJobTaskExecutionRepository executionRepo,
+    IJobTaskDispatcher dispatcher,
+    IProductKpiRepository productKpiRepository
+) : IJobTaskRunnerService
 {
     private readonly IJobTaskExecutionRepository _executionRepo = executionRepo;
     private readonly IJobTaskDispatcher _dispatcher = dispatcher;
+    private readonly IProductKpiRepository _productKpiRepository = productKpiRepository;
 
     public async Task<JobExecutionStatus> RunAsync(JobTask jobTask, JobTriggerType triggerType, CancellationToken ct)
     {
@@ -31,8 +33,11 @@ public class JobTaskRunnerService(
         try
         {
             await _dispatcher.DispatchAsync(jobTask, execution, ct);
+
+            if (jobTask.Result == JobExecutionStatus.Failed)
+                throw new Exception();
+
             execution.Status = JobExecutionStatus.Succeeded;
-            jobTask.Result = JobExecutionStatus.Succeeded;
 
             return jobTask.Result;
         }
@@ -40,7 +45,6 @@ public class JobTaskRunnerService(
         {
             execution.Status = JobExecutionStatus.Failed;
             execution.ErrorMessage = ex.ToString()[..^1];
-            jobTask.Result = JobExecutionStatus.Failed;
 
             return jobTask.Result;
         }
@@ -49,6 +53,7 @@ public class JobTaskRunnerService(
             execution.FinishedAt = DateTime.UtcNow;
             _executionRepo.Update(execution);
             await _executionRepo.SaveChangesAsync(ct);
+            await _productKpiRepository.UpdateSchedulerStatus(jobTask.CompanyId, ct);
         }
     }
 }

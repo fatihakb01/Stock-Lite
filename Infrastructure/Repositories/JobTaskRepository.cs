@@ -28,86 +28,35 @@ public class JobTaskRepository(DataContext context)
             .ToListAsync(ct);
     }
 
-    public async Task<List<JobTask>> GetDueTasksAsync(DateTime now, CancellationToken ct)
+    public async Task<JobTask?> GetNextDueTaskAsync(Guid companyId, DateTime now, CancellationToken ct)
     {
         return await _context.JobTasks
             .Where(x =>
+                x.CompanyId == companyId &&
                 !x.IsArchived &&
                 !x.AllowManualTriggerOnly &&
                 (
                     x.Result != JobExecutionStatus.Running ||
-                    x.LastStartedAt < now.AddMinutes(-(x.RetryDelayMinutes ?? 1 ))
+                    x.LastStartedAt < now.AddMinutes(-(x.RetryDelayMinutes ?? 1))
                 ) &&
                 x.Retries < x.MaxRetries &&
                 x.NextRunAt != null &&
                 x.NextRunAt <= now)
-            .ToListAsync(ct);
+            .OrderBy(x => x.NextRunAt)
+            .FirstOrDefaultAsync(ct);
     }
 
-    public async Task<Dictionary<Guid, JobExecutionStatus>> GetScheduledJobResultByJobTaskAsync(
-        Guid jobTaskId, CancellationToken ct)
+    public async Task<bool> HasExhaustedTaskAsync(Guid companyId, CancellationToken ct)
     {
-        return await _context.ScheduledJobs
-            .Where(x => x.JobTaskId == jobTaskId)
-            .GroupBy(x => x.Id)
-            .Select(g => g
-                .Select(x => new
-                {
-                    x.Id,
-                    x.Result
-                })
-                .First()
-            )
-            .ToDictionaryAsync(
-                x => x.Id,
-                x => x.Result,
-                ct
-            );
+        return await _context.JobTasks
+            .Where(x =>
+                x.CompanyId == companyId &&
+                x.Result == JobExecutionStatus.Failed &&
+                x.Retries >= x.MaxRetries)
+            .AnyAsync(ct);
     }
 
-    public async Task ResetScheduledJobResultByJobTaskAsync(Guid jobTaskId, CancellationToken ct)
-    {
-        var jobs = _context.ScheduledJobs
-            .Where(x => x.JobTaskId == jobTaskId)
-            .ToList();
-
-        var succeededJobs = _context.ScheduledJobs
-            .Where(x => x.JobTaskId == jobTaskId && x.Result == JobExecutionStatus.Succeeded)
-            .ToList();
-
-        if (jobs.Count != succeededJobs.Count)
-            return;
-
-        foreach (var job in jobs)
-        {
-            job.Result = JobExecutionStatus.Pending;
-        }
-
-        await _context.SaveChangesAsync(ct);
-    }
-
-    public async Task ResetJobTaskResultByJobTaskAsync(Guid jobTaskId, CancellationToken ct)
-    {
-        var jobTasks = _context.JobTasks
-            .Where(x => x.Id == jobTaskId)
-            .ToList();
-
-        var succeededJobTasks = _context.JobTasks
-            .Where(x => x.Id == jobTaskId && x.Result == JobExecutionStatus.Pending)
-            .ToList();
-
-        if (jobTasks.Count != succeededJobTasks.Count)
-            return;
-
-        foreach (var jobTask in jobTasks)
-        {
-            jobTask.Result = JobExecutionStatus.Pending;
-        }
-
-        await _context.SaveChangesAsync(ct);
-    }
-
-    public async Task<bool> TryLockTaskAsync(Guid taskId, DateTime now)
+    public async Task<bool> TryLockTaskAsync(Guid jobTaskId, DateTime now)
     {
         var affected = await _context.Database.ExecuteSqlRawAsync(
             """
@@ -118,13 +67,13 @@ public class JobTaskRepository(DataContext context)
             AND Result <> 1
             """,
             now,
-            taskId
+            jobTaskId
         );
 
         return affected == 1;
     }
 
-    public async Task CleanJobTask(Guid taskId, CancellationToken ct)
+    public async Task CleanJobTask(Guid jobTaskId, CancellationToken ct)
     {
         await _context.Database.ExecuteSqlRawAsync(
             """
@@ -133,7 +82,47 @@ public class JobTaskRepository(DataContext context)
                 Result = 0
             WHERE Id = {0}
             """,
-            taskId
+            jobTaskId
+        );
+
+        await _context.SaveChangesAsync(ct);
+    }
+
+    public async Task ResetScheduler(Guid companyId, CancellationToken ct)
+    {
+        await _context.Database.ExecuteSqlRawAsync(
+            """
+        DECLARE @ResetJobTaskIds TABLE (Id UNIQUEIDENTIFIER);
+
+        WITH AvailableJobTasks AS (
+            SELECT COUNT(*) AS Total
+            FROM JobTasks
+            WHERE CompanyId = {0}
+            AND IsArchived = 0
+        ),
+        SucceededJobTasks AS (
+            SELECT COUNT(*) AS Total
+            FROM JobTasks
+            WHERE CompanyId = {0}
+            AND IsArchived = 0
+            AND Result = 2
+        )
+        UPDATE JobTasks
+        SET Result = 0
+        OUTPUT inserted.Id INTO @ResetJobTaskIds
+        WHERE CompanyId = {0}
+        AND IsArchived = 0
+        AND (SELECT Total FROM AvailableJobTasks) = (SELECT Total FROM SucceededJobTasks);
+
+        IF EXISTS (SELECT 1 FROM @ResetJobTaskIds)
+        BEGIN
+            UPDATE ScheduledJobs
+            SET Result = 0
+            WHERE JobTaskId IN (SELECT Id FROM @ResetJobTaskIds)
+            AND IsArchived = 0;
+        END
+        """,
+            companyId
         );
 
         await _context.SaveChangesAsync(ct);

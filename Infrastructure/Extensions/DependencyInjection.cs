@@ -95,6 +95,7 @@ public static class DependencyInjection
         services.AddScoped<IScheduledJobRepository, ScheduledJobRepository>();
         services.AddScoped<IJobExecutionRepository, JobExecutionRepository>();
         services.AddScoped<IJobTaskExecutionRepository, JobTaskExecutionRepository>();
+        services.AddScoped<ICompanyRepository, CompanyRepository>();
 
         // --- Internal Services ---
         services.AddScoped<ITokenService, TokenService>();

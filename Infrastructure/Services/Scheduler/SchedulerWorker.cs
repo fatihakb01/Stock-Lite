@@ -16,23 +16,39 @@ namespace Infrastructure.Services.Scheduler
             {
                 using var scope = _scopeFactory.CreateScope();
 
-                var repository = scope.ServiceProvider
+                var companyRepository = scope.ServiceProvider
+                    .GetRequiredService<ICompanyRepository>();
+
+                var jobTaskRepository = scope.ServiceProvider
                     .GetRequiredService<IJobTaskRepository>();
 
                 var service = scope.ServiceProvider
                     .GetRequiredService<IJobTaskRunnerService>();
 
-                var dueTasks = await repository.GetDueTasksAsync(DateTime.UtcNow, ct);
+                var companyIds = await companyRepository.GetCompanyIds(ct);
 
-                foreach (var task in dueTasks)
+                foreach (var companyId in companyIds)
                 {
-                    var locked = await repository.TryLockTaskAsync(task.Id, DateTime.UtcNow);
+                    var isBlocked = await jobTaskRepository.HasExhaustedTaskAsync(companyId, ct);
 
-                    if (!locked) continue;
+                    if (isBlocked)
+                        continue;
 
-                    JobTriggerType triggerType = task.Retries == 0 ? JobTriggerType.Scheduled : JobTriggerType.Retry;
+                    var task = await jobTaskRepository.GetNextDueTaskAsync(companyId, DateTime.UtcNow, ct);
 
-                    await service.RunAsync(task, triggerType, ct);
+                    if (task == null)
+                        continue;
+
+                    var locked = await jobTaskRepository.TryLockTaskAsync(task.Id, DateTime.UtcNow);
+
+                    if (locked)
+                    {
+                        JobTriggerType triggerType = task.Retries == 0
+                            ? JobTriggerType.Scheduled
+                            : JobTriggerType.Retry;
+
+                        await service.RunAsync(task, triggerType, ct);
+                    }
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(30), ct);

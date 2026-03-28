@@ -8,33 +8,34 @@ namespace Infrastructure.Repositories;
 public class Repository<T>(DataContext context) 
     : IRepository<T> where T : class
 {
+    private readonly DataContext _context = context;
     public async Task AddAsync(T entity, CancellationToken cancellationToken)
     {
-        await context.Set<T>().AddAsync(entity, cancellationToken);
+        await _context.Set<T>().AddAsync(entity, cancellationToken);
     }
     public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken)
     {
-        return await context.Set<T>().AnyAsync(predicate, cancellationToken);
+        return await _context.Set<T>().AnyAsync(predicate, cancellationToken);
     }
 
     public async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await context.Set<T>().FindAsync([id], cancellationToken);
+        return await _context.Set<T>().FindAsync([id], cancellationToken);
     }
 
     public void Remove(T entity)
     {
-        context.Set<T>().Remove(entity);
+        _context.Set<T>().Remove(entity);
     }
 
     public void Update(T entity)
     {
-        context.Set<T>().Update(entity);
+        _context.Set<T>().Update(entity);
     }
 
     public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken)
     {
-        return await context.SaveChangesAsync(cancellationToken) > 0;
+        return await _context.SaveChangesAsync(cancellationToken) > 0;
     }
 
     public async Task<T?> SingleOrDefaultAsync(
@@ -42,7 +43,7 @@ public class Repository<T>(DataContext context)
         CancellationToken cancellationToken,
         params Expression<Func<T, object>>[]? includes)
     {
-        IQueryable<T> query = context.Set<T>();
+        IQueryable<T> query = _context.Set<T>();
 
         if (includes != null)
         {
@@ -57,7 +58,7 @@ public class Repository<T>(DataContext context)
 
     public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken, params Expression<Func<T, object>>[]? includes)
     {
-        IQueryable<T> query = context.Set<T>().Where(predicate);
+        IQueryable<T> query = _context.Set<T>().Where(predicate);
 
         // Apply includes if provided
         foreach (var include in includes!)
@@ -70,6 +71,6 @@ public class Repository<T>(DataContext context)
 
     public async Task<int> CountAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken)
     {
-        return await context.Set<T>().Where(predicate).CountAsync(cancellationToken);
+        return await _context.Set<T>().Where(predicate).CountAsync(cancellationToken);
     }
 }

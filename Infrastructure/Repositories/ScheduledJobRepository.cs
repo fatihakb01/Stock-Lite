@@ -122,4 +122,19 @@ public class ScheduledJobRepository(DataContext context)
 
         await _context.SaveChangesAsync(ct);
     }
+
+    public async Task<bool> TryLockTaskAsync(Guid jobId)
+    {
+        var affected = await _context.Database.ExecuteSqlRawAsync(
+            """
+            UPDATE ScheduledJobs
+            SET Result = 1
+            WHERE Id = {0}
+            AND Result <> 1
+            """,
+            jobId
+        );
+
+        return affected == 1;
+    }
 }

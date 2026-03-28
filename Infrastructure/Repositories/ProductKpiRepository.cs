@@ -26,17 +26,16 @@ public class ProductKpiRepository(DataContext context)
     {
         var schedulerStatus = await _context.Database
             .SqlQueryRaw<int>(
-                @"
-            SELECT TOP 1 s.Result AS Value
-            FROM ScheduledJobs s
-            INNER JOIN JobTasks j ON j.Id = s.JobTaskId
+            @"
+            SELECT TOP 1 j.Result AS Value
+            FROM JobTasks j
             WHERE j.CompanyId = @companyId
             ORDER BY
-                CASE s.Result
+                CASE j.Result
                     WHEN 3 THEN 1  -- failed
                     WHEN 1 THEN 2  -- running
+					WHEN 2 THEN 3  -- succeeded
                     WHEN 0 THEN 4  -- pending
-                    WHEN 2 THEN 3  -- succeeded
                     ELSE 5
                 END
             ",
@@ -48,36 +47,51 @@ public class ProductKpiRepository(DataContext context)
 
     public async Task UpdateProductKpis(Guid companyId, CancellationToken ct)
     {
+        var productKpi = await _context.ProductKpis
+            .SingleOrDefaultAsync(k => k.CompanyId == companyId, ct);
+
+        if (productKpi == null)
+        {
+            var company = await _context.Companies
+                .SingleOrDefaultAsync(c => c.Id == companyId, ct);
+
+            productKpi = new ProductKpi
+            {
+                CompanyId = companyId,
+                Company = company!
+            };
+
+            await _context.AddAsync(productKpi, ct);
+        }
+
         var schedulerStatus = await GetSchedulerStatus(companyId, ct);
         var totalProducts = await GetProductsCount(companyId, ct);
         var belowSafetyStock = await GetProductsBelowSafetyStockCount(companyId, ct);
         var recommendedOrders = await GetProductsWithRecommendedOrdersCount(companyId, ct);
         var withoutStockAtLeadTime = await GetProductsWithoutStockAtLeadTimeCount(companyId, ct);
         var withoutForecast = await GetProductsWithoutForecastCount(companyId, ct);
-        var company = await _context.Companies.SingleOrDefaultAsync(c => c.Id == companyId, ct);
 
-        var productKpi = new ProductKpi()
-        {
-            SchedulerStatus = schedulerStatus,
-            TotalProductCount = totalProducts,
-            BelowSafetyStockCount = belowSafetyStock,
-            RecommendedOrdersCount = recommendedOrders,
-            WithoutStockAtLeadTimeCount = withoutStockAtLeadTime,
-            WithoutForecastCount = withoutForecast,
-            CompanyId = companyId,
-            Company = company!
-        };
+        Boolean isChanged =
+            productKpi.SchedulerStatus != schedulerStatus ||
+            productKpi.TotalProductCount != totalProducts ||
+            productKpi.BelowSafetyStockCount != belowSafetyStock ||
+            productKpi.RecommendedOrdersCount != recommendedOrders ||
+            productKpi.WithoutStockAtLeadTimeCount != withoutStockAtLeadTime ||
+            productKpi.WithoutForecastCount != withoutForecast;
 
-        var productKpiExist = await _context.ProductKpis.AnyAsync(k => k.CompanyId == companyId, ct);
-        if (productKpiExist)
-            _context.ProductKpis.Remove(productKpi);
+        if (!isChanged) return;
 
-        await _context.AddAsync(productKpi, ct);
+        productKpi.SchedulerStatus = schedulerStatus;
+        productKpi.TotalProductCount = totalProducts;
+        productKpi.BelowSafetyStockCount = belowSafetyStock;
+        productKpi.RecommendedOrdersCount = recommendedOrders;
+        productKpi.WithoutStockAtLeadTimeCount = withoutStockAtLeadTime;
+        productKpi.WithoutForecastCount = withoutForecast;
 
         var result = await _context.SaveChangesAsync(ct);
 
         if (result == 0)
-            throw new InvalidOperationException("Could not update ProductKpi."); 
+            throw new InvalidOperationException("Could not update ProductKpi.");
     }
 
     public async Task UpdateSchedulerStatus(Guid companyId, CancellationToken ct)
@@ -103,6 +117,8 @@ public class ProductKpiRepository(DataContext context)
         }
         else
         {
+            if (productKpi.SchedulerStatus == schedulerStatus) return;
+
             productKpi.SchedulerStatus = schedulerStatus;
         }
 

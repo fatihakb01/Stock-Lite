@@ -20,8 +20,6 @@ public class JobDispatcher(IServiceProvider provider, DataContext context) : IJo
         CancellationToken ct
     )
     {
-        job.Result = JobExecutionStatus.Running;
-
         switch (job.JobType)
         {
             case JobType.Import:

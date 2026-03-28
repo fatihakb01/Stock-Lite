@@ -348,11 +348,12 @@ public static class DataSeederInitializer
 				NextRunAt,
 				RetryDelayMinutes,
 				MaxRetries,
+				Retries,
 				Result
 			)
 			VALUES 
-			(@JobTaskOne,'JT-1','Import Job Task','',0,0,@CompanyId,0,@ScheduledAt,@ScheduledAt,1,1,@Result),
-			(@JobTaskTwo,'JT-2','Calculation Jobs','',0,0,@CompanyId,0,@ScheduledAt,@ScheduledAt,1,1,@Result)
+			(@JobTaskOne,'JT-1','Import Job Task','',0,0,@CompanyId,0,@ScheduledAt,@ScheduledAt,1,1,0,@Result),
+			(@JobTaskTwo,'JT-2','Calculation Jobs','',0,0,@CompanyId,0,@ScheduledAt,@ScheduledAt,1,1,0,@Result)
 
 			-- Create ScheduledJobs
 			INSERT INTO ScheduledJobs (
