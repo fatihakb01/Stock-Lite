@@ -32,7 +32,10 @@ public class RunScheduledJob
             );
 
             if (scheduledJob == null)
-                return Result<Unit>.Failure("scheduledJob not found or archived", 404);
+                return Result<Unit>.Failure("ScheduledJob not found or archived", 404);
+
+            if (scheduledJob.Result == JobExecutionStatus.Running)
+                return Result<Unit>.Failure("ScheduledJob already running", 400);
 
             var jobTaskExecution = new JobTaskExecution
             {

@@ -31,6 +31,9 @@ public class RunJobTask
             if (jobTask == null)
                 return Result<Unit>.Failure("JobTask not found", 404);
 
+            if (jobTask.Result == JobExecutionStatus.Running)
+                return Result<Unit>.Failure("JobTask already running", 400);
+
             await jobTaskRunnerService.RunAsync(jobTask, JobTriggerType.Manual, ct);
 
             return Result<Unit>.Success(Unit.Value);
