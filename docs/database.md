@@ -486,6 +486,7 @@ Bootstraps a fully functional company environment in a single atomic operation.
 - SuperAdmin user
 - Default JobTasks
 - Pre-configured ScheduledJobs
+- Default values for product KPIs
 
 #### Scheduled Jobs Created
 
@@ -494,7 +495,9 @@ The procedure inserts scheduled jobs for:
 - Transaction import
 - Confirmed order import
 - Purchase order import
+- User defined fields import
 - Sales calculation
+- Seasonality calculation
 - Stock level calculation
 - Forecast calculation
 - Confirmed demand calculation
