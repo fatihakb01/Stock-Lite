@@ -5,8 +5,10 @@ export type SchedulerSelection =
   | { type: "scheduledjob"; jobTaskId: string; scheduledJobId: string }
   | null;
 
-export function useSchedulerSelection() {
-  const [selection, setSelection] = useState<SchedulerSelection>(null);
+export function useSchedulerSelection(defaultJobTaskId?: string) {
+  const [selection, setSelection] = useState<SchedulerSelection>(
+      defaultJobTaskId ? { type: "jobtask", jobTaskId: defaultJobTaskId } : null
+  );
 
   return {
     selection,

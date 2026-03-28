@@ -4,9 +4,13 @@ import JobTaskList from "../segments/JobTaskList";
 import ScheduledJobList from "../segments/ScheduledJobList";
 import SchedulerDetailPanel from "../segments/SchedulerDetailPanel";
 import { useCurrentUser } from "../../../hooks/useUsers";
+import { useJobTasks } from "../../../hooks/useJobTasks";
 
 export default function SchedulerOverviewTab() {
-  const selection = useSchedulerSelection();
+  const { data: jobTasks } = useJobTasks();
+  const defaultJobTaskId = jobTasks?.[0]?.id;
+
+  const selection = useSchedulerSelection(defaultJobTaskId);
   const { data: currentUser } = useCurrentUser();
 
   return (

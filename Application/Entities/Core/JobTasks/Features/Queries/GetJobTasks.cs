@@ -24,13 +24,13 @@ public class GetJobTasks
         {
             var jobTasks = await repository.FindAsync(x =>
                 x.CompanyId == currentUser.CompanyId,
-                ct,
-                x => x.Jobs.OrderBy(x => x.ExecutionOrder)
+                ct
             );
 
             if (!jobTasks.Any())
                 return Result<List<JobTaskDto>>.Failure("JobTasks not found", 404);
 
+            jobTasks = jobTasks.OrderBy(j => j.NextRunAt);
             var jobTaskDtos = mapper.Map<List<JobTaskDto>>(jobTasks);
 
             return Result<List<JobTaskDto>>.Success(jobTaskDtos);

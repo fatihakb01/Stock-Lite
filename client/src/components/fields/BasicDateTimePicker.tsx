@@ -23,9 +23,9 @@ export default function BasicDateTimePicker<T extends FieldValues>({
                 render={({ field, fieldState }) => (
                     <DateTimePicker
                         label={label}
-                        value={field.value ? dayjs(field.value) : null}
+                        value={field.value ? dayjs(field.value).startOf("second") : null}
                         onChange={(date) =>
-                            field.onChange(date ? date.toISOString() : undefined)
+                            field.onChange(date ? date.format("YYYY-MM-DDTHH:mm:ss") : undefined)
                         }
                         slotProps={{
                             textField: {
