@@ -22,6 +22,7 @@ export default function ScheduledJobDetails({ scheduledJobId, user } :
   const [isEditing, setIsEditing] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const showAll = false;
+  const isNotSuperAdmin = user && user.role !== "SuperAdmin";
 
   const { data, isLoading, isError } = useScheduledJob(scheduledJobId);
   const runScheduledJob = useRunScheduledJob(scheduledJobId);
@@ -91,38 +92,40 @@ export default function ScheduledJobDetails({ scheduledJobId, user } :
       <Divider />
 
       <Stack direction="row" spacing={1}>
-        {user && user.role === "SuperAdmin" && (
-        <>
-          <Button variant="contained" onClick={() => setIsEditing(true)}>
-            Edit
-          </Button>
-
-          <Button
+        <Button 
+          variant="contained" 
+          onClick={() => setIsEditing(true)}
+          disabled={isNotSuperAdmin}
+        >
+          Edit
+        </Button>
+        
+        <Button
+          color="success"
+          variant="contained"
+          onClick={() => runScheduledJob.mutate()}
+          disabled={runScheduledJob.isPending || isNotSuperAdmin}
+        >
+          Run scheduled job
+        </Button>
+        
+        <Button
+            sx={{ bgcolor: "grey" }}
             variant="contained"
-            onClick={() => runScheduledJob.mutate()}
-            disabled={runScheduledJob.isPending}
-          >
-            Run scheduled job
-          </Button>
-
-          <Button
-              variant="contained"
-              onClick={() => cleanScheduledJob.mutate()}
-              disabled={cleanScheduledJob.isPending}
-          >
-              Clean scheduled job
-          </Button>
-
-          <Button
-            sx={{ bgcolor:"red" }}
-            variant="contained"
-            onClick={() => deleteScheduledJob.mutate()}
-            disabled={deleteScheduledJob.isPending}
-          >
-            Delete scheduled job
-          </Button>
-        </>
-        )}
+            onClick={() => cleanScheduledJob.mutate()}
+            disabled={cleanScheduledJob.isPending || isNotSuperAdmin}
+        >
+            Clean scheduled job
+        </Button>
+        
+        <Button
+          color="error"
+          variant="contained"
+          onClick={() => deleteScheduledJob.mutate()}
+          disabled={deleteScheduledJob.isPending || isNotSuperAdmin}
+        >
+          Delete scheduled job
+        </Button>
 
         <Button
           variant="contained"

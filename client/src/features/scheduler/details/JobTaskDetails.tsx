@@ -9,6 +9,7 @@ export default function JobTaskDetails({ jobTaskId, user } : { jobTaskId: string
   const [isEditing, setIsEditing] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const showAll = false;
+  const isNotSuperAdmin = user && user.role !== "SuperAdmin";
 
   const { data, isLoading } = useJobTask(jobTaskId);
   const runJobTask = useRunJobTask(jobTaskId);
@@ -87,38 +88,42 @@ export default function JobTaskDetails({ jobTaskId, user } : { jobTaskId: string
       </Typography>
 
       <Stack direction="row" spacing={1}>
-        {user && user.role === "SuperAdmin" && (
-          <>
-            <Button variant="contained" onClick={() => setIsEditing(true)}>
-              Edit
-            </Button>
-            
-            <Button
-              variant="contained"
-              onClick={() => runJobTask.mutate()}
-              disabled={runJobTask.isPending}
-            >
-                Run job task
-            </Button>
-
-            <Button
-                variant="contained"
-                onClick={() => cleanJobTask.mutate()}
-                disabled={cleanJobTask.isPending}
-            >
-                Clean job task
-            </Button>
-
-            <Button
-              sx={{ bgcolor:"red" }}
-              variant="contained"
-              onClick={() => deleteJobTask.mutate()}
-              disabled={deleteJobTask.isPending}
-            >
-              Delete job task
-            </Button>
-          </>
-        )}
+        <Button 
+          variant="contained" 
+          onClick={() => setIsEditing(true)}
+          disabled={isNotSuperAdmin}
+        >
+          Edit
+        </Button>
+        
+        <Button
+          color="success"
+          variant="contained"
+          onClick={() => runJobTask.mutate()}
+          disabled={runJobTask.isPending || isNotSuperAdmin}
+        >
+            Run job task
+        </Button>
+        
+        <Button
+            sx={{ bgcolor: "grey" }}
+            variant="contained"
+            onClick={() => cleanJobTask.mutate()}
+            disabled={cleanJobTask.isPending || isNotSuperAdmin}
+        >
+            Clean job task
+        </Button>
+        
+        <Button
+          color="error"
+          variant="contained"
+          onClick={() => deleteJobTask.mutate()}
+          disabled={deleteJobTask.isPending || isNotSuperAdmin}
+        >
+          Delete job task
+        </Button>
+         
+       
 
         <Button
           variant="contained"
