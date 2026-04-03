@@ -30,6 +30,7 @@ public class DataContext(DbContextOptions<DataContext> options)
     public DbSet<JobTaskExecution> JobTaskExecutions { get; set; }
     public DbSet<ProductKpi> ProductKpis { get; set; }
     public DbSet<UserDefinedField> UserDefinedFields { get; set; }
+    public DbSet<ExportProfile> ExportProfile { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

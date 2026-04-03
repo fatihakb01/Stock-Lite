@@ -55,6 +55,11 @@ public class CompanyConfiguration : IEntityTypeConfiguration<Company>
             .HasForeignKey(j => j.CompanyId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasMany(b => b.ExportProfiles)
+            .WithOne(ex => ex.Company)
+            .HasForeignKey(ex => ex.CompanyId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasOne(b => b.ProductKpi)
             .WithOne(k => k.Company)
             .HasForeignKey<ProductKpi>(k => k.CompanyId)

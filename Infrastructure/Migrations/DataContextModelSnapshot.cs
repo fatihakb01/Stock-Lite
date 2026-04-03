@@ -122,6 +122,60 @@ namespace Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Domain.Entities.Core.ExportProfile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CustomSource")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("CustomType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("ExportFileType")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ExportType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TargetPath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId", "Id");
+
+                    b.HasIndex("CompanyId", "Name");
+
+                    b.ToTable("ExportProfile", t =>
+                        {
+                            t.HasCheckConstraint("CK_ExportProfile_Custom_Source_And_Type", "\r\n                    ([CustomSource] IS NULL AND [CustomType] IS NULL)\r\n                    OR ([CustomSource] IS NOT NULL AND [CustomType] IS NOT NULL)\r\n                    ");
+
+                            t.HasCheckConstraint("CK_ExportProfile_Custom_Source_Or_Export_Type", "\r\n                    ([CustomSource] IS NULL AND [ExportType] IS NOT NULL)\r\n                    OR ([CustomSource] IS NOT NULL AND [ExportType] IS NULL)\r\n                    ");
+                        });
+                });
+
             modelBuilder.Entity("Domain.Entities.Core.JobExecution", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1067,6 +1121,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Core.ExportProfile", b =>
+                {
+                    b.HasOne("Domain.Entities.Core.Company", "Company")
+                        .WithMany("ExportProfiles")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+                });
+
             modelBuilder.Entity("Domain.Entities.Core.JobExecution", b =>
                 {
                     b.HasOne("Domain.Entities.Core.JobTaskExecution", "JobTaskExecution")
@@ -1354,6 +1419,8 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Core.Company", b =>
                 {
                     b.Navigation("ConfirmedOrders");
+
+                    b.Navigation("ExportProfiles");
 
                     b.Navigation("JobTasks");
 

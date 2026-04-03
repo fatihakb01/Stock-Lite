@@ -18,6 +18,7 @@ using Application.Entities.Core.ScheduledJobs.DTOs;
 using Application.Entities.Derived.ProductKpis.DTOs;
 using Application.Entities.Derived.Seasonality.DTOs;
 using Application.Entities.Core.UserDefinedFields.DTOs;
+using Application.Entities.Core.ExportProfiles.DTOs;
 
 namespace Application.Core;
 
@@ -87,6 +88,15 @@ public class MappingProfiles : Profile
         // Stocklevel entity
         CreateMap<StockLevel, StockLevelDto>();
 
+        // UserDefinedField entity
+        CreateMap<UserDefinedField, UserDefinedFieldDto>();
+
+        // ExportProfile
+        CreateMap<ExportProfile, ExportProfileDto>();
+        CreateMap<ExportProfile, ExportProfileDetailDto>();
+        CreateMap<CreateExportProfileDto, ExportProfile>();
+        CreateMap<EditExportProfileDto, ExportProfile>();
+
         // User entity
         CreateMap<User, CurrentUserDto>();
         CreateMap<User, UserDto>();
@@ -108,8 +118,5 @@ public class MappingProfiles : Profile
 
         // JobExecution entity
         CreateMap<JobExecution, JobExecutionDto>();
-
-        // UserDefinedField entity
-        CreateMap<UserDefinedField, UserDefinedFieldDto>();
     }
 }

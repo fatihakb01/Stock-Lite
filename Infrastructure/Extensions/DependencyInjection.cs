@@ -20,6 +20,8 @@ using Domain.Interfaces.Services.Users;
 using Infrastructure.Services.Scheduler.Imports;
 using Infrastructure.Services.Scheduler;
 using Microsoft.Extensions.Hosting;
+using Domain.Interfaces.Services.Export;
+using Infrastructure.Services.Export;
 
 namespace Infrastructure.Extensions;
 
@@ -78,7 +80,8 @@ public static class DependencyInjection
         services.AddAuthorizationBuilder()
             .AddPolicy("SuperAdminOnly", policy => policy.RequireClaim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", "SuperAdmin"))
             .AddPolicy("AdminOnly", policy => policy.RequireClaim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", "Admin"))
-            .AddPolicy("AdminOrSuperAdmin", policy => policy.RequireClaim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", new[] { "Admin", "SuperAdmin" }));
+            .AddPolicy("AdminOrSuperAdmin", policy => policy.RequireClaim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", ["Admin", "SuperAdmin"]))
+            .AddPolicy("KeyUserOrAdminOrSuperAdmin", policy => policy.RequireClaim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", ["KeyUser", "Admin", "SuperAdmin"]));
 
         // --- Repositories ---
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -124,6 +127,8 @@ public static class DependencyInjection
         services.AddScoped<IJobTaskDispatcher, JobTaskDispatcher>();
         services.AddScoped<IJobTaskRunnerService, JobTaskRunnerService>();
         services.AddHostedService<SchedulerWorker>();
+
+        services.AddScoped<IExportService, ExportService>();
 
         // --- External Services ---
         services.AddOptions();
