@@ -11,7 +11,6 @@ namespace Application.Entities.Core.ExportProfiles.DTOs
         public CustomType? CustomType { get; set; }
         public string? CustomSource { get; set; }
 
-        public FileType ExportFileType { get; set; }
         public string? TargetPath { get; set; }
     }
 }

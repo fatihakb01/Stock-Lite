@@ -24,9 +24,6 @@ namespace Infrastructure.Configurations.Core
             builder.Property(ex => ex.CustomSource)
                 .HasMaxLength(100);
 
-            builder.Property(ex => ex.ExportFileType)
-                .IsRequired();
-
             builder.Property(ex => ex.CreatedBy)
                 .IsRequired();
 

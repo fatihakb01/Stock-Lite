@@ -1,6 +1,4 @@
-﻿using ClosedXML.Excel;
-using CsvHelper;
-using Domain.Entities.Core;
+﻿using Domain.Entities.Core;
 using Domain.Enums;
 using Domain.Interfaces.Services.Export;
 using Infrastructure.Context;
@@ -8,14 +6,18 @@ using Infrastructure.Services.Export.Records;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data.Common;
-using System.Globalization;
 
 namespace Infrastructure.Services.Export
 {
-    public class ExportService(DataContext context) : IExportService
+    public class ExportService(
+        DataContext context,
+        IFileExportHelper helper
+    ) : IExportService
     {
         private const int Timeout = 120;
         private readonly DataContext _context = context;
+        private readonly IFileExportHelper _helper = helper;
+
         public async Task ExportAsync(ExportProfile profile, Guid companyId, CancellationToken ct)
         {
             if (!string.IsNullOrWhiteSpace(profile.CustomSource))
@@ -113,12 +115,12 @@ namespace Infrastructure.Services.Export
                 ",
                 r => new ConfirmedOrderAggregateRecord
                 {
-                    SKU = r.GetString(r.GetOrdinal("SKU")),
-                    PeriodType = r.GetString(r.GetOrdinal("PeriodType")),
-                    PeriodStartDate = r.GetDateTime(r.GetOrdinal("PeriodStartDate")),
-                    PeriodEndDate = r.GetDateTime(r.GetOrdinal("PeriodEndDate")),
-                    TotalConfirmedQuantity = r.GetInt32(r.GetOrdinal("TotalConfirmedQuantity")),
-                    TotalConfirmedRevenue = r.GetDecimal(r.GetOrdinal("TotalConfirmedRevenue"))
+                    SKU = r.GetRefField<string>("SKU"),
+                    PeriodType = r.GetRefField<string>("PeriodType"),
+                    PeriodStartDate = r.GetField<DateTime>("PeriodStartDate"),
+                    PeriodEndDate = r.GetField<DateTime>("PeriodEndDate"),
+                    TotalConfirmedQuantity = r.GetField<int>("TotalConfirmedQuantity"),
+                    TotalConfirmedRevenue = r.GetField<decimal>("TotalConfirmedRevenue")
                 },
                 ct,
                 new SqlParameter("@CompanyId", companyId)
@@ -144,12 +146,12 @@ namespace Infrastructure.Services.Export
                 ",
                 r => new ForecastRecord
                 {
-                    SKU = r.GetString(r.GetOrdinal("SKU")),
-                    PeriodType = r.GetString(r.GetOrdinal("PeriodType")),
-                    PeriodStartDate = r.GetDateTime(r.GetOrdinal("PeriodStartDate")),
-                    PeriodEndDate = r.GetDateTime(r.GetOrdinal("PeriodEndDate")),
-                    PredictedQuantity = r.GetDecimal(r.GetOrdinal("PredictedQuantity")),
-                    PredictedRevenue = r.GetDecimal(r.GetOrdinal("PredictedRevenue"))
+                    SKU = r.GetRefField<string>("SKU"),
+                    PeriodType = r.GetRefField<string>("PeriodType"),
+                    PeriodStartDate = r.GetField<DateTime>("PeriodStartDate"),
+                    PeriodEndDate = r.GetField<DateTime>("PeriodEndDate"),
+                    PredictedQuantity = r.GetField<decimal>("PredictedQuantity"),
+                    PredictedRevenue = r.GetField<decimal>("PredictedRevenue")
                 },
                 ct,
                 new SqlParameter("@CompanyId", companyId)
@@ -178,12 +180,12 @@ namespace Infrastructure.Services.Export
                 ",
                 r => new ProductKpiRecord
                 {
-                    SchedulerStatus = r.GetString(r.GetOrdinal("SchedulerStatus")),
-                    TotalProductCount = r.GetInt32(r.GetOrdinal("TotalProductCount")),
-                    BelowSafetyStockCount = r.GetInt32(r.GetOrdinal("BelowSafetyStockCount")),
-                    RecommendedOrdersCount = r.GetInt32(r.GetOrdinal("RecommendedOrdersCount")),
-                    WithoutStockAtLeadTimeCount = r.GetInt32(r.GetOrdinal("WithoutStockAtLeadTimeCount")),
-                    WithoutForecastCount = r.GetInt32(r.GetOrdinal("WithoutForecastCount"))
+                    SchedulerStatus = r.GetRefField<string>("SchedulerStatus"),
+                    TotalProductCount = r.GetField<int>("TotalProductCount"),
+                    BelowSafetyStockCount = r.GetField<int>("BelowSafetyStockCount"),
+                    RecommendedOrdersCount = r.GetField<int>("RecommendedOrdersCount"),
+                    WithoutStockAtLeadTimeCount = r.GetField<int>("WithoutStockAtLeadTimeCount"),
+                    WithoutForecastCount = r.GetField<int>("WithoutForecastCount")
                 },
                 ct,
                 new SqlParameter("@CompanyId", companyId)
@@ -214,17 +216,17 @@ namespace Infrastructure.Services.Export
                 ",
                 r => new PurchaseForecastRecord
                 {
-                    SKU = r.GetString(r.GetOrdinal("SKU")),
-                    WeekStartDate = r.GetDateTime(r.GetOrdinal("WeekStartDate")),
-                    WeekEndDate = r.GetDateTime(r.GetOrdinal("WeekEndDate")),
-                    WeekIndex = r.GetInt32(r.GetOrdinal("WeekIndex")),
-                    ForecastQuantity = r.GetDecimal(r.GetOrdinal("ForecastQuantity")),
-                    QuantityCommitted = r.GetInt32(r.GetOrdinal("QuantityCommitted")),
-                    QuantityOnOrder = r.GetInt32(r.GetOrdinal("QuantityOnOrder")),
-                    ProjectedStock = r.GetInt32(r.GetOrdinal("ProjectedStock")),
-                    NeedsReorder = r.GetBoolean(r.GetOrdinal("NeedsReorder")),
-                    RecommendedOrderQuantity = r.GetInt32(r.GetOrdinal("RecommendedOrderQuantity")),
-                    RecommendedOrderDate = r.GetDateTime(r.GetOrdinal("RecommendedOrderDate"))
+                    SKU = r.GetRefField<string>("SKU"),
+                    WeekStartDate = r.GetField<DateTime>("WeekStartDate"),
+                    WeekEndDate = r.GetField<DateTime>("WeekEndDate"),
+                    WeekIndex = r.GetField<int>("WeekIndex"),
+                    ForecastQuantity = r.GetField<decimal>("ForecastQuantity"),
+                    QuantityCommitted = r.GetField<int>("QuantityCommitted"),
+                    QuantityOnOrder = r.GetField<int>("QuantityOnOrder"),
+                    ProjectedStock = r.GetField<decimal>("ProjectedStock"),
+                    NeedsReorder = r.GetField<bool>("NeedsReorder"),
+                    RecommendedOrderQuantity = r.GetField<int>("RecommendedOrderQuantity"),
+                    RecommendedOrderDate = r.GetNullableField<DateTime>("RecommendedOrderDate")
                 },
                 ct,
                 new SqlParameter("@CompanyId", companyId)
@@ -250,12 +252,12 @@ namespace Infrastructure.Services.Export
                 ",
                 r => new SalesAggregateRecord
                 {
-                    SKU = r.GetString(r.GetOrdinal("SKU")),
-                    PeriodType = r.GetString(r.GetOrdinal("PeriodType")),
-                    PeriodStartDate = r.GetDateTime(r.GetOrdinal("PeriodStartDate")),
-                    PeriodEndDate = r.GetDateTime(r.GetOrdinal("PeriodEndDate")),
-                    TotalQuantity = r.GetInt32(r.GetOrdinal("TotalQuantity")),
-                    TotalRevenue = r.GetDecimal(r.GetOrdinal("TotalRevenue"))
+                    SKU = r.GetRefField<string>("SKU"),
+                    PeriodType = r.GetRefField<string>("PeriodType"),
+                    PeriodStartDate = r.GetField<DateTime>("PeriodStartDate"),
+                    PeriodEndDate = r.GetField<DateTime>("PeriodEndDate"),
+                    TotalQuantity = r.GetField<int>("TotalQuantity"),
+                    TotalRevenue = r.GetField<decimal>("TotalRevenue")
                 },
                 ct,
                 new SqlParameter("@CompanyId", companyId)
@@ -284,10 +286,10 @@ namespace Infrastructure.Services.Export
                 ",
                 r => new SeasonalityRecord
                 {
-                    SKU = r.GetString(r.GetOrdinal("SKU")),
-                    PeriodStartDate = r.GetDateTime(r.GetOrdinal("PeriodStartDate")),
-                    PredictedQuantity = r.GetDecimal(r.GetOrdinal("PredictedQuantity")),
-                    Factor = r.GetDecimal(r.GetOrdinal("Factor"))
+                    SKU = r.GetRefField<string>("SKU"),
+                    PeriodStartDate = r.GetField<DateTime>("PeriodStartDate"),
+                    PredictedQuantity = r.GetField<decimal>("PredictedQuantity"),
+                    Factor = r.GetField<decimal>("Factor")
                 },
                 ct,
                 new SqlParameter("@CompanyId", companyId)
@@ -316,95 +318,48 @@ namespace Infrastructure.Services.Export
                 ",
                 r => new StockLevelRecord
                 {
-                    SKU = r.GetString(r.GetOrdinal("SKU")),
-                    QuantityOnHand = r.GetInt32(r.GetOrdinal("QuantityOnHand")),
-                    QuantityOnOrder = r.GetInt32(r.GetOrdinal("QuantityOnOrder")),
-                    QuantityCommitted = r.GetInt32(r.GetOrdinal("QuantityCommitted")),
-                    NetStockPosition = r.GetDecimal(r.GetOrdinal("NetStockPosition")),
-                    ForecastQuantity = r.GetDecimal(r.GetOrdinal("ForecastQuantity")),
-                    ReorderPoint = r.GetInt32(r.GetOrdinal("ReorderPoint")),
-                    NeedsReorder = r.GetBoolean(r.GetOrdinal("NeedsReorder")),
-                    RecommendedOrderQuantity = r.GetInt32(r.GetOrdinal("RecommendedOrderQuantity")),
+                    SKU = r.GetRefField<string>("SKU"),
+                    QuantityOnHand = r.GetField<int>("QuantityOnHand"),
+                    QuantityOnOrder = r.GetField<int>("QuantityOnOrder"),
+                    QuantityCommitted = r.GetField<int>("QuantityCommitted"),
+                    NetStockPosition = r.GetField<decimal>("NetStockPosition"),
+                    ForecastQuantity = r.GetField<decimal>("ForecastQuantity"),
+                    ReorderPoint = r.GetField<int>("ReorderPoint"),
+                    NeedsReorder = r.GetField<bool>("NeedsReorder"),
+                    RecommendedOrderQuantity = r.GetField<int>("RecommendedOrderQuantity")
                 },
                 ct,
                 new SqlParameter("@CompanyId", companyId)
             );
         }
 
-        //private async Task<List<SummaryRecord>> GetSummaryRecordsAsync(
-        //    Guid companyId, CancellationToken ct)
-        //{
-        //    return new List<SummaryRecord> { };
-        //}
-
-        private static string TryGetValidTargetPath(ExportProfile profile)
-        {
-            string? targetPath = profile.TargetPath;
-
-            if (targetPath == null)
-                throw new InvalidOperationException("TargetPath must be filled in");
-
-            if (!targetPath.EndsWith(".csv") && !targetPath.EndsWith(".xlsx"))
-                throw new InvalidOperationException("Extension of targetPath is not supported");
-
-            if (targetPath.EndsWith(".csv") && profile.ExportFileType == FileType.Excel)
-                throw new InvalidOperationException("Extension of the targetPath is .csv but export file type is excel");
-
-            if (targetPath.EndsWith(".xlsx") && profile.ExportFileType == FileType.Csv)
-                throw new InvalidOperationException("Extension of the targetPath is .xlsx but export file type is csv");
-
-            return targetPath;
-        }
-
         // --- File writing ---
         private async Task WriteFileAsync<T>(
             List<T> records, ExportProfile profile, CancellationToken ct)
         {
-            string targetPath = TryGetValidTargetPath(profile);
+            if (string.IsNullOrWhiteSpace(profile.TargetPath))
+                throw new InvalidOperationException("TargetPath must be filled in.");
 
-            var directory = Path.GetDirectoryName(targetPath);
+            var fileType = _helper.GetFileTypeFromPath(profile.TargetPath);
+
+            var directory = Path.GetDirectoryName(profile.TargetPath);
             if (!string.IsNullOrEmpty(directory))
                 Directory.CreateDirectory(directory);
 
-            if (profile.ExportFileType == FileType.Csv)
-                await WriteCsvAsync(records, targetPath, ct);
+            if (fileType == FileType.Csv)
+                await _helper.WriteCsvAsync(records, profile.TargetPath, ct);
             else
-                WriteExcel(records, targetPath);
-        }
-
-        private static async Task WriteCsvAsync<T>(
-            List<T> records, string targetPath, CancellationToken ct)
-        {
-            await using var writer = new StreamWriter(targetPath);
-            await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-            await csv.WriteRecordsAsync(records, ct);
-        }
-
-        private static void WriteExcel<T>(List<T> records, string targetPath)
-        {
-            using var workbook = new XLWorkbook();
-            var sheet = workbook.Worksheets.Add("Export");
-
-            var properties = typeof(T).GetProperties();
-
-            // Write header row
-            for (int i = 0; i < properties.Length; i++)
-                sheet.Cell(1, i + 1).Value = properties[i].Name;
-
-            // Write data rows
-            for (int row = 0; row < records.Count; row++)
-                for (int col = 0; col < properties.Length; col++)
-                    sheet.Cell(row + 2, col + 1).Value =
-                        XLCellValue.FromObject(properties[col].GetValue(records[row]));
-
-            workbook.SaveAs(targetPath);
+                _helper.WriteExcel(records, profile.TargetPath);
         }
 
         // --- Custom export ---
         private async Task ExportCustomAsync(
             ExportProfile profile, Guid companyId, CancellationToken ct)
         {
-            string targetPath = TryGetValidTargetPath(profile);
+            if (string.IsNullOrWhiteSpace(profile.TargetPath))
+                throw new InvalidOperationException("TargetPath must be filled in.");
+
+            var fileType = _helper.GetFileTypeFromPath(profile.TargetPath);
 
             if (!profile.CustomSource!.StartsWith("custom_", StringComparison.OrdinalIgnoreCase)
                 && !profile.CustomSource.StartsWith("dbo.custom_", StringComparison.OrdinalIgnoreCase))
@@ -471,7 +426,10 @@ namespace Infrastructure.Services.Export
                 {
                     var row = new Dictionary<string, object?>();
                     foreach (var col in columnNames)
-                        row[col] = reader.IsDBNull(reader.GetOrdinal(col)) ? null : reader.GetValue(reader.GetOrdinal(col));
+                    {
+                        var ordinal = reader.GetOrdinal(col);
+                        row[col] = reader.IsDBNull(ordinal) ? null : reader.GetValue(ordinal);
+                    }
                     rows.Add(row);
                 }
             }
@@ -485,54 +443,10 @@ namespace Infrastructure.Services.Export
                     $"Failed to execute custom source '{profile.CustomSource}': {ex.Message}", ex);
             }
 
-            if (profile.ExportFileType == FileType.Csv)
-                await WriteDictionaryCsvAsync(rows, targetPath, ct);
+            if (fileType == FileType.Csv)
+                await _helper.WriteDictionaryCsvAsync(rows, profile.TargetPath);
             else
-                WriteDictionaryExcel(rows, targetPath);
-        }
-
-        private static async Task WriteDictionaryCsvAsync(
-            List<Dictionary<string, object?>> rows, string targetPath, CancellationToken ct)
-        {
-            await using var writer = new StreamWriter(targetPath);
-            await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-
-            if (rows.Count == 0) return;
-
-            foreach (var key in rows[0].Keys)
-                csv.WriteField(key);
-            await csv.NextRecordAsync();
-
-            foreach (var row in rows)
-            {
-                foreach (var value in row.Values)
-                    csv.WriteField(value);
-                await csv.NextRecordAsync();
-            }
-        }
-
-        private static void WriteDictionaryExcel(
-            List<Dictionary<string, object?>> rows, string targetPath)
-        {
-            using var workbook = new XLWorkbook();
-            var sheet = workbook.Worksheets.Add("Export");
-
-            if (rows.Count == 0)
-            {
-                workbook.SaveAs(targetPath);
-                return;
-            }
-
-            var headers = rows[0].Keys.ToList();
-            for (int i = 0; i < headers.Count; i++)
-                sheet.Cell(1, i + 1).Value = headers[i];
-
-            for (int row = 0; row < rows.Count; row++)
-                for (int col = 0; col < headers.Count; col++)
-                    sheet.Cell(row + 2, col + 1).Value =
-                        XLCellValue.FromObject(rows[row][headers[col]]);
-
-            workbook.SaveAs(targetPath);
+                _helper.WriteDictionaryExcel(rows, profile.TargetPath);
         }
     }
 }

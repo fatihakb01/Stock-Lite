@@ -12,7 +12,6 @@ namespace Domain.Entities.Core
         public CustomType? CustomType { get; set; }
         public string? CustomSource { get; set; }
 
-        public FileType ExportFileType { get; set; }
         public string? TargetPath { get; set; }
 
         public Guid CompanyId { get; set; }

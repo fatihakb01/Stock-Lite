@@ -11,6 +11,7 @@ import ChangePasswordPage from "../features/users/ChangePasswordPage";
 import ForgotPasswordPage from "../features/users/ForgotPasswordPage";
 /*import MasterDataPage from "../features/masterdata/MasterDataPage";*/
 import SchedulerPage from "../features/scheduler/SchedulerPage";
+import ExportProfilePage from "../features/export/ExportProfilePage";
 
 const router = createBrowserRouter([
   // Public routes (no sidebar)
@@ -35,9 +36,9 @@ const router = createBrowserRouter([
     children: [
       { path: "/home", element: <HomePage /> },
       { path: "/products", element: <ProductsPage /> },
-      /*{ path: "/data", element: <MasterDataPage /> },*/
       { path: "/scheduler", element: <SchedulerPage /> },
-      { path: "/users", element: <UsersPage /> }
+      { path: "/users", element: <UsersPage /> },
+      { path: "/export", element: <ExportProfilePage /> }
     ]
   }
 ]);

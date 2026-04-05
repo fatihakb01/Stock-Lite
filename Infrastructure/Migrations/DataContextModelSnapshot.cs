@@ -148,9 +148,6 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<int>("ExportFileType")
-                        .HasColumnType("int");
-
                     b.Property<int?>("ExportType")
                         .HasColumnType("int");
 

@@ -8,7 +8,6 @@
         SalesAggregates = 3,
         PurchaseForecasts = 4,
         ProductKpis = 5,
-        Seasonality = 6,
-        Summary = 7
+        Seasonality = 6
     }
 }

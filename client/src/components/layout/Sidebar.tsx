@@ -8,6 +8,7 @@ import {
   LogOut,
   //Database,
   CalendarCheck,
+  Database,
 } from "lucide-react";
 
 import {
@@ -37,9 +38,9 @@ export default function Sidebar() {
   const menuItems = [
     { text: "Home", icon: <Home />, to: "/home" },
     { text: "Products", icon: <ShoppingBag />, to: "/products" },
-    /*{ text: "Master Data", icon: <Database />, to: "/data" },*/
     { text: "Scheduler", icon: <CalendarCheck />, to: "/scheduler" },
-    { text: "User Management", icon: <Users/>, to: "/users"}
+    { text: "User Management", icon: <Users/>, to: "/users"},
+    { text: "Export", icon: <Database />, to: "/export"}
   ];
 
   const iconColor = theme.palette.mode === "light" ? "black" : "white";

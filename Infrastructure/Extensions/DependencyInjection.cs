@@ -19,7 +19,6 @@ using Infrastructure.Services.Users;
 using Domain.Interfaces.Services.Users;
 using Infrastructure.Services.Scheduler.Imports;
 using Infrastructure.Services.Scheduler;
-using Microsoft.Extensions.Hosting;
 using Domain.Interfaces.Services.Export;
 using Infrastructure.Services.Export;
 
@@ -129,6 +128,7 @@ public static class DependencyInjection
         services.AddHostedService<SchedulerWorker>();
 
         services.AddScoped<IExportService, ExportService>();
+        services.AddScoped<IFileExportHelper, FileExportHelper>();
 
         // --- External Services ---
         services.AddOptions();
