@@ -35,9 +35,9 @@ export const exportProfileSchema = z.object({
     }
 
     // Check whether extension is valid (.xlsx or .csv)
-    const targetPath = data.targetPath?.toLowerCase() ?? "";
+    const targetPath = data.targetPath?.toLowerCase();
 
-    if (!targetPath.endsWith(".xlsx") && !targetPath.endsWith(".csv")) {
+    if (targetPath && !targetPath.endsWith(".xlsx") && !targetPath.endsWith(".csv")) {
         ctx.addIssue({
             code: "custom",
             message: "Please specify a valid extension (.xlsx or .csv)",

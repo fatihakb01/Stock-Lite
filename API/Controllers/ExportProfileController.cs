@@ -1,6 +1,8 @@
 ﻿using Application.Entities.Core.ExportProfiles.DTOs;
 using Application.Entities.Core.ExportProfiles.Features.Commands;
 using Application.Entities.Core.ExportProfiles.Features.Queries;
+using Domain.Enums;
+using Domain.Interfaces.Services.Export.Records;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +29,18 @@ namespace API.Controllers
         public async Task<ActionResult<Unit>> RunExportProfile(Guid id)
         {
             return HandleResult(await Mediator.Send(new RunExportProfile.Command { Id = id }));
+        }
+
+        [Authorize(Policy = "KeyUserOrAdminOrSuperAdmin")]
+        [HttpPost("stream/{id}")]
+        public async Task<IActionResult> StreamExportProfile(Guid id, [FromQuery] FileType fileType)
+        {
+            var result = await Mediator.Send(new StreamExportProfile.Command { Id = id, FileType = fileType });
+
+            if (!result.IsSuccess)
+                return Problem(title: result.Error, statusCode: result.Code);
+
+            return File(result.Value!.Content, result.Value.ContentType, result.Value.FileName);
         }
 
         [Authorize(Policy = "AdminOrSuperAdmin")]

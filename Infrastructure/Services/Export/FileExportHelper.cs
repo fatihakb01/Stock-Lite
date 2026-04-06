@@ -10,7 +10,7 @@ namespace Infrastructure.Services.Export
     {
         public FileType GetFileTypeFromPath(string targetPath)
         {
-            var extension = Path.GetExtension(targetPath).ToLowerInvariant();
+            string? extension = targetPath != null ? Path.GetExtension(targetPath).ToLowerInvariant() : null;
 
             return extension switch
             {
@@ -21,16 +21,94 @@ namespace Infrastructure.Services.Export
             };
         }
 
-        public async Task WriteCsvAsync<T>(List<T> records, string targetPath, CancellationToken ct)
+        public async Task WriteCsvAsync<T>(
+            List<T> records, 
+            string targetPath, 
+            CancellationToken ct
+        )
         {
             await using var writer = new StreamWriter(targetPath);
-            await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-            await csv.WriteRecordsAsync(records, ct);
+            await CsvWriter(writer, records, ct);
+        }
+
+        public async Task<MemoryStream> WriteStreamCsvAsync<T>(
+            List<T> records,
+            CancellationToken ct
+        )
+        {
+            var ms = new MemoryStream();
+            await using var writer = new StreamWriter(ms, leaveOpen: true);
+            await CsvWriter(writer, records, ct);
+            ms.Position = 0;
+            return ms;
         }
 
         public void WriteExcel<T>(List<T> records, string targetPath)
         {
-            using var workbook = new XLWorkbook();
+            using var workbook = ExcelWriter(records);
+
+            workbook.SaveAs(targetPath);
+        }
+
+        public MemoryStream WriteStreamExcel<T>(List<T> records)
+        {
+            var ms = new MemoryStream();
+            using var workbook = ExcelWriter(records);
+            workbook.SaveAs(ms);
+            ms.Position = 0;
+            return ms;
+        }
+
+        public async Task WriteDictionaryCsvAsync(List<Dictionary<string, object?>> rows, string targetPath)
+        {
+            await using var writer = new StreamWriter(targetPath);
+            await DictionaryCsvWriter(writer, rows);
+        }
+
+        public async Task<MemoryStream> WriteStreamDictionaryCsvAsync(
+            List<Dictionary<string,
+            object?>> rows
+        )
+        {
+            var ms = new MemoryStream();
+            await using var writer = new StreamWriter(ms, leaveOpen: true);
+            await DictionaryCsvWriter(writer, rows);
+            ms.Position = 0;
+            return ms;
+        }
+
+        public void WriteDictionaryExcel(List<Dictionary<string, object?>> rows, string targetPath)
+        {
+            using var workbook = DictionaryExcelWriter(rows);
+
+            workbook.SaveAs(targetPath);
+        }
+
+        public MemoryStream WriteStreamDictionaryExcel(List<Dictionary<string, object?>> rows)
+        {
+            var ms = new MemoryStream();
+            using var workbook = DictionaryExcelWriter(rows);
+            workbook.SaveAs(ms);
+            ms.Position = 0;
+            return ms;
+        }
+
+        private static async Task CsvWriter<T>(
+            StreamWriter? writer,
+            List<T> records,
+            CancellationToken ct
+        )
+        {
+            if (writer != null)
+            {
+                await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+                await csv.WriteRecordsAsync(records, ct);
+            }
+        }
+
+        private static XLWorkbook ExcelWriter<T>(List<T> records)
+        {
+            var workbook = new XLWorkbook();
             var sheet = workbook.Worksheets.Add("Export");
 
             var properties = typeof(T).GetProperties();
@@ -45,38 +123,34 @@ namespace Infrastructure.Services.Export
                     sheet.Cell(row + 2, col + 1).Value =
                         XLCellValue.FromObject(properties[col].GetValue(records[row]));
 
-            workbook.SaveAs(targetPath);
+            return workbook;
         }
 
-        public async Task WriteDictionaryCsvAsync(List<Dictionary<string, object?>> rows, string targetPath)
+        private static async Task DictionaryCsvWriter(StreamWriter? writer, List<Dictionary<string, object?>> rows)
         {
-            await using var writer = new StreamWriter(targetPath);
-            await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-
-            if (rows.Count == 0) return;
-
-            foreach (var key in rows[0].Keys)
-                csv.WriteField(key);
-            await csv.NextRecordAsync();
-
-            foreach (var row in rows)
+            if (writer != null)
             {
-                foreach (var value in row.Values)
-                    csv.WriteField(value);
+                await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+
+                if (rows.Count == 0) return;
+
+                foreach (var key in rows[0].Keys)
+                    csv.WriteField(key);
                 await csv.NextRecordAsync();
+
+                foreach (var row in rows)
+                {
+                    foreach (var value in row.Values)
+                        csv.WriteField(value);
+                    await csv.NextRecordAsync();
+                }
             }
         }
 
-        public void WriteDictionaryExcel(List<Dictionary<string, object?>> rows, string targetPath)
+        private static XLWorkbook DictionaryExcelWriter(List<Dictionary<string, object?>> rows)
         {
-            using var workbook = new XLWorkbook();
+            var workbook = new XLWorkbook();
             var sheet = workbook.Worksheets.Add("Export");
-
-            if (rows.Count == 0)
-            {
-                workbook.SaveAs(targetPath);
-                return;
-            }
 
             var headers = rows[0].Keys.ToList();
             for (int i = 0; i < headers.Count; i++)
@@ -87,7 +161,7 @@ namespace Infrastructure.Services.Export
                     sheet.Cell(row + 2, col + 1).Value =
                         XLCellValue.FromObject(rows[row][headers[col]]);
 
-            workbook.SaveAs(targetPath);
+            return workbook;
         }
     }
 }

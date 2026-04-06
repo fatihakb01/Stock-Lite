@@ -1,6 +1,7 @@
 ﻿using Domain.Entities.Core;
 using Domain.Enums;
 using Domain.Interfaces.Services.Export;
+using Domain.Interfaces.Services.Export.Records;
 using Infrastructure.Context;
 using Infrastructure.Services.Export.Records;
 using Microsoft.Data.SqlClient;
@@ -18,7 +19,63 @@ namespace Infrastructure.Services.Export
         private readonly DataContext _context = context;
         private readonly IFileExportHelper _helper = helper;
 
-        public async Task ExportAsync(ExportProfile profile, Guid companyId, CancellationToken ct)
+        public async Task<ExportResult> ExportToStreamAsync(
+            ExportProfile profile, 
+            FileType fileType, 
+            Guid companyId, 
+            CancellationToken ct
+        )
+        {
+            MemoryStream ms;
+
+            if (!string.IsNullOrWhiteSpace(profile.CustomSource))
+            {
+                ms = await ExportCustomToStreamAsync(profile, fileType, companyId, ct);
+            }
+            else
+            {
+                ms = profile.ExportType switch
+                {
+                    ExportType.StockLevels => await WriteToStreamAsync(
+                        await GetStockLevelRecordsAsync(companyId, ct), fileType, ct),
+
+                    ExportType.SalesAggregates => await WriteToStreamAsync(
+                        await GetSalesAggregateRecordsAsync(companyId, ct), fileType, ct),
+
+                    ExportType.Forecasts => await WriteToStreamAsync(
+                        await GetForecastRecordsAsync(companyId, ct), fileType, ct),
+
+                    ExportType.PurchaseForecasts => await WriteToStreamAsync(
+                        await GetPurchaseForecastRecordsAsync(companyId, ct), fileType, ct),
+
+                    ExportType.ConfirmedOrderAggregates => await WriteToStreamAsync(
+                        await GetConfirmedOrderAggregateRecordsAsync(companyId, ct), fileType, ct),
+
+                    ExportType.ProductKpis => await WriteToStreamAsync(
+                        await GetProductKpiRecordsAsync(companyId, ct), fileType, ct),
+
+                    ExportType.Seasonality => await WriteToStreamAsync(
+                        await GetSeasonalityRecordsAsync(companyId, ct), fileType, ct),
+
+                    _ => throw new InvalidOperationException(
+                        $"Unsupported export type: {profile.ExportType}")
+                };
+            }
+
+            var extension = fileType == FileType.Csv ? "csv" : "xlsx";
+            var contentType = fileType == FileType.Csv
+                ? "text/csv"
+                : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+            return new ExportResult
+            {
+                Content = ms.ToArray(),
+                FileName = $"{profile.Name}_{DateTime.UtcNow:yyyyMMdd_HHmmss}.{extension}",
+                ContentType = contentType
+            };
+        }
+
+        public async Task ExportToFileAsync(ExportProfile profile, Guid companyId, CancellationToken ct)
         {
             if (!string.IsNullOrWhiteSpace(profile.CustomSource))
             {
@@ -26,47 +83,33 @@ namespace Infrastructure.Services.Export
                 return;
             }
 
-            switch (profile.ExportType)
+            var task = profile.ExportType switch
             {
-                case ExportType.StockLevels:
-                    var stockRecords = await GetStockLevelRecordsAsync(companyId, ct);
-                    await WriteFileAsync(stockRecords, profile, ct);
-                    break;
+                ExportType.StockLevels => WriteFileAsync(
+                    await GetStockLevelRecordsAsync(companyId, ct), profile, ct),
 
-                case ExportType.SalesAggregates:
-                    var salesRecords = await GetSalesAggregateRecordsAsync(companyId, ct);
-                    await WriteFileAsync(salesRecords, profile, ct);
-                    break;
+                ExportType.SalesAggregates => WriteFileAsync(
+                    await GetSalesAggregateRecordsAsync(companyId, ct), profile, ct),
 
-                case ExportType.Forecasts:
-                    var forecastRecords = await GetForecastRecordsAsync(companyId, ct);
-                    await WriteFileAsync(forecastRecords, profile, ct);
-                    break;
+                ExportType.Forecasts => WriteFileAsync(
+                    await GetForecastRecordsAsync(companyId, ct), profile, ct),
 
-                case ExportType.PurchaseForecasts:
-                    var purchaseForecastRecords = await GetPurchaseForecastRecordsAsync(companyId, ct);
-                    await WriteFileAsync(purchaseForecastRecords, profile, ct);
-                    break;
+                ExportType.PurchaseForecasts => WriteFileAsync(
+                    await GetPurchaseForecastRecordsAsync(companyId, ct), profile, ct),
 
-                case ExportType.ConfirmedOrderAggregates:
-                    var confirmedOrderRecords = await GetConfirmedOrderAggregateRecordsAsync(companyId, ct);
-                    await WriteFileAsync(confirmedOrderRecords, profile, ct);
-                    break;
+                ExportType.ConfirmedOrderAggregates => WriteFileAsync(
+                    await GetConfirmedOrderAggregateRecordsAsync(companyId, ct), profile, ct),
 
-                case ExportType.ProductKpis:
-                    var kpiRecords = await GetProductKpiRecordsAsync(companyId, ct);
-                    await WriteFileAsync(kpiRecords, profile, ct);
-                    break;
+                ExportType.ProductKpis => WriteFileAsync(
+                    await GetProductKpiRecordsAsync(companyId, ct), profile, ct),
 
-                case ExportType.Seasonality:
-                    var seasonalityRecords = await GetSeasonalityRecordsAsync(companyId, ct);
-                    await WriteFileAsync(seasonalityRecords, profile, ct);
-                    break;
+                ExportType.Seasonality => WriteFileAsync(
+                    await GetSeasonalityRecordsAsync(companyId, ct), profile, ct),
 
-                default:
-                    throw new InvalidOperationException(
-                        $"Unsupported export type: {profile.ExportType}");
-            }
+                _ => throw new InvalidOperationException($"Unsupported export type: {profile.ExportType}")
+            };
+
+            await task;
         }
 
         private async Task<List<T>> QueryAsync<T>(
@@ -352,15 +395,45 @@ namespace Infrastructure.Services.Export
                 _helper.WriteExcel(records, profile.TargetPath);
         }
 
+        // --- Stream writing ---
+        private async Task<MemoryStream> WriteToStreamAsync<T>(
+            List<T> records, FileType fileType, CancellationToken ct)
+        {
+            return fileType == FileType.Csv
+                ? await _helper.WriteStreamCsvAsync(records, ct)
+                : _helper.WriteStreamExcel(records);
+        }
+
         // --- Custom export ---
+        private async Task<MemoryStream> ExportCustomToStreamAsync(
+            ExportProfile profile, FileType fileType, Guid companyId, CancellationToken ct)
+        {
+            var rows = await FetchCustomRowsAsync(profile, companyId, ct);
+
+            return fileType == FileType.Csv
+                ? await _helper.WriteStreamDictionaryCsvAsync(rows)
+                : _helper.WriteStreamDictionaryExcel(rows);
+        }
+
         private async Task ExportCustomAsync(
             ExportProfile profile, Guid companyId, CancellationToken ct)
         {
-            if (string.IsNullOrWhiteSpace(profile.TargetPath))
-                throw new InvalidOperationException("TargetPath must be filled in.");
+            var fileType = _helper.GetFileTypeFromPath(profile.TargetPath!);
+            var rows = await FetchCustomRowsAsync(profile, companyId, ct);
 
-            var fileType = _helper.GetFileTypeFromPath(profile.TargetPath);
+            var directory = Path.GetDirectoryName(profile.TargetPath);
+            if (!string.IsNullOrEmpty(directory))
+                Directory.CreateDirectory(directory);
 
+            if (fileType == FileType.Csv)
+                await _helper.WriteDictionaryCsvAsync(rows, profile.TargetPath!);
+            else
+                _helper.WriteDictionaryExcel(rows, profile.TargetPath!);
+        }
+
+        private async Task<List<Dictionary<string, object?>>> FetchCustomRowsAsync(
+            ExportProfile profile, Guid companyId, CancellationToken ct)
+        {
             if (!profile.CustomSource!.StartsWith("custom_", StringComparison.OrdinalIgnoreCase)
                 && !profile.CustomSource.StartsWith("dbo.custom_", StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException(
@@ -370,7 +443,7 @@ namespace Infrastructure.Services.Export
             var objectType = await _context.Database
                 .SqlQueryRaw<string>(
                     @"SELECT type AS Value FROM sys.objects WHERE name = @customSource",
-                    new SqlParameter("@customSource", profile.CustomSource.Replace("dbo.",""))
+                    new SqlParameter("@customSource", profile.CustomSource.Replace("dbo.", ""))
                 )
                 .SingleOrDefaultAsync(ct);
 
@@ -443,10 +516,7 @@ namespace Infrastructure.Services.Export
                     $"Failed to execute custom source '{profile.CustomSource}': {ex.Message}", ex);
             }
 
-            if (fileType == FileType.Csv)
-                await _helper.WriteDictionaryCsvAsync(rows, profile.TargetPath);
-            else
-                _helper.WriteDictionaryExcel(rows, profile.TargetPath);
+            return rows;
         }
     }
 }

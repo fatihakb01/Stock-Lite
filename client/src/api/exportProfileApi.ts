@@ -16,6 +16,27 @@ export const RunExportProfile = async (id: string): Promise<void> => {
     return res.data;
 }
 
+export const StreamExportProfile = async (id: string, fileType: string): Promise<void> => {
+    const res = await api.post(`/exportprofile/stream/${id}?fileType=${fileType}`, null, {
+        responseType: "blob"
+    });
+
+    const blob = new Blob([res.data], { type: res.headers["content-type"] });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    const disposition = res.headers["content-disposition"];
+    const fileName = disposition
+        ? disposition.split("filename=")[1]?.replace(/"/g, "")
+        : `export.${fileType === "Csv" ? "csv" : "xlsx"}`;
+
+    a.href = url;
+    a.download = fileName;
+    a.click();
+
+    URL.revokeObjectURL(url);
+};
+
 export const CreateExportProfile = async (dto: CreateExportProfileDto): Promise<ExportProfileDetail> => {
     const res = await api.post('/exportprofile', dto);
     return res.data;

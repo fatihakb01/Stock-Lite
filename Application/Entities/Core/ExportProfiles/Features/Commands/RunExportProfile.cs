@@ -32,7 +32,7 @@ namespace Application.Entities.Core.ExportProfiles.Features.Commands
                     return Result<Unit>.Failure("ExportProfile not found", 404);
 
                 if (exportProfile.TargetPath != null)
-                    await service.ExportAsync(exportProfile, currentUser.CompanyId, ct);
+                    await service.ExportToFileAsync(exportProfile, currentUser.CompanyId, ct);
                 else
                     return Result<Unit>.Failure("TargetPath must be filled in", 400);
 
