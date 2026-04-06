@@ -243,19 +243,21 @@ public static class DataSeederInitializer
         var sql = @"
 		/*
 		DECLARE @name NVARCHAR(100) = 'Test Company',
-				@email NVARCHAR(255) = 'test@test.com',
-				@userName NVARCHAR(50) = 'Vatos01',
-				@isActive BIT = 1,
-				@phoneNumber NVARCHAR(20) = '+31612345678',
-				@address NVARCHAR(250) = 'Test street 123'
-
+    			@email NVARCHAR(255) = 'test@test.com',
+    			@userName NVARCHAR(50) = 'TestUser',
+    			@isActive BIT = 1,
+    			@phoneNumber NVARCHAR(20) = '+31612345678',
+    			@address NVARCHAR(250) = 'Test street 123',
+    			@companyId UNIQUEIDENTIFIER
+    
+		-- Set-up the environment
 		EXEC [dbo].[CreateCompany]
-			@name,
-			@email,
-			@userName,
-			@isActive,
-			@phoneNumber,
-			@address
+    		@name,
+    		@email,
+    		@userName,
+    		@isActive,
+    		@phoneNumber,
+    		@address
 		*/
         CREATE OR ALTER PROCEDURE [dbo].[CreateCompany]
             @name NVARCHAR(100),
@@ -411,6 +413,31 @@ public static class DataSeederInitializer
                 FROM ProductKpis
                 WHERE CompanyId = @CompanyId
             )
+
+			-- Create ExportProfiles
+			INSERT INTO ExportProfile (
+				Id,
+				[Name],
+				ExportType,
+				CompanyId,
+				CreatedAt,
+				CreatedBy
+			)
+			VALUES
+			(NEWID(),'CSV: Confirmed Demand Export',1,@CompanyId,@CreatedAt,@UserId),
+			(NEWID(),'CSV: Forecast Export',2,@CompanyId,@CreatedAt,@UserId),
+			(NEWID(),'CSV: Product KPIs Export',5,@CompanyId,@CreatedAt,@UserId),
+			(NEWID(),'CSV: Purchase Forecast Export',4,@CompanyId,@CreatedAt,@UserId),
+			(NEWID(),'CSV: Sales Export',3,@CompanyId,@CreatedAt,@UserId),
+			(NEWID(),'CSV: Seasonality Forecast Export',6,@CompanyId,@CreatedAt,@UserId),
+			(NEWID(),'CSV: Stock Level Export',0,@CompanyId,@CreatedAt,@UserId),
+			(NEWID(),'Excel: Confirmed Demand Export',1,@CompanyId,@CreatedAt,@UserId),
+			(NEWID(),'Excel: Forecast Export',2,@CompanyId,@CreatedAt,@UserId),
+			(NEWID(),'Excel: Product KPIs Export',5,@CompanyId,@CreatedAt,@UserId),
+			(NEWID(),'Excel: Purchase Forecast Export',4,@CompanyId,@CreatedAt,@UserId),
+			(NEWID(),'Excel: Sales Export',3,@CompanyId,@CreatedAt,@UserId),
+			(NEWID(),'Excel: Seasonality Forecast Export',6,@CompanyId,@CreatedAt,@UserId),
+			(NEWID(),'Excel: Stock Level Export',0,@CompanyId,@CreatedAt,@UserId)
         END
         ";
 
