@@ -459,9 +459,6 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("AllowManualTrigger")
-                        .HasColumnType("bit");
-
                     b.Property<int?>("CalculationType")
                         .HasColumnType("int");
 

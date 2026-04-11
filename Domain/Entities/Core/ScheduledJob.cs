@@ -17,7 +17,6 @@ public class ScheduledJob
     public string? Source { get; set; }
     public string? Target { get; set; }
 
-    public bool AllowManualTrigger { get; set; } = true;
     public bool IsArchived { get; set; }
 
     public Guid JobTaskId { get; set; }
