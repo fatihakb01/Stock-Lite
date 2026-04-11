@@ -368,7 +368,6 @@ public static class DataSeederInitializer
 				PeriodType,
 				Source,
 				Target,
-				AllowManualTrigger,
 				IsArchived,
 				JobTaskId,
 				ExecutionOrder,
@@ -377,18 +376,18 @@ public static class DataSeederInitializer
 				Result
 			)
 			VALUES
-			(NEWID(),'Import User Defined Fields','','0',NULL,'4',NULL,'C:\CSharp\Data\Master\udf.csv',NULL,'1','0',@JobTaskOne,'4',@CreatedAt,@UserId,@Result),
-			(NEWID(),'Import Confirmed Orders','','0',NULL,'2',NULL,'C:\CSharp\Data\Master\confirmedorders.csv',NULL,'1','0',@JobTaskOne,'3',@CreatedAt,@UserId,@Result),
-			(NEWID(),'Import Purchase Orders','','0',NULL,'3',NULL,'C:\CSharp\Data\Master\purchaseorders.csv',NULL,'1','0',@JobTaskOne,'2',@CreatedAt,@UserId,@Result),
-			(NEWID(),'Import Transactions','','0',NULL,'1',NULL,'C:\CSharp\Data\Master\transactions.csv',NULL,'1','0',@JobTaskOne,'1',@CreatedAt,@UserId,@Result),
-			(NEWID(),'Import Products','','0',NULL,'0',NULL,'C:\CSharp\Data\Master\products.csv',NULL,'1','0',@JobTaskOne,'0',@CreatedAt,@UserId,@Result),
-			(NEWID(),'Calculate purchase forecast','','1','4',NULL,NULL,NULL,NULL,'1','0',@JobTaskTwo,'4',@CreatedAt,@UserId,@Result),
-			(NEWID(),'Calculate confirmed demand','','1','1',NULL,NULL,NULL,NULL,'1','0',@JobTaskTwo,'3',@CreatedAt,@UserId,@Result),
-			(NEWID(),'Calculate forecast','','1','2',NULL,NULL,NULL,NULL,'1','0',@JobTaskTwo,'2',@CreatedAt,@UserId,@Result),
-			(NEWID(),'Calculate stock levels','','1','0',NULL,NULL,NULL,NULL,'1','0',@JobTaskTwo,'5',@CreatedAt,@UserId,@Result),
-			(NEWID(),'Calculate sales','','1','3',NULL,NULL,NULL,NULL,'1','0',@JobTaskTwo,'0',@CreatedAt,@UserId,@Result),
-			(NEWID(),'Calculate product KPIs','','1','5',NULL,NULL,NULL,NULL,'1','0',@JobTaskTwo,'6',@CreatedAt,@UserId,@Result),
-			(NEWID(),'Calculate seasonality','','1','6',NULL,NULL,NULL,NULL,'1','0',@JobTaskTwo,'1',@CreatedAt,@UserId,@Result)
+			(NEWID(),'Import User Defined Fields','','0',NULL,'4',NULL,'C:\CSharp\Data\Master\udf.csv',NULL,'0',@JobTaskOne,'4',@CreatedAt,@UserId,@Result),
+			(NEWID(),'Import Confirmed Orders','','0',NULL,'2',NULL,'C:\CSharp\Data\Master\confirmedorders.csv',NULL,'0',@JobTaskOne,'3',@CreatedAt,@UserId,@Result),
+			(NEWID(),'Import Purchase Orders','','0',NULL,'3',NULL,'C:\CSharp\Data\Master\purchaseorders.csv',NULL,'0',@JobTaskOne,'2',@CreatedAt,@UserId,@Result),
+			(NEWID(),'Import Transactions','','0',NULL,'1',NULL,'C:\CSharp\Data\Master\transactions.csv',NULL,'0',@JobTaskOne,'1',@CreatedAt,@UserId,@Result),
+			(NEWID(),'Import Products','','0',NULL,'0',NULL,'C:\CSharp\Data\Master\products.csv',NULL,'0',@JobTaskOne,'0',@CreatedAt,@UserId,@Result),
+			(NEWID(),'Calculate purchase forecast','','1','4',NULL,NULL,NULL,NULL,'0',@JobTaskTwo,'4',@CreatedAt,@UserId,@Result),
+			(NEWID(),'Calculate confirmed demand','','1','1',NULL,NULL,NULL,NULL,'0',@JobTaskTwo,'3',@CreatedAt,@UserId,@Result),
+			(NEWID(),'Calculate forecast','','1','2',NULL,NULL,NULL,NULL,'0',@JobTaskTwo,'2',@CreatedAt,@UserId,@Result),
+			(NEWID(),'Calculate stock levels','','1','0',NULL,NULL,NULL,NULL,'0',@JobTaskTwo,'5',@CreatedAt,@UserId,@Result),
+			(NEWID(),'Calculate sales','','1','3',NULL,NULL,NULL,NULL,'0',@JobTaskTwo,'0',@CreatedAt,@UserId,@Result),
+			(NEWID(),'Calculate product KPIs','','1','5',NULL,NULL,NULL,NULL,'0',@JobTaskTwo,'6',@CreatedAt,@UserId,@Result),
+			(NEWID(),'Calculate seasonality','','1','6',NULL,NULL,NULL,NULL,'0',@JobTaskTwo,'1',@CreatedAt,@UserId,@Result)
 			
 			-- Create ProductKpis
             INSERT INTO ProductKpis (
