@@ -1,8 +1,8 @@
 import { Typography, Stack } from "@mui/material";
 import JobTaskDetails from "../details/JobTaskDetails";
 import ScheduledJobDetails from "../details/ScheduledJobDetails";
-import type { SchedulerSelection } from "../selector/useSchedulerSelection";
 import type { CurrentUser } from "../../../types/users/userTypes";
+import type { SchedulerSelection } from "../../../hooks/useSchedulerSelection";
 
 export default function SchedulerDetailPanel({ selection, user }: {
   selection: SchedulerSelection,

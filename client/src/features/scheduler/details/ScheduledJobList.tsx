@@ -15,12 +15,12 @@ import { Box, Stack, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useJobTask } from "../../../hooks/useJobTasks";
 import Section from "../../../components/general/Section";
-import AddScheduledJobButton from "../buttons/AddScheduledJobButton";
 import { useReorderScheduledJobs } from "../../../hooks/useScheduledJobs";
-import { SortableScheduledJobItem } from "../item/SortableScheduledJobItem";
 import type { ScheduledJob } from "../../../types/scheduledJobs/scheduledJobTypes";
-import type { SchedulerSelection } from "../selector/useSchedulerSelection";
 import type { CurrentUser } from "../../../types/users/userTypes";
+import type { SchedulerSelection } from "../../../hooks/useSchedulerSelection";
+import ScheduledJobAddForm from "../forms/ScheduledJobAddForm";
+import { SortableScheduledJobItem } from "../components/SortableScheduledJobItem";
 
 type Props = {
   selected: SchedulerSelection
@@ -88,7 +88,7 @@ export default function ScheduledJobList({ selected, onSelect, user } : Props) {
   return (
     <Section title="Scheduled jobs">
       {user && user.role === "SuperAdmin" && (
-        <AddScheduledJobButton jobTaskKey={jobTaskKey}/>
+        <ScheduledJobAddForm jobTaskKey={jobTaskKey}/>
       )}
 
       <Box mt={2}>

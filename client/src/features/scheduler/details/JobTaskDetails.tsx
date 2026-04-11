@@ -2,8 +2,8 @@ import { Stack, Typography, Button, Divider, CircularProgress } from "@mui/mater
 import { useState } from "react";
 import { useCleanJobTask, useDeleteJobTask, useJobTask, useJobTaskHistory, useRunJobTask } from "../../../hooks/useJobTasks";
 import JobTaskEditForm from "../forms/JobTaskEditForm";
-import ExecutionTable from "../tables/ExecutionTable";
 import type { CurrentUser } from "../../../types/users/userTypes";
+import ExecutionTable from "../components/ExecutionTable";
 
 export default function JobTaskDetails({ jobTaskId, user } : { jobTaskId: string, user: CurrentUser }) {
   const [isEditing, setIsEditing] = useState(false);

@@ -14,8 +14,8 @@ import {
   useScheduledJobHistory
 } from "../../../hooks/useScheduledJobs";
 import ScheduledJobEditForm from "../forms/ScheduledJobEditForm";
-import ExecutionTable from "../tables/ExecutionTable";
 import type { CurrentUser } from "../../../types/users/userTypes";
+import ExecutionTable from "../components/ExecutionTable";
 
 export default function ScheduledJobDetails({ scheduledJobId, user } : 
   { scheduledJobId: string, user: CurrentUser }) {

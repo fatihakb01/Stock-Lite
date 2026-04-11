@@ -15,7 +15,7 @@ import {
 } from "../schemas/scheduledJobSchema";
 import ScheduledJobForm from "../forms/ScheduledJobForm";
 
-export default function AddScheduledJobButton({ jobTaskKey }: { jobTaskKey: string }) {
+export default function ScheduledJobAddForm({ jobTaskKey }: { jobTaskKey: string }) {
   const [open, setOpen] = useState(false);
   const createScheduledJob = useCreateScheduledJob();
 

@@ -3,8 +3,8 @@ import { useState } from "react";
 import TabPanel from "../../components/tabs/TabPanel";
 import SchedulerOverviewTab from "./tabs/SchedulerOverviewTab";
 import RecentHistoryTab from "./tabs/RecentHistoryTab";
-import SchedulerStatusBadge from "./chips/SchedulerStatusBadge";
 import { useSchedulerStatus } from "../../hooks/useProductKpis";
+import SchedulerStatusBadge from "./components/SchedulerStatusBadge";
 
 export default function SchedulerPage() {
     const [tab, setTab] = useState(0);

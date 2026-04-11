@@ -1,10 +1,10 @@
 import { Stack, List, ListItemButton, Typography, Box } from "@mui/material";
 import { useJobTasks } from "../../../hooks/useJobTasks";
 import Section from "../../../components/general/Section";
-import type { SchedulerSelection } from "../selector/useSchedulerSelection";
-import AddJobTaskButton from "../buttons/AddJobTaskButton";
 import type { CurrentUser } from "../../../types/users/userTypes";
-import SchedulerStatusBadge from "../chips/SchedulerStatusBadge";
+import type { SchedulerSelection } from "../../../hooks/useSchedulerSelection";
+import JobTaskAddForm from "../forms/JobTaskAddForm";
+import SchedulerStatusBadge from "../components/SchedulerStatusBadge";
 
 type Props = {
   selected: SchedulerSelection
@@ -22,7 +22,7 @@ export default function JobTaskList({ selected, onSelect, user } : Props) {
     <Section title="Job tasks">
       <Stack spacing={1}>
         {user && user.role === "SuperAdmin" && (
-          <AddJobTaskButton />
+          <JobTaskAddForm />
         )}
 
         <List dense>

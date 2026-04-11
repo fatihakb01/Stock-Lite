@@ -1,10 +1,10 @@
 import { Grid, Paper } from "@mui/material";
-import { useSchedulerSelection } from "../selector/useSchedulerSelection";
-import JobTaskList from "../segments/JobTaskList";
-import ScheduledJobList from "../segments/ScheduledJobList";
-import SchedulerDetailPanel from "../segments/SchedulerDetailPanel";
 import { useCurrentUser } from "../../../hooks/useUsers";
 import { useJobTasks } from "../../../hooks/useJobTasks";
+import { useSchedulerSelection } from "../../../hooks/useSchedulerSelection";
+import JobTaskList from "../details/JobTaskList";
+import ScheduledJobList from "../details/ScheduledJobList";
+import SchedulerDetailPanel from "../details/SchedulerDetailPanel";
 
 export default function SchedulerOverviewTab() {
   const { data: jobTasks } = useJobTasks();

@@ -1,6 +1,6 @@
 import { Typography} from "@mui/material";
 import { useRecentHistory } from "../../../hooks/useJobTasks";
-import ExecutionTable from "../tables/ExecutionTable";
+import ExecutionTable from "../components/ExecutionTable";
 
 export default function RecentHistoryTab() {
   const { data, isLoading } = useRecentHistory();

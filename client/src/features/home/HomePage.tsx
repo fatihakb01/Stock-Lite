@@ -1,7 +1,7 @@
 import { Box, Typography, Card, CardContent } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useProductKpi, useSchedulerStatus } from "../../hooks/useProductKpis";
-import SchedulerStatusBadge from "../scheduler/chips/SchedulerStatusBadge";
+import SchedulerStatusBadge from "../scheduler/components/SchedulerStatusBadge";
 
 export default function HomePage() {
   const { data: data } = useProductKpi();

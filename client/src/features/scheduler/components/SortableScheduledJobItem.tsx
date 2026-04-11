@@ -1,7 +1,7 @@
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
 import { Box, Typography } from "@mui/material";
-import SchedulerStatusBadge from "../chips/SchedulerStatusBadge";
+import SchedulerStatusBadge from "./SchedulerStatusBadge";
 
 type Props = {
   id: string

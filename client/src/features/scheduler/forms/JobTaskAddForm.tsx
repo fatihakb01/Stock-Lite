@@ -15,7 +15,7 @@ import {
 } from "../schemas/jobTaskSchema";
 import JobTaskForm from "../forms/JobTaskForm";
 
-export default function AddJobTaskButton() {
+export default function JobTaskAddForm() {
   const [open, setOpen] = useState(false);
   const createJobTask = useCreateJobTask();
 
