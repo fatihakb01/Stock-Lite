@@ -78,6 +78,7 @@ Most controllers require authentication:
 Two main policies are used:
 - `AdminOrSuperAdmin`
 - `SuperAdminOnly`
+- `KeyUserOrAdminOrSuperAdmin`
 
 This ensures:
 - Role-based access control
@@ -88,6 +89,7 @@ Example:
 - Creating or editing entities → Admin or SuperAdmin
 - Running jobs → SuperAdmin only
 - Company creation → SuperAdmin only
+- Running exports → KeyUser or Admin or SuperAdmin
 
 User authentication endpoints (login, confirm email, reset password) allow anonymous access where required.
 
@@ -225,6 +227,21 @@ Endpoint:
 - GET by product id
 
 Supports flexible extensibility without schema changes.
+
+### ExportProfileController
+
+Manages running exports
+
+Endpoints:
+- GET list
+- GET by id
+- POST run
+- POST stream
+- POST create
+- PUT edit
+- DELETE remove
+
+Distinction between saving at pre-defined target path (run) and downloading from browser (stream).
 
 ## Derived Entity Controllers
 

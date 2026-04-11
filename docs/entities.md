@@ -147,6 +147,7 @@ Logical grouping of scheduled jobs.
 Relationship
 - Many JobTasks → 1 Company
 - 1 JobTask → Many ScheduledJobs
+- 1 JobTask → Many JobTaskExecutions
 
 #### 🕒 ScheduledJob
 
@@ -167,6 +168,15 @@ Represents a single execution instance of a scheduled job.
 
 Relationship
 - Many JobExecutions → 1 ScheduledJob
+- Many JobExecutions → 1 JobTaskExecution
+
+### JobTaskExecution
+
+Represents a single execution instance of a JobTask.
+
+Relationship
+- Many JobTaskExecutions → 1 JobTask
+- 1 JobTaskExecution → many JobExecutions
 
 ## 📊 Derived Entities
 

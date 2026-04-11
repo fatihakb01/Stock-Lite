@@ -487,6 +487,7 @@ Bootstraps a fully functional company environment in a single atomic operation.
 - Default JobTasks
 - Pre-configured ScheduledJobs
 - Default values for product KPIs
+- Default ExportProfiles
 
 #### Scheduled Jobs Created
 
