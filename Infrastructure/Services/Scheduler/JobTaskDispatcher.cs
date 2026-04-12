@@ -81,9 +81,9 @@ namespace Infrastructure.Services.Scheduler
             await _jobTaskRepo.SaveChangesAsync(ct);
         }
 
-        private static DateTime? CalculateNextRun(DateTime? current, Period? period)
+        internal static DateTime? CalculateNextRun(DateTime? current, Period? period)
         {
-            return current.HasValue ? period switch
+            return (current.HasValue && period.HasValue) ? period switch
             {
                 Period.Daily => current.Value.AddDays(1),
                 Period.Weekly => current.Value.AddDays(7),
