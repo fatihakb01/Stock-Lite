@@ -4,7 +4,7 @@ using Infrastructure.Services.Scheduler;
 namespace Test.Unit.Scheduler
 {
 
-    public class CalculateNextRunTests
+    public class CalculateNextRunTest
     {
         [Theory]
         [InlineData(Period.Daily)]

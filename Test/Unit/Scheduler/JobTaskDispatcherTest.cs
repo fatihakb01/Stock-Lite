@@ -8,14 +8,14 @@ using System.Linq.Expressions;
 
 namespace Test.Unit.Scheduler
 {
-    public class JobTaskDispatcherTests
+    public class JobTaskDispatcherTest
     {
         private readonly Mock<IJobTaskRepository> _jobTaskRepoMock;
         private readonly Mock<IScheduledJobRepository> _scheduledJobRepoMock;
         private readonly Mock<IJobRunnerService> _jobRunnerServiceMock;
         private readonly JobTaskDispatcher _dispatcher;
 
-        public JobTaskDispatcherTests()
+        public JobTaskDispatcherTest()
         {
             _jobTaskRepoMock = new Mock<IJobTaskRepository>();
             _scheduledJobRepoMock = new Mock<IScheduledJobRepository>();
@@ -28,7 +28,28 @@ namespace Test.Unit.Scheduler
             );
         }
 
-        private static JobTask CreateJobTask(
+        private static ScheduledJob CreateScheduledJob(
+            Guid jobTaskId,
+            ImportDataType? dataType = null,
+            string? source = null,
+            int executionOrder = 0
+        )
+        {
+            return new ScheduledJob
+            {
+                Id = Guid.NewGuid(),
+                Name = "Test Job",
+                JobTaskId = jobTaskId,
+                ExecutionOrder = executionOrder,
+                IsArchived = false,
+                ImportDataType = dataType,
+                Source = source,
+                Result = JobExecutionStatus.Pending,
+                JobTask = null!
+            };
+        }
+
+        internal static JobTask CreateJobTask(
             int retries = 0,
             int maxRetries = 3,
             int? retryDelayMinutes = 5,
@@ -58,17 +79,6 @@ namespace Test.Unit.Scheduler
             StartedAt = DateTime.UtcNow,
             Status = JobExecutionStatus.Running,
             TriggerType = JobTriggerType.Scheduled
-        };
-
-        private static ScheduledJob CreateScheduledJob(Guid jobTaskId, int executionOrder = 0) => new ScheduledJob
-        {
-            Id = Guid.NewGuid(),
-            Name = "Test Job",
-            JobTaskId = jobTaskId,
-            ExecutionOrder = executionOrder,
-            IsArchived = false,
-            Result = JobExecutionStatus.Pending,
-            JobTask = null!
         };
 
         [Fact]

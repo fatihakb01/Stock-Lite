@@ -39,7 +39,7 @@ public class JobDispatcher(IServiceProvider provider, DataContext context) : IJo
         }
     }
 
-    private async Task HandleImport(ScheduledJob job, CancellationToken ct)
+    internal async Task HandleImport(ScheduledJob job, CancellationToken ct)
     {
         if (job.ImportDataType == null)
             throw new InvalidOperationException("Import job requires ImportDataType.");
