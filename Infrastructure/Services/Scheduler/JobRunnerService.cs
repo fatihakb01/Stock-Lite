@@ -32,7 +32,7 @@ public class JobRunnerService(
         try
         {
             await _dispatcher.DispatchAsync(job, ct);
-            execution.Status = JobExecutionStatus.Succeeded;            
+            execution.Status = JobExecutionStatus.Succeeded;
             return JobExecutionStatus.Succeeded;
         }
         catch (Exception ex)

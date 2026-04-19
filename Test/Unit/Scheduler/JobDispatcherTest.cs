@@ -72,19 +72,22 @@ namespace Test.Unit.Scheduler
         private static (Mock<IServiceProvider> root, Mock<IServiceProvider> scoped) SetupScopedProvider(
             Action<Mock<IServiceProvider>> configureScoped)
         {
+            // 1. Create the inner scoped provider — tests put their services here
             var mockScopedProvider = new Mock<IServiceProvider>();
-            configureScoped(mockScopedProvider);
+            configureScoped(mockScopedProvider); // e.g. register IImportCoordinator
 
+            // 2. Wrap it in a scope object
             var mockScope = new Mock<IServiceScope>();
             mockScope.Setup(s => s.ServiceProvider).Returns(mockScopedProvider.Object);
 
+            // 3. Wrap the scope in a factory
             var mockScopeFactory = new Mock<IServiceScopeFactory>();
             mockScopeFactory.Setup(f => f.CreateScope()).Returns(mockScope.Object);
 
+            // 4. Register the factory on the root provider
             var mockRoot = new Mock<IServiceProvider>();
-            mockRoot
-                .Setup(p => p.GetService(typeof(IServiceScopeFactory)))
-                .Returns(mockScopeFactory.Object);
+            mockRoot.Setup(p => p.GetService(typeof(IServiceScopeFactory)))
+                    .Returns(mockScopeFactory.Object);
 
             return (mockRoot, mockScopedProvider);
         }
