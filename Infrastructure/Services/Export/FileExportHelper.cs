@@ -152,6 +152,8 @@ namespace Infrastructure.Services.Export
             var workbook = new XLWorkbook();
             var sheet = workbook.Worksheets.Add("Export");
 
+            if (rows.Count == 0) return workbook;
+
             var headers = rows[0].Keys.ToList();
             for (int i = 0; i < headers.Count; i++)
                 sheet.Cell(1, i + 1).Value = headers[i];
