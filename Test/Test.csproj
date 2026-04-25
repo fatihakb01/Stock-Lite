@@ -28,7 +28,6 @@
     <Folder Include="Integration\Services\" />
     <Folder Include="Integration\Repositories\" />
     <Folder Include="Unit\Calculations\" />
-    <Folder Include="Unit\Export\" />
     <Folder Include="Unit\Validators\" />
   </ItemGroup>
 
