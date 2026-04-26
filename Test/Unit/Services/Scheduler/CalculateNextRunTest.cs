@@ -1,7 +1,7 @@
 ﻿using Domain.Enums;
 using Infrastructure.Services.Scheduler;
 
-namespace Test.Unit.Scheduler
+namespace Test.Unit.Services.Scheduler
 {
 
     public class CalculateNextRunTest

@@ -6,7 +6,7 @@ using Infrastructure.Services.Scheduler;
 using Moq;
 using System.Linq.Expressions;
 
-namespace Test.Unit.Scheduler
+namespace Test.Unit.Services.Scheduler
 {
     public class JobTaskDispatcherTest
     {

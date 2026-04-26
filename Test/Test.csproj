@@ -27,7 +27,8 @@
   <ItemGroup>
     <Folder Include="Integration\Services\" />
     <Folder Include="Integration\Repositories\" />
-    <Folder Include="Unit\Validators\" />
+    <Folder Include="Unit\Validators\Users\" />
+    <Folder Include="Unit\Validators\Scheduler\" />
   </ItemGroup>
 
 </Project>

@@ -8,7 +8,7 @@ using System.Security.Claims;
 using System.Text;
 
 
-namespace Test.Unit.Users
+namespace Test.Unit.Services.Users
 {
     public class TokenServiceTest
     {

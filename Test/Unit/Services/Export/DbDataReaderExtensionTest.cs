@@ -2,7 +2,7 @@
 using Moq;
 using System.Data.Common;
 
-namespace Test.Unit.Export
+namespace Test.Unit.Services.Export
 {
     public class DbDataReaderExtensionTest
     {

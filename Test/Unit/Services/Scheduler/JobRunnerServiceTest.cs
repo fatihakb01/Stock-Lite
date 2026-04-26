@@ -5,7 +5,7 @@ using Domain.Interfaces.Services.Scheduler;
 using Infrastructure.Services.Scheduler;
 using Moq;
 
-namespace Test.Unit.Scheduler
+namespace Test.Unit.Services.Scheduler
 {
     public class JobRunnerServiceTest
     {

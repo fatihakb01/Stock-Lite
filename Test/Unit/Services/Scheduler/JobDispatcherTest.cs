@@ -6,7 +6,7 @@ using Infrastructure.Services.Scheduler;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
-namespace Test.Unit.Scheduler
+namespace Test.Unit.Services.Scheduler
 {
     public class JobDispatcherTest
     {

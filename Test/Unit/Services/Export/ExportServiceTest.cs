@@ -1,13 +1,10 @@
-﻿using ClosedXML.Excel;
-using Domain.Entities.Core;
+﻿using Domain.Entities.Core;
 using Domain.Enums;
 using Domain.Interfaces.Services.Export;
-using Domain.Interfaces.Services.Export.Records;
-using Infrastructure.Services.Export;
 using Infrastructure.Services.Export.Records;
 using Moq;
 
-namespace Test.Unit.Export
+namespace Test.Unit.Services.Export
 {
     public class ExportServiceTest
     {

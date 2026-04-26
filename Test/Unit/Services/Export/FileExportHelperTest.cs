@@ -2,7 +2,7 @@
 using Domain.Enums;
 using Infrastructure.Services.Export;
 
-namespace Test.Unit.Export
+namespace Test.Unit.Services.Export
 {
     public class FileExportHelperTest
     {
