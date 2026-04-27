@@ -29,14 +29,16 @@ public class BaseScheduledJobDtoValidator : AbstractValidator<BaseScheduledJobDt
 
         RuleFor(x => x.JobType)
             .NotNull()
-                .WithMessage(jobTypeMessage);
+                .IsInEnum()
+                    .WithMessage(jobTypeMessage);
 
 
         When(x => x.JobType == JobType.Import, () =>
         {
             RuleFor(x => x.ImportDataType)
                 .NotNull()
-                    .WithMessage(importDataTypeMessage);
+                    .IsInEnum()
+                        .WithMessage(importDataTypeMessage);
             RuleFor(x => x.Source)
                 .NotEmpty()
                     .WithMessage("Source can't be empty when JobType equals Import.");
@@ -46,7 +48,8 @@ public class BaseScheduledJobDtoValidator : AbstractValidator<BaseScheduledJobDt
         {
             RuleFor(x => x.CalculationType)
                 .NotNull()
-                    .WithMessage(calculationTypeMessage);
+                    .IsInEnum()
+                        .WithMessage(calculationTypeMessage);
         });
 
         When(x => x.JobType == JobType.CustomCalculation, () =>
