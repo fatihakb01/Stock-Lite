@@ -4,7 +4,7 @@ using Application.Entities.Core.ScheduledJobs.Validators;
 using Domain.Enums;
 using FluentValidation.TestHelper;
 
-namespace Test.Unit.Validators
+namespace Test.Unit.Validators.Scheduler
 {
     public class ScheduledJobValidatorTest
     {
