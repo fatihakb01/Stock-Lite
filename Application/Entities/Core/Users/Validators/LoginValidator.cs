@@ -7,7 +7,12 @@ public class LoginValidator : AbstractValidator<LoginUserDto>
 {
     public LoginValidator()
     {
-        RuleFor(x => x.Email).NotEmpty().EmailAddress();
+        RuleFor(x => x.Email)
+            .NotEmpty()
+            .EmailAddress()
+            .Must(email => !email.Contains(' '))
+            .WithMessage("Email address must not contain spaces.");
+
         RuleFor(x => x.Password)
             .NotEmpty()
             .MinimumLength(6)

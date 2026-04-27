@@ -12,7 +12,9 @@ public class RegisterValidator : AbstractValidator<EditUserDto>
 
         RuleFor(x => x.Email)
             .NotEmpty()
-            .EmailAddress();
+            .EmailAddress()
+            .Must(email => !email.Contains(' '))
+            .WithMessage("Email address must not contain spaces.");
 
         RuleFor(x => x.FirstName)
             .MaximumLength(50)
@@ -28,6 +30,7 @@ public class RegisterValidator : AbstractValidator<EditUserDto>
             .When(x => !string.IsNullOrWhiteSpace(x.PhoneNumber));
 
         RuleFor(x => x.Role)
-            .NotEmpty();
+            .NotEmpty()
+            .IsInEnum();
     }
 }

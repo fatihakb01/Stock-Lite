@@ -13,7 +13,9 @@ public class RegisterUserValidator : AbstractValidator<RegisterUserDto>
 
         RuleFor(x => x.Email)
             .NotEmpty()
-            .EmailAddress();
+            .EmailAddress()
+            .Must(email => !email.Contains(' '))
+            .WithMessage("Email address must not contain spaces.");
 
         RuleFor(x => x.Password)
             .NotEmpty()
@@ -37,6 +39,7 @@ public class RegisterUserValidator : AbstractValidator<RegisterUserDto>
             .When(x => !string.IsNullOrWhiteSpace(x.PhoneNumber));
 
         RuleFor(x => x.Role)
-            .NotEmpty();
+            .NotEmpty()
+            .IsInEnum();
     }
 }
