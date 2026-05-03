@@ -69,7 +69,7 @@ public class CurrentUserServiceTest
         var service = new CurrentUserService(
             CreateContext(Guid.NewGuid(), Guid.NewGuid(), isAdmin: isAdmin));
 
-        Assert.True(service.IsAdmin);
+        Assert.Equal(service.IsAdmin, isAdmin);
     }
 
     [Theory]
@@ -80,7 +80,7 @@ public class CurrentUserServiceTest
         var service = new CurrentUserService(
             CreateContext(Guid.NewGuid(), Guid.NewGuid(), isSuperAdmin: isSuperAdmin));
 
-        Assert.True(service.IsSuperAdmin);
+        Assert.Equal(service.IsSuperAdmin, isSuperAdmin);
     }
 
     [Fact]

@@ -60,10 +60,12 @@ public class Repository<T>(DataContext context)
     {
         IQueryable<T> query = _context.Set<T>().Where(predicate);
 
-        // Apply includes if provided
-        foreach (var include in includes!)
+        if (includes != null)
         {
-            query = query.Include(include);
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
         }
 
         return await query.ToListAsync(cancellationToken);

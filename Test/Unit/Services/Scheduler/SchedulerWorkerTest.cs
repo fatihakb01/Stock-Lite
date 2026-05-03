@@ -10,7 +10,7 @@ namespace Test.Unit.Services.Scheduler;
 
 public class SchedulerWorkerTest
 {
-    private static IServiceScopeFactory CreateScopeFactory(
+    private static IServiceScope CreateScopeFactory(
         Mock<ICompanyRepository> companyRepo,
         Mock<IJobTaskRepository> jobTaskRepo,
         Mock<IJobTaskRunnerService> runnerService)
@@ -29,10 +29,7 @@ public class SchedulerWorkerTest
         var scope = new Mock<IServiceScope>();
         scope.Setup(x => x.ServiceProvider).Returns(scopedProvider.Object);
 
-        var factory = new Mock<IServiceScopeFactory>();
-        factory.Setup(x => x.CreateScope()).Returns(scope.Object);
-
-        return factory.Object;
+        return scope.Object;
     }
 
     [Fact]
@@ -58,21 +55,16 @@ public class SchedulerWorkerTest
             .ReturnsAsync(true);
 
         var runner = new Mock<IJobTaskRunnerService>();
-        runner.Setup(x => x.RunAsync(jobTask, JobTriggerType.Scheduled, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(JobExecutionStatus.Succeeded);
-
-        var scopeFactory = CreateScopeFactory(companyRepo, jobTaskRepo, runner);
-
-        var worker = new SchedulerWorker(scopeFactory);
+        var scope = CreateScopeFactory(companyRepo, jobTaskRepo, runner);
 
         var cts = new CancellationTokenSource();
         cts.CancelAfter(100);
 
-        await worker.StartAsync(cts.Token);
+        await SchedulerWorker.ExecuteOnceAsync(scope.ServiceProvider, cts.Token);
 
         runner.Verify(x =>
             x.RunAsync(jobTask, JobTriggerType.Scheduled, It.IsAny<CancellationToken>()),
-            Times.AtLeastOnce);
+            Times.Once);
     }
 
     [Fact]
@@ -89,15 +81,12 @@ public class SchedulerWorkerTest
             .ReturnsAsync(true);
 
         var runner = new Mock<IJobTaskRunnerService>();
-
-        var scopeFactory = CreateScopeFactory(companyRepo, jobTaskRepo, runner);
-
-        var worker = new SchedulerWorker(scopeFactory);
+        var scope = CreateScopeFactory(companyRepo, jobTaskRepo, runner);
 
         var cts = new CancellationTokenSource();
         cts.CancelAfter(100);
 
-        await worker.StartAsync(cts.Token);
+        await SchedulerWorker.ExecuteOnceAsync(scope.ServiceProvider, cts.Token);
 
         runner.Verify(x =>
             x.RunAsync(It.IsAny<JobTask>(), It.IsAny<JobTriggerType>(), It.IsAny<CancellationToken>()),
@@ -127,15 +116,12 @@ public class SchedulerWorkerTest
             .ReturnsAsync(false);
 
         var runner = new Mock<IJobTaskRunnerService>();
-
-        var scopeFactory = CreateScopeFactory(companyRepo, jobTaskRepo, runner);
-
-        var worker = new SchedulerWorker(scopeFactory);
+        var scope = CreateScopeFactory(companyRepo, jobTaskRepo, runner);
 
         var cts = new CancellationTokenSource();
         cts.CancelAfter(100);
 
-        await worker.StartAsync(cts.Token);
+        await SchedulerWorker.ExecuteOnceAsync(scope.ServiceProvider, cts.Token);
 
         runner.Verify(x =>
             x.RunAsync(It.IsAny<JobTask>(), It.IsAny<JobTriggerType>(), It.IsAny<CancellationToken>()),
