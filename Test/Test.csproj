@@ -27,7 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-	<Folder Include="Integration\Repositories\" />
     <Folder Include="Integration\Services\" />
   </ItemGroup>
 

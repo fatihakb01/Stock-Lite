@@ -1,24 +1,16 @@
 ﻿using Domain.Entities.Core;
 using Infrastructure.Repositories;
+using Test.Integration.Helper;
 
 namespace Test.Integration.Repositories
 {
-    public class RepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
+    public class RepositoryTest(DatabaseFixture fixture)
+        : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
     {
-        private readonly DatabaseFixture _fixture;
-
-        public RepositoryTest(DatabaseFixture fixture)
-        {
-            _fixture = fixture;
-        }
-
-        public Task InitializeAsync() => _fixture.ResetAsync();
-        public Task DisposeAsync() => Task.CompletedTask;
-
         private Repository<Company> CreateRepository() =>
-            new Repository<Company>(_fixture.Context);
+            new Repository<Company>(Fixture.Context);
 
-        private static Company CreateCompany(string name = "Test Company") => new Company
+        internal static Company CreateCompany(string name = "Test Company") => new Company
         {
             Id = Guid.NewGuid(),
             Name = name,
@@ -27,11 +19,11 @@ namespace Test.Integration.Repositories
             CreatedAt = DateTime.UtcNow
         };
 
-        private static List<Company> CreateCompanies(string name = "Test Company", int numberOfCompanies = 10)
+        internal static List<Company> CreateCompanies(string name = "Test Company", int total = 10)
         {
             List<Company> companies = new List<Company>();
 
-            for (int i = 1; i <= numberOfCompanies; i++)
+            for (int i = 1; i <= total; i++)
             {
                 companies.Add(new Company
                 {

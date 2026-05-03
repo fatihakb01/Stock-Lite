@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Respawn;
 using Testcontainers.MsSql;
 
-namespace Test.Integration
+namespace Test.Integration.Helper
 {
     public class DatabaseFixture : IAsyncLifetime
     {

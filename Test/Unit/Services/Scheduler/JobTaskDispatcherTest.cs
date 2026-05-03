@@ -30,6 +30,7 @@ namespace Test.Unit.Services.Scheduler
 
         internal static ScheduledJob CreateScheduledJob(
             Guid jobTaskId,
+            string name = "Test Job",
             ImportDataType? dataType = null,
             string? source = null,
             int executionOrder = 0
@@ -38,7 +39,7 @@ namespace Test.Unit.Services.Scheduler
             return new ScheduledJob
             {
                 Id = Guid.NewGuid(),
-                Name = "Test Job",
+                Name = name,
                 JobTaskId = jobTaskId,
                 ExecutionOrder = executionOrder,
                 IsArchived = false,
@@ -50,26 +51,45 @@ namespace Test.Unit.Services.Scheduler
         }
 
         internal static JobTask CreateJobTask(
+            string name = "Test Task",
+            string jobTaskKey = "TEST-",
             int retries = 0,
             int maxRetries = 3,
             int? retryDelayMinutes = 5,
             bool allowManualTriggerOnly = false,
             Period? periodType = Period.Daily,
-            DateTime? scheduledAt = null
+            DateTime? scheduledAt = null,
+            Guid? companyId = null
         ) => new JobTask
         {
             Id = Guid.NewGuid(),
-            Name = "Test Task",
-            JobTaskKey = "TEST-1",
+            Name = name,
+            JobTaskKey = jobTaskKey,
             Retries = retries,
             MaxRetries = maxRetries,
             RetryDelayMinutes = retryDelayMinutes,
             AllowManualTriggerOnly = allowManualTriggerOnly,
             PeriodType = periodType,
             ScheduledAt = scheduledAt,
-            CompanyId = Guid.NewGuid(),
+            NextRunAt = scheduledAt,
+            CompanyId = companyId ?? Guid.NewGuid(),
             Company = null!
         };
+
+        internal static List<JobTask> CreateJobTasks(int total = 5)
+        {
+            List<JobTask> tasks = new List<JobTask>();
+
+            for (int i = 1; i <= total; i++)
+            {
+                string name = "Test Task " + i;
+                string jobTaskKey = "TEST-" + i;
+                JobTask task = CreateJobTask(name: name, jobTaskKey: jobTaskKey);
+                tasks.Add(task);
+            }
+
+            return tasks;
+        }
 
         [Fact]
         public async Task DispatchAsync_AllJobsSucceed_SetsJobTaskResultToSucceeded()
