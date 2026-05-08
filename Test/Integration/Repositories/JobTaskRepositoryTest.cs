@@ -1,7 +1,7 @@
 ﻿using Domain.Entities.Core;
 using Domain.Enums;
 using Infrastructure.Repositories;
-using Test.Helper.Scheduler;
+using Test.Helper;
 using Test.Integration.Helper;
 
 namespace Test.Integration.Repositories

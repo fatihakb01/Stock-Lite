@@ -5,7 +5,7 @@ using Domain.Interfaces.Services.Scheduler;
 using Infrastructure.Services.Scheduler;
 using Moq;
 using System.Linq.Expressions;
-using Test.Helper.Scheduler;
+using Test.Helper;
 
 namespace Test.Unit.Services.Scheduler
 {

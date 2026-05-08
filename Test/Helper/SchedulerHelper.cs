@@ -1,7 +1,7 @@
 ﻿using Domain.Entities.Core;
 using Domain.Enums;
 
-namespace Test.Helper.Scheduler
+namespace Test.Helper
 {
     public static class SchedulerHelper
     {

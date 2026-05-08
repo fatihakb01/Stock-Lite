@@ -5,7 +5,7 @@ using Domain.Interfaces.Services.Scheduler.Imports;
 using Infrastructure.Services.Scheduler;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using Test.Helper.Scheduler;
+using Test.Helper;
 
 namespace Test.Unit.Services.Scheduler
 {
