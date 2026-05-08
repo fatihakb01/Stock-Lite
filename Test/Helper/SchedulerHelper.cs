@@ -3,7 +3,7 @@ using Domain.Enums;
 
 namespace Test.Helper
 {
-    public static class SchedulerHelper
+    internal static class SchedulerHelper
     {
         internal static JobTask CreateJobTask(
             string name = "Test Task",
