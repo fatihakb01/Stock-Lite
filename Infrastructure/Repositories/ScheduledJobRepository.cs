@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.InkML;
 using Domain.Entities.Core;
 using Domain.Interfaces.Repositories;
 using Infrastructure.Context;
@@ -42,6 +43,7 @@ public class ScheduledJobRepository(DataContext context)
 
         var jobTaskId = job.JobTaskId;
         _context.ScheduledJobs.Remove(job);
+        await _context.SaveChangesAsync(ct);
 
         var remaining = await _context.ScheduledJobs
             .Where(j => j.JobTaskId == jobTaskId)
