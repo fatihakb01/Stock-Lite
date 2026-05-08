@@ -4,6 +4,7 @@ using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Scheduler;
 using Infrastructure.Services.Scheduler;
 using Moq;
+using Test.Helper.Scheduler;
 
 namespace Test.Unit.Services.Scheduler
 {
@@ -24,18 +25,10 @@ namespace Test.Unit.Services.Scheduler
             );
         }
 
-        private static (ScheduledJob job, JobTaskExecution taskExecution) CreateJobAndExecution()
-        {
-            var jobTask = JobTaskDispatcherTest.CreateJobTask();
-            var taskExecution = JobTaskRunnerServiceTest.CreateExecution(jobTask);
-            var job = JobTaskDispatcherTest.CreateScheduledJob(jobTask.Id);
-            return (job, taskExecution);
-        }
-
         [Fact]
         public async Task RunAsync_DispatchSucceeds_SetsJobResultToSucceeded()
         {
-            var (job, taskExecution) = CreateJobAndExecution();
+            var (job, taskExecution) = SchedulerHelper.CreateTaskAndExecution();
 
             _dispatcherMock
                 .Setup(d => d.DispatchAsync(job, It.IsAny<CancellationToken>()))
@@ -49,7 +42,7 @@ namespace Test.Unit.Services.Scheduler
         [Fact]
         public async Task RunAsync_DispatchThrows_SetsJobResultToFailed()
         {
-            var (job, taskExecution) = CreateJobAndExecution();
+            var (job, taskExecution) = SchedulerHelper.CreateTaskAndExecution();
 
             _dispatcherMock
                 .Setup(d => d.DispatchAsync(job, It.IsAny<CancellationToken>()))
@@ -63,7 +56,7 @@ namespace Test.Unit.Services.Scheduler
         [Fact]
         public async Task RunAsync_DispatchThrows_SetsErrorMessageOnExecution()
         {
-            var (job, taskExecution) = CreateJobAndExecution();
+            var (job, taskExecution) = SchedulerHelper.CreateTaskAndExecution();
             JobExecution? capturedExecution = null;
 
             _dispatcherMock
@@ -84,7 +77,7 @@ namespace Test.Unit.Services.Scheduler
         [Fact]
         public async Task RunAsync_DispatchSucceeds_SetsFinishedAt()
         {
-            var (job, taskExecution) = CreateJobAndExecution();
+            var (job, taskExecution) = SchedulerHelper.CreateTaskAndExecution();
             JobExecution? capturedExecution = null;
 
             _dispatcherMock
@@ -106,7 +99,7 @@ namespace Test.Unit.Services.Scheduler
         [Fact]
         public async Task RunAsync_DispatchThrows_StillSetsFinishedAt()
         {
-            var (job, taskExecution) = CreateJobAndExecution();
+            var (job, taskExecution) = SchedulerHelper.CreateTaskAndExecution();
             JobExecution? capturedExecution = null;
 
             _dispatcherMock
@@ -128,7 +121,7 @@ namespace Test.Unit.Services.Scheduler
         [Fact]
         public async Task RunAsync_Always_CallsUpdateAndSaveOnExecutionRepository()
         {
-            var (job, taskExecution) = CreateJobAndExecution();
+            var (job, taskExecution) = SchedulerHelper.CreateTaskAndExecution();
 
             _dispatcherMock
                 .Setup(d => d.DispatchAsync(job, It.IsAny<CancellationToken>()))

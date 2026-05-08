@@ -5,6 +5,7 @@ using Domain.Interfaces.Services.Scheduler;
 using Infrastructure.Services.Scheduler;
 using Moq;
 using System.Linq.Expressions;
+using Test.Helper.Scheduler;
 
 namespace Test.Unit.Services.Scheduler
 {
@@ -28,74 +29,11 @@ namespace Test.Unit.Services.Scheduler
             );
         }
 
-        internal static ScheduledJob CreateScheduledJob(
-            Guid jobTaskId,
-            string name = "Test Job",
-            ImportDataType? dataType = null,
-            string? source = null,
-            int executionOrder = 0
-        )
-        {
-            return new ScheduledJob
-            {
-                Id = Guid.NewGuid(),
-                Name = name,
-                JobTaskId = jobTaskId,
-                ExecutionOrder = executionOrder,
-                IsArchived = false,
-                ImportDataType = dataType,
-                Source = source,
-                Result = JobExecutionStatus.Pending,
-                JobTask = null!
-            };
-        }
-
-        internal static JobTask CreateJobTask(
-            string name = "Test Task",
-            string jobTaskKey = "TEST-",
-            int retries = 0,
-            int maxRetries = 3,
-            int? retryDelayMinutes = 5,
-            bool allowManualTriggerOnly = false,
-            Period? periodType = Period.Daily,
-            DateTime? scheduledAt = null,
-            Guid? companyId = null
-        ) => new JobTask
-        {
-            Id = Guid.NewGuid(),
-            Name = name,
-            JobTaskKey = jobTaskKey,
-            Retries = retries,
-            MaxRetries = maxRetries,
-            RetryDelayMinutes = retryDelayMinutes,
-            AllowManualTriggerOnly = allowManualTriggerOnly,
-            PeriodType = periodType,
-            ScheduledAt = scheduledAt,
-            NextRunAt = scheduledAt,
-            CompanyId = companyId ?? Guid.NewGuid(),
-            Company = null!
-        };
-
-        internal static List<JobTask> CreateJobTasks(int total = 5)
-        {
-            List<JobTask> tasks = new List<JobTask>();
-
-            for (int i = 1; i <= total; i++)
-            {
-                string name = "Test Task " + i;
-                string jobTaskKey = "TEST-" + i;
-                JobTask task = CreateJobTask(name: name, jobTaskKey: jobTaskKey);
-                tasks.Add(task);
-            }
-
-            return tasks;
-        }
-
         [Fact]
         public async Task DispatchAsync_AllJobsSucceed_SetsJobTaskResultToSucceeded()
         {
-            var jobTask = CreateJobTask();
-            var job = CreateScheduledJob(jobTask.Id);
+            var jobTask = SchedulerHelper.CreateJobTask();
+            var job = SchedulerHelper.CreateScheduledJob(task: jobTask);
 
             _scheduledJobRepoMock
                 .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))
@@ -123,9 +61,9 @@ namespace Test.Unit.Services.Scheduler
             JobExecutionStatus statusJob2
         )
         {
-            var jobTask = CreateJobTask();
-            var job1 = CreateScheduledJob(jobTask.Id, executionOrder: 0);
-            var job2 = CreateScheduledJob(jobTask.Id, executionOrder: 1);
+            var jobTask = SchedulerHelper.CreateJobTask();
+            var job1 = SchedulerHelper.CreateScheduledJob(executionOrder: 0, task: jobTask);
+            var job2 = SchedulerHelper.CreateScheduledJob(executionOrder: 1, task: jobTask);
 
             _scheduledJobRepoMock
                 .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))
@@ -148,8 +86,8 @@ namespace Test.Unit.Services.Scheduler
         [Fact]
         public async Task DispatchAsync_AllJobsSucceed_CallsResetScheduler()
         {
-            var jobTask = CreateJobTask();
-            var job = CreateScheduledJob(jobTask.Id);
+            var jobTask = SchedulerHelper.CreateJobTask();
+            var job = SchedulerHelper.CreateScheduledJob(task: jobTask);
 
             _scheduledJobRepoMock
                 .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))
@@ -175,8 +113,8 @@ namespace Test.Unit.Services.Scheduler
         public async Task DispatchAsync_AllJobsSucceed_ScheduledTask_UpdatesNextRunAt()
         {
             var scheduledAt = new DateTime(2026, 1, 1);
-            var jobTask = CreateJobTask(allowManualTriggerOnly: false, periodType: Period.Daily, scheduledAt: scheduledAt);
-            var job = CreateScheduledJob(jobTask.Id);
+            var jobTask = SchedulerHelper.CreateJobTask(allowManualTriggerOnly: false, periodType: Period.Daily, scheduledAt: scheduledAt);
+            var job = SchedulerHelper.CreateScheduledJob(task: jobTask);
 
             _scheduledJobRepoMock
                 .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))
@@ -199,8 +137,8 @@ namespace Test.Unit.Services.Scheduler
         [Fact]
         public async Task DispatchAsync_AllJobsSucceed_ManualTriggerOnly_DoesNotUpdateNextRunAt()
         {
-            var jobTask = CreateJobTask(allowManualTriggerOnly: true);
-            var job = CreateScheduledJob(jobTask.Id);
+            var jobTask = SchedulerHelper.CreateJobTask(allowManualTriggerOnly: true);
+            var job = SchedulerHelper.CreateScheduledJob(task: jobTask);
 
             _scheduledJobRepoMock
                 .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))
@@ -224,8 +162,8 @@ namespace Test.Unit.Services.Scheduler
         [InlineData(null, 1)]
         public async Task DispatchAsync_JobFails_WithRetriesRemaining_SetsNextRunAtUsingRetryDelay(int? retryDelayMinutes, int expectedDelayMinutes)
         {
-            var jobTask = CreateJobTask(retries: 0, maxRetries: 3, retryDelayMinutes: retryDelayMinutes);
-            var job = CreateScheduledJob(jobTask.Id);
+            var jobTask = SchedulerHelper.CreateJobTask(retries: 0, maxRetries: 3, retryDelayMinutes: retryDelayMinutes);
+            var job = SchedulerHelper.CreateScheduledJob(task: jobTask);
 
             _scheduledJobRepoMock
                 .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))
@@ -254,8 +192,8 @@ namespace Test.Unit.Services.Scheduler
         [Fact]
         public async Task DispatchAsync_JobFails_WithRetriesRemaining_IncrementsRetriesAndSetsNextRunAt()
         {
-            var jobTask = CreateJobTask(retries: 0, maxRetries: 3);
-            var job = CreateScheduledJob(jobTask.Id);
+            var jobTask = SchedulerHelper.CreateJobTask(retries: 0, maxRetries: 3);
+            var job = SchedulerHelper.CreateScheduledJob(task: jobTask);
 
             _scheduledJobRepoMock
                 .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))
@@ -279,8 +217,8 @@ namespace Test.Unit.Services.Scheduler
         [Fact]
         public async Task DispatchAsync_JobFails_MaxRetriesReached_DoesNotSetNextRunAt()
         {
-            var jobTask = CreateJobTask(retries: 3, maxRetries: 3);
-            var job = CreateScheduledJob(jobTask.Id);
+            var jobTask = SchedulerHelper.CreateJobTask(retries: 3, maxRetries: 3);
+            var job = SchedulerHelper.CreateScheduledJob(task: jobTask);
 
             _scheduledJobRepoMock
                 .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))
@@ -304,9 +242,9 @@ namespace Test.Unit.Services.Scheduler
         [Fact]
         public async Task DispatchAsync_FirstJobFails_SecondJobIsNotExecuted()
         {
-            var jobTask = CreateJobTask();
-            var job1 = CreateScheduledJob(jobTask.Id, executionOrder: 0);
-            var job2 = CreateScheduledJob(jobTask.Id, executionOrder: 1);
+            var jobTask = SchedulerHelper.CreateJobTask();
+            var job1 = SchedulerHelper.CreateScheduledJob(executionOrder: 0, task: jobTask);
+            var job2 = SchedulerHelper.CreateScheduledJob(executionOrder: 1, task: jobTask);
 
             _scheduledJobRepoMock
                 .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))
@@ -331,8 +269,8 @@ namespace Test.Unit.Services.Scheduler
         [Fact]
         public async Task DispatchAsync_LockFails_JobIsSkipped()
         {
-            var jobTask = CreateJobTask();
-            var job = CreateScheduledJob(jobTask.Id);
+            var jobTask = SchedulerHelper.CreateJobTask();
+            var job = SchedulerHelper.CreateScheduledJob(task: jobTask);
 
             _scheduledJobRepoMock
                 .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))
@@ -353,7 +291,7 @@ namespace Test.Unit.Services.Scheduler
         [Fact]
         public async Task DispatchAsync_NoJobs_SetsJobTaskResultToSucceeded()
         {
-            var jobTask = CreateJobTask();
+            var jobTask = SchedulerHelper.CreateJobTask();
 
             _scheduledJobRepoMock
                 .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))

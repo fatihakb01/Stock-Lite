@@ -5,70 +5,12 @@ using Domain.Interfaces.Services.Scheduler.Imports;
 using Infrastructure.Services.Scheduler;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Test.Helper.Scheduler;
 
 namespace Test.Unit.Services.Scheduler
 {
     public class JobDispatcherTest
     {
-        private static ScheduledJob CreateImportJob(
-            ImportDataType? dataType = ImportDataType.Products,
-            string? source = "C:\\Data\\products.csv"
-        )
-        {
-            var jobTask = JobTaskDispatcherTest.CreateJobTask();
-            return new ScheduledJob
-            {
-                Id = Guid.NewGuid(),
-                Name = "Test Import Job",
-                JobTaskId = jobTask.Id,
-                JobType = JobType.Import,
-                ImportDataType = dataType,
-                Source = source,
-                ExecutionOrder = 0,
-                IsArchived = false,
-                Result = JobExecutionStatus.Pending,
-                JobTask = jobTask
-            };
-        }
-
-        private static ScheduledJob CreateCalculationJob(
-            StandardCalculationType calculationType = StandardCalculationType.StockLevels,
-            Period? periodType = null
-        )
-        {
-            var jobTask = JobTaskDispatcherTest.CreateJobTask();
-            return new ScheduledJob
-            {
-                Id = Guid.NewGuid(),
-                Name = "Test Calculation Job",
-                JobTaskId = jobTask.Id,
-                JobType = JobType.StandardCalculation,
-                CalculationType = calculationType,
-                PeriodType = periodType,
-                ExecutionOrder = 0,
-                IsArchived = false,
-                Result = JobExecutionStatus.Pending,
-                JobTask = jobTask
-            };
-        }
-
-        private static ScheduledJob CreateCustomJob(string? target = "custom_my_proc")
-        {
-            var jobTask = JobTaskDispatcherTest.CreateJobTask();
-            return new ScheduledJob
-            {
-                Id = Guid.NewGuid(),
-                Name = "Test Custom Job",
-                JobTaskId = jobTask.Id,
-                JobType = JobType.CustomCalculation,
-                Target = target,
-                ExecutionOrder = 0,
-                IsArchived = false,
-                Result = JobExecutionStatus.Pending,
-                JobTask = jobTask
-            };
-        }
-
         private static (Mock<IServiceProvider> root, Mock<IServiceProvider> scoped) SetupScopedProvider(
             Action<Mock<IServiceProvider>> configureScoped)
         {
@@ -99,7 +41,7 @@ namespace Test.Unit.Services.Scheduler
             var (root, _) = SetupScopedProvider(_ => { });
             var dispatcher = new JobDispatcher(root.Object, null!);
 
-            var jobTask = JobTaskDispatcherTest.CreateJobTask();
+            var jobTask = SchedulerHelper.CreateJobTask();
             var job = new ScheduledJob
             {
                 Id = Guid.NewGuid(),
@@ -125,7 +67,10 @@ namespace Test.Unit.Services.Scheduler
         {
             var (root, _) = SetupScopedProvider(_ => { });
             var dispatcher = new JobDispatcher(root.Object, null!);
-            var job = CreateImportJob(dataType, source);
+
+            var job = SchedulerHelper.CreateScheduledJob(jobType: JobType.Import);
+            job.ImportDataType = dataType;
+            job.Source = source;
 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 dispatcher.HandleImport(job, CancellationToken.None));
@@ -153,7 +98,10 @@ namespace Test.Unit.Services.Scheduler
                       .Returns(mockCoordinator.Object));
 
             var dispatcher = new JobDispatcher(root.Object, null!);
-            var job = CreateImportJob(dataType, "C:\\Data\\file.csv");
+
+            var job = SchedulerHelper.CreateScheduledJob(jobType: JobType.Import);
+            job.ImportDataType = dataType;
+            job.Source = "C:\\Data\\file.csv";
 
             await dispatcher.HandleImport(job, CancellationToken.None);
 
@@ -181,7 +129,8 @@ namespace Test.Unit.Services.Scheduler
                 scoped.Setup(p => p.GetService(serviceType)).Returns(service));
 
             var dispatcher = new JobDispatcher(root.Object, null!);
-            var job = CreateCalculationJob(calculationType);
+            var job = SchedulerHelper.CreateScheduledJob(jobType: JobType.StandardCalculation);
+            job.CalculationType = calculationType;
 
             await dispatcher.DispatchAsync(job, CancellationToken.None);
 
@@ -193,7 +142,8 @@ namespace Test.Unit.Services.Scheduler
         {
             var (root, _) = SetupScopedProvider(_ => { });
             var dispatcher = new JobDispatcher(root.Object, null!);
-            var job = CreateCalculationJob((StandardCalculationType)99);
+            var job = SchedulerHelper.CreateScheduledJob(jobType: JobType.StandardCalculation);
+            job.CalculationType = (StandardCalculationType) 99;
 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 dispatcher.DispatchAsync(job, CancellationToken.None));
@@ -208,7 +158,8 @@ namespace Test.Unit.Services.Scheduler
         {
             var (root, _) = SetupScopedProvider(_ => { });
             var dispatcher = new JobDispatcher(root.Object, null!);
-            var job = CreateCustomJob(target);
+            var job = SchedulerHelper.CreateScheduledJob(jobType: JobType.CustomCalculation);
+            job.Target = target;
 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 dispatcher.DispatchAsync(job, CancellationToken.None));
@@ -223,7 +174,8 @@ namespace Test.Unit.Services.Scheduler
         {
             var (root, _) = SetupScopedProvider(_ => { });
             var dispatcher = new JobDispatcher(root.Object, null!);
-            var job = CreateCustomJob(target);
+            var job = SchedulerHelper.CreateScheduledJob(jobType: JobType.CustomCalculation);
+            job.Target = target;
 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 dispatcher.DispatchAsync(job, CancellationToken.None));

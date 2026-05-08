@@ -5,6 +5,7 @@ using Domain.Interfaces.Services.Scheduler;
 using Infrastructure.Services.Scheduler;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Test.Helper.Scheduler;
 
 namespace Test.Unit.Services.Scheduler;
 
@@ -37,7 +38,7 @@ public class SchedulerWorkerTest
     {
         var companyId = Guid.NewGuid();
 
-        var jobTask = JobTaskDispatcherTest.CreateJobTask();
+        var jobTask = SchedulerHelper.CreateJobTask();
         jobTask.CompanyId = companyId;
 
         var companyRepo = new Mock<ICompanyRepository>();
@@ -98,7 +99,7 @@ public class SchedulerWorkerTest
     {
         var companyId = Guid.NewGuid();
 
-        var jobTask = JobTaskDispatcherTest.CreateJobTask();
+        var jobTask = SchedulerHelper.CreateJobTask();
         jobTask.CompanyId = companyId;
 
         var companyRepo = new Mock<ICompanyRepository>();

@@ -4,6 +4,7 @@ using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Scheduler;
 using Infrastructure.Services.Scheduler;
 using Moq;
+using Test.Helper.Scheduler;
 
 namespace Test.Unit.Services.Scheduler
 {
@@ -49,7 +50,7 @@ namespace Test.Unit.Services.Scheduler
             bool allowManualTriggerOnly
         )
         {
-            var jobTask = JobTaskDispatcherTest.CreateJobTask(
+            var jobTask = SchedulerHelper.CreateJobTask(
                 allowManualTriggerOnly: allowManualTriggerOnly,
                 scheduledAt: allowManualTriggerOnly ? null : new DateTime(2026, 1, 1)
             );
@@ -75,7 +76,7 @@ namespace Test.Unit.Services.Scheduler
             bool allowManualTriggerOnly
         )
         {
-            var jobTask = JobTaskDispatcherTest.CreateJobTask(
+            var jobTask = SchedulerHelper.CreateJobTask(
                 allowManualTriggerOnly: allowManualTriggerOnly,
                 scheduledAt: allowManualTriggerOnly ? null : new DateTime(2026, 1, 1)
             );
@@ -101,7 +102,7 @@ namespace Test.Unit.Services.Scheduler
             bool allowManualTriggerOnly
         )
         {
-            var jobTask = JobTaskDispatcherTest.CreateJobTask(
+            var jobTask = SchedulerHelper.CreateJobTask(
                 allowManualTriggerOnly: allowManualTriggerOnly,
                 scheduledAt: allowManualTriggerOnly ? null : new DateTime(2026, 1, 1)
             );
@@ -134,7 +135,7 @@ namespace Test.Unit.Services.Scheduler
             bool allowManualTriggerOnly
         )
         {
-            var jobTask = JobTaskDispatcherTest.CreateJobTask(
+            var jobTask = SchedulerHelper.CreateJobTask(
                 allowManualTriggerOnly: allowManualTriggerOnly,
                 scheduledAt: allowManualTriggerOnly ? null : new DateTime(2026, 1, 1)
             );
@@ -165,7 +166,7 @@ namespace Test.Unit.Services.Scheduler
             bool allowManualTriggerOnly
         )
         {
-            var jobTask = JobTaskDispatcherTest.CreateJobTask(
+            var jobTask = SchedulerHelper.CreateJobTask(
                 allowManualTriggerOnly: allowManualTriggerOnly,
                 scheduledAt: allowManualTriggerOnly ? null : new DateTime(2026, 1, 1)
             );
@@ -198,7 +199,7 @@ namespace Test.Unit.Services.Scheduler
             bool allowManualTriggerOnly
         )
         {
-            var jobTask = JobTaskDispatcherTest.CreateJobTask(
+            var jobTask = SchedulerHelper.CreateJobTask(
                 allowManualTriggerOnly: allowManualTriggerOnly,
                 scheduledAt: allowManualTriggerOnly ? null : new DateTime(2026, 1, 1)
             );
@@ -232,7 +233,7 @@ namespace Test.Unit.Services.Scheduler
             bool allowManualTriggerOnly
         )
         {
-            var jobTask = JobTaskDispatcherTest.CreateJobTask(
+            var jobTask = SchedulerHelper.CreateJobTask(
                 allowManualTriggerOnly: allowManualTriggerOnly,
                 scheduledAt: allowManualTriggerOnly ? null : new DateTime(2026, 1, 1)
             );
@@ -263,7 +264,7 @@ namespace Test.Unit.Services.Scheduler
             bool allowManualTriggerOnly
         )
         {
-            var jobTask = JobTaskDispatcherTest.CreateJobTask(
+            var jobTask = SchedulerHelper.CreateJobTask(
                 allowManualTriggerOnly: allowManualTriggerOnly,
                 scheduledAt: allowManualTriggerOnly ? null : new DateTime(2026, 1, 1)
             );
@@ -290,7 +291,7 @@ namespace Test.Unit.Services.Scheduler
             bool allowManualTriggerOnly
         )
         {
-            var jobTask = JobTaskDispatcherTest.CreateJobTask(
+            var jobTask = SchedulerHelper.CreateJobTask(
                 allowManualTriggerOnly: allowManualTriggerOnly,
                 scheduledAt: allowManualTriggerOnly ? null : new DateTime(2026, 1, 1)
             );
