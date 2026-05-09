@@ -6,7 +6,7 @@ using Test.Integration.Helper;
 
 namespace Test.Integration.Repositories
 {
-    public class JobTaskRepositoryTest(DatabaseFixture fixture) 
+    public class JobTaskCompanyHelper(DatabaseFixture fixture) 
         : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
     {
         private JobTaskRepository CreateRepository()
@@ -20,7 +20,7 @@ namespace Test.Integration.Repositories
             var repo = CreateRepository();
 
             var now = DateTime.UtcNow;
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -52,7 +52,7 @@ namespace Test.Integration.Repositories
             var repo = CreateRepository();
 
             var now = DateTime.UtcNow;
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -84,7 +84,7 @@ namespace Test.Integration.Repositories
         public async Task GetNextDueTaskAsync_IgnoresArchived()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -104,7 +104,7 @@ namespace Test.Integration.Repositories
         public async Task GetNextDueTaskAsync_IgnoresManualOnly()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -124,7 +124,7 @@ namespace Test.Integration.Repositories
         public async Task GetNextDueTaskAsync_RespectsRetryLimit()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -145,7 +145,7 @@ namespace Test.Integration.Repositories
         public async Task HasExhaustedTaskAsync_WhenExists_ReturnsTrue()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -167,7 +167,7 @@ namespace Test.Integration.Repositories
         public async Task HasExhaustedTaskAsync_WhenNone_ReturnsFalse()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -181,7 +181,7 @@ namespace Test.Integration.Repositories
         public async Task TryLockTaskAsync_WhenUnlocked_UpdatesRow()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -206,7 +206,7 @@ namespace Test.Integration.Repositories
         public async Task TryLockTaskAsync_WhenAlreadyRunning_ReturnsFalse()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -226,7 +226,7 @@ namespace Test.Integration.Repositories
         public async Task CleanJobTask_ResetsFields()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -251,7 +251,7 @@ namespace Test.Integration.Repositories
         public async Task ResetScheduler_WhenAllSucceeded_ResetsTasks_And_ScheduledJobs()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -301,7 +301,7 @@ namespace Test.Integration.Repositories
         public async Task ResetScheduler_WhenNotAllSucceeded_DoesNotResetTasks_Or_ScheduledJobs()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -355,7 +355,7 @@ namespace Test.Integration.Repositories
         public async Task ResetScheduler_IgnoresArchivedScheduledJobs()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();

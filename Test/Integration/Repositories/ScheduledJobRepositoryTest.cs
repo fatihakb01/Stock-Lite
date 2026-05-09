@@ -5,7 +5,7 @@ using Test.Integration.Helper;
 
 namespace Test.Integration.Repositories
 {
-    public class ScheduledJobRepositoryTest(DatabaseFixture fixture)
+    public class ScheduledJobCompanyHelper(DatabaseFixture fixture)
         : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
     {
         private ScheduledJobRepository CreateRepository()
@@ -17,7 +17,7 @@ namespace Test.Integration.Repositories
         public async Task GetScheduledJobAndExecutionsAsync_ReturnsExecutions(int count)
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -61,7 +61,7 @@ namespace Test.Integration.Repositories
         public async Task AddScheduledJobAsync_AssignsNextExecutionOrder(int total)
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -87,7 +87,7 @@ namespace Test.Integration.Repositories
         public async Task DeleteScheduledJobAsync_RemovesJob_And_ReordersRemaining()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -119,7 +119,7 @@ namespace Test.Integration.Repositories
         public async Task ReorderScheduledJobAsync_ReordersExecutionOrder()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -160,7 +160,7 @@ namespace Test.Integration.Repositories
         {
             var repo = CreateRepository();
 
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -182,7 +182,7 @@ namespace Test.Integration.Repositories
         public async Task CleanScheduledJobs_ResetsAllJobResults()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -209,7 +209,7 @@ namespace Test.Integration.Repositories
         public async Task CleanScheduledJob_ResetsJob_And_TaskRetries()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -238,7 +238,7 @@ namespace Test.Integration.Repositories
         public async Task TryLockTaskAsync_WhenUnlocked_ReturnsTrue()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -266,7 +266,7 @@ namespace Test.Integration.Repositories
         public async Task TryLockTaskAsync_WhenAlreadyRunning_ReturnsFalse()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();

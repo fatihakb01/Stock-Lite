@@ -6,7 +6,7 @@ using Test.Integration.Helper;
 
 namespace Test.Integration.Repositories
 {
-    public class ProductKpiRepositoryTest(DatabaseFixture fixture)
+    public class ProductKpiCompanyHelper(DatabaseFixture fixture)
         : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
     {
         private ProductKpiRepository CreateRepository()
@@ -16,7 +16,7 @@ namespace Test.Integration.Repositories
         public async Task GetProductKpis_WhenExists_ReturnsProductKpi()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -59,7 +59,7 @@ namespace Test.Integration.Repositories
         public async Task GetSchedulerStatus_WhenFailedTaskExists_ReturnsFailed()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -88,7 +88,7 @@ namespace Test.Integration.Repositories
         public async Task GetSchedulerStatus_WhenRunningTaskExists_ReturnsRunning()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -117,7 +117,7 @@ namespace Test.Integration.Repositories
         public async Task UpdateSchedulerStatus_WhenProductKpiMissing_CreatesProductKpi()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -138,7 +138,7 @@ namespace Test.Integration.Repositories
         public async Task UpdateSchedulerStatus_WhenChanged_UpdatesStatus()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -169,7 +169,7 @@ namespace Test.Integration.Repositories
         public async Task UpdateProductKpis_WhenMissing_CreatesProductKpi()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();
@@ -200,7 +200,7 @@ namespace Test.Integration.Repositories
         public async Task UpdateProductKpis_WhenValuesChanged_UpdatesExistingKpi()
         {
             var repo = CreateRepository();
-            var company = RepositoryTest.CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.SaveChangesAsync();

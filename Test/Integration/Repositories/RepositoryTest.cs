@@ -1,5 +1,6 @@
 ﻿using Domain.Entities.Core;
 using Infrastructure.Repositories;
+using Test.Helper;
 using Test.Integration.Helper;
 
 namespace Test.Integration.Repositories
@@ -10,39 +11,11 @@ namespace Test.Integration.Repositories
         private Repository<Company> CreateRepository() =>
             new Repository<Company>(Fixture.Context);
 
-        internal static Company CreateCompany(string name = "Test Company") => new Company
-        {
-            Id = Guid.NewGuid(),
-            Name = name,
-            Email = "test@test.com",
-            IsActive = true,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        internal static List<Company> CreateCompanies(string name = "Test Company", int total = 10)
-        {
-            List<Company> companies = new List<Company>();
-
-            for (int i = 1; i <= total; i++)
-            {
-                companies.Add(new Company
-                {
-                    Id = Guid.NewGuid(),
-                    Name = name + " " + i,
-                    Email = "test" + i + "@test.com",
-                    IsActive = true,
-                    CreatedAt = DateTime.UtcNow
-                });
-            }
-
-            return companies;
-        }
-
         [Fact]
         public async Task AddAsync_ValidEntity_PersistsToDatabase()
         {
             var repo = CreateRepository();
-            var company = CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await repo.AddAsync(company, CancellationToken.None);
             await repo.SaveChangesAsync(CancellationToken.None);
@@ -58,7 +31,7 @@ namespace Test.Integration.Repositories
         public async Task ExistsAsync_ExistingEntity_ReturnsTrue()
         {
             var repo = CreateRepository();
-            var company = CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await repo.AddAsync(company, CancellationToken.None);
             await repo.SaveChangesAsync(CancellationToken.None);
@@ -85,7 +58,7 @@ namespace Test.Integration.Repositories
         public async Task SingleOrDefaultAsync_ExistingEntity_ReturnsEntity()
         {
             var repo = CreateRepository();
-            var company = CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await repo.AddAsync(company, CancellationToken.None);
             await repo.SaveChangesAsync(CancellationToken.None);
@@ -112,7 +85,7 @@ namespace Test.Integration.Repositories
         public async Task FindAsync_ExistingEntities_ReturnsEntities()
         {
             var repo = CreateRepository();
-            var companies = CreateCompanies();
+            var companies = CompanyHelper.CreateCompanies();
 
             foreach (var company in companies)
                 await repo.AddAsync(company, CancellationToken.None);
@@ -144,7 +117,7 @@ namespace Test.Integration.Repositories
         public async Task Update_ExistingEntity_PersistsChanges()
         {
             var repo = CreateRepository();
-            var company = CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await repo.AddAsync(company, CancellationToken.None);
             await repo.SaveChangesAsync(CancellationToken.None);
@@ -163,7 +136,7 @@ namespace Test.Integration.Repositories
         public async Task Remove_ExistingEntity_DeletesFromDatabase()
         {
             var repo = CreateRepository();
-            var company = CreateCompany();
+            var company = CompanyHelper.CreateCompany();
 
             await repo.AddAsync(company, CancellationToken.None);
             await repo.SaveChangesAsync(CancellationToken.None);
@@ -181,7 +154,7 @@ namespace Test.Integration.Repositories
         public async Task CountAsync_ReturnsCorrectCount()
         {
             var repo = CreateRepository();
-            var companies = CreateCompanies();
+            var companies = CompanyHelper.CreateCompanies();
 
             foreach (var c in companies)
                 await repo.AddAsync(c, CancellationToken.None);
