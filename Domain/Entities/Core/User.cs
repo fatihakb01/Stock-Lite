@@ -15,5 +15,5 @@ public class User : IdentityUser
     public Guid CompanyId { get; set; }
 
     // Navigation
-    public required Company Company { get; set; }
+    public Company Company { get; set; } = null!;
 }
