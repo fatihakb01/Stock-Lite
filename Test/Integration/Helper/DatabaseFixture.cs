@@ -1,4 +1,6 @@
-﻿using Infrastructure.Context;
+﻿using Microsoft.Extensions.Logging.Abstractions;
+using Infrastructure.Context;
+using Infrastructure.Context.DatabaseInitializer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Respawn;
@@ -52,8 +54,13 @@ namespace Test.Integration.Helper
 
             Context = new DataContext(options);
 
+            var logger = NullLogger.Instance;
+
             // Apply all migrations to spin up the schema
             await Context.Database.MigrateAsync();
+
+            // Create DB objects
+            await DbInitializer.InitializeAsync(Context, logger);
 
             // Set up Respawn to reset data between tests
             var connection = Context.Database.GetDbConnection();
