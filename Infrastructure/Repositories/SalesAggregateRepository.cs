@@ -1,10 +1,10 @@
-using System.Data;
 using Domain.Entities.Derived;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using Infrastructure.Context;
-using Microsoft.Data.SqlClient;
+using Infrastructure.Repositories.Helper;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Infrastructure.Repositories;
 
@@ -12,10 +12,12 @@ public class SalesAggregateRepository
     : Repository<SalesAggregate>, ISalesAggregateRepository
 {
     private readonly DataContext _context;
+    private readonly CallProcedureHelper _helper;
 
     public SalesAggregateRepository(DataContext context) : base(context)
     {
         _context = context;
+        _helper = new CallProcedureHelper(context);
     }
 
     public async Task<IEnumerable<SalesAggregate>> GetByProductIdAsync(Guid productId, Period periodType)
@@ -46,7 +48,7 @@ public class SalesAggregateRepository
             _ => "dbo.InsertSalesAggregates" 
         };
 
-        await ExecuteProcAsync(procedureName, companyId, productIds);
+        await _helper.ExecuteProcAsync(procedureName, companyId, productIds);
     }
 
     public async Task UpdateSalesAggregatesAsync(Guid companyId, IEnumerable<Guid>? productIds = null, Period? periodType = null)
@@ -59,30 +61,6 @@ public class SalesAggregateRepository
             _ => "dbo.UpdateSalesAggregates"
         };
 
-        await ExecuteProcAsync(procedureName, companyId, productIds);
-    }
-
-    private async Task ExecuteProcAsync(
-        string procName, 
-        Guid companyId, 
-        IEnumerable<Guid>? productIds
-    )
-    {
-        var paramCompany = new SqlParameter("@CompanyId", companyId);
-
-        var productIdsTable = new DataTable();
-        productIdsTable.Columns.Add("Id", typeof(Guid));
-        if (productIds != null)
-            foreach (var id in productIds)
-                productIdsTable.Rows.Add(id);
-
-        var paramProductIds = new SqlParameter("@ProductIds", productIdsTable)
-        {
-            TypeName = "dbo.GuidList",
-            SqlDbType = SqlDbType.Structured
-        };
-
-        await _context.Database.ExecuteSqlAsync(
-            $"EXEC {procName} {paramCompany}, {paramProductIds}");
+        await _helper.ExecuteProcAsync(procedureName, companyId, productIds);
     }
 }

@@ -1,9 +1,9 @@
-using System.Data;
 using Domain.Entities.Derived;
 using Domain.Interfaces.Repositories;
 using Infrastructure.Context;
-using Microsoft.Data.SqlClient;
+using Infrastructure.Repositories.Helper;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Infrastructure.Repositories;
 
@@ -11,9 +11,12 @@ public class SeasonalityRepository
     : Repository<Seasonality>, ISeasonalityRepository
 {
     private readonly DataContext _context;
+    private readonly CallProcedureHelper _helper;
+
     public SeasonalityRepository(DataContext context) : base(context)
     {
         _context = context;
+        _helper = new CallProcedureHelper(context);
     }
 
     public async Task<IEnumerable<Seasonality>> GetSeasonalityByProductAsync(Guid productId)
@@ -29,40 +32,16 @@ public class SeasonalityRepository
 
     public async Task DeleteSeasonalityAsync(Guid companyId, IEnumerable<Guid>? productIds = null)
     {
-        await ExecuteProcAsync("dbo.DeletePastSeasonality", companyId, productIds);
+        await _helper.ExecuteProcAsync("dbo.DeletePastSeasonality", companyId, productIds);
     }
 
     public async Task InsertSeasonalityAsync(Guid companyId, IEnumerable<Guid>? productIds = null)
     {
-        await ExecuteProcAsync("dbo.InsertSeasonality", companyId, productIds);
+        await _helper.ExecuteProcAsync("dbo.InsertSeasonality", companyId, productIds);
     }
 
     public async Task UpdateSeasonalityAsync(Guid companyId, IEnumerable<Guid>? productIds = null)
     {
-        await ExecuteProcAsync("dbo.UpdateSeasonality", companyId, productIds);
-    }
-
-    private async Task ExecuteProcAsync(
-        string procName, 
-        Guid companyId, 
-        IEnumerable<Guid>? productIds
-    )
-    {
-        var paramCompany = new SqlParameter("@CompanyId", companyId);
-
-        var productIdsTable = new DataTable();
-        productIdsTable.Columns.Add("Id", typeof(Guid));
-        if (productIds != null)
-            foreach (var id in productIds)
-                productIdsTable.Rows.Add(id);
-
-        var paramProductIds = new SqlParameter("@ProductIds", productIdsTable)
-        {
-            TypeName = "dbo.GuidList",
-            SqlDbType = SqlDbType.Structured
-        };
-
-        await _context.Database.ExecuteSqlAsync(
-            $"EXEC {procName} {paramCompany}, {paramProductIds}");
+        await _helper.ExecuteProcAsync("dbo.UpdateSeasonality", companyId, productIds);
     }
 }

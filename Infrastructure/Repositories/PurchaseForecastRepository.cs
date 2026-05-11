@@ -1,9 +1,9 @@
-using System.Data;
 using Domain.Entities.Derived;
 using Domain.Interfaces.Repositories;
 using Infrastructure.Context;
-using Microsoft.Data.SqlClient;
+using Infrastructure.Repositories.Helper;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Infrastructure.Repositories;
 
@@ -11,10 +11,12 @@ public class PurchaseForecastRepository
     : Repository<PurchaseForecast>, IPurchaseForecastRepository
 {
     private readonly DataContext _context;
+    private readonly CallProcedureHelper _helper;
 
     public PurchaseForecastRepository(DataContext context) : base(context)
     {
         _context = context;
+        _helper = new CallProcedureHelper(context);
     }
 
     public async Task<ICollection<PurchaseForecast>> GetByProductAsync(Guid productId)
@@ -38,39 +40,16 @@ public class PurchaseForecastRepository
 
     public async Task InsertPurchaseForecastsAsync(Guid companyId, IEnumerable<Guid>? productIds = null)
     {
-        await ExecuteProcAsync("dbo.InsertPurchaseForecasts", companyId, productIds);
+        await _helper.ExecuteProcAsync("dbo.InsertPurchaseForecasts", companyId, productIds);
     }
 
     public async Task UpdatePurchaseForecastsAsync(Guid companyId, IEnumerable<Guid>? productIds = null)
     {
-        await ExecuteProcAsync("dbo.UpdatePurchaseForecasts", companyId, productIds);
+        await _helper.ExecuteProcAsync("dbo.UpdatePurchaseForecasts", companyId, productIds);
     }
 
     public async Task DeletePurchaseForecastsAsync(Guid companyId, IEnumerable<Guid>? productIds = null)
     {
-        await ExecuteProcAsync("dbo.DeletePurchaseForecasts", companyId, productIds);
-    }
-
-    private async Task ExecuteProcAsync(string procName, Guid companyId, IEnumerable<Guid>? productIds)
-    {
-        var paramCompany = new SqlParameter("@CompanyId", companyId);
-
-        var productIdsTable = new DataTable();
-        productIdsTable.Columns.Add("Id", typeof(Guid));
-
-        if (productIds != null)
-        {
-            foreach (var id in productIds)
-                productIdsTable.Rows.Add(id);
-        }
-
-        var paramProductIds = new SqlParameter("@ProductIds", productIdsTable)
-        {
-            TypeName = "dbo.GuidList",
-            SqlDbType = SqlDbType.Structured
-        };
-
-        await _context.Database.ExecuteSqlAsync(
-            $"EXEC {procName} {paramCompany}, {paramProductIds}");
+        await _helper.ExecuteProcAsync("dbo.DeletePurchaseForecasts", companyId, productIds);
     }
 }

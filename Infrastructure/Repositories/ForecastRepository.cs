@@ -3,7 +3,7 @@ using Domain.Entities.Derived;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using Infrastructure.Context;
-using Microsoft.Data.SqlClient;
+using Infrastructure.Repositories.Helper;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
@@ -11,10 +11,12 @@ namespace Infrastructure.Repositories;
 public class ForecastRepository : Repository<Forecast>, IForecastRepository
 {
     private readonly DataContext _context;
+    private readonly CallProcedureHelper _helper;
 
     public ForecastRepository(DataContext context) : base(context)
     {
         _context = context;
+        _helper = new CallProcedureHelper(context);
     }
 
     public async Task<IEnumerable<Forecast>> GetForecastByProductAsync(Guid productId, Period periodType)
@@ -59,7 +61,7 @@ public class ForecastRepository : Repository<Forecast>, IForecastRepository
             _ => "dbo.InsertForecasts" 
         };
 
-        await ExecuteProcAsync(procedureName, companyId, productIds);
+        await _helper.ExecuteProcAsync(procedureName, companyId, productIds);
     }
 
     public async Task UpdateForecastsAsync(Guid companyId, IEnumerable<Guid>? productIds = null, Period? periodType = null)
@@ -72,50 +74,11 @@ public class ForecastRepository : Repository<Forecast>, IForecastRepository
             _ => "dbo.UpdateForecasts" 
         };
 
-        await ExecuteProcAsync(procedureName, companyId, productIds);
+        await _helper.ExecuteProcAsync(procedureName, companyId, productIds);
     }
 
     public async Task DeleteForecastsAsync(Guid companyId, IEnumerable<Guid>? productIds = null, Period period = Period.Monthly)
     {
-        await ExecuteProcAsync("dbo.DeletePastForecasts", companyId, productIds, period);
-    }
-
-    private async Task ExecuteProcAsync(
-        string procName, 
-        Guid companyId, 
-        IEnumerable<Guid>? productIds,
-        Period? period = null
-    )
-    {
-        var paramCompany = new SqlParameter("@CompanyId", companyId);
-
-        var productIdsTable = new DataTable();
-        productIdsTable.Columns.Add("Id", typeof(Guid));
-        if (productIds != null)
-            foreach (var id in productIds)
-                productIdsTable.Rows.Add(id);
-
-        var paramProductIds = new SqlParameter("@ProductIds", productIdsTable)
-        {
-            TypeName = "dbo.GuidList",
-            SqlDbType = SqlDbType.Structured
-        };
-
-        FormattableString sql;
-
-        if (period is null)
-        {
-            sql = $"EXEC {procName} {paramCompany}, {paramProductIds}";
-        }
-        else
-        {
-            var paramPeriod = new SqlParameter(
-                "@PeriodType",
-                period.ToString());
-
-            sql = $"EXEC {procName} {paramCompany}, {paramProductIds}, {paramPeriod}";
-        }
-
-        await _context.Database.ExecuteSqlAsync(sql);
+        await _helper.ExecuteProcAsync("dbo.DeletePastForecasts", companyId, productIds, period);
     }
 }
