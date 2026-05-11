@@ -1,7 +1,5 @@
-﻿using Domain.Entities.Derived;
-using Domain.Enums;
+﻿using Domain.Enums;
 using Infrastructure.Repositories;
-using Microsoft.EntityFrameworkCore;
 using Test.Helper;
 using Test.Integration.Helper;
 
@@ -10,6 +8,7 @@ namespace Test.Integration.Repositories;
 public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
     : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
 {
+    private readonly SalesAggregateHelper _salesAggregateHelper = new SalesAggregateHelper(fixture);
     private SalesAggregateRepository CreateRepository() =>
         new(Fixture.Context);
 
@@ -27,6 +26,26 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
         [Period.Weekly],
         [Period.Monthly],
     ];
+
+    [Theory]
+    [MemberData(nameof(UpdatePeriodData))]
+    public async Task GetByProductIdAsync_WhenPeriod_ReturnsForecast(Period period)
+    {
+        var repo = CreateRepository();
+        var company = CompanyHelper.CreateCompany();
+        await Fixture.Context.Companies.AddAsync(company);
+
+        var product = ProductHelper.CreateProduct(company);
+        await Fixture.Context.Products.AddAsync(product);
+
+        var aggregate = SalesAggregateHelper.CreateSalesAggregate(product, period);
+        await Fixture.Context.SalesAggregates.AddAsync(aggregate);
+        await Fixture.Context.SaveChangesAsync();
+
+        var result = await repo.GetByProductIdAsync(product.Id, period);
+
+        Assert.NotEmpty(result);
+    }
 
     [Theory]
     [MemberData(nameof(InsertPeriodData))]
@@ -47,20 +66,7 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
             [product.Id],
             period);
 
-        int count = 0;
-        if (period == null)
-        {
-            count = await Fixture.Context.SalesAggregates
-                .CountAsync(x => x.ProductId == product.Id);
-        }
-        else
-        {
-            count = await Fixture.Context.SalesAggregates
-                .CountAsync(x =>
-                    x.ProductId == product.Id &&
-                    x.PeriodType == period
-                );
-        }
+        int count = await _salesAggregateHelper.GetSalesCountAsync(product.Id, period);
 
         Assert.Equal(rows, count);
     }
@@ -89,27 +95,87 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
             [product.Id],
             period);
 
-        int count = 0;
-        if (period == null)
-        {
-            count = await Fixture.Context.SalesAggregates
-                .CountAsync(x => x.ProductId == product.Id);
-        }
-        else
-        {
-            count = await Fixture.Context.SalesAggregates
-                .CountAsync(x =>
-                    x.ProductId == product.Id &&
-                    x.PeriodType == period
-                );
-        }
+        int count = await _salesAggregateHelper.GetSalesCountAsync(product.Id, period);
 
         Assert.Equal(rows, count);
     }
 
     [Theory]
+    [MemberData(nameof(InsertPeriodData))]
+    public async Task InsertSalesAggregatesAsync_WhenCompanySpecified_OnlyInsertsForThatCompany(
+        Period? period,
+        int rows)
+    {
+        var repo = CreateRepository();
+        var company1 = CompanyHelper.CreateCompany(name: "Company 1");
+        var company2 = CompanyHelper.CreateCompany(name: "Company 2");
+
+        var product1 = ProductHelper.CreateProduct(company1, name: "Product 1", sku: "SKU-0001");
+        var product2 = ProductHelper.CreateProduct(company2, name: "Product 2", sku: "SKU-0002");
+
+        await Fixture.Context.Companies.AddRangeAsync(company1, company2);
+        await Fixture.Context.Products.AddRangeAsync(product1, product2);
+        await Fixture.Context.SaveChangesAsync();
+
+        await repo.InsertSalesAggregatesAsync(company1.Id, [product1.Id], period);
+        int count1 = await _salesAggregateHelper.GetSalesCountAsync(product1.Id, period);
+        int count2 = await _salesAggregateHelper.GetSalesCountAsync(product2.Id, period);
+
+        Assert.Equal(rows, count1);
+        Assert.Equal(0, count2);
+    }
+
+    [Theory]
+    [MemberData(nameof(InsertPeriodData))]
+    public async Task InsertSalesAggregatesAsync_WhenProductIdsNotSpecified_InsertsForAllProducts(
+        Period? period,
+        int rows)
+    {
+        var repo = CreateRepository();
+        var company = CompanyHelper.CreateCompany();
+
+        var product1 = ProductHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
+        var product2 = ProductHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
+
+        await Fixture.Context.Companies.AddAsync(company);
+        await Fixture.Context.Products.AddRangeAsync(product1, product2);
+        await Fixture.Context.SaveChangesAsync();
+
+        await repo.InsertSalesAggregatesAsync(company.Id, [], period);
+        int count1 = await _salesAggregateHelper.GetSalesCountAsync(product1.Id, period);
+        int count2 = await _salesAggregateHelper.GetSalesCountAsync(product2.Id, period);
+
+        Assert.Equal(rows, count1);
+        Assert.Equal(rows, count2);
+    }
+
+    [Theory]
+    [MemberData(nameof(InsertPeriodData))]
+    public async Task InsertSalesAggregatesAsync_WhenProductIdsSpecified_OnlyInsertsForSpecifiedProducts(
+        Period? period,
+        int rows)
+    {
+        var repo = CreateRepository();
+        var company = CompanyHelper.CreateCompany();
+
+        var product1 = ProductHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
+        var product2 = ProductHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
+
+        await Fixture.Context.Companies.AddAsync(company);
+        await Fixture.Context.Products.AddRangeAsync(product1, product2);
+        await Fixture.Context.SaveChangesAsync();
+
+        await repo.InsertSalesAggregatesAsync(company.Id, [product1.Id], period);
+        int count1 = await _salesAggregateHelper.GetSalesCountAsync(product1.Id, period);
+        int count2 = await _salesAggregateHelper.GetSalesCountAsync(product2.Id, period);
+
+        Assert.Equal(rows, count1);
+        Assert.Equal(0, count2);
+    }
+
+    [Theory]
     [MemberData(nameof(UpdatePeriodData))]
-    public async Task UpdateSalesAggregatesAsync_WhenPeriod_UpdatesPeriodTotals(Period? period)
+    public async Task UpdateSalesAggregatesAsync_WhenPeriod_UpdatesPeriodTotals(Period period)
     {
         var repo = CreateRepository();
         var company = CompanyHelper.CreateCompany();
@@ -143,18 +209,7 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
             [product.Id],
             period);
 
-        var correctDate = DateHelper.GetPeriodStartDate(period);
-        var aggregate = await Fixture.Context.SalesAggregates
-            .SingleAsync(x =>
-                x.ProductId == product.Id &&
-                x.PeriodType == period &&
-                x.PeriodStartDate == correctDate);
-
-        if (period == null)
-        {
-            aggregate = await Fixture.Context.SalesAggregates
-                .SingleAsync(x => x.ProductId == product.Id);
-        }
+        var aggregate = await _salesAggregateHelper.GetSalesAsync(product.Id, period);
 
         Assert.Equal(5, aggregate.TotalQuantity);
         Assert.Equal(50, aggregate.TotalRevenue);
@@ -204,9 +259,8 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
             [product1.Id],
             period);
 
-        var correctDate = DateHelper.GetPeriodStartDate(period);
-        var aggregate1 = await GetAggregateAsync(product1.Id, period);
-        var aggregate2 = await GetAggregateAsync(product2.Id, period);
+        var aggregate1 = await _salesAggregateHelper.GetSalesAsync(product1.Id, period);
+        var aggregate2 = await _salesAggregateHelper.GetSalesAsync(product2.Id, period);
 
         Assert.Equal(5, aggregate1.TotalQuantity);
         Assert.Equal(50, aggregate1.TotalRevenue);
@@ -259,9 +313,8 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
             [],
             period);
 
-        var correctDate = DateHelper.GetPeriodStartDate(period);
-        var aggregate1 = await GetAggregateAsync(product1.Id, period);
-        var aggregate2 = await GetAggregateAsync(product2.Id, period);
+        var aggregate1 = await _salesAggregateHelper.GetSalesAsync(product1.Id, period);
+        var aggregate2 = await _salesAggregateHelper.GetSalesAsync(product2.Id, period);
 
         Assert.Equal(5, aggregate1.TotalQuantity);
         Assert.Equal(50, aggregate1.TotalRevenue);
@@ -304,9 +357,9 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
             [product.Id],
             null);
 
-        var daily = await GetAggregateAsync(product.Id, Period.Daily);
-        var weekly = await GetAggregateAsync(product.Id, Period.Weekly);
-        var monthly = await GetAggregateAsync(product.Id, Period.Monthly);
+        var daily = await _salesAggregateHelper.GetSalesAsync(product.Id, Period.Daily);
+        var weekly = await _salesAggregateHelper.GetSalesAsync(product.Id, Period.Weekly);
+        var monthly = await _salesAggregateHelper.GetSalesAsync(product.Id, Period.Monthly);
 
         Assert.Equal(5, daily.TotalQuantity);
         Assert.Equal(50, daily.TotalRevenue);
@@ -384,8 +437,8 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
             [product1.Id],
             period);
 
-        var aggregate1 = await GetAggregateAsync(product1.Id, period);
-        var aggregate2 = await GetAggregateAsync(product2.Id, period);
+        var aggregate1 = await _salesAggregateHelper.GetSalesAsync(product1.Id, period);
+        var aggregate2 = await _salesAggregateHelper.GetSalesAsync(product2.Id, period);
 
         // Company 1 SHOULD be updated
         Assert.Equal(5, aggregate1.TotalQuantity);
@@ -394,18 +447,5 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
         // Company 2 should remain untouched
         Assert.Equal(0, aggregate2.TotalQuantity);
         Assert.Equal(0, aggregate2.TotalRevenue);
-    }
-
-    private async Task<SalesAggregate> GetAggregateAsync(
-        Guid productId,
-        Period period)
-    {
-        var correctDate = DateHelper.GetPeriodStartDate(period);
-
-        return await Fixture.Context.SalesAggregates
-            .SingleAsync(x =>
-                x.ProductId == productId &&
-                x.PeriodType == period &&
-                x.PeriodStartDate == correctDate);
     }
 }
