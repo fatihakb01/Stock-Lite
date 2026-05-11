@@ -9,7 +9,8 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
     : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
 {
     private readonly ForecastHelper _forecastHelper = new ForecastHelper(fixture);
-    private readonly DateTime now = DateTime.UtcNow.Date;
+    private readonly DateTime _now = DateTime.UtcNow.Date;
+
     private ForecastRepository CreateRepository() =>
         new(Fixture.Context);
 
@@ -192,8 +193,8 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
         var pastForecast = ForecastHelper.CreateForecast(
             product,
             period,
-            periodStartDate: now.AddMonths(-2),
-            periodEndDate: now.AddMonths(-1));
+            periodStartDate: _now.AddMonths(-2),
+            periodEndDate: _now.AddMonths(-1));
 
         await Fixture.Context.Forecasts.AddAsync(pastForecast);
         await Fixture.Context.SaveChangesAsync();
@@ -219,8 +220,8 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
         var futureForecast = ForecastHelper.CreateForecast(
             product,
             period,
-            periodStartDate: now,
-            periodEndDate: now.AddMonths(1));
+            periodStartDate: _now,
+            periodEndDate: _now.AddMonths(1));
 
         await Fixture.Context.Forecasts.AddAsync(futureForecast);
         await Fixture.Context.SaveChangesAsync();
@@ -246,13 +247,13 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
 
         var pastForecast1 = ForecastHelper.CreateForecast(
             product1, period,
-            periodStartDate: now.AddMonths(-2),
-            periodEndDate: now.AddMonths(-1));
+            periodStartDate: _now.AddMonths(-2),
+            periodEndDate: _now.AddMonths(-1));
 
         var pastForecast2 = ForecastHelper.CreateForecast(
             product2, period,
-            periodStartDate: now.AddMonths(-2),
-            periodEndDate: now.AddMonths(-1));
+            periodStartDate: _now.AddMonths(-2),
+            periodEndDate: _now.AddMonths(-1));
 
         await Fixture.Context.Forecasts.AddRangeAsync(pastForecast1, pastForecast2);
         await Fixture.Context.SaveChangesAsync();
@@ -281,13 +282,13 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
 
         var pastForecast1 = ForecastHelper.CreateForecast(
             product1, period,
-            periodStartDate: now.AddMonths(-2),
-            periodEndDate: now.AddMonths(-1));
+            periodStartDate: _now.AddMonths(-2),
+            periodEndDate: _now.AddMonths(-1));
 
         var pastForecast2 = ForecastHelper.CreateForecast(
             product2, Period.Monthly,
-            periodStartDate: now.AddMonths(-2),
-            periodEndDate: now.AddMonths(-1));
+            periodStartDate: _now.AddMonths(-2),
+            periodEndDate: _now.AddMonths(-1));
 
         await Fixture.Context.Forecasts.AddRangeAsync(pastForecast1, pastForecast2);
         await Fixture.Context.SaveChangesAsync();
@@ -316,13 +317,13 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
 
         var pastForecast1 = ForecastHelper.CreateForecast(
             product1, period,
-            periodStartDate: now.AddMonths(-2),
-            periodEndDate: now.AddMonths(-1));
+            periodStartDate: _now.AddMonths(-2),
+            periodEndDate: _now.AddMonths(-1));
 
         var pastForecast2 = ForecastHelper.CreateForecast(
             product2, period,
-            periodStartDate: now.AddMonths(-2),
-            periodEndDate: now.AddMonths(-1));
+            periodStartDate: _now.AddMonths(-2),
+            periodEndDate: _now.AddMonths(-1));
 
         await Fixture.Context.Forecasts.AddRangeAsync(pastForecast1, pastForecast2);
         await Fixture.Context.SaveChangesAsync();
