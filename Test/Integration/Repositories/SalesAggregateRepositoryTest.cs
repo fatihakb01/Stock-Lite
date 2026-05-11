@@ -9,6 +9,8 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
     : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
 {
     private readonly SalesAggregateHelper _salesAggregateHelper = new SalesAggregateHelper(fixture);
+    private readonly DateTime _now = DateTime.UtcNow.Date;
+
     private SalesAggregateRepository CreateRepository() =>
         new(Fixture.Context);
 
@@ -186,7 +188,7 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
 
         var transaction = TransactionHelper.CreateTransaction(
             company,
-            DateTime.UtcNow.Date);
+            _now);
 
         await Fixture.Context.Transactions.AddAsync(transaction);
 
@@ -229,7 +231,7 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
 
         var transaction = TransactionHelper.CreateTransaction(
             company,
-            DateTime.UtcNow.Date);
+            _now);
         await Fixture.Context.Transactions.AddAsync(transaction);
 
         var lineItem1 = TransactionHelper.CreateTransactionLineItem(
@@ -283,7 +285,7 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
 
         var transaction = TransactionHelper.CreateTransaction(
             company,
-            DateTime.UtcNow.Date);
+            _now);
         await Fixture.Context.Transactions.AddAsync(transaction);
 
         var lineItem1 = TransactionHelper.CreateTransactionLineItem(
@@ -335,7 +337,7 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
 
         var transaction = TransactionHelper.CreateTransaction(
             company,
-            DateTime.UtcNow.Date);
+            _now);
         await Fixture.Context.Transactions.AddAsync(transaction);
 
         var lineItem = TransactionHelper.CreateTransactionLineItem(
@@ -394,11 +396,11 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
 
         var transaction1 = TransactionHelper.CreateTransaction(
             company1,
-            DateTime.UtcNow.Date);
+            _now);
 
         var transaction2 = TransactionHelper.CreateTransaction(
             company2,
-            DateTime.UtcNow.Date);
+            _now);
 
         await Fixture.Context.Transactions.AddRangeAsync(
             transaction1,
