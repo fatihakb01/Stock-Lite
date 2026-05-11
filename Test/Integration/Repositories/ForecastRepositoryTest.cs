@@ -179,6 +179,164 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
 
     [Theory]
     [MemberData(nameof(UpdatePeriodData))]
+    public async Task DeleteForecastsAsync_DeletesPastForecasts(Period period)
+    {
+        var repo = CreateRepository();
+        var company = CompanyHelper.CreateCompany();
+        var product = ProductHelper.CreateProduct(company);
+
+        await Fixture.Context.Companies.AddAsync(company);
+        await Fixture.Context.Products.AddAsync(product);
+
+        // Seed a past forecast — PeriodEndDate in the past
+        var pastForecast = ForecastHelper.CreateForecast(
+            product,
+            period,
+            periodStartDate: now.AddMonths(-2),
+            periodEndDate: now.AddMonths(-1));
+
+        await Fixture.Context.Forecasts.AddAsync(pastForecast);
+        await Fixture.Context.SaveChangesAsync();
+
+        await repo.DeleteForecastsAsync(company.Id, [product.Id], period);
+        int count = await _forecastHelper.GetForecastCountAsync(product.Id, period);
+
+        Assert.Equal(0, count);
+    }
+
+    [Theory]
+    [MemberData(nameof(UpdatePeriodData))]
+    public async Task DeleteForecastsAsync_DoesNotDeleteFutureForecasts(Period period)
+    {
+        var repo = CreateRepository();
+        var company = CompanyHelper.CreateCompany();
+        var product = ProductHelper.CreateProduct(company);
+
+        await Fixture.Context.Companies.AddAsync(company);
+        await Fixture.Context.Products.AddAsync(product);
+
+        // Future forecast — should survive deletion
+        var futureForecast = ForecastHelper.CreateForecast(
+            product,
+            period,
+            periodStartDate: now,
+            periodEndDate: now.AddMonths(1));
+
+        await Fixture.Context.Forecasts.AddAsync(futureForecast);
+        await Fixture.Context.SaveChangesAsync();
+
+        await repo.DeleteForecastsAsync(company.Id, [product.Id], period);
+        int count = await _forecastHelper.GetForecastCountAsync(product.Id, period);
+
+        Assert.Equal(1, count);
+    }
+
+    [Theory]
+    [MemberData(nameof(UpdatePeriodData))]
+    public async Task DeleteForecastsAsync_WhenProductIdsSpecified_OnlyDeletesSpecifiedProducts(Period period)
+    {
+        var repo = CreateRepository();
+        var company = CompanyHelper.CreateCompany();
+
+        var product1 = ProductHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
+        var product2 = ProductHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
+
+        await Fixture.Context.Companies.AddAsync(company);
+        await Fixture.Context.Products.AddRangeAsync(product1, product2);
+
+        var pastForecast1 = ForecastHelper.CreateForecast(
+            product1, period,
+            periodStartDate: now.AddMonths(-2),
+            periodEndDate: now.AddMonths(-1));
+
+        var pastForecast2 = ForecastHelper.CreateForecast(
+            product2, period,
+            periodStartDate: now.AddMonths(-2),
+            periodEndDate: now.AddMonths(-1));
+
+        await Fixture.Context.Forecasts.AddRangeAsync(pastForecast1, pastForecast2);
+        await Fixture.Context.SaveChangesAsync();
+
+        // Only delete for product1
+        await repo.DeleteForecastsAsync(company.Id, [product1.Id], period);
+        int count1 = await _forecastHelper.GetForecastCountAsync(product1.Id, period);
+        int count2 = await _forecastHelper.GetForecastCountAsync(product2.Id, period);
+
+        Assert.Equal(0, count1);
+        Assert.Equal(1, count2);
+    }
+
+    [Theory]
+    [MemberData(nameof(UpdatePeriodData))]
+    public async Task DeleteForecastsAsync_WhenProductIdsNotSpecified_DeletesAllProducts(Period period)
+    {
+        var repo = CreateRepository();
+        var company = CompanyHelper.CreateCompany();
+
+        var product1 = ProductHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
+        var product2 = ProductHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
+
+        await Fixture.Context.Companies.AddAsync(company);
+        await Fixture.Context.Products.AddRangeAsync(product1, product2);
+
+        var pastForecast1 = ForecastHelper.CreateForecast(
+            product1, period,
+            periodStartDate: now.AddMonths(-2),
+            periodEndDate: now.AddMonths(-1));
+
+        var pastForecast2 = ForecastHelper.CreateForecast(
+            product2, Period.Monthly,
+            periodStartDate: now.AddMonths(-2),
+            periodEndDate: now.AddMonths(-1));
+
+        await Fixture.Context.Forecasts.AddRangeAsync(pastForecast1, pastForecast2);
+        await Fixture.Context.SaveChangesAsync();
+
+        await repo.DeleteForecastsAsync(company.Id, [], period);
+        int count1 = await _forecastHelper.GetForecastCountAsync(product1.Id, period);
+        int count2 = await _forecastHelper.GetForecastCountAsync(product2.Id, period);
+
+        Assert.Equal(0, count1);
+        Assert.Equal(0, count2);
+    }
+
+    [Theory]
+    [MemberData(nameof(UpdatePeriodData))]
+    public async Task DeleteForecastsAsync_WhenCompanySpecified_OnlyDeletesThatCompany(Period period)
+    {
+        var repo = CreateRepository();
+        var company1 = CompanyHelper.CreateCompany(name: "Company 1");
+        var company2 = CompanyHelper.CreateCompany(name: "Company 2");
+
+        var product1 = ProductHelper.CreateProduct(company1, name: "Product 1", sku: "SKU-0001");
+        var product2 = ProductHelper.CreateProduct(company2, name: "Product 2", sku: "SKU-0002");
+
+        await Fixture.Context.Companies.AddRangeAsync(company1, company2);
+        await Fixture.Context.Products.AddRangeAsync(product1, product2);
+
+        var pastForecast1 = ForecastHelper.CreateForecast(
+            product1, period,
+            periodStartDate: now.AddMonths(-2),
+            periodEndDate: now.AddMonths(-1));
+
+        var pastForecast2 = ForecastHelper.CreateForecast(
+            product2, period,
+            periodStartDate: now.AddMonths(-2),
+            periodEndDate: now.AddMonths(-1));
+
+        await Fixture.Context.Forecasts.AddRangeAsync(pastForecast1, pastForecast2);
+        await Fixture.Context.SaveChangesAsync();
+
+        await repo.DeleteForecastsAsync(company1.Id, [product1.Id], period);
+        int count1 = await _forecastHelper.GetForecastCountAsync(product1.Id, period);
+        int count2 = await _forecastHelper.GetForecastCountAsync(product2.Id, period);
+
+        Assert.Equal(0, count1);
+        Assert.Equal(1, count2);
+    }
+
+    [Theory]
+    [MemberData(nameof(UpdatePeriodData))]
     public async Task UpdateForecastsAsync_WhenPeriod_UpdatesForecastValues(
         Period period)
     {

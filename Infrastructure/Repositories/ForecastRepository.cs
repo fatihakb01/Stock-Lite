@@ -19,8 +19,8 @@ public class ForecastRepository : Repository<Forecast>, IForecastRepository
 
     public async Task<IEnumerable<Forecast>> GetForecastByProductAsync(Guid productId, Period periodType)
     {
-        DateTime today = DateTime.UtcNow;
-        int diff = ((7 + (DateTime.UtcNow.DayOfWeek - DayOfWeek.Monday)) % 7) + 7;
+        DateTime today = DateTime.UtcNow.Date;
+        int diff = ((7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7) + 7;
 
         DateTime startDate = periodType switch
         {
@@ -75,15 +75,16 @@ public class ForecastRepository : Repository<Forecast>, IForecastRepository
         await ExecuteProcAsync(procedureName, companyId, productIds);
     }
 
-    public async Task DeleteForecastsAsync(Guid companyId, IEnumerable<Guid>? productIds = null)
+    public async Task DeleteForecastsAsync(Guid companyId, IEnumerable<Guid>? productIds = null, Period period = Period.Monthly)
     {
-        await ExecuteProcAsync("dbo.DeletePastForecasts", companyId, productIds);
+        await ExecuteProcAsync("dbo.DeletePastForecasts", companyId, productIds, period);
     }
 
     private async Task ExecuteProcAsync(
         string procName, 
         Guid companyId, 
-        IEnumerable<Guid>? productIds
+        IEnumerable<Guid>? productIds,
+        Period? period = null
     )
     {
         var paramCompany = new SqlParameter("@CompanyId", companyId);
@@ -100,7 +101,21 @@ public class ForecastRepository : Repository<Forecast>, IForecastRepository
             SqlDbType = SqlDbType.Structured
         };
 
-        await _context.Database.ExecuteSqlAsync(
-            $"EXEC {procName} {paramCompany}, {paramProductIds}");
+        FormattableString sql;
+
+        if (period is null)
+        {
+            sql = $"EXEC {procName} {paramCompany}, {paramProductIds}";
+        }
+        else
+        {
+            var paramPeriod = new SqlParameter(
+                "@PeriodType",
+                period.ToString());
+
+            sql = $"EXEC {procName} {paramCompany}, {paramProductIds}, {paramPeriod}";
+        }
+
+        await _context.Database.ExecuteSqlAsync(sql);
     }
 }
