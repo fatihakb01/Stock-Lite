@@ -9,77 +9,65 @@ internal static class ProductHelper
         Company company,
         string name = "Test Product",
         string sku = "SKU-0001",
-        decimal price = 9.99m,
-        int quantityOnHand = 10,
-        int netStockPosition = 10,
-        int forecastQuantity = 10,
-        int recommendedOrderQuantity = 0,
-        int safetyStock = 5)
+        decimal price = 10
+    ) => new Product
     {
-        var product = new Product
-        {
-            Name = name,
-            SKU = sku,
-            Price = price,
-            CompanyId = company.Id,
-            Company = company
-        };
-
-        var stockLevel = new StockLevel
-        {
-            ProductId = product.Id,
-            Product = product,
-            QuantityOnHand = quantityOnHand,
-            QuantityOnOrder = 0,
-            QuantityCommitted = 0,
-            NetStockPosition = netStockPosition,
-            ForecastQuantity = forecastQuantity,
-            ReorderPoint = 1,
-            NeedsReorder = false,
-            RecommendedOrderQuantity = recommendedOrderQuantity,
-            LastCalculatedAt = DateTime.UtcNow
-        };
-
-        var inventoryPolicy = new ProductInventoryPolicy
-        {
-            ProductId = product.Id,
-            Product = product,
-            LeadTimeDays = 10,
-            MinimumOrderQuantity = 1,
-            OrderIncrementQuantity = 1,
-            SafetyStock = safetyStock,
-            StockAdjustment = 0
-        };
-
-        product.StockLevel = stockLevel;
-        product.InventoryPolicy = inventoryPolicy;
-
-        return product;
-    }
+        Name = name,
+        SKU = sku,
+        Price = price,
+        CompanyId = company.Id,
+        Company = company
+    };
+    
 
     internal static List<Product> CreateProducts(Company company)
     {
-        return
-        [
-            CreateProduct(
-                company,
-                name: "Product 1",
-                sku: "SKU-0001",
-                quantityOnHand: 15,
-                netStockPosition: -1,
-                forecastQuantity: 0,
-                recommendedOrderQuantity: 2,
-                safetyStock: 5),
+        var product1 = CreateProduct(company: company, name: "Product 1", sku: "SKU-0001");
 
-            CreateProduct(
-                company,
-                name: "Product 2",
-                sku: "SKU-0002",
-                quantityOnHand: 25,
-                netStockPosition: 10,
-                forecastQuantity: 5,
-                recommendedOrderQuantity: 0,
-                safetyStock: 50)
-        ];
+        product1.InventoryPolicy =InventoryPolicyHelper.CreateInventoryPolicy(
+            product: product1,
+            safetyStock: 5,
+            leadTimeDays: 7,
+            minimumOrderQuantity: 5,
+            orderIncrementQuantity: 5,
+            stockAdjustment: 0
+        );
+
+        product1.StockLevel = StockLevelHelper.CreateStockLevel(
+            product: product1,
+            quantityOnHand: 15,
+            quantityOnOrder: 0,
+            quantityCommitted: 0,
+            netStockPosition: -1,
+            forecastQuantity: 0,
+            reorderPoint: 1,
+            needsReorder: false,
+            recommendedOrderQuantity: 2
+        );
+
+        var product2 = CreateProduct(company: company, name: "Product 2", sku: "SKU-0002");
+
+        product2.InventoryPolicy = InventoryPolicyHelper.CreateInventoryPolicy(
+            product: product2,
+            safetyStock: 50,
+            leadTimeDays: 7,
+            minimumOrderQuantity: 5,
+            orderIncrementQuantity: 5,
+            stockAdjustment: 0
+        );
+
+        product2.StockLevel = StockLevelHelper.CreateStockLevel(
+            product: product2,
+            quantityOnHand: 25,
+            quantityOnOrder: 0,
+            quantityCommitted: 0,
+            netStockPosition: 10,
+            forecastQuantity: 5,
+            reorderPoint: 1,
+            needsReorder: false,
+            recommendedOrderQuantity: 0
+        );
+
+        return [product1, product2];
     }
 }

@@ -76,5 +76,29 @@ namespace Test.Helper
             await _fixture.Context.SalesAggregates.AddAsync(aggregate);
             await _fixture.Context.Seasonality.AddAsync(seasonality);
         }
+
+        internal async Task SeedWeeklyForecastsAsync(
+            Product product, 
+            decimal predictedQuantity = 100,
+            decimal predictedRevenue = 1000
+        )
+        {
+            var startDate = DateHelper.GetPeriodStartDate(Period.Weekly);
+            var endDate = DateHelper.GetPeriodEndDate(Period.Weekly);
+
+            var forecasts = Enumerable.Range(0, 52).Select(i => new Forecast
+            {
+                ProductId = product.Id,
+                Product = product,
+                PeriodType = Period.Weekly,
+                PeriodStartDate = startDate.AddDays(i * 7),
+                PeriodEndDate = endDate.AddDays(i * 7),
+                PredictedQuantity = predictedQuantity,
+                PredictedRevenue = predictedRevenue,
+                Confidence = 0.50
+            }).ToList();
+
+            await _fixture.Context.Forecasts.AddRangeAsync(forecasts);
+        }
     }
 }
