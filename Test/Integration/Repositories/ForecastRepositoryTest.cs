@@ -31,7 +31,7 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
 
     [Theory]
     [MemberData(nameof(UpdatePeriodData))]
-    public async Task GetForecastByProductAsync_WhenPeriod_ReturnsForecast(Period period)
+    public async Task GetForecastByProductAsync_WhenPeriodAndForecast_ReturnsForecast(Period period)
     {
         var repo = CreateRepository();
         var company = CompanyHelper.CreateCompany();
@@ -47,6 +47,23 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
         var result = await repo.GetForecastByProductAsync(product.Id, period);
 
         Assert.NotEmpty(result);
+    }
+
+    [Theory]
+    [MemberData(nameof(UpdatePeriodData))]
+    public async Task GetForecastByProductAsync_WhenPeriodAndNoForecast_ReturnsForecast(Period period)
+    {
+        var repo = CreateRepository();
+        var company = CompanyHelper.CreateCompany();
+        await Fixture.Context.Companies.AddAsync(company);
+
+        var product = ProductHelper.CreateProduct(company);
+        await Fixture.Context.Products.AddAsync(product);
+        await Fixture.Context.SaveChangesAsync();
+
+        var result = await repo.GetForecastByProductAsync(product.Id, period);
+
+        Assert.Empty(result);
     }
 
     [Theory]
