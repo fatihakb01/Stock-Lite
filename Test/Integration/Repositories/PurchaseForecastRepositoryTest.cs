@@ -1,5 +1,4 @@
 ﻿using Domain.Entities.Core;
-using Domain.Entities.Derived;
 using Domain.Enums;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +13,8 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
     private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
     private readonly ProductHelper _productHelper = new ProductHelper(fixture);
     private readonly PurchaseForecastHelper _purchaseForecastHelper = new PurchaseForecastHelper(fixture);
-    private readonly ForecastHelper _forecastHelper = new(fixture);
+    private readonly ForecastHelper _forecastHelper = new ForecastHelper(fixture);
+    private readonly InventoryPolicyHelper _inventoryPolicyHelper = new InventoryPolicyHelper(fixture);
     private readonly ConfirmedOrderHelper _coHelper = new ConfirmedOrderHelper(fixture);
     private readonly DateTime _now = DateTime.UtcNow.Date;
 
@@ -70,14 +70,13 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
             recommendedOrderQuantity: recommendedOrderQuantity
         );
 
-        var policy = InventoryPolicyHelper.CreateInventoryPolicy(
+        await _inventoryPolicyHelper.CreateInventoryPolicy(
             product: product,
             safetyStock: safetyStock,
             leadTimeDays: leadTimeDays,
             minimumOrderQuantity: moq,
             orderIncrementQuantity: orderIncrement);
 
-        await Fixture.Context.ProductInventoryPolicies.AddAsync(policy);
         await Fixture.Context.StockLevels.AddAsync(stocklevel);
         await Fixture.Context.SaveChangesAsync();
 
@@ -476,10 +475,8 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
         await _forecastHelper.SeedWeeklyForecastsAsync(product1);
         await _forecastHelper.SeedWeeklyForecastsAsync(product2);
 
-        var policy1 = InventoryPolicyHelper.CreateInventoryPolicy(product1, safetyStock: 100);
-        var policy2 = InventoryPolicyHelper.CreateInventoryPolicy(product2, safetyStock: 100);
-        await Fixture.Context.ProductInventoryPolicies.AddRangeAsync(policy1, policy2);
-        await Fixture.Context.SaveChangesAsync();
+        await _inventoryPolicyHelper.CreateInventoryPolicy(product1, safetyStock: 100);
+        await _inventoryPolicyHelper.CreateInventoryPolicy(product2, safetyStock: 100);
 
         await repo.InsertPurchaseForecastsAsync(company.Id, [product1.Id, product2.Id]);
         await repo.UpdatePurchaseForecastsAsync(company.Id, [product1.Id]);

@@ -41,7 +41,7 @@ internal class ProductHelper(DatabaseFixture fixture)
             saveChanges: false
          );
 
-        product1.InventoryPolicy = InventoryPolicyHelper.CreateInventoryPolicy(
+        product1.InventoryPolicy = InventoryPolicyHelper.CreateInventoryPolicyStatic(
             product: product1,
             safetyStock: 5,
             leadTimeDays: 7,
@@ -69,7 +69,7 @@ internal class ProductHelper(DatabaseFixture fixture)
             saveChanges: false
          );
 
-        product2.InventoryPolicy = InventoryPolicyHelper.CreateInventoryPolicy(
+        product2.InventoryPolicy = InventoryPolicyHelper.CreateInventoryPolicyStatic(
             product: product2,
             safetyStock: 50,
             leadTimeDays: 7,
