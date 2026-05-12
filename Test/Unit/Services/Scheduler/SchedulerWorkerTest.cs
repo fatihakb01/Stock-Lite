@@ -38,7 +38,7 @@ public class SchedulerWorkerTest
     {
         var companyId = Guid.NewGuid();
 
-        var jobTask = SchedulerHelper.CreateJobTask();
+        var jobTask = SchedulerHelper.CreateJobTaskStatic();
         jobTask.CompanyId = companyId;
 
         var companyRepo = new Mock<ICompanyRepository>();
@@ -99,7 +99,7 @@ public class SchedulerWorkerTest
     {
         var companyId = Guid.NewGuid();
 
-        var jobTask = SchedulerHelper.CreateJobTask();
+        var jobTask = SchedulerHelper.CreateJobTaskStatic();
         jobTask.CompanyId = companyId;
 
         var companyRepo = new Mock<ICompanyRepository>();

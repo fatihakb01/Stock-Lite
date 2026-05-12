@@ -41,7 +41,7 @@ namespace Test.Unit.Services.Scheduler
             var (root, _) = SetupScopedProvider(_ => { });
             var dispatcher = new JobDispatcher(root.Object, null!);
 
-            var jobTask = SchedulerHelper.CreateJobTask();
+            var jobTask = SchedulerHelper.CreateJobTaskStatic();
             var job = new ScheduledJob
             {
                 Id = Guid.NewGuid(),
@@ -68,7 +68,7 @@ namespace Test.Unit.Services.Scheduler
             var (root, _) = SetupScopedProvider(_ => { });
             var dispatcher = new JobDispatcher(root.Object, null!);
 
-            var job = SchedulerHelper.CreateScheduledJob(jobType: JobType.Import);
+            var job = SchedulerHelper.CreateScheduledJobStatic(jobType: JobType.Import);
             job.ImportDataType = dataType;
             job.Source = source;
 
@@ -99,7 +99,7 @@ namespace Test.Unit.Services.Scheduler
 
             var dispatcher = new JobDispatcher(root.Object, null!);
 
-            var job = SchedulerHelper.CreateScheduledJob(jobType: JobType.Import);
+            var job = SchedulerHelper.CreateScheduledJobStatic(jobType: JobType.Import);
             job.ImportDataType = dataType;
             job.Source = "C:\\Data\\file.csv";
 
@@ -129,7 +129,7 @@ namespace Test.Unit.Services.Scheduler
                 scoped.Setup(p => p.GetService(serviceType)).Returns(service));
 
             var dispatcher = new JobDispatcher(root.Object, null!);
-            var job = SchedulerHelper.CreateScheduledJob(jobType: JobType.StandardCalculation);
+            var job = SchedulerHelper.CreateScheduledJobStatic(jobType: JobType.StandardCalculation);
             job.CalculationType = calculationType;
 
             await dispatcher.DispatchAsync(job, CancellationToken.None);
@@ -142,7 +142,7 @@ namespace Test.Unit.Services.Scheduler
         {
             var (root, _) = SetupScopedProvider(_ => { });
             var dispatcher = new JobDispatcher(root.Object, null!);
-            var job = SchedulerHelper.CreateScheduledJob(jobType: JobType.StandardCalculation);
+            var job = SchedulerHelper.CreateScheduledJobStatic(jobType: JobType.StandardCalculation);
             job.CalculationType = (StandardCalculationType) 99;
 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -158,7 +158,7 @@ namespace Test.Unit.Services.Scheduler
         {
             var (root, _) = SetupScopedProvider(_ => { });
             var dispatcher = new JobDispatcher(root.Object, null!);
-            var job = SchedulerHelper.CreateScheduledJob(jobType: JobType.CustomCalculation);
+            var job = SchedulerHelper.CreateScheduledJobStatic(jobType: JobType.CustomCalculation);
             job.Target = target;
 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -174,7 +174,7 @@ namespace Test.Unit.Services.Scheduler
         {
             var (root, _) = SetupScopedProvider(_ => { });
             var dispatcher = new JobDispatcher(root.Object, null!);
-            var job = SchedulerHelper.CreateScheduledJob(jobType: JobType.CustomCalculation);
+            var job = SchedulerHelper.CreateScheduledJobStatic(jobType: JobType.CustomCalculation);
             job.Target = target;
 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>

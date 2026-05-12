@@ -10,6 +10,7 @@ namespace Test.Integration.Repositories
         : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
     {
         private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
+        private readonly SchedulerHelper _schedulerHelper = new SchedulerHelper(fixture);
         private JobTaskRepository CreateRepository()
             => new JobTaskRepository(Fixture.Context);
 
@@ -22,18 +23,13 @@ namespace Test.Integration.Repositories
             var now = DateTime.UtcNow;
             var company = await _companyHelper.CreateCompany();
 
-            var task = SchedulerHelper.CreateJobTask(
+            var task = await _schedulerHelper.CreateJobTask(
                 name: "Test Task 1",
                 jobTaskKey: "TEST-1",
                 companyId: company.Id,
                 scheduledAt: now);
-            var jobs = SchedulerHelper.CreateScheduledJobs(jobTask: task, total: count);
-            var executions = SchedulerHelper.CreateJobExecutions(task.Id, jobs);
-
-            await Fixture.Context.JobTasks.AddAsync(task);
-            await Fixture.Context.ScheduledJobs.AddRangeAsync(jobs);
-            await Fixture.Context.JobExecutions.AddRangeAsync(executions);
-            await Fixture.Context.SaveChangesAsync();
+            var jobs = await _schedulerHelper.CreateScheduledJobs(jobTask: task, total: count);
+            var executions = await _schedulerHelper.CreateJobExecutions(task.Id, jobs);
 
             var result = await repo.GetJobsAndExecutionsAsync(task.Id, company.Id, CancellationToken.None);
             var expected = executions.OrderByDescending(x => x.StartedAt).Take(30).ToList();
@@ -51,21 +47,18 @@ namespace Test.Integration.Repositories
             var company = await _companyHelper.CreateCompany();
 
             // due
-            var task1 = SchedulerHelper.CreateJobTask(
+            var task1 = await _schedulerHelper.CreateJobTask(
                 name: "Test Task 1",
                 jobTaskKey: "TEST-1",
                 companyId: company.Id, 
                 scheduledAt: now.AddMinutes(-5));
 
             // future
-            var task2 = SchedulerHelper.CreateJobTask(
+            await _schedulerHelper.CreateJobTask(
                 name: "Test Task 2",
                 jobTaskKey: "TEST-2",
                 companyId: company.Id, 
                 scheduledAt: now.AddMinutes(5));
-
-            await Fixture.Context.JobTasks.AddRangeAsync(task1, task2);
-            await Fixture.Context.SaveChangesAsync();
 
             var result = await repo.GetNextDueTaskAsync(company.Id, now, CancellationToken.None);
 
@@ -78,11 +71,9 @@ namespace Test.Integration.Repositories
         {
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
+            var task = await _schedulerHelper.CreateJobTask(companyId: company.Id, scheduledAt: DateTime.UtcNow.AddMinutes(-1));
 
-            var task = SchedulerHelper.CreateJobTask(companyId: company.Id, scheduledAt: DateTime.UtcNow.AddMinutes(-1));
             task.IsArchived = true;
-
-            await Fixture.Context.JobTasks.AddAsync(task);
             await Fixture.Context.SaveChangesAsync();
 
             var result = await repo.GetNextDueTaskAsync(company.Id, DateTime.UtcNow, CancellationToken.None);
@@ -95,11 +86,9 @@ namespace Test.Integration.Repositories
         {
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
+            var task = await _schedulerHelper.CreateJobTask(companyId: company.Id, scheduledAt: DateTime.UtcNow.AddMinutes(-1));
 
-            var task = SchedulerHelper.CreateJobTask(companyId: company.Id, scheduledAt: DateTime.UtcNow.AddMinutes(-1));
             task.AllowManualTriggerOnly = true;
-
-            await Fixture.Context.JobTasks.AddAsync(task);
             await Fixture.Context.SaveChangesAsync();
 
             var result = await repo.GetNextDueTaskAsync(company.Id, DateTime.UtcNow, CancellationToken.None);
@@ -112,12 +101,10 @@ namespace Test.Integration.Repositories
         {
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
+            var task = await _schedulerHelper.CreateJobTask(companyId: company.Id, scheduledAt: DateTime.UtcNow.AddMinutes(-1));
 
-            var task = SchedulerHelper.CreateJobTask(companyId: company.Id, scheduledAt: DateTime.UtcNow.AddMinutes(-1));
             task.Retries = 3;
             task.MaxRetries = 3;
-
-            await Fixture.Context.JobTasks.AddAsync(task);
             await Fixture.Context.SaveChangesAsync();
 
             var result = await repo.GetNextDueTaskAsync(company.Id, DateTime.UtcNow, CancellationToken.None);
@@ -130,13 +117,11 @@ namespace Test.Integration.Repositories
         {
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
+            var task = await _schedulerHelper.CreateJobTask(companyId: company.Id);
 
-            var task = SchedulerHelper.CreateJobTask(companyId: company.Id);
             task.Result = JobExecutionStatus.Failed;
             task.Retries = 3;
             task.MaxRetries = 3;
-
-            await Fixture.Context.JobTasks.AddAsync(task);
             await Fixture.Context.SaveChangesAsync();
 
             var result = await repo.HasExhaustedTaskAsync(company.Id, CancellationToken.None);
@@ -149,7 +134,6 @@ namespace Test.Integration.Repositories
         {
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
-
             var result = await repo.HasExhaustedTaskAsync(company.Id, CancellationToken.None);
 
             Assert.False(result);
@@ -160,11 +144,9 @@ namespace Test.Integration.Repositories
         {
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
+            var task = await _schedulerHelper.CreateJobTask(companyId: company.Id);
 
-            var task = SchedulerHelper.CreateJobTask(companyId: company.Id);
             task.Result = JobExecutionStatus.Pending;
-
-            await Fixture.Context.JobTasks.AddAsync(task);
             await Fixture.Context.SaveChangesAsync();
 
             var result = await repo.TryLockTaskAsync(task.Id, DateTime.UtcNow);
@@ -182,11 +164,9 @@ namespace Test.Integration.Repositories
         {
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
+            var task = await _schedulerHelper.CreateJobTask(companyId: company.Id);
 
-            var task = SchedulerHelper.CreateJobTask(companyId: company.Id);
             task.Result = JobExecutionStatus.Running;
-
-            await Fixture.Context.JobTasks.AddAsync(task);
             await Fixture.Context.SaveChangesAsync();
 
             var result = await repo.TryLockTaskAsync(task.Id, DateTime.UtcNow);
@@ -199,12 +179,10 @@ namespace Test.Integration.Repositories
         {
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
+            var task = await _schedulerHelper.CreateJobTask(companyId: company.Id);
 
-            var task = SchedulerHelper.CreateJobTask(companyId: company.Id);
             task.Result = JobExecutionStatus.Failed;
             task.Retries = 5;
-
-            await Fixture.Context.JobTasks.AddAsync(task);
             await Fixture.Context.SaveChangesAsync();
 
             await repo.CleanJobTask(task.Id, CancellationToken.None);
@@ -223,7 +201,7 @@ namespace Test.Integration.Repositories
             var company = await _companyHelper.CreateCompany();
 
             // Create succeeded JobTasks
-            var tasks = SchedulerHelper.CreateJobTasks();
+            var tasks = await _schedulerHelper.CreateJobTasks(saveChanges: false);
 
             tasks.ForEach(t =>
             {
@@ -232,14 +210,12 @@ namespace Test.Integration.Repositories
                 t.IsArchived = false;
             });
 
-            await Fixture.Context.JobTasks.AddRangeAsync(tasks);
-
             // Create succeeded ScheduledJobs linked to tasks
             var scheduledJobs = new List<ScheduledJob>();
 
             foreach (var task in tasks)
             {
-                var jobs = SchedulerHelper.CreateScheduledJobs(task);
+                var jobs = await _schedulerHelper.CreateScheduledJobs(task);
 
                 jobs.ForEach(j =>
                 {
@@ -250,9 +226,7 @@ namespace Test.Integration.Repositories
                 scheduledJobs.AddRange(jobs);
             }
 
-            await Fixture.Context.ScheduledJobs.AddRangeAsync(scheduledJobs);
             await Fixture.Context.SaveChangesAsync();
-
             await repo.ResetScheduler(company.Id, CancellationToken.None);
             Fixture.Context.ChangeTracker.Clear();
 
@@ -270,7 +244,7 @@ namespace Test.Integration.Repositories
             var company = await _companyHelper.CreateCompany();
 
             // One succeeded task
-            var successTask = SchedulerHelper.CreateJobTask(
+            var successTask = await _schedulerHelper.CreateJobTask(
                 name: "Success Task",
                 jobTaskKey: "SUCCESS-TASK",
                 companyId: company.Id);
@@ -278,18 +252,16 @@ namespace Test.Integration.Repositories
             successTask.Result = JobExecutionStatus.Succeeded;
 
             // One failed task
-            var failedTask = SchedulerHelper.CreateJobTask(
+            var failedTask = await _schedulerHelper.CreateJobTask(
                 name: "Failed Task",
                 jobTaskKey: "FAILED-TASK",
                 companyId: company.Id);
 
             failedTask.Result = JobExecutionStatus.Failed;
 
-            await Fixture.Context.JobTasks.AddRangeAsync(successTask, failedTask);
-
             // Scheduled jobs linked to tasks
-            var successJobs = SchedulerHelper.CreateScheduledJobs(successTask);
-            var failedJobs = SchedulerHelper.CreateScheduledJobs(failedTask);
+            var successJobs = await _schedulerHelper.CreateScheduledJobs(successTask);
+            var failedJobs = await _schedulerHelper.CreateScheduledJobs(failedTask);
             var scheduledJobs = successJobs
                 .Concat(failedJobs)
                 .ToList();
@@ -300,9 +272,7 @@ namespace Test.Integration.Repositories
                 j.IsArchived = false;
             });
 
-            await Fixture.Context.ScheduledJobs.AddRangeAsync(scheduledJobs);
             await Fixture.Context.SaveChangesAsync();
-
             await repo.ResetScheduler(company.Id, CancellationToken.None);
             Fixture.Context.ChangeTracker.Clear();
 
@@ -321,19 +291,17 @@ namespace Test.Integration.Repositories
             var company = await _companyHelper.CreateCompany();
 
             // Create succeeded JobTask
-            var task = SchedulerHelper.CreateJobTask(
+            var task = await _schedulerHelper.CreateJobTask(
                 name: "Test Task",
                 jobTaskKey: "TEST-TASK",
                 companyId: company.Id);
 
             task.Result = JobExecutionStatus.Succeeded;
             task.IsArchived = false;
-
-            await Fixture.Context.JobTasks.AddAsync(task);
             await Fixture.Context.SaveChangesAsync();
 
             // Create active ScheduledJob
-            var activeJob = SchedulerHelper.CreateScheduledJob(
+            var activeJob = await _schedulerHelper.CreateScheduledJob(
                 executionOrder: 0,
                 name: "Active Job",
                 task: task);
@@ -341,16 +309,14 @@ namespace Test.Integration.Repositories
             activeJob.IsArchived = false;
 
             // Create archived ScheduledJob
-            var archivedJob = SchedulerHelper.CreateScheduledJob(
+            var archivedJob = await _schedulerHelper.CreateScheduledJob(
                 executionOrder: 1,
                 name: "Archived Job",
                 task: task);
             archivedJob.Result = JobExecutionStatus.Succeeded;
             archivedJob.IsArchived = true;
 
-            await Fixture.Context.ScheduledJobs.AddRangeAsync(activeJob, archivedJob);
             await Fixture.Context.SaveChangesAsync();
-
             await repo.ResetScheduler(company.Id, CancellationToken.None);
             Fixture.Context.ChangeTracker.Clear();
 

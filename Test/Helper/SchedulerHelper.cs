@@ -1,11 +1,46 @@
 ﻿using Domain.Entities.Core;
 using Domain.Enums;
+using Test.Integration.Helper;
 
 namespace Test.Helper
 {
-    internal static class SchedulerHelper
+    internal class SchedulerHelper(DatabaseFixture fixture)
     {
-        internal static JobTask CreateJobTask(
+        private readonly DatabaseFixture _fixture = fixture;
+        internal async Task<JobTask> CreateJobTask(
+            string name = "Test Task",
+            string jobTaskKey = "TEST-",
+            int retries = 0,
+            int maxRetries = 3,
+            int? retryDelayMinutes = 5,
+            bool allowManualTriggerOnly = false,
+            Period? periodType = Period.Daily,
+            DateTime? scheduledAt = null,
+            Guid? companyId = null,
+            bool saveChanges = true
+        )
+        {
+            var task = CreateJobTaskStatic(
+                name: name,
+                jobTaskKey: jobTaskKey,
+                retries: retries,
+                maxRetries: maxRetries,
+                retryDelayMinutes: retryDelayMinutes,
+                allowManualTriggerOnly: allowManualTriggerOnly,
+                periodType: periodType,
+                scheduledAt: scheduledAt,
+                companyId: companyId
+            );
+
+            await _fixture.Context.JobTasks.AddAsync(task);
+
+            if (saveChanges)
+                await _fixture.Context.SaveChangesAsync();
+
+            return task;
+        }
+
+        internal static JobTask CreateJobTaskStatic(
             string name = "Test Task",
             string jobTaskKey = "TEST-",
             int retries = 0,
@@ -31,7 +66,7 @@ namespace Test.Helper
             Company = null!
         };
 
-        internal static List<JobTask> CreateJobTasks(int total = 5)
+        internal async Task<List<JobTask>> CreateJobTasks(int total = 5, bool saveChanges = true)
         {
             List<JobTask> tasks = new List<JobTask>();
 
@@ -39,16 +74,21 @@ namespace Test.Helper
             {
                 string name = "Test Task " + i;
                 string jobTaskKey = "TEST-" + i;
-                JobTask task = CreateJobTask(name: name, jobTaskKey: jobTaskKey);
+                JobTask task = CreateJobTaskStatic(name: name, jobTaskKey: jobTaskKey);
                 tasks.Add(task);
             }
+
+            await _fixture.Context.JobTasks.AddRangeAsync(tasks);
+
+            if (saveChanges)
+                await _fixture.Context.SaveChangesAsync();
 
             return tasks;
         }
 
-        internal static ScheduledJob CreateScheduledJob(
-            string name = "Test Job", 
-            int executionOrder = 0, 
+        internal static ScheduledJob CreateScheduledJobStatic(
+            string name = "Test Job",
+            int executionOrder = 0,
             JobType jobType = JobType.Import,
             JobTask? task = null
         )
@@ -62,17 +102,43 @@ namespace Test.Helper
             };
         }
 
-        internal static List<ScheduledJob> CreateScheduledJobs(JobTask jobTask, JobType jobType = JobType.Import, int total = 5)
+        internal async Task<ScheduledJob> CreateScheduledJob(
+            string name = "Test Job", 
+            int executionOrder = 0, 
+            JobType jobType = JobType.Import,
+            JobTask? task = null,
+            bool saveChanges = true
+        )
+        {
+            var job = CreateScheduledJobStatic(
+                name: name,
+                executionOrder: executionOrder,
+                jobType: jobType,
+                task: task
+            );
+
+            await _fixture.Context.ScheduledJobs.AddAsync(job);
+
+            if (saveChanges)
+                await _fixture.Context.SaveChangesAsync();
+
+            return job;
+        }
+
+        internal async Task<List<ScheduledJob>> CreateScheduledJobs(JobTask jobTask, JobType jobType = JobType.Import, int total = 5)
         {
             List<ScheduledJob> jobs = new List<ScheduledJob>();
 
             for (int i = 1; i <= total; i++)
             {
                 string name = "Test Job " + i;
-                ScheduledJob job = CreateScheduledJob(name: name, executionOrder: i - 1, jobType: jobType, task: jobTask);
+                ScheduledJob job = CreateScheduledJobStatic(name: name, executionOrder: i - 1, jobType: jobType, task: jobTask);
 
                 jobs.Add(job);
             }
+
+            await _fixture.Context.ScheduledJobs.AddRangeAsync(jobs);
+            await _fixture.Context.SaveChangesAsync();
 
             return jobs;
         }
@@ -85,7 +151,7 @@ namespace Test.Helper
             JobTask? task = null
         )
         {
-            var jobTask = task ?? CreateJobTask();
+            var jobTask = task ?? CreateJobTaskStatic();
             return new ScheduledJob
             {
                 Id = Guid.NewGuid(),
@@ -109,7 +175,7 @@ namespace Test.Helper
             JobTask? task = null
         )
         {
-            var jobTask = task ?? CreateJobTask();
+            var jobTask = task ?? CreateJobTaskStatic();
             return new ScheduledJob
             {
                 Id = Guid.NewGuid(),
@@ -132,7 +198,7 @@ namespace Test.Helper
             JobTask? task = null
         )
         {
-            var jobTask = task ?? CreateJobTask();
+            var jobTask = task ?? CreateJobTaskStatic();
             return new ScheduledJob
             {
                 Id = Guid.NewGuid(),
@@ -147,7 +213,7 @@ namespace Test.Helper
             };
         }
 
-        internal static JobTaskExecution CreateJobTaskExecution(
+        private static JobTaskExecution CreateJobTaskExecution(
             Guid jobTaskId,
             JobTriggerType triggerType = JobTriggerType.Scheduled,
             JobExecutionStatus status = JobExecutionStatus.Running
@@ -161,7 +227,7 @@ namespace Test.Helper
             JobExecutions = []
         };
 
-        internal static JobExecution CreateJobExecution(
+        internal static JobExecution CreateJobExecutionStatic(
             Guid jobTaskId,
             Guid scheduledJobId,
             JobTriggerType triggerType = JobTriggerType.Scheduled,
@@ -182,23 +248,47 @@ namespace Test.Helper
             };
         }
 
+        internal async Task<JobExecution> CreateJobExecution(
+            Guid jobTaskId,
+            Guid scheduledJobId,
+            JobTriggerType triggerType = JobTriggerType.Scheduled,
+            JobExecutionStatus status = JobExecutionStatus.Running
+        )
+        {
+            var execution = CreateJobExecutionStatic(
+                jobTaskId: jobTaskId,
+                scheduledJobId: scheduledJobId,
+                triggerType: triggerType,
+                status: status
+            );
+
+            await _fixture.Context.JobExecutions.AddAsync(execution);
+            await _fixture.Context.SaveChangesAsync();
+
+            return execution;
+        }
+
         internal static (ScheduledJob job, JobTaskExecution taskExecution) CreateTaskAndExecution()
         {
-            var jobTask = CreateJobTask();
-            var job = CreateScheduledJob(task: jobTask);
+            var jobTask = CreateJobTaskStatic();
+            var job = CreateScheduledJobStatic(task: jobTask);
             var taskExecution = CreateJobTaskExecution(jobTask.Id);
+
             return (job, taskExecution);
         }
 
-        internal static List<JobExecution> CreateJobExecutions(Guid jobTaskId, List<ScheduledJob> jobs)
+        internal async Task<List<JobExecution>> CreateJobExecutions(Guid jobTaskId, List<ScheduledJob> jobs)
         {
             List<JobExecution> executions = new List<JobExecution>();
 
             foreach (var job in jobs)
             {
-                var execution = CreateJobExecution(jobTaskId, job.Id);
+                var execution = CreateJobExecutionStatic(jobTaskId, job.Id);
                 executions.Add(execution);
             }
+
+            await _fixture.Context.JobExecutions.AddRangeAsync(executions);
+            await _fixture.Context.SaveChangesAsync();
 
             return executions;
         }

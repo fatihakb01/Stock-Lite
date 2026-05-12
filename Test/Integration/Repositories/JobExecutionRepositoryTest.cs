@@ -8,6 +8,7 @@ namespace Test.Integration.Repositories
         : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
     {
         private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
+        private readonly SchedulerHelper _schedulerHelper = new SchedulerHelper(fixture);
         private JobExecutionRepository CreateRepository()
             => new JobExecutionRepository(Fixture.Context);
 
@@ -17,18 +18,13 @@ namespace Test.Integration.Repositories
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
 
-            var task = SchedulerHelper.CreateJobTask(
+            var task = await _schedulerHelper.CreateJobTask(
                 name: "Test Task",
                 jobTaskKey: "TEST-1",
                 companyId: company.Id);
 
-            var jobs = SchedulerHelper.CreateScheduledJobs(task, total: 5);
-            var executions = SchedulerHelper.CreateJobExecutions(task.Id, jobs);
-
-            await Fixture.Context.JobTasks.AddAsync(task);
-            await Fixture.Context.ScheduledJobs.AddRangeAsync(jobs);
-            await Fixture.Context.JobExecutions.AddRangeAsync(executions);
-            await Fixture.Context.SaveChangesAsync();
+            var jobs = await _schedulerHelper.CreateScheduledJobs(task, total: 5);
+            var executions = await _schedulerHelper.CreateJobExecutions(task.Id, jobs);
 
             var result = await repo.GetRecentExecutionAsync(
                 company.Id,
@@ -68,29 +64,22 @@ namespace Test.Integration.Repositories
             var company2 = await _companyHelper.CreateCompany("Company 2");
 
             // Company 1
-            var task1 = SchedulerHelper.CreateJobTask(
+            var task1 = await _schedulerHelper.CreateJobTask(
                 name: "Task 1",
                 jobTaskKey: "TASK-1",
                 companyId: company1.Id);
 
-            var jobs1 = SchedulerHelper.CreateScheduledJobs(task1, total: 3);
-            var executions1 = SchedulerHelper.CreateJobExecutions(task1.Id, jobs1);
+            var jobs1 = await _schedulerHelper.CreateScheduledJobs(task1, total: 3);
+            await _schedulerHelper.CreateJobExecutions(task1.Id, jobs1);
 
             // Company 2
-            var task2 = SchedulerHelper.CreateJobTask(
+            var task2 = await _schedulerHelper.CreateJobTask(
                 name: "Task 2",
                 jobTaskKey: "TASK-2",
                 companyId: company2.Id);
 
-            var jobs2 = SchedulerHelper.CreateScheduledJobs(task2, total: 2);
-            var executions2 = SchedulerHelper.CreateJobExecutions(task2.Id, jobs2);
-
-            await Fixture.Context.JobTasks.AddRangeAsync(task1, task2);
-            await Fixture.Context.ScheduledJobs.AddRangeAsync(jobs1);
-            await Fixture.Context.ScheduledJobs.AddRangeAsync(jobs2);
-            await Fixture.Context.JobExecutions.AddRangeAsync(executions1);
-            await Fixture.Context.JobExecutions.AddRangeAsync(executions2);
-            await Fixture.Context.SaveChangesAsync();
+            var jobs2 = await _schedulerHelper.CreateScheduledJobs(task2, total: 2);
+            await _schedulerHelper.CreateJobExecutions(task2.Id, jobs2);
 
             var result = await repo.GetRecentExecutionAsync(
                 company1.Id,
@@ -107,13 +96,13 @@ namespace Test.Integration.Repositories
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
 
-            var task = SchedulerHelper.CreateJobTask(
+            var task = await _schedulerHelper.CreateJobTask(
                 name: "Test Task",
                 jobTaskKey: "TEST-1",
                 companyId: company.Id);
 
-            var jobs = SchedulerHelper.CreateScheduledJobs(task, total: 2);
-            var executions = SchedulerHelper.CreateJobExecutions(task.Id, jobs);
+            var jobs = await _schedulerHelper.CreateScheduledJobs(task, total: 2);
+            var executions = await _schedulerHelper.CreateJobExecutions(task.Id, jobs);
 
             // Make one execution old
             executions[0].StartedAt = DateTime.UtcNow.AddDays(-40);
@@ -121,9 +110,6 @@ namespace Test.Integration.Repositories
             // Keep one recent
             executions[1].StartedAt = DateTime.UtcNow.AddDays(-5);
 
-            await Fixture.Context.JobTasks.AddAsync(task);
-            await Fixture.Context.ScheduledJobs.AddRangeAsync(jobs);
-            await Fixture.Context.JobExecutions.AddRangeAsync(executions);
             await Fixture.Context.SaveChangesAsync();
 
             var result = await repo.GetRecentExecutionAsync(
@@ -141,21 +127,18 @@ namespace Test.Integration.Repositories
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
 
-            var task = SchedulerHelper.CreateJobTask(
+            var task = await _schedulerHelper.CreateJobTask(
                 name: "Test Task",
                 jobTaskKey: "TEST-1",
                 companyId: company.Id);
 
-            var jobs = SchedulerHelper.CreateScheduledJobs(task, total: 3);
-            var executions = SchedulerHelper.CreateJobExecutions(task.Id, jobs);
+            var jobs = await _schedulerHelper.CreateScheduledJobs(task, total: 3);
+            var executions = await _schedulerHelper.CreateJobExecutions(task.Id, jobs);
 
             executions[0].StartedAt = DateTime.UtcNow.AddMinutes(-30);
             executions[1].StartedAt = DateTime.UtcNow.AddMinutes(-10);
             executions[2].StartedAt = DateTime.UtcNow.AddMinutes(-20);
 
-            await Fixture.Context.JobTasks.AddAsync(task);
-            await Fixture.Context.ScheduledJobs.AddRangeAsync(jobs);
-            await Fixture.Context.JobExecutions.AddRangeAsync(executions);
             await Fixture.Context.SaveChangesAsync();
 
             var result = await repo.GetRecentExecutionAsync(

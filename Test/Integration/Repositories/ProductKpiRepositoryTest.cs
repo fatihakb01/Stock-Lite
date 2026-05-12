@@ -11,6 +11,7 @@ namespace Test.Integration.Repositories
     {
         private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
         private readonly ProductHelper _productHelper = new ProductHelper(fixture);
+        private readonly SchedulerHelper _schedulerHelper = new SchedulerHelper(fixture);
         private ProductKpiRepository CreateRepository()
             => new ProductKpiRepository(Fixture.Context);
 
@@ -60,19 +61,18 @@ namespace Test.Integration.Repositories
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
 
-            var failedTask = SchedulerHelper.CreateJobTask(
+            var failedTask = await _schedulerHelper.CreateJobTask(
                 name: "Test Task 1",
                 jobTaskKey: "TEST-1",
                 companyId: company.Id);
             failedTask.Result = JobExecutionStatus.Failed;
 
-            var runningTask = SchedulerHelper.CreateJobTask(
+            var runningTask = await _schedulerHelper.CreateJobTask(
                 name: "Test Task 2",
                 jobTaskKey: "TEST-2",
                 companyId: company.Id);
             runningTask.Result = JobExecutionStatus.Running;
 
-            await Fixture.Context.JobTasks.AddRangeAsync(failedTask, runningTask);
             await Fixture.Context.SaveChangesAsync();
 
             var result = await repo.GetSchedulerStatus(company.Id, CancellationToken.None);
@@ -86,19 +86,18 @@ namespace Test.Integration.Repositories
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
 
-            var runningTask = SchedulerHelper.CreateJobTask(
+            var runningTask = await _schedulerHelper.CreateJobTask(
                 name: "Test Task 1",
                 jobTaskKey: "TEST-1",
                 companyId: company.Id);
             runningTask.Result = JobExecutionStatus.Running;
 
-            var succeededTask = SchedulerHelper.CreateJobTask(
+            var succeededTask = await _schedulerHelper.CreateJobTask(
                 name: "Test Task 2",
                 jobTaskKey: "TEST-2",
                 companyId: company.Id);
             succeededTask.Result = JobExecutionStatus.Succeeded;
 
-            await Fixture.Context.JobTasks.AddRangeAsync(runningTask, succeededTask);
             await Fixture.Context.SaveChangesAsync();
 
             var result = await repo.GetSchedulerStatus(company.Id, CancellationToken.None);
@@ -112,10 +111,9 @@ namespace Test.Integration.Repositories
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
 
-            var task = SchedulerHelper.CreateJobTask(companyId: company.Id);
+            var task = await _schedulerHelper.CreateJobTask(companyId: company.Id);
             task.Result = JobExecutionStatus.Running;
 
-            await Fixture.Context.JobTasks.AddAsync(task);
             await Fixture.Context.SaveChangesAsync();
 
             await repo.UpdateSchedulerStatus(company.Id, CancellationToken.None);
@@ -137,11 +135,10 @@ namespace Test.Integration.Repositories
                 SchedulerStatus = JobExecutionStatus.Pending
             };
 
-            var task = SchedulerHelper.CreateJobTask(companyId: company.Id);
+            var task = await _schedulerHelper.CreateJobTask(companyId: company.Id);
             task.Result = JobExecutionStatus.Failed;
 
             await Fixture.Context.ProductKpis.AddAsync(kpi);
-            await Fixture.Context.JobTasks.AddAsync(task);
             await Fixture.Context.SaveChangesAsync();
 
             await repo.UpdateSchedulerStatus(company.Id, CancellationToken.None);
@@ -158,12 +155,9 @@ namespace Test.Integration.Repositories
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
 
-            var task = SchedulerHelper.CreateJobTask(companyId: company.Id);
+            var task = await _schedulerHelper.CreateJobTask(companyId: company.Id);
             task.Result = JobExecutionStatus.Succeeded;
-
-            await Fixture.Context.JobTasks.AddAsync(task);
-
-            var products = await _productHelper.CreateProducts(company);
+            await _productHelper.CreateProducts(company);
 
             await repo.UpdateProductKpis(company.Id, CancellationToken.None);
 
@@ -198,10 +192,8 @@ namespace Test.Integration.Repositories
 
             await Fixture.Context.ProductKpis.AddAsync(existing);
 
-            var task = SchedulerHelper.CreateJobTask(companyId: company.Id);
+            var task = await _schedulerHelper.CreateJobTask(companyId: company.Id);
             task.Result = JobExecutionStatus.Failed;
-
-            await Fixture.Context.JobTasks.AddAsync(task);
 
             var products = await _productHelper.CreateProducts(company);
 
