@@ -16,6 +16,7 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
     private readonly ForecastHelper _forecastHelper = new ForecastHelper(fixture);
     private readonly InventoryPolicyHelper _inventoryPolicyHelper = new InventoryPolicyHelper(fixture);
     private readonly ConfirmedOrderHelper _coHelper = new ConfirmedOrderHelper(fixture);
+    private readonly PurchaseOrderHelper _poHelper = new PurchaseOrderHelper(fixture);
     private readonly DateTime _now = DateTime.UtcNow.Date;
 
     private PurchaseForecastRepository CreateRepository() => new PurchaseForecastRepository(Fixture.Context);
@@ -370,17 +371,14 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
             leadTimeDays: 7);
 
         // Add enough received purchase orders to create high QuantityOnHand
-        var po = PurchaseOrderHelper.CreatePurchaseOrder(
+        var po = await _poHelper.CreatePurchaseOrder(
             company, 
             status: PurchaseOrderStatus.Completed,
             expectedDeliveryDate: _now,
             receivedDate: _now);
-        await Fixture.Context.PurchaseOrder.AddAsync(po);
 
-        var poLine = PurchaseOrderHelper.CreatePurchaseOrderLineItem(
+        await _poHelper.CreatePurchaseOrderLineItem(
             po, product, quantity: 1000, receivedQuantity: 1000);
-        await Fixture.Context.PurchaseOrderLineItem.AddAsync(poLine);
-        await Fixture.Context.SaveChangesAsync();
 
         await repo.InsertPurchaseForecastsAsync(company.Id, [product.Id]);
         await repo.UpdatePurchaseForecastsAsync(company.Id, [product.Id]);
@@ -398,16 +396,13 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
 
         // Open purchase order arriving this week
         var startDate = DateHelper.GetPeriodStartDate(Period.Weekly);
-        var po = PurchaseOrderHelper.CreatePurchaseOrder(
+        var po = await _poHelper.CreatePurchaseOrder(
             company,
             expectedDeliveryDate: startDate.AddDays(3),
             status: PurchaseOrderStatus.Draft);
-        await Fixture.Context.PurchaseOrder.AddAsync(po);
 
-        var poLine = PurchaseOrderHelper.CreatePurchaseOrderLineItem(
+        await _poHelper.CreatePurchaseOrderLineItem(
             po, product, quantity: 50, receivedQuantity: 0);
-        await Fixture.Context.PurchaseOrderLineItem.AddAsync(poLine);
-        await Fixture.Context.SaveChangesAsync();
 
         await repo.InsertPurchaseForecastsAsync(company.Id, [product.Id]);
         await repo.UpdatePurchaseForecastsAsync(company.Id, [product.Id]);

@@ -1,43 +1,61 @@
 ﻿using Domain.Entities.Core;
 using Domain.Enums;
+using Test.Integration.Helper;
 
 namespace Test.Helper
 {
-    internal static class PurchaseOrderHelper
+    internal class PurchaseOrderHelper(DatabaseFixture fixture)
     {
+        private readonly DatabaseFixture _fixture = fixture;
         private readonly static DateTime Now = DateTime.UtcNow.Date;
-        internal static PurchaseOrder CreatePurchaseOrder(
+        internal async Task<PurchaseOrder> CreatePurchaseOrder(
             Company company,
             string orderNumber = "PO-0001",
             DateTime? expectedDeliveryDate = null,
             DateTime? receivedDate = null,
             PurchaseOrderStatus status = PurchaseOrderStatus.Completed
-        ) => new PurchaseOrder
+        )
         {
-            CompanyId = company.Id,
-            Company = company,
-            OrderNumber = orderNumber,
-            OrderDate = Now,
-            ExpectedDeliveryDate = expectedDeliveryDate ?? Now.AddDays(7),
-            ReceivedDate = receivedDate,
-            Status = status
-        };
+            var po = new PurchaseOrder
+            {
+                CompanyId = company.Id,
+                Company = company,
+                OrderNumber = orderNumber,
+                OrderDate = Now,
+                ExpectedDeliveryDate = expectedDeliveryDate ?? Now.AddDays(7),
+                ReceivedDate = receivedDate,
+                Status = status
+            };
 
-        internal static PurchaseOrderLineItem CreatePurchaseOrderLineItem(
+            await _fixture.Context.PurchaseOrder.AddAsync(po);
+            await _fixture.Context.SaveChangesAsync();
+
+            return po;
+        }
+
+        internal async Task<PurchaseOrderLineItem> CreatePurchaseOrderLineItem(
             PurchaseOrder order,
             Product product,
             int quantity = 20,
             int receivedQuantity = 0,
             decimal unitCost = 10
-        ) => new PurchaseOrderLineItem
+        )
         {
-            PurchaseOrderId = order.Id,
-            PurchaseOrder = order,
-            ProductId = product.Id,
-            Product = product,
-            Quantity = quantity,
-            ReceivedQuantity = receivedQuantity,
-            UnitCost = unitCost
-        };
+            var poli = new PurchaseOrderLineItem
+            {
+                PurchaseOrderId = order.Id,
+                PurchaseOrder = order,
+                ProductId = product.Id,
+                Product = product,
+                Quantity = quantity,
+                ReceivedQuantity = receivedQuantity,
+                UnitCost = unitCost
+            };
+
+            await _fixture.Context.PurchaseOrderLineItem.AddAsync(poli);
+            await _fixture.Context.SaveChangesAsync();
+
+            return poli;
+        }
     }
 }
