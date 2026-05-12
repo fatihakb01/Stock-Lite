@@ -1,30 +1,47 @@
 ﻿using Domain.Entities.Core;
-using Domain.Entities.Derived;
+using Test.Integration.Helper;
 
 namespace Test.Helper;
 
-internal static class ProductHelper
+internal class ProductHelper(DatabaseFixture fixture)
 {
-    internal static Product CreateProduct(
+    private readonly DatabaseFixture _fixture = fixture;
+    internal async Task<Product> CreateProduct(
         Company company,
         string name = "Test Product",
         string sku = "SKU-0001",
-        decimal price = 10
-    ) => new Product
+        decimal price = 10,
+        bool saveChanges = true
+    )
     {
-        Name = name,
-        SKU = sku,
-        Price = price,
-        CompanyId = company.Id,
-        Company = company
-    };
+        var product = new Product
+        {
+            Name = name,
+            SKU = sku,
+            Price = price,
+            CompanyId = company.Id,
+            Company = company
+        };
+
+        await _fixture.Context.Products.AddAsync(product);
+
+        if (saveChanges)
+            await _fixture.Context.SaveChangesAsync();
+
+        return product;
+    }
     
 
-    internal static List<Product> CreateProducts(Company company)
+    internal async Task<List<Product>> CreateProducts(Company company)
     {
-        var product1 = CreateProduct(company: company, name: "Product 1", sku: "SKU-0001");
+        var product1 = await CreateProduct(
+            company: company, 
+            name: "Product 1", 
+            sku: "SKU-0001",
+            saveChanges: false
+         );
 
-        product1.InventoryPolicy =InventoryPolicyHelper.CreateInventoryPolicy(
+        product1.InventoryPolicy = InventoryPolicyHelper.CreateInventoryPolicy(
             product: product1,
             safetyStock: 5,
             leadTimeDays: 7,
@@ -45,7 +62,12 @@ internal static class ProductHelper
             recommendedOrderQuantity: 2
         );
 
-        var product2 = CreateProduct(company: company, name: "Product 2", sku: "SKU-0002");
+        var product2 = await CreateProduct(
+            company: company, 
+            name: "Product 2", 
+            sku: "SKU-0002",
+            saveChanges: false
+         );
 
         product2.InventoryPolicy = InventoryPolicyHelper.CreateInventoryPolicy(
             product: product2,
@@ -67,6 +89,9 @@ internal static class ProductHelper
             needsReorder: false,
             recommendedOrderQuantity: 0
         );
+
+        await _fixture.Context.Products.AddRangeAsync(product1, product2);
+        await _fixture.Context.SaveChangesAsync();
 
         return [product1, product2];
     }

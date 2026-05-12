@@ -10,6 +10,7 @@ namespace Test.Integration.Repositories
         : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
     {
         private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
+        private readonly ProductHelper _productHelper = new ProductHelper(fixture);
         private ProductKpiRepository CreateRepository()
             => new ProductKpiRepository(Fixture.Context);
 
@@ -162,10 +163,8 @@ namespace Test.Integration.Repositories
 
             await Fixture.Context.JobTasks.AddAsync(task);
 
-            var products = ProductHelper.CreateProducts(company);
+            var products = await _productHelper.CreateProducts(company);
 
-            await Fixture.Context.Products.AddRangeAsync(products);
-            await Fixture.Context.SaveChangesAsync();
             await repo.UpdateProductKpis(company.Id, CancellationToken.None);
 
             Fixture.Context.ChangeTracker.Clear();
@@ -204,10 +203,8 @@ namespace Test.Integration.Repositories
 
             await Fixture.Context.JobTasks.AddAsync(task);
 
-            var products = ProductHelper.CreateProducts(company);
+            var products = await _productHelper.CreateProducts(company);
 
-            Fixture.Context.Products.AddRange(products);
-            await Fixture.Context.SaveChangesAsync();
             await repo.UpdateProductKpis(company.Id, CancellationToken.None);
 
             Fixture.Context.ChangeTracker.Clear();

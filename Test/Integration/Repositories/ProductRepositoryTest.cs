@@ -9,6 +9,7 @@ namespace Test.Integration.Repositories
         : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
     {
         private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
+        private readonly ProductHelper _productHelper = new ProductHelper(fixture);
         private ProductRepository CreateRepository()
             => new ProductRepository(Fixture.Context);
 
@@ -17,10 +18,7 @@ namespace Test.Integration.Repositories
         {
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
-            var products = ProductHelper.CreateProducts(company);
-
-            await Fixture.Context.Products.AddRangeAsync(products);
-            await Fixture.Context.SaveChangesAsync();
+            var products = await _productHelper.CreateProducts(company);
 
             var result = await repo.GetFilteredProducts(
                 null,
@@ -36,10 +34,7 @@ namespace Test.Integration.Repositories
         {
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
-            var products = ProductHelper.CreateProducts(company);
-
-            await Fixture.Context.Products.AddRangeAsync(products);
-            await Fixture.Context.SaveChangesAsync();
+            var products = await _productHelper.CreateProducts(company);
 
             var result = await repo.GetFilteredProducts(
                 ProductFilter.BelowSafetyStock,
@@ -63,10 +58,7 @@ namespace Test.Integration.Repositories
         {
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
-            var products = ProductHelper.CreateProducts(company);
-
-            await Fixture.Context.Products.AddRangeAsync(products);
-            await Fixture.Context.SaveChangesAsync();
+            var products = await _productHelper.CreateProducts(company);
 
             var result = await repo.GetFilteredProducts(
                 ProductFilter.WithRecommendedOrders,
@@ -87,10 +79,7 @@ namespace Test.Integration.Repositories
         {
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
-            var products = ProductHelper.CreateProducts(company);
-
-            await Fixture.Context.Products.AddRangeAsync(products);
-            await Fixture.Context.SaveChangesAsync();
+            var products = await _productHelper.CreateProducts(company);
 
             var result = await repo.GetFilteredProducts(
                 ProductFilter.WithoutStockAtLeadTime,
@@ -111,10 +100,7 @@ namespace Test.Integration.Repositories
         {
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
-            var products = ProductHelper.CreateProducts(company);
-
-            await Fixture.Context.Products.AddRangeAsync(products);
-            await Fixture.Context.SaveChangesAsync();
+            var products = await _productHelper.CreateProducts(company);
 
             var result = await repo.GetFilteredProducts(
                 ProductFilter.WithoutForecast,
@@ -137,13 +123,8 @@ namespace Test.Integration.Repositories
             var company1 = await _companyHelper.CreateCompany();
             var company2 = await _companyHelper.CreateCompany();
 
-            var company1Products = ProductHelper.CreateProducts(company1);
-            var company2Products = ProductHelper.CreateProducts(company2);
-
-            await Fixture.Context.Products.AddRangeAsync(company1Products);
-            await Fixture.Context.Products.AddRangeAsync(company2Products);
-
-            await Fixture.Context.SaveChangesAsync();
+            await _productHelper.CreateProducts(company1);
+            await _productHelper.CreateProducts(company2);
 
             var result = await repo.GetFilteredProducts(
                 null,
