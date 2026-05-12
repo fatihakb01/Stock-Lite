@@ -15,6 +15,7 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
     private readonly ProductHelper _productHelper = new ProductHelper(fixture);
     private readonly PurchaseForecastHelper _purchaseForecastHelper = new PurchaseForecastHelper(fixture);
     private readonly ForecastHelper _forecastHelper = new(fixture);
+    private readonly ConfirmedOrderHelper _coHelper = new ConfirmedOrderHelper(fixture);
     private readonly DateTime _now = DateTime.UtcNow.Date;
 
     private PurchaseForecastRepository CreateRepository() => new PurchaseForecastRepository(Fixture.Context);
@@ -443,16 +444,16 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
 
         // Open confirmed order arriving this week
         var startDate = DateHelper.GetPeriodStartDate(Period.Weekly);
-        var co = ConfirmedOrderHelper.CreateConfirmedOrder(
+        var co = await _coHelper.CreateConfirmedOrder(
             company,
             expectedDeliveryDate: startDate.AddDays(3),
             status: ConfirmedOrderStatus.Confirmed);
-        await Fixture.Context.ConfirmedOrder.AddAsync(co);
 
-        var coLine = ConfirmedOrderHelper.CreateConfirmedOrderLineItem(
-            co, product, quantity: 50, soldQuantity: 0);
-        await Fixture.Context.ConfirmedOrderLineItem.AddAsync(coLine);
-        await Fixture.Context.SaveChangesAsync();
+        await _coHelper.CreateConfirmedOrderLineItem(
+            co, 
+            product, 
+            quantity: 50, 
+            soldQuantity: 0);
 
         await repo.InsertPurchaseForecastsAsync(company.Id, [product.Id]);
         await repo.UpdatePurchaseForecastsAsync(company.Id, [product.Id]);
