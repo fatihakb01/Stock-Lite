@@ -39,9 +39,7 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
         var company = await _companyHelper.CreateCompany();
         var product = await _productHelper.CreateProduct(company);
 
-        var forecast = ForecastHelper.CreateForecast(product, period);
-        await Fixture.Context.Forecasts.AddAsync(forecast);
-        await Fixture.Context.SaveChangesAsync();
+        await _forecastHelper.CreateForecast(product, period);
 
         var result = await repo.GetForecastByProductAsync(product.Id, period);
 
@@ -179,14 +177,11 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
         var product = await _productHelper.CreateProduct(company);
 
         // Seed a past forecast — PeriodEndDate in the past
-        var pastForecast = ForecastHelper.CreateForecast(
+        await _forecastHelper.CreateForecast(
             product,
             period,
             periodStartDate: _now.AddMonths(-2),
             periodEndDate: _now.AddMonths(-1));
-
-        await Fixture.Context.Forecasts.AddAsync(pastForecast);
-        await Fixture.Context.SaveChangesAsync();
 
         await repo.DeleteForecastsAsync(company.Id, [product.Id], period);
         int count = await _forecastHelper.GetForecastCountAsync(product.Id, period);
@@ -203,14 +198,11 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
         var product = await _productHelper.CreateProduct(company);
 
         // Future forecast — should survive deletion
-        var futureForecast = ForecastHelper.CreateForecast(
+        await _forecastHelper.CreateForecast(
             product,
             period,
             periodStartDate: _now,
             periodEndDate: _now.AddMonths(1));
-
-        await Fixture.Context.Forecasts.AddAsync(futureForecast);
-        await Fixture.Context.SaveChangesAsync();
 
         await repo.DeleteForecastsAsync(company.Id, [product.Id], period);
         int count = await _forecastHelper.GetForecastCountAsync(product.Id, period);
@@ -228,18 +220,15 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
         var product1 = await _productHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
         var product2 = await _productHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-        var pastForecast1 = ForecastHelper.CreateForecast(
+        await _forecastHelper.CreateForecast(
             product1, period,
             periodStartDate: _now.AddMonths(-2),
             periodEndDate: _now.AddMonths(-1));
 
-        var pastForecast2 = ForecastHelper.CreateForecast(
+        await _forecastHelper.CreateForecast(
             product2, period,
             periodStartDate: _now.AddMonths(-2),
             periodEndDate: _now.AddMonths(-1));
-
-        await Fixture.Context.Forecasts.AddRangeAsync(pastForecast1, pastForecast2);
-        await Fixture.Context.SaveChangesAsync();
 
         // Only delete for product1
         await repo.DeleteForecastsAsync(company.Id, [product1.Id], period);
@@ -260,18 +249,15 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
         var product1 = await _productHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
         var product2 = await _productHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-        var pastForecast1 = ForecastHelper.CreateForecast(
+        await _forecastHelper.CreateForecast(
             product1, period,
             periodStartDate: _now.AddMonths(-2),
             periodEndDate: _now.AddMonths(-1));
 
-        var pastForecast2 = ForecastHelper.CreateForecast(
-            product2, Period.Monthly,
+        await _forecastHelper.CreateForecast(
+            product2, period,
             periodStartDate: _now.AddMonths(-2),
             periodEndDate: _now.AddMonths(-1));
-
-        await Fixture.Context.Forecasts.AddRangeAsync(pastForecast1, pastForecast2);
-        await Fixture.Context.SaveChangesAsync();
 
         await repo.DeleteForecastsAsync(company.Id, [], period);
         int count1 = await _forecastHelper.GetForecastCountAsync(product1.Id, period);
@@ -292,18 +278,15 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
         var product1 = await _productHelper.CreateProduct(company1, name: "Product 1", sku: "SKU-0001");
         var product2 = await _productHelper.CreateProduct(company2, name: "Product 2", sku: "SKU-0002");
 
-        var pastForecast1 = ForecastHelper.CreateForecast(
+        await _forecastHelper.CreateForecast(
             product1, period,
             periodStartDate: _now.AddMonths(-2),
             periodEndDate: _now.AddMonths(-1));
 
-        var pastForecast2 = ForecastHelper.CreateForecast(
+        await _forecastHelper.CreateForecast(
             product2, period,
             periodStartDate: _now.AddMonths(-2),
             periodEndDate: _now.AddMonths(-1));
-
-        await Fixture.Context.Forecasts.AddRangeAsync(pastForecast1, pastForecast2);
-        await Fixture.Context.SaveChangesAsync();
 
         await repo.DeleteForecastsAsync(company1.Id, [product1.Id], period);
         int count1 = await _forecastHelper.GetForecastCountAsync(product1.Id, period);
@@ -411,7 +394,6 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
 
         await _forecastHelper.SeedForecastDependenciesAsync(product1, 100, 1000, Period.Monthly);
         await _forecastHelper.SeedForecastDependenciesAsync(product2, 200, 2000, Period.Monthly);
-        await Fixture.Context.SaveChangesAsync();
 
         await repo.InsertForecastsAsync(
             company.Id,
@@ -453,7 +435,6 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
 
         await _forecastHelper.SeedForecastDependenciesAsync(product1, 100, 1000, Period.Monthly);
         await _forecastHelper.SeedForecastDependenciesAsync(product2, 200, 2000, Period.Monthly);
-        await Fixture.Context.SaveChangesAsync();
 
         await repo.InsertForecastsAsync(
             company.Id,
@@ -496,7 +477,6 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
 
         await _forecastHelper.SeedForecastDependenciesAsync(product1, 100, 1000, Period.Monthly);
         await _forecastHelper.SeedForecastDependenciesAsync(product2, 200, 2000, Period.Monthly);
-        await Fixture.Context.SaveChangesAsync();
 
         await repo.InsertForecastsAsync(
             company1.Id,

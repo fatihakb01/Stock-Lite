@@ -9,7 +9,7 @@ namespace Test.Helper
     internal class ForecastHelper(DatabaseFixture fixture)
     {
         private readonly DatabaseFixture _fixture = fixture;
-        internal static Forecast CreateForecast(
+        internal async Task<Forecast> CreateForecast(
             Product product,
             Period period,
             decimal predictedQuantity = 100,
@@ -29,6 +29,9 @@ namespace Test.Helper
                 PredictedRevenue = predictedRevenue,
                 Confidence = 0.50
             };
+
+            await _fixture.Context.Forecasts.AddAsync(forecast);
+            await _fixture.Context.SaveChangesAsync();
 
             return forecast;
         }
@@ -75,9 +78,10 @@ namespace Test.Helper
 
             await _fixture.Context.SalesAggregates.AddAsync(aggregate);
             await _fixture.Context.Seasonality.AddAsync(seasonality);
+            await _fixture.Context.SaveChangesAsync();
         }
 
-        internal async Task SeedWeeklyForecastsAsync(
+        internal async Task<List<Forecast>> SeedWeeklyForecastsAsync(
             Product product, 
             decimal predictedQuantity = 100,
             decimal predictedRevenue = 1000
@@ -99,6 +103,9 @@ namespace Test.Helper
             }).ToList();
 
             await _fixture.Context.Forecasts.AddRangeAsync(forecasts);
+            await _fixture.Context.SaveChangesAsync();
+
+            return forecasts;
         }
     }
 }
