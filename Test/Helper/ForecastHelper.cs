@@ -9,6 +9,8 @@ namespace Test.Helper
     internal class ForecastHelper(DatabaseFixture fixture)
     {
         private readonly DatabaseFixture _fixture = fixture;
+        private readonly SalesAggregateHelper _salesHelper = new SalesAggregateHelper(fixture);
+
         internal async Task<Forecast> CreateForecast(
             Product product,
             Period period,
@@ -73,10 +75,9 @@ namespace Test.Helper
             decimal revenue,
             Period period)
         {
-            var aggregate = SalesAggregateHelper.CreateSalesAggregate(product, period, quantity, revenue);
+            await _salesHelper.CreateSalesAggregate(product, period, quantity, revenue);
             var seasonality = SeasonalityHelper.CreateSeasonality(product, 1);
 
-            await _fixture.Context.SalesAggregates.AddAsync(aggregate);
             await _fixture.Context.Seasonality.AddAsync(seasonality);
             await _fixture.Context.SaveChangesAsync();
         }

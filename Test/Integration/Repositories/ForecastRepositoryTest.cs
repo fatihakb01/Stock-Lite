@@ -10,6 +10,7 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
 {
     private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
     private readonly ProductHelper _productHelper = new ProductHelper(fixture);
+    private readonly SalesAggregateHelper _salesHelper = new SalesAggregateHelper(fixture);
     private readonly ForecastHelper _forecastHelper = new ForecastHelper(fixture);
     private readonly DateTime _now = DateTime.UtcNow.Date;
 
@@ -306,8 +307,7 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
         var product = await _productHelper.CreateProduct(company);
 
         // monthly sales needed for forecast calculation
-        var aggregate = SalesAggregateHelper.CreateSalesAggregate(product, Period.Monthly);
-        await Fixture.Context.SalesAggregates.AddAsync(aggregate);
+        await _salesHelper.CreateSalesAggregate(product, Period.Monthly);
 
         var seasonality = SeasonalityHelper.CreateSeasonality(product, 1);
         await Fixture.Context.Seasonality.AddAsync(seasonality);
@@ -339,8 +339,7 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
         var company = await _companyHelper.CreateCompany();
         var product = await _productHelper.CreateProduct(company);
 
-        var aggregate = SalesAggregateHelper.CreateSalesAggregate(product, Period.Monthly);
-        await Fixture.Context.SalesAggregates.AddAsync(aggregate);
+        await _salesHelper.CreateSalesAggregate(product, Period.Monthly);
 
         var seasonality = SeasonalityHelper.CreateSeasonality(product, 1);
         await Fixture.Context.Seasonality.AddAsync(seasonality);

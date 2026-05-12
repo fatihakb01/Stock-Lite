@@ -9,7 +9,31 @@ namespace Test.Helper
     internal class SalesAggregateHelper(DatabaseFixture fixture)
     {
         private readonly DatabaseFixture _fixture = fixture;
-        internal static SalesAggregate CreateSalesAggregate(
+        internal async Task<SalesAggregate> CreateSalesAggregate(
+            Product product,
+            Period period,
+            int totalQuantity = 100,
+            decimal totalRevenue = 1000,
+            DateTime? periodStartDate = null,
+            DateTime? periodEndDate = null
+        )
+        {
+            var sales = CreateSalesAggregateStatic(
+                product: product,
+                period: period,
+                totalQuantity: totalQuantity,
+                totalRevenue: totalRevenue,
+                periodStartDate: periodStartDate,
+                periodEndDate: periodEndDate
+            );
+
+            await _fixture.Context.SalesAggregates.AddAsync(sales);
+            await _fixture.Context.SaveChangesAsync();
+
+            return sales;
+        }
+
+        internal static SalesAggregate CreateSalesAggregateStatic(
             Product product,
             Period period,
             int totalQuantity = 100,
@@ -27,7 +51,7 @@ namespace Test.Helper
             TotalRevenue = totalRevenue
         };
 
-        internal static List<SalesAggregate> CreateSalesAggregates(
+        internal async Task<List<SalesAggregate>> CreateSalesAggregates(
             Product product,
             DateTime now,
             int months = 12
@@ -40,7 +64,7 @@ namespace Test.Helper
                 var start = new DateTime(now.Year, now.Month, 1).AddMonths(-i - 1);
                 var quantity = i == 0 ? 1000 : 100;
 
-                var aggregate = CreateSalesAggregate(
+                var aggregate = CreateSalesAggregateStatic(
                     product,
                     Period.Monthly,
                     totalQuantity: quantity,
@@ -50,6 +74,9 @@ namespace Test.Helper
 
                 aggregates.Add(aggregate);
             }
+
+            await _fixture.Context.SalesAggregates.AddRangeAsync(aggregates);
+            await _fixture.Context.SaveChangesAsync();
 
             return aggregates;
         }

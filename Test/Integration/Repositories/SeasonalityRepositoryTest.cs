@@ -10,6 +10,7 @@ namespace Test.Integration.Repositories
     {
         private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
         private readonly ProductHelper _productHelper = new ProductHelper(fixture);
+        private readonly SalesAggregateHelper _salesHelper = new SalesAggregateHelper(fixture);
         private readonly DateTime _now = DateTime.UtcNow.Date;
 
         private SeasonalityRepository CreateRepository() =>
@@ -184,9 +185,7 @@ namespace Test.Integration.Repositories
             var company = await _companyHelper.CreateCompany();
             var product = await _productHelper.CreateProduct(company);
 
-            var aggregates = SalesAggregateHelper.CreateSalesAggregates(product, _now, 12);
-            await Fixture.Context.SalesAggregates.AddRangeAsync(aggregates);
-            await Fixture.Context.SaveChangesAsync();
+            await _salesHelper.CreateSalesAggregates(product, _now, 12);
 
             await repo.InsertSeasonalityAsync(company.Id, [product.Id]);
             await repo.UpdateSeasonalityAsync(company.Id, [product.Id]);
@@ -205,9 +204,7 @@ namespace Test.Integration.Repositories
             var company = await _companyHelper.CreateCompany();
             var product = await _productHelper.CreateProduct(company);
 
-            var aggregates = SalesAggregateHelper.CreateSalesAggregates(product, _now, 6);
-            await Fixture.Context.SalesAggregates.AddRangeAsync(aggregates);
-            await Fixture.Context.SaveChangesAsync();
+            await _salesHelper.CreateSalesAggregates(product, _now, 6);
 
             await repo.InsertSeasonalityAsync(company.Id, [product.Id]);
             await repo.UpdateSeasonalityAsync(company.Id, [product.Id]);
@@ -228,12 +225,8 @@ namespace Test.Integration.Repositories
             var product1 = await _productHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
             var product2 = await _productHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-            var aggregates1 = SalesAggregateHelper.CreateSalesAggregates(product1, _now, 12);
-            var aggregates2 = SalesAggregateHelper.CreateSalesAggregates(product2, _now, 12);
-
-            await Fixture.Context.SalesAggregates.AddRangeAsync(aggregates1);
-            await Fixture.Context.SalesAggregates.AddRangeAsync(aggregates2);
-            await Fixture.Context.SaveChangesAsync();
+            await _salesHelper.CreateSalesAggregates(product1, _now, 12);
+            await _salesHelper.CreateSalesAggregates(product2, _now, 12);
 
             await repo.InsertSeasonalityAsync(company.Id, [product1.Id, product2.Id]);
             await repo.UpdateSeasonalityAsync(company.Id, [product1.Id]);
@@ -257,12 +250,8 @@ namespace Test.Integration.Repositories
             var product1 = await _productHelper.CreateProduct(company1, name: "Product 1", sku: "SKU-0001");
             var product2 = await _productHelper.CreateProduct(company2, name: "Product 2", sku: "SKU-0002");
 
-            var aggregates1 = SalesAggregateHelper.CreateSalesAggregates(product1, _now, 12);
-            var aggregates2 = SalesAggregateHelper.CreateSalesAggregates(product2, _now, 12);
-
-            await Fixture.Context.SalesAggregates.AddRangeAsync(aggregates1);
-            await Fixture.Context.SalesAggregates.AddRangeAsync(aggregates2);
-            await Fixture.Context.SaveChangesAsync();
+            await _salesHelper.CreateSalesAggregates(product1, _now, 12);
+            await _salesHelper.CreateSalesAggregates(product2, _now, 12);
 
             await repo.InsertSeasonalityAsync(company1.Id, [product1.Id]);
             await repo.InsertSeasonalityAsync(company2.Id, [product2.Id]);

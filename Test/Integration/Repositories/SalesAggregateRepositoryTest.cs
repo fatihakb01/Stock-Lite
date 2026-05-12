@@ -10,7 +10,7 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
 {
     private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
     private readonly ProductHelper _productHelper = new ProductHelper(fixture);
-    private readonly SalesAggregateHelper _salesAggregateHelper = new SalesAggregateHelper(fixture);
+    private readonly SalesAggregateHelper _salesHelper = new SalesAggregateHelper(fixture);
     private readonly DateTime _now = DateTime.UtcNow.Date;
 
     private SalesAggregateRepository CreateRepository() =>
@@ -39,9 +39,7 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
         var company = await _companyHelper.CreateCompany();
         var product = await _productHelper.CreateProduct(company);
 
-        var aggregate = SalesAggregateHelper.CreateSalesAggregate(product, period);
-        await Fixture.Context.SalesAggregates.AddAsync(aggregate);
-        await Fixture.Context.SaveChangesAsync();
+        await _salesHelper.CreateSalesAggregate(product, period);
 
         var result = await repo.GetByProductIdAsync(product.Id, period);
 
@@ -76,7 +74,7 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
             [product.Id],
             period);
 
-        int count = await _salesAggregateHelper.GetSalesCountAsync(product.Id, period);
+        int count = await _salesHelper.GetSalesCountAsync(product.Id, period);
 
         Assert.Equal(rows, count);
     }
@@ -101,7 +99,7 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
             [product.Id],
             period);
 
-        int count = await _salesAggregateHelper.GetSalesCountAsync(product.Id, period);
+        int count = await _salesHelper.GetSalesCountAsync(product.Id, period);
 
         Assert.Equal(rows, count);
     }
@@ -120,8 +118,8 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
         var product2 = await _productHelper.CreateProduct(company2, name: "Product 2", sku: "SKU-0002");
 
         await repo.InsertSalesAggregatesAsync(company1.Id, [product1.Id], period);
-        int count1 = await _salesAggregateHelper.GetSalesCountAsync(product1.Id, period);
-        int count2 = await _salesAggregateHelper.GetSalesCountAsync(product2.Id, period);
+        int count1 = await _salesHelper.GetSalesCountAsync(product1.Id, period);
+        int count2 = await _salesHelper.GetSalesCountAsync(product2.Id, period);
 
         Assert.Equal(rows, count1);
         Assert.Equal(0, count2);
@@ -140,8 +138,8 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
         var product2 = await _productHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
         await repo.InsertSalesAggregatesAsync(company.Id, [], period);
-        int count1 = await _salesAggregateHelper.GetSalesCountAsync(product1.Id, period);
-        int count2 = await _salesAggregateHelper.GetSalesCountAsync(product2.Id, period);
+        int count1 = await _salesHelper.GetSalesCountAsync(product1.Id, period);
+        int count2 = await _salesHelper.GetSalesCountAsync(product2.Id, period);
 
         Assert.Equal(rows, count1);
         Assert.Equal(rows, count2);
@@ -160,8 +158,8 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
         var product2 = await _productHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
         await repo.InsertSalesAggregatesAsync(company.Id, [product1.Id], period);
-        int count1 = await _salesAggregateHelper.GetSalesCountAsync(product1.Id, period);
-        int count2 = await _salesAggregateHelper.GetSalesCountAsync(product2.Id, period);
+        int count1 = await _salesHelper.GetSalesCountAsync(product1.Id, period);
+        int count2 = await _salesHelper.GetSalesCountAsync(product2.Id, period);
 
         Assert.Equal(rows, count1);
         Assert.Equal(0, count2);
@@ -197,7 +195,7 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
             [product.Id],
             period);
 
-        var aggregate = await _salesAggregateHelper.GetSalesAsync(product.Id, period);
+        var aggregate = await _salesHelper.GetSalesAsync(product.Id, period);
 
         Assert.Equal(5, aggregate.TotalQuantity);
         Assert.Equal(50, aggregate.TotalRevenue);
@@ -243,8 +241,8 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
             [product1.Id],
             period);
 
-        var aggregate1 = await _salesAggregateHelper.GetSalesAsync(product1.Id, period);
-        var aggregate2 = await _salesAggregateHelper.GetSalesAsync(product2.Id, period);
+        var aggregate1 = await _salesHelper.GetSalesAsync(product1.Id, period);
+        var aggregate2 = await _salesHelper.GetSalesAsync(product2.Id, period);
 
         Assert.Equal(5, aggregate1.TotalQuantity);
         Assert.Equal(50, aggregate1.TotalRevenue);
@@ -294,8 +292,8 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
             [],
             period);
 
-        var aggregate1 = await _salesAggregateHelper.GetSalesAsync(product1.Id, period);
-        var aggregate2 = await _salesAggregateHelper.GetSalesAsync(product2.Id, period);
+        var aggregate1 = await _salesHelper.GetSalesAsync(product1.Id, period);
+        var aggregate2 = await _salesHelper.GetSalesAsync(product2.Id, period);
 
         Assert.Equal(5, aggregate1.TotalQuantity);
         Assert.Equal(50, aggregate1.TotalRevenue);
@@ -333,9 +331,9 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
             [product.Id],
             null);
 
-        var daily = await _salesAggregateHelper.GetSalesAsync(product.Id, Period.Daily);
-        var weekly = await _salesAggregateHelper.GetSalesAsync(product.Id, Period.Weekly);
-        var monthly = await _salesAggregateHelper.GetSalesAsync(product.Id, Period.Monthly);
+        var daily = await _salesHelper.GetSalesAsync(product.Id, Period.Daily);
+        var weekly = await _salesHelper.GetSalesAsync(product.Id, Period.Weekly);
+        var monthly = await _salesHelper.GetSalesAsync(product.Id, Period.Monthly);
 
         Assert.Equal(5, daily.TotalQuantity);
         Assert.Equal(50, daily.TotalRevenue);
@@ -410,8 +408,8 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
             [product1.Id],
             period);
 
-        var aggregate1 = await _salesAggregateHelper.GetSalesAsync(product1.Id, period);
-        var aggregate2 = await _salesAggregateHelper.GetSalesAsync(product2.Id, period);
+        var aggregate1 = await _salesHelper.GetSalesAsync(product1.Id, period);
+        var aggregate2 = await _salesHelper.GetSalesAsync(product2.Id, period);
 
         // Company 1 SHOULD be updated
         Assert.Equal(5, aggregate1.TotalQuantity);
