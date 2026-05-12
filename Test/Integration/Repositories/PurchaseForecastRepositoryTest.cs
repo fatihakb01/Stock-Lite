@@ -90,9 +90,7 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
         var company = await _companyHelper.CreateCompany();
         var product = await _productHelper.CreateProduct(company);
 
-        var purchaseForecast = PurchaseForecastHelper.CreatePurchaseForecast(product);
-        await Fixture.Context.PurchaseForecasts.AddAsync(purchaseForecast);
-        await Fixture.Context.SaveChangesAsync();
+        await _purchaseForecastHelper.CreatePurchaseForecast(product);
 
         var result = await repo.GetByProductAsync(product.Id);
 
@@ -216,13 +214,10 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
         var product = await _productHelper.CreateProduct(company);
 
         // Past forecast
-        var past = PurchaseForecastHelper.CreatePurchaseForecast(
+        await _purchaseForecastHelper.CreatePurchaseForecast(
             product,
             weekStartDate: _now.AddDays(-14),
             weekEndDate: _now.AddDays(-8));
-
-        await Fixture.Context.PurchaseForecasts.AddAsync(past);
-        await Fixture.Context.SaveChangesAsync();
 
         await repo.DeletePurchaseForecastsAsync(company.Id, [product.Id]);
         int count = await Fixture.Context.PurchaseForecasts
@@ -239,13 +234,10 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
         var product = await _productHelper.CreateProduct(company);
 
         // Future forecast
-        var future = PurchaseForecastHelper.CreatePurchaseForecast(
+        await _purchaseForecastHelper.CreatePurchaseForecast(
             product,
             weekStartDate: _now,
             weekEndDate: _now.AddDays(6));
-
-        await Fixture.Context.PurchaseForecasts.AddAsync(future);
-        await Fixture.Context.SaveChangesAsync();
 
         await repo.DeletePurchaseForecastsAsync(company.Id, [product.Id]);
         int count = await Fixture.Context.PurchaseForecasts
@@ -263,13 +255,10 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
         var product1 = await _productHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
         var product2 = await _productHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-        var past1 = PurchaseForecastHelper.CreatePurchaseForecast(
+        await _purchaseForecastHelper.CreatePurchaseForecast(
             product1, weekStartDate: _now.AddDays(-14), weekEndDate: _now.AddDays(-8));
-        var past2 = PurchaseForecastHelper.CreatePurchaseForecast(
+        await _purchaseForecastHelper.CreatePurchaseForecast(
             product2, weekStartDate: _now.AddDays(-14), weekEndDate: _now.AddDays(-8));
-
-        await Fixture.Context.PurchaseForecasts.AddRangeAsync(past1, past2);
-        await Fixture.Context.SaveChangesAsync();
 
         await repo.DeletePurchaseForecastsAsync(company.Id, [product1.Id]);
 
@@ -291,13 +280,10 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
         var product1 = await _productHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
         var product2 = await _productHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-        var past1 = PurchaseForecastHelper.CreatePurchaseForecast(
+        await _purchaseForecastHelper.CreatePurchaseForecast(
             product1, weekStartDate: _now.AddDays(-14), weekEndDate: _now.AddDays(-8));
-        var past2 = PurchaseForecastHelper.CreatePurchaseForecast(
+        await _purchaseForecastHelper.CreatePurchaseForecast(
             product2, weekStartDate: _now.AddDays(-14), weekEndDate: _now.AddDays(-8));
-
-        await Fixture.Context.PurchaseForecasts.AddRangeAsync(past1, past2);
-        await Fixture.Context.SaveChangesAsync();
 
         await repo.DeletePurchaseForecastsAsync(company.Id, []);
 
@@ -320,13 +306,10 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
         var product1 = await _productHelper.CreateProduct(company1, name: "Product 1", sku: "SKU-0001");
         var product2 = await _productHelper.CreateProduct(company2, name: "Product 2", sku: "SKU-0002");
 
-        var past1 = PurchaseForecastHelper.CreatePurchaseForecast(
+        await _purchaseForecastHelper.CreatePurchaseForecast(
             product1, weekStartDate: _now.AddDays(-14), weekEndDate: _now.AddDays(-8));
-        var past2 = PurchaseForecastHelper.CreatePurchaseForecast(
+        await _purchaseForecastHelper.CreatePurchaseForecast(
             product2, weekStartDate: _now.AddDays(-14), weekEndDate: _now.AddDays(-8));
-
-        await Fixture.Context.PurchaseForecasts.AddRangeAsync(past1, past2);
-        await Fixture.Context.SaveChangesAsync();
 
         await repo.DeletePurchaseForecastsAsync(company1.Id, [product1.Id]);
 

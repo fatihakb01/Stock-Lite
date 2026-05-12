@@ -10,7 +10,7 @@ namespace Test.Helper
     {
         private readonly DatabaseFixture _fixture = fixture;
 
-        internal static PurchaseForecast CreatePurchaseForecast(
+        internal async Task<PurchaseForecast> CreatePurchaseForecast(
             Product product,
             DateTime? weekStartDate = null,
             DateTime? weekEndDate = null,
@@ -21,21 +21,29 @@ namespace Test.Helper
             decimal projectedStock = 15,
             bool needsReorder = false,
             int recommendedOrderQuantity = 0
-        ) => new PurchaseForecast
+        )
         {
-            Product = product,
-            ProductId = product.Id,
-            WeekStartDate = weekStartDate ?? DateHelper.GetPeriodStartDate(Period.Weekly),
-            WeekEndDate = weekEndDate ?? DateHelper.GetPeriodEndDate(Period.Weekly),
-            WeekIndex = weekIndex,
-            ForecastQuantity = forecastQuantity,
-            QuantityCommitted = quantityCommitted,
-            QuantityOnOrder = quantityOnOrder,
-            ProjectedStock = projectedStock,
-            NeedsReorder = needsReorder,
-            RecommendedOrderQuantity= recommendedOrderQuantity,
-            CalculatedAt = DateTime.UtcNow
-        };
+            var pfc = new PurchaseForecast
+            {
+                Product = product,
+                ProductId = product.Id,
+                WeekStartDate = weekStartDate ?? DateHelper.GetPeriodStartDate(Period.Weekly),
+                WeekEndDate = weekEndDate ?? DateHelper.GetPeriodEndDate(Period.Weekly),
+                WeekIndex = weekIndex,
+                ForecastQuantity = forecastQuantity,
+                QuantityCommitted = quantityCommitted,
+                QuantityOnOrder = quantityOnOrder,
+                ProjectedStock = projectedStock,
+                NeedsReorder = needsReorder,
+                RecommendedOrderQuantity = recommendedOrderQuantity,
+                CalculatedAt = DateTime.UtcNow
+            };
+
+            await _fixture.Context.PurchaseForecasts.AddAsync(pfc);
+            await _fixture.Context.SaveChangesAsync();
+
+            return pfc;
+        }
 
         internal async Task<PurchaseForecast> GetPurchaseForecastAsync(
             Guid productId)
