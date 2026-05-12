@@ -8,6 +8,7 @@ namespace Test.Integration.Repositories
     public class SeasonalityRepositoryTest(DatabaseFixture fixture)
         : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
     {
+        private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
         private readonly DateTime _now = DateTime.UtcNow.Date;
 
         private SeasonalityRepository CreateRepository() =>
@@ -17,10 +18,9 @@ namespace Test.Integration.Repositories
         public async Task GetSeasonalityByProductAsync_WhenSeasonalityExists_ReturnsRecords()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany();
             var product = ProductHelper.CreateProduct(company);
 
-            await Fixture.Context.Companies.AddAsync(company);
             await Fixture.Context.Products.AddAsync(product);
 
             var seasonality = SeasonalityHelper.CreateSeasonality(product, 1.0m);
@@ -36,10 +36,10 @@ namespace Test.Integration.Repositories
         public async Task GetSeasonalityByProductAsync_WhenNoSeasonalityExists_ReturnsEmpty()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany();
             var product = ProductHelper.CreateProduct(company);
 
-            await Fixture.Context.Companies.AddAsync(company);
+            
             await Fixture.Context.Products.AddAsync(product);
             await Fixture.Context.SaveChangesAsync();
 
@@ -52,10 +52,10 @@ namespace Test.Integration.Repositories
         public async Task GetSeasonalityByProductAsync_ExcludesRecordsBeyond12Months()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany();
             var product = ProductHelper.CreateProduct(company);
 
-            await Fixture.Context.Companies.AddAsync(company);
+            
             await Fixture.Context.Products.AddAsync(product);
 
             // Within 12 months — should be returned
@@ -79,10 +79,10 @@ namespace Test.Integration.Repositories
         public async Task InsertSeasonalityAsync_InsertsExpectedNumberOfRows()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany();
             var product = ProductHelper.CreateProduct(company);
 
-            await Fixture.Context.Companies.AddAsync(company);
+            
             await Fixture.Context.Products.AddAsync(product);
             await Fixture.Context.SaveChangesAsync();
 
@@ -99,10 +99,10 @@ namespace Test.Integration.Repositories
         public async Task InsertSeasonalityAsync_WhenCalledTwice_DoesNotDuplicate()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany();
             var product = ProductHelper.CreateProduct(company);
 
-            await Fixture.Context.Companies.AddAsync(company);
+            
             await Fixture.Context.Products.AddAsync(product);
             await Fixture.Context.SaveChangesAsync();
 
@@ -119,12 +119,12 @@ namespace Test.Integration.Repositories
         public async Task InsertSeasonalityAsync_WhenProductIdsSpecified_OnlyInsertsForSpecifiedProducts()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany();
 
             var product1 = ProductHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
             var product2 = ProductHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-            await Fixture.Context.Companies.AddAsync(company);
+            
             await Fixture.Context.Products.AddRangeAsync(product1, product2);
             await Fixture.Context.SaveChangesAsync();
 
@@ -143,12 +143,12 @@ namespace Test.Integration.Repositories
         public async Task InsertSeasonalityAsync_WhenProductIdsNotSpecified_InsertsForAllProducts()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany();
 
             var product1 = ProductHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
             var product2 = ProductHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-            await Fixture.Context.Companies.AddAsync(company);
+            
             await Fixture.Context.Products.AddRangeAsync(product1, product2);
             await Fixture.Context.SaveChangesAsync();
 
@@ -168,13 +168,13 @@ namespace Test.Integration.Repositories
         {
             var repo = CreateRepository();
 
-            var company1 = CompanyHelper.CreateCompany(name: "Company 1");
-            var company2 = CompanyHelper.CreateCompany(name: "Company 2");
+            var company1 = await _companyHelper.CreateCompany(name: "Company 1");
+            var company2 = await _companyHelper.CreateCompany(name: "Company 2");
 
             var product1 = ProductHelper.CreateProduct(company1, name: "Product 1", sku: "SKU-0001");
             var product2 = ProductHelper.CreateProduct(company2, name: "Product 2", sku: "SKU-0002");
 
-            await Fixture.Context.Companies.AddRangeAsync(company1, company2);
+            
             await Fixture.Context.Products.AddRangeAsync(product1, product2);
             await Fixture.Context.SaveChangesAsync();
 
@@ -193,10 +193,10 @@ namespace Test.Integration.Repositories
         public async Task InsertSeasonalityAsync_DefaultFactorIsOne()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany();
             var product = ProductHelper.CreateProduct(company);
 
-            await Fixture.Context.Companies.AddAsync(company);
+            
             await Fixture.Context.Products.AddAsync(product);
             await Fixture.Context.SaveChangesAsync();
 
@@ -213,10 +213,10 @@ namespace Test.Integration.Repositories
         public async Task UpdateSeasonalityAsync_WithEnoughHistory_UpdatesFactorFromDefault()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany();
             var product = ProductHelper.CreateProduct(company);
 
-            await Fixture.Context.Companies.AddAsync(company);
+            
             await Fixture.Context.Products.AddAsync(product);
 
             var aggregates = SalesAggregateHelper.CreateSalesAggregates(product, _now, 12);
@@ -237,10 +237,10 @@ namespace Test.Integration.Repositories
         public async Task UpdateSeasonalityAsync_WithLessThan12MonthsHistory_KeepsFactorAtOne()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany();
             var product = ProductHelper.CreateProduct(company);
 
-            await Fixture.Context.Companies.AddAsync(company);
+            
             await Fixture.Context.Products.AddAsync(product);
 
             var aggregates = SalesAggregateHelper.CreateSalesAggregates(product, _now, 6);
@@ -261,12 +261,12 @@ namespace Test.Integration.Repositories
         public async Task UpdateSeasonalityAsync_WhenProductIdsSpecified_OnlyUpdatesSpecifiedProducts()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany();
 
             var product1 = ProductHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
             var product2 = ProductHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-            await Fixture.Context.Companies.AddAsync(company);
+            
             await Fixture.Context.Products.AddRangeAsync(product1, product2);
 
             var aggregates1 = SalesAggregateHelper.CreateSalesAggregates(product1, _now, 12);
@@ -292,13 +292,13 @@ namespace Test.Integration.Repositories
         public async Task UpdateSeasonalityAsync_WhenCompanySpecified_OnlyUpdatesThatCompany()
         {
             var repo = CreateRepository();
-            var company1 = CompanyHelper.CreateCompany(name: "Company 1");
-            var company2 = CompanyHelper.CreateCompany(name: "Company 2");
+            var company1 = await _companyHelper.CreateCompany(name: "Company 1");
+            var company2 = await _companyHelper.CreateCompany(name: "Company 2");
 
             var product1 = ProductHelper.CreateProduct(company1, name: "Product 1", sku: "SKU-0001");
             var product2 = ProductHelper.CreateProduct(company2, name: "Product 2", sku: "SKU-0002");
 
-            await Fixture.Context.Companies.AddRangeAsync(company1, company2);
+            
             await Fixture.Context.Products.AddRangeAsync(product1, product2);
 
             var aggregates1 = SalesAggregateHelper.CreateSalesAggregates(product1, _now, 12);
@@ -325,10 +325,10 @@ namespace Test.Integration.Repositories
         public async Task DeleteSeasonalityAsync_DeletesPastMonths()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany();
             var product = ProductHelper.CreateProduct(company);
 
-            await Fixture.Context.Companies.AddAsync(company);
+            
             await Fixture.Context.Products.AddAsync(product);
 
             var pastSeasonality = SeasonalityHelper.CreateSeasonality(
@@ -349,10 +349,10 @@ namespace Test.Integration.Repositories
         public async Task DeleteSeasonalityAsync_DoesNotDeleteCurrentOrFutureMonths()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany();
             var product = ProductHelper.CreateProduct(company);
 
-            await Fixture.Context.Companies.AddAsync(company);
+            
             await Fixture.Context.Products.AddAsync(product);
 
             // Current month
@@ -378,12 +378,12 @@ namespace Test.Integration.Repositories
         public async Task DeleteSeasonalityAsync_WhenProductIdsSpecified_OnlyDeletesSpecifiedProducts()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany();
 
             var product1 = ProductHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
             var product2 = ProductHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-            await Fixture.Context.Companies.AddAsync(company);
+            
             await Fixture.Context.Products.AddRangeAsync(product1, product2);
 
             var past1 = SeasonalityHelper.CreateSeasonality(product1, 1.0m, periodStartDate: _now.AddMonths(-2));
@@ -404,12 +404,12 @@ namespace Test.Integration.Repositories
         public async Task DeleteSeasonalityAsync_WhenProductIdsNotSpecified_DeletesAllProducts()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany();
 
             var product1 = ProductHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
             var product2 = ProductHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-            await Fixture.Context.Companies.AddAsync(company);
+            
             await Fixture.Context.Products.AddRangeAsync(product1, product2);
 
             var past1 = SeasonalityHelper.CreateSeasonality(product1, 1.0m, periodStartDate: _now.AddMonths(-2));
@@ -431,13 +431,13 @@ namespace Test.Integration.Repositories
         {
             var repo = CreateRepository();
 
-            var company1 = CompanyHelper.CreateCompany(name: "Company 1");
-            var company2 = CompanyHelper.CreateCompany(name: "Company 2");
+            var company1 = await _companyHelper.CreateCompany(name: "Company 1");
+            var company2 = await _companyHelper.CreateCompany(name: "Company 2");
 
             var product1 = ProductHelper.CreateProduct(company1, name: "Product 1", sku: "SKU-0001");
             var product2 = ProductHelper.CreateProduct(company2, name: "Product 2", sku: "SKU-0002");
 
-            await Fixture.Context.Companies.AddRangeAsync(company1, company2);
+            
             await Fixture.Context.Products.AddRangeAsync(product1, product2);
 
             var past1 = SeasonalityHelper.CreateSeasonality(product1, 1.0m, periodStartDate: _now.AddMonths(-2));

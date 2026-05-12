@@ -9,6 +9,7 @@ namespace Test.Integration.Repositories
     public class ProductKpiCompanyHelper(DatabaseFixture fixture)
         : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
     {
+        private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
         private ProductKpiRepository CreateRepository()
             => new ProductKpiRepository(Fixture.Context);
 
@@ -16,10 +17,7 @@ namespace Test.Integration.Repositories
         public async Task GetProductKpis_WhenExists_ReturnsProductKpi()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await Fixture.Context.Companies.AddAsync(company);
-            await Fixture.Context.SaveChangesAsync();
+            var company = await _companyHelper.CreateCompany();
 
             var kpi = new ProductKpi
             {
@@ -59,10 +57,7 @@ namespace Test.Integration.Repositories
         public async Task GetSchedulerStatus_WhenFailedTaskExists_ReturnsFailed()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await Fixture.Context.Companies.AddAsync(company);
-            await Fixture.Context.SaveChangesAsync();
+            var company = await _companyHelper.CreateCompany();
 
             var failedTask = SchedulerHelper.CreateJobTask(
                 name: "Test Task 1",
@@ -88,10 +83,7 @@ namespace Test.Integration.Repositories
         public async Task GetSchedulerStatus_WhenRunningTaskExists_ReturnsRunning()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await Fixture.Context.Companies.AddAsync(company);
-            await Fixture.Context.SaveChangesAsync();
+            var company = await _companyHelper.CreateCompany();
 
             var runningTask = SchedulerHelper.CreateJobTask(
                 name: "Test Task 1",
@@ -117,10 +109,7 @@ namespace Test.Integration.Repositories
         public async Task UpdateSchedulerStatus_WhenProductKpiMissing_CreatesProductKpi()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await Fixture.Context.Companies.AddAsync(company);
-            await Fixture.Context.SaveChangesAsync();
+            var company = await _companyHelper.CreateCompany();
 
             var task = SchedulerHelper.CreateJobTask(companyId: company.Id);
             task.Result = JobExecutionStatus.Running;
@@ -138,10 +127,7 @@ namespace Test.Integration.Repositories
         public async Task UpdateSchedulerStatus_WhenChanged_UpdatesStatus()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await Fixture.Context.Companies.AddAsync(company);
-            await Fixture.Context.SaveChangesAsync();
+            var company = await _companyHelper.CreateCompany();
 
             var kpi = new ProductKpi
             {
@@ -169,10 +155,7 @@ namespace Test.Integration.Repositories
         public async Task UpdateProductKpis_WhenMissing_CreatesProductKpi()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await Fixture.Context.Companies.AddAsync(company);
-            await Fixture.Context.SaveChangesAsync();
+            var company = await _companyHelper.CreateCompany();
 
             var task = SchedulerHelper.CreateJobTask(companyId: company.Id);
             task.Result = JobExecutionStatus.Succeeded;
@@ -200,10 +183,7 @@ namespace Test.Integration.Repositories
         public async Task UpdateProductKpis_WhenValuesChanged_UpdatesExistingKpi()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await Fixture.Context.Companies.AddAsync(company);
-            await Fixture.Context.SaveChangesAsync();
+            var company = await _companyHelper.CreateCompany();
 
             var existing = new ProductKpi
             {

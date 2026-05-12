@@ -11,6 +11,7 @@ namespace Test.Integration.Repositories;
 public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
     : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
 {
+    private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
     private readonly PurchaseForecastHelper _purchaseForecastHelper = new PurchaseForecastHelper(fixture);
     private readonly ForecastHelper _forecastHelper = new(fixture);
     private readonly DateTime _now = DateTime.UtcNow.Date;
@@ -23,10 +24,10 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
         string productName = "Test Product",
         string sku = "SKU-0001")
     {
-        var company = CompanyHelper.CreateCompany(name: companyName);
+        var company = await _companyHelper.CreateCompany(name: companyName);
         var product = ProductHelper.CreateProduct(company, name: productName, sku: sku);
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddAsync(product);
         await _forecastHelper.SeedWeeklyForecastsAsync(product);
         await Fixture.Context.SaveChangesAsync();
@@ -52,10 +53,10 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
         bool needsReorder = false,
         int recommendedOrderQuantity = 0)
     {
-        var company = CompanyHelper.CreateCompany(name: companyName);
+        var company = await _companyHelper.CreateCompany(name: companyName);
         var product = ProductHelper.CreateProduct(company, name: productName, sku: sku);
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddAsync(product);
         await _forecastHelper.SeedWeeklyForecastsAsync(product, forecastQuantity);
 
@@ -89,10 +90,10 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
     public async Task GetByProductAsync_WhenPurchaseForecastExists_ReturnsForecasts()
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
         var product = ProductHelper.CreateProduct(company);
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddAsync(product);
 
         var purchaseForecast = PurchaseForecastHelper.CreatePurchaseForecast(product);
@@ -108,10 +109,10 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
     public async Task GetByProductAsync_WhenNoPurchaseForecastExists_ReturnsEmpty()
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
         var product = ProductHelper.CreateProduct(company);
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddAsync(product);
         await Fixture.Context.SaveChangesAsync();
 
@@ -173,12 +174,12 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
     public async Task InsertPurchaseForecastsAsync_WhenProductIdsNotSpecified_InsertsForAllProducts()
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
 
         var product1 = ProductHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
         var product2 = ProductHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddRangeAsync(product1, product2);
         await _forecastHelper.SeedWeeklyForecastsAsync(product1);
         await _forecastHelper.SeedWeeklyForecastsAsync(product2);
@@ -199,12 +200,12 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
     public async Task InsertPurchaseForecastsAsync_WhenProductIdsSpecified_OnlyInsertsForSpecifiedProducts()
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
 
         var product1 = ProductHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
         var product2 = ProductHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddRangeAsync(product1, product2);
         await _forecastHelper.SeedWeeklyForecastsAsync(product1);
         await _forecastHelper.SeedWeeklyForecastsAsync(product2);
@@ -225,10 +226,10 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
     public async Task DeletePurchaseForecastsAsync_DeletesPastForecasts()
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
         var product = ProductHelper.CreateProduct(company);
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddAsync(product);
 
         // Past forecast
@@ -251,10 +252,10 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
     public async Task DeletePurchaseForecastsAsync_DoesNotDeleteFutureForecasts()
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
         var product = ProductHelper.CreateProduct(company);
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddAsync(product);
 
         // Future forecast
@@ -277,12 +278,12 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
     public async Task DeletePurchaseForecastsAsync_WhenProductIdsSpecified_OnlyDeletesSpecifiedProducts()
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
 
         var product1 = ProductHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
         var product2 = ProductHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddRangeAsync(product1, product2);
 
         var past1 = PurchaseForecastHelper.CreatePurchaseForecast(
@@ -308,12 +309,12 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
     public async Task DeletePurchaseForecastsAsync_WhenProductIdsNotSpecified_DeletesAllProducts()
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
 
         var product1 = ProductHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
         var product2 = ProductHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddRangeAsync(product1, product2);
 
         var past1 = PurchaseForecastHelper.CreatePurchaseForecast(
@@ -339,13 +340,12 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
     public async Task DeletePurchaseForecastsAsync_WhenCompanySpecified_OnlyDeletesThatCompany()
     {
         var repo = CreateRepository();
-        var company1 = CompanyHelper.CreateCompany(name: "Company 1");
-        var company2 = CompanyHelper.CreateCompany(name: "Company 2");
+        var company1 = await _companyHelper.CreateCompany(name: "Company 1");
+        var company2 = await _companyHelper.CreateCompany(name: "Company 2");
 
         var product1 = ProductHelper.CreateProduct(company1, name: "Product 1", sku: "SKU-0001");
         var product2 = ProductHelper.CreateProduct(company2, name: "Product 2", sku: "SKU-0002");
 
-        await Fixture.Context.Companies.AddRangeAsync(company1, company2);
         await Fixture.Context.Products.AddRangeAsync(product1, product2);
 
         var past1 = PurchaseForecastHelper.CreatePurchaseForecast(
@@ -495,12 +495,12 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
     public async Task UpdatePurchaseForecastsAsync_WhenProductIdsSpecified_OnlyUpdatesSpecifiedProducts()
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
 
         var product1 = ProductHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
         var product2 = ProductHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddRangeAsync(product1, product2);
         await _forecastHelper.SeedWeeklyForecastsAsync(product1);
         await _forecastHelper.SeedWeeklyForecastsAsync(product2);

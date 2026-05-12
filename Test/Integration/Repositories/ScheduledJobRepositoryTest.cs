@@ -8,6 +8,7 @@ namespace Test.Integration.Repositories
     public class ScheduledJobCompanyHelper(DatabaseFixture fixture)
         : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
     {
+        private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
         private ScheduledJobRepository CreateRepository()
             => new ScheduledJobRepository(Fixture.Context);
 
@@ -17,10 +18,7 @@ namespace Test.Integration.Repositories
         public async Task GetScheduledJobAndExecutionsAsync_ReturnsExecutions(int count)
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await Fixture.Context.Companies.AddAsync(company);
-            await Fixture.Context.SaveChangesAsync();
+            var company = await _companyHelper.CreateCompany();
 
             var task = SchedulerHelper.CreateJobTask(companyId: company.Id);
             var job = SchedulerHelper.CreateScheduledJob(task: task);
@@ -61,10 +59,7 @@ namespace Test.Integration.Repositories
         public async Task AddScheduledJobAsync_AssignsNextExecutionOrder(int total)
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await Fixture.Context.Companies.AddAsync(company);
-            await Fixture.Context.SaveChangesAsync();
+            var company = await _companyHelper.CreateCompany();
 
             var task = SchedulerHelper.CreateJobTask(companyId: company.Id);
 
@@ -87,10 +82,7 @@ namespace Test.Integration.Repositories
         public async Task DeleteScheduledJobAsync_RemovesJob_And_ReordersRemaining()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await Fixture.Context.Companies.AddAsync(company);
-            await Fixture.Context.SaveChangesAsync();
+            var company = await _companyHelper.CreateCompany();
 
             var task = SchedulerHelper.CreateJobTask(companyId: company.Id);
             var jobs = SchedulerHelper.CreateScheduledJobs(task, total: 3);
@@ -119,10 +111,7 @@ namespace Test.Integration.Repositories
         public async Task ReorderScheduledJobAsync_ReordersExecutionOrder()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await Fixture.Context.Companies.AddAsync(company);
-            await Fixture.Context.SaveChangesAsync();
+            var company = await _companyHelper.CreateCompany();
 
             var task = SchedulerHelper.CreateJobTask(companyId: company.Id);
             var jobs = SchedulerHelper.CreateScheduledJobs(task, total: 3);
@@ -159,11 +148,7 @@ namespace Test.Integration.Repositories
         public async Task ReorderScheduledJobAsync_WhenJobMismatch_Throws()
         {
             var repo = CreateRepository();
-
-            var company = CompanyHelper.CreateCompany();
-
-            await Fixture.Context.Companies.AddAsync(company);
-            await Fixture.Context.SaveChangesAsync();
+            var company = await _companyHelper.CreateCompany();
 
             var invalidIds = new List<Guid>
             {
@@ -182,10 +167,7 @@ namespace Test.Integration.Repositories
         public async Task CleanScheduledJobs_ResetsAllJobResults()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await Fixture.Context.Companies.AddAsync(company);
-            await Fixture.Context.SaveChangesAsync();
+            var company = await _companyHelper.CreateCompany();
 
             var task = SchedulerHelper.CreateJobTask(companyId: company.Id);
             var jobs = SchedulerHelper.CreateScheduledJobs(task);
@@ -209,10 +191,7 @@ namespace Test.Integration.Repositories
         public async Task CleanScheduledJob_ResetsJob_And_TaskRetries()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await Fixture.Context.Companies.AddAsync(company);
-            await Fixture.Context.SaveChangesAsync();
+            var company = await _companyHelper.CreateCompany();
 
             var task = SchedulerHelper.CreateJobTask(companyId: company.Id, maxRetries: 5);
             task.Retries = 4;
@@ -238,10 +217,7 @@ namespace Test.Integration.Repositories
         public async Task TryLockTaskAsync_WhenUnlocked_ReturnsTrue()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await Fixture.Context.Companies.AddAsync(company);
-            await Fixture.Context.SaveChangesAsync();
+            var company = await _companyHelper.CreateCompany();
 
             var task = SchedulerHelper.CreateJobTask(companyId: company.Id);
             var job = SchedulerHelper.CreateScheduledJob(task: task);
@@ -266,10 +242,7 @@ namespace Test.Integration.Repositories
         public async Task TryLockTaskAsync_WhenAlreadyRunning_ReturnsFalse()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await Fixture.Context.Companies.AddAsync(company);
-            await Fixture.Context.SaveChangesAsync();
+            var company = await _companyHelper.CreateCompany();
 
             var task = SchedulerHelper.CreateJobTask(companyId: company.Id);
             var job = SchedulerHelper.CreateScheduledJob(task: task);

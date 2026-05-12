@@ -7,6 +7,7 @@ namespace Test.Integration.Repositories
     public class JobExecutionRepositoryTest(DatabaseFixture fixture)
         : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
     {
+        private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
         private JobExecutionRepository CreateRepository()
             => new JobExecutionRepository(Fixture.Context);
 
@@ -14,10 +15,7 @@ namespace Test.Integration.Repositories
         public async Task GetRecentExecutionAsync_WhenExecutionsExist_ReturnsExecutions()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await Fixture.Context.Companies.AddAsync(company);
-            await Fixture.Context.SaveChangesAsync();
+            var company = await _companyHelper.CreateCompany();
 
             var task = SchedulerHelper.CreateJobTask(
                 name: "Test Task",
@@ -51,10 +49,7 @@ namespace Test.Integration.Repositories
         public async Task GetRecentExecutionAsync_WhenNoExecutionsExist_ReturnsEmptyList()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await Fixture.Context.Companies.AddAsync(company);
-            await Fixture.Context.SaveChangesAsync();
+            var company = await _companyHelper.CreateCompany();
 
             var result = await repo.GetRecentExecutionAsync(
                 company.Id,
@@ -69,11 +64,8 @@ namespace Test.Integration.Repositories
         public async Task GetRecentExecutionAsync_ReturnsOnlyExecutionsForCompany()
         {
             var repo = CreateRepository();
-            var company1 = CompanyHelper.CreateCompany("Company 1");
-            var company2 = CompanyHelper.CreateCompany("Company 2");
-
-            await Fixture.Context.Companies.AddRangeAsync(company1, company2);
-            await Fixture.Context.SaveChangesAsync();
+            var company1 = await _companyHelper.CreateCompany("Company 1");
+            var company2 = await _companyHelper.CreateCompany("Company 2");
 
             // Company 1
             var task1 = SchedulerHelper.CreateJobTask(
@@ -113,10 +105,7 @@ namespace Test.Integration.Repositories
         public async Task GetRecentExecutionAsync_IgnoresOldExecutions()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await Fixture.Context.Companies.AddAsync(company);
-            await Fixture.Context.SaveChangesAsync();
+            var company = await _companyHelper.CreateCompany();
 
             var task = SchedulerHelper.CreateJobTask(
                 name: "Test Task",
@@ -150,10 +139,7 @@ namespace Test.Integration.Repositories
         public async Task GetRecentExecutionAsync_ReturnsOrderedByStartedAtDescending()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await Fixture.Context.Companies.AddAsync(company);
-            await Fixture.Context.SaveChangesAsync();
+            var company = await _companyHelper.CreateCompany();
 
             var task = SchedulerHelper.CreateJobTask(
                 name: "Test Task",

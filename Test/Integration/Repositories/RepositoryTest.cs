@@ -8,6 +8,7 @@ namespace Test.Integration.Repositories
     public class RepositoryTest(DatabaseFixture fixture)
         : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
     {
+        private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
         private Repository<Company> CreateRepository() =>
             new Repository<Company>(Fixture.Context);
 
@@ -15,10 +16,7 @@ namespace Test.Integration.Repositories
         public async Task AddAsync_ValidEntity_PersistsToDatabase()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await repo.AddAsync(company, CancellationToken.None);
-            await repo.SaveChangesAsync(CancellationToken.None);
+            var company = await _companyHelper.CreateCompany();
 
             var found = await repo.SingleOrDefaultAsync(
                 c => c.Id == company.Id, CancellationToken.None);
@@ -31,10 +29,7 @@ namespace Test.Integration.Repositories
         public async Task ExistsAsync_ExistingEntity_ReturnsTrue()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await repo.AddAsync(company, CancellationToken.None);
-            await repo.SaveChangesAsync(CancellationToken.None);
+            var company = await _companyHelper.CreateCompany();
 
             var exists = await repo.ExistsAsync(
                 c => c.Id == company.Id, 
@@ -58,10 +53,7 @@ namespace Test.Integration.Repositories
         public async Task SingleOrDefaultAsync_ExistingEntity_ReturnsEntity()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await repo.AddAsync(company, CancellationToken.None);
-            await repo.SaveChangesAsync(CancellationToken.None);
+            var company = await _companyHelper.CreateCompany();
 
             var found = await repo.SingleOrDefaultAsync(
                 c => c.Id == company.Id, CancellationToken.None);
@@ -85,12 +77,7 @@ namespace Test.Integration.Repositories
         public async Task FindAsync_ExistingEntities_ReturnsEntities()
         {
             var repo = CreateRepository();
-            var companies = CompanyHelper.CreateCompanies();
-
-            foreach (var company in companies)
-                await repo.AddAsync(company, CancellationToken.None);
-            
-            await repo.SaveChangesAsync(CancellationToken.None);
+            var companies = await _companyHelper.CreateCompanies();
 
             var results = await repo.FindAsync(
                 c => c.Name.Contains("Test Company"), 
@@ -117,10 +104,7 @@ namespace Test.Integration.Repositories
         public async Task Update_ExistingEntity_PersistsChanges()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await repo.AddAsync(company, CancellationToken.None);
-            await repo.SaveChangesAsync(CancellationToken.None);
+            var company = await _companyHelper.CreateCompany();
 
             company.Name = "Updated Name";
             repo.Update(company);
@@ -136,10 +120,7 @@ namespace Test.Integration.Repositories
         public async Task Remove_ExistingEntity_DeletesFromDatabase()
         {
             var repo = CreateRepository();
-            var company = CompanyHelper.CreateCompany();
-
-            await repo.AddAsync(company, CancellationToken.None);
-            await repo.SaveChangesAsync(CancellationToken.None);
+            var company = await _companyHelper.CreateCompany();
 
             repo.Remove(company);
             await repo.SaveChangesAsync(CancellationToken.None);
@@ -154,12 +135,7 @@ namespace Test.Integration.Repositories
         public async Task CountAsync_ReturnsCorrectCount()
         {
             var repo = CreateRepository();
-            var companies = CompanyHelper.CreateCompanies();
-
-            foreach (var c in companies)
-                await repo.AddAsync(c, CancellationToken.None);
-
-            await repo.SaveChangesAsync(CancellationToken.None);
+            var companies = await _companyHelper.CreateCompanies();
 
             var count = await repo.CountAsync(
                 c => c.Name.Contains("Test Company"),

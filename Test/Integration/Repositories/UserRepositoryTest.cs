@@ -11,6 +11,7 @@ namespace Test.Integration.Repositories
     public class UserRepositoryTest
         : IntegrationTestBase, IClassFixture<DatabaseFixture>
     {
+        private readonly CompanyHelper _companyHelper;
         private readonly Mock<IResend> _resendMock;
         private readonly Mock<IWebHostEnvironment> _envMock;
         private readonly UserHelper _userHelper;
@@ -18,6 +19,7 @@ namespace Test.Integration.Repositories
         public UserRepositoryTest(DatabaseFixture fixture)
             : base(fixture)
         {
+            _companyHelper = new CompanyHelper(fixture);
             _resendMock = new Mock<IResend>();
             _envMock = new Mock<IWebHostEnvironment>();
 
@@ -32,7 +34,7 @@ namespace Test.Integration.Repositories
         public async Task CreateAsync_WhenValid_CreatesUser()
         {
             var repo = _userHelper.CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany(saveChanges: false);
             var user = UserHelper.CreateUser(company);
 
             var result = await repo.CreateAsync(user, "Password123!");
@@ -49,7 +51,7 @@ namespace Test.Integration.Repositories
         public async Task GetByEmailAsync_WhenExists_ReturnsUser()
         {
             var repo = _userHelper.CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany(saveChanges: false);
             var user = UserHelper.CreateUser(company);
 
             await repo.CreateAsync(user, "Password123!");
@@ -74,7 +76,7 @@ namespace Test.Integration.Repositories
         public async Task GetByIdAsync_WhenExists_ReturnsUser()
         {
             var repo = _userHelper.CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany(saveChanges: false);
             var user = UserHelper.CreateUser(company);
             var userId = Guid.Parse(user.Id);
 
@@ -100,7 +102,7 @@ namespace Test.Integration.Repositories
         public async Task CheckPasswordAsync_WhenCorrect_ReturnsTrue()
         {
             var repo = _userHelper.CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany(saveChanges: false);
             var user = UserHelper.CreateUser(company);
 
             await repo.CreateAsync(user, "Password123!");
@@ -114,7 +116,7 @@ namespace Test.Integration.Repositories
         public async Task CheckPasswordAsync_WhenIncorrect_ReturnsFalse()
         {
             var repo = _userHelper.CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany(saveChanges: false);
             var user = UserHelper.CreateUser(company);
 
             await repo.CreateAsync(user, "Password123!");
@@ -128,7 +130,7 @@ namespace Test.Integration.Repositories
         public async Task GenerateEmailConfirmationTokenAsync_ReturnsToken()
         {
             var repo = _userHelper.CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany(saveChanges: false);
             var user = UserHelper.CreateUser(company);
 
             var token = await repo.GenerateEmailConfirmationTokenAsync(user);
@@ -141,7 +143,7 @@ namespace Test.Integration.Repositories
         public async Task ConfirmEmailAsync_WhenValidToken_ConfirmsEmail()
         {
             var repo = _userHelper.CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany(saveChanges: false);
             var user = UserHelper.CreateUser(company);
 
             await repo.CreateAsync(user, "Password123!");
@@ -160,7 +162,7 @@ namespace Test.Integration.Repositories
         public async Task GeneratePasswordResetTokenAsync_ReturnsToken()
         {
             var repo = _userHelper.CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany(saveChanges: false);
             var user = UserHelper.CreateUser(company);
 
             await repo.CreateAsync(user, "Password123!");
@@ -175,7 +177,7 @@ namespace Test.Integration.Repositories
         public async Task ResetPasswordAsync_WhenValidToken_UpdatesPassword()
         {
             var repo = _userHelper.CreateRepository();
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany(saveChanges: false);
             var user = UserHelper.CreateUser(company);
 
             await repo.CreateAsync(user, "Password123!");
@@ -206,7 +208,7 @@ namespace Test.Integration.Repositories
             _envMock.Setup(x => x.EnvironmentName)
                 .Returns(Environments.Development);
 
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany(saveChanges: false);
             var user = UserHelper.CreateUser(company);
 
             await repo.CreateAsync(user, "Password123!");
@@ -233,7 +235,7 @@ namespace Test.Integration.Repositories
                 .Setup(x => x.EnvironmentName)
                 .Returns(Environments.Production);
 
-            var company = CompanyHelper.CreateCompany();
+            var company = await _companyHelper.CreateCompany(saveChanges: false);
             var user = UserHelper.CreateUser(company: company, email: "realuser@test.com");
             var userId = Guid.Parse(user.Id);
 

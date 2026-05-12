@@ -7,6 +7,7 @@ namespace Test.Integration.Repositories
     public class CompanyRepositoryTest(DatabaseFixture fixture)
         : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
     {
+        private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
         private CompanyRepository CreateRepository() =>
             new CompanyRepository(Fixture.Context);
 
@@ -14,10 +15,7 @@ namespace Test.Integration.Repositories
         public async Task GetCompanyIds_WhenExists_ReturnsCompanyIds()
         {
             var repo = CreateRepository();
-            var companies = CompanyHelper.CreateCompanies();
-
-            await Fixture.Context.Companies.AddRangeAsync(companies);
-            await Fixture.Context.SaveChangesAsync();
+            var companies = await _companyHelper.CreateCompanies();
 
             var expected = companies
                 .Select(x => x.Id)

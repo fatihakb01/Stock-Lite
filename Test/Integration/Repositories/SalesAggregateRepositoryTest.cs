@@ -8,6 +8,7 @@ namespace Test.Integration.Repositories;
 public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
     : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
 {
+    private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
     private readonly SalesAggregateHelper _salesAggregateHelper = new SalesAggregateHelper(fixture);
     private readonly DateTime _now = DateTime.UtcNow.Date;
 
@@ -34,8 +35,8 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
     public async Task GetByProductIdAsync_WhenPeriodAndSales_ReturnsForecast(Period period)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
-        await Fixture.Context.Companies.AddAsync(company);
+        var company = await _companyHelper.CreateCompany();
+        
 
         var product = ProductHelper.CreateProduct(company);
         await Fixture.Context.Products.AddAsync(product);
@@ -54,8 +55,8 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
     public async Task GetByProductIdAsync_WhenPeriodAndNoSales_ReturnsForecast(Period period)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
-        await Fixture.Context.Companies.AddAsync(company);
+        var company = await _companyHelper.CreateCompany();
+        
 
         var product = ProductHelper.CreateProduct(company);
         await Fixture.Context.Products.AddAsync(product);
@@ -73,8 +74,8 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
         int rows)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
-        await Fixture.Context.Companies.AddAsync(company);
+        var company = await _companyHelper.CreateCompany();
+        
 
         var product = ProductHelper.CreateProduct(company);
         await Fixture.Context.Products.AddAsync(product);
@@ -97,8 +98,8 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
         int rows)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
-        await Fixture.Context.Companies.AddAsync(company);
+        var company = await _companyHelper.CreateCompany();
+        
 
         var product = ProductHelper.CreateProduct(company);
         await Fixture.Context.Products.AddAsync(product);
@@ -126,13 +127,13 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
         int rows)
     {
         var repo = CreateRepository();
-        var company1 = CompanyHelper.CreateCompany(name: "Company 1");
-        var company2 = CompanyHelper.CreateCompany(name: "Company 2");
+        var company1 = await _companyHelper.CreateCompany(name: "Company 1");
+        var company2 = await _companyHelper.CreateCompany(name: "Company 2");
 
         var product1 = ProductHelper.CreateProduct(company1, name: "Product 1", sku: "SKU-0001");
         var product2 = ProductHelper.CreateProduct(company2, name: "Product 2", sku: "SKU-0002");
 
-        await Fixture.Context.Companies.AddRangeAsync(company1, company2);
+        
         await Fixture.Context.Products.AddRangeAsync(product1, product2);
         await Fixture.Context.SaveChangesAsync();
 
@@ -151,12 +152,12 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
         int rows)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
 
         var product1 = ProductHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
         var product2 = ProductHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddRangeAsync(product1, product2);
         await Fixture.Context.SaveChangesAsync();
 
@@ -175,12 +176,12 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
         int rows)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
 
         var product1 = ProductHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
         var product2 = ProductHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddRangeAsync(product1, product2);
         await Fixture.Context.SaveChangesAsync();
 
@@ -197,8 +198,8 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
     public async Task UpdateSalesAggregatesAsync_WhenPeriod_UpdatesPeriodTotals(Period period)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
-        await Fixture.Context.Companies.AddAsync(company);
+        var company = await _companyHelper.CreateCompany();
+        
 
         var product = ProductHelper.CreateProduct(company);
         await Fixture.Context.Products.AddAsync(product);
@@ -239,8 +240,8 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
     public async Task UpdateSalesAggregatesAsync_WhenProductIdsSpecified_OnlyUpdatesSpecifiedProducts(Period period)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
-        await Fixture.Context.Companies.AddAsync(company);
+        var company = await _companyHelper.CreateCompany();
+        
 
         var product1 = ProductHelper.CreateProduct(company: company, name: "Test Product 1", sku: "SKU-0001");
         var product2 = ProductHelper.CreateProduct(company: company, name: "Test Product 2", sku: "SKU-0002");
@@ -293,8 +294,8 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
     public async Task UpdateSalesAggregatesAsync_WhenProductIdsNotSpecified_UpdatesAllProducts(Period period)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
-        await Fixture.Context.Companies.AddAsync(company);
+        var company = await _companyHelper.CreateCompany();
+        
 
         var product1 = ProductHelper.CreateProduct(company: company, name: "Test Product 1", sku: "SKU-0001");
         var product2 = ProductHelper.CreateProduct(company: company, name: "Test Product 2", sku: "SKU-0002");
@@ -346,8 +347,8 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
     public async Task UpdateSalesAggregatesAsync_WhenNoPeriod_UpdatesAllPeriods()
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
-        await Fixture.Context.Companies.AddAsync(company);
+        var company = await _companyHelper.CreateCompany();
+        
 
         var product = ProductHelper.CreateProduct(company);
         await Fixture.Context.Products.AddAsync(product);
@@ -396,19 +397,19 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
     {
         var repo = CreateRepository();
 
-        var company1 = CompanyHelper.CreateCompany(name: "Company 1");
+        var company1 = await _companyHelper.CreateCompany(name: "Company 1");
         var product1 = ProductHelper.CreateProduct(
             company: company1,
             name: "Product 1",
             sku: "SKU-0001");
 
-        var company2 = CompanyHelper.CreateCompany(name: "Company 2");
+        var company2 = await _companyHelper.CreateCompany(name: "Company 2");
         var product2 = ProductHelper.CreateProduct(
             company: company2,
             name: "Product 2",
             sku: "SKU-0002");
 
-        await Fixture.Context.Companies.AddRangeAsync(company1, company2);
+        
         await Fixture.Context.Products.AddRangeAsync(product1, product2);
 
         var transaction1 = TransactionHelper.CreateTransaction(

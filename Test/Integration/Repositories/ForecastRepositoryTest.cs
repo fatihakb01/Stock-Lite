@@ -8,6 +8,7 @@ namespace Test.Integration.Repositories;
 public class ForecastRepositoryTest(DatabaseFixture fixture)
     : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
 {
+    private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
     private readonly ForecastHelper _forecastHelper = new ForecastHelper(fixture);
     private readonly DateTime _now = DateTime.UtcNow.Date;
 
@@ -34,9 +35,7 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
     public async Task GetForecastByProductAsync_WhenPeriodAndForecast_ReturnsForecast(Period period)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
-        await Fixture.Context.Companies.AddAsync(company);
-
+        var company = await _companyHelper.CreateCompany();
         var product = ProductHelper.CreateProduct(company);
         await Fixture.Context.Products.AddAsync(product);
 
@@ -54,9 +53,7 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
     public async Task GetForecastByProductAsync_WhenPeriodAndNoForecast_ReturnsForecast(Period period)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
-        await Fixture.Context.Companies.AddAsync(company);
-
+        var company = await _companyHelper.CreateCompany();
         var product = ProductHelper.CreateProduct(company);
         await Fixture.Context.Products.AddAsync(product);
         await Fixture.Context.SaveChangesAsync();
@@ -73,10 +70,8 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
         int rows)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
         var product = ProductHelper.CreateProduct(company);
-
-        await Fixture.Context.Companies.AddAsync(company);
         await Fixture.Context.Products.AddAsync(product);
         await Fixture.Context.SaveChangesAsync();
 
@@ -97,10 +92,8 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
         int rows)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
         var product = ProductHelper.CreateProduct(company);
-
-        await Fixture.Context.Companies.AddAsync(company);
         await Fixture.Context.Products.AddAsync(product);
         await Fixture.Context.SaveChangesAsync();
 
@@ -126,13 +119,12 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
         int rows)
     {
         var repo = CreateRepository();
-        var company1 = CompanyHelper.CreateCompany(name: "Company 1");
-        var company2 = CompanyHelper.CreateCompany(name: "Company 2");
+        var company1 = await _companyHelper.CreateCompany(name: "Company 1");
+        var company2 = await _companyHelper.CreateCompany(name: "Company 2");
 
         var product1 = ProductHelper.CreateProduct(company1, name: "Product 1", sku: "SKU-0001");
         var product2 = ProductHelper.CreateProduct(company2, name: "Product 2", sku: "SKU-0002");
 
-        await Fixture.Context.Companies.AddRangeAsync(company1, company2);
         await Fixture.Context.Products.AddRangeAsync(product1, product2);
         await Fixture.Context.SaveChangesAsync();
 
@@ -152,12 +144,12 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
         int rows)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
 
         var product1 = ProductHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
         var product2 = ProductHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddRangeAsync(product1, product2);
         await Fixture.Context.SaveChangesAsync();
 
@@ -177,12 +169,12 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
         int rows)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
 
         var product1 = ProductHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
         var product2 = ProductHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddRangeAsync(product1, product2);
         await Fixture.Context.SaveChangesAsync();
 
@@ -200,10 +192,10 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
     public async Task DeleteForecastsAsync_DeletesPastForecasts(Period period)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
         var product = ProductHelper.CreateProduct(company);
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddAsync(product);
 
         // Seed a past forecast — PeriodEndDate in the past
@@ -227,10 +219,10 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
     public async Task DeleteForecastsAsync_DoesNotDeleteFutureForecasts(Period period)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
         var product = ProductHelper.CreateProduct(company);
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddAsync(product);
 
         // Future forecast — should survive deletion
@@ -254,12 +246,12 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
     public async Task DeleteForecastsAsync_WhenProductIdsSpecified_OnlyDeletesSpecifiedProducts(Period period)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
 
         var product1 = ProductHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
         var product2 = ProductHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddRangeAsync(product1, product2);
 
         var pastForecast1 = ForecastHelper.CreateForecast(
@@ -289,12 +281,12 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
     public async Task DeleteForecastsAsync_WhenProductIdsNotSpecified_DeletesAllProducts(Period period)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
 
         var product1 = ProductHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
         var product2 = ProductHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddRangeAsync(product1, product2);
 
         var pastForecast1 = ForecastHelper.CreateForecast(
@@ -323,13 +315,13 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
     public async Task DeleteForecastsAsync_WhenCompanySpecified_OnlyDeletesThatCompany(Period period)
     {
         var repo = CreateRepository();
-        var company1 = CompanyHelper.CreateCompany(name: "Company 1");
-        var company2 = CompanyHelper.CreateCompany(name: "Company 2");
+        var company1 = await _companyHelper.CreateCompany(name: "Company 1");
+        var company2 = await _companyHelper.CreateCompany(name: "Company 2");
 
         var product1 = ProductHelper.CreateProduct(company1, name: "Product 1", sku: "SKU-0001");
         var product2 = ProductHelper.CreateProduct(company2, name: "Product 2", sku: "SKU-0002");
 
-        await Fixture.Context.Companies.AddRangeAsync(company1, company2);
+        
         await Fixture.Context.Products.AddRangeAsync(product1, product2);
 
         var pastForecast1 = ForecastHelper.CreateForecast(
@@ -359,10 +351,10 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
         Period period)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
         var product = ProductHelper.CreateProduct(company);
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddAsync(product);
 
         // monthly sales needed for forecast calculation
@@ -396,10 +388,10 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
     public async Task UpdateForecastsAsync_WhenNoPeriod_UpdatesAllForecastValues()
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
         var product = ProductHelper.CreateProduct(company);
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddAsync(product);
 
         var aggregate = SalesAggregateHelper.CreateSalesAggregate(product, Period.Monthly);
@@ -443,7 +435,7 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
         Period period)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
 
         var product1 = ProductHelper.CreateProduct(
             company,
@@ -455,7 +447,7 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
             name: "Product 2",
             sku: "SKU-0002");
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddRangeAsync(product1, product2);
 
         await _forecastHelper.SeedForecastDependenciesAsync(product1, 100, 1000, Period.Monthly);
@@ -488,7 +480,7 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
         Period period)
     {
         var repo = CreateRepository();
-        var company = CompanyHelper.CreateCompany();
+        var company = await _companyHelper.CreateCompany();
 
         var product1 = ProductHelper.CreateProduct(
             company,
@@ -500,7 +492,7 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
             name: "Product 2",
             sku: "SKU-0002");
 
-        await Fixture.Context.Companies.AddAsync(company);
+        
         await Fixture.Context.Products.AddRangeAsync(product1, product2);
 
         await _forecastHelper.SeedForecastDependenciesAsync(product1, 100, 1000, Period.Monthly);
@@ -533,8 +525,8 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
         Period period)
     {
         var repo = CreateRepository();
-        var company1 = CompanyHelper.CreateCompany(name: "Company 1");
-        var company2 = CompanyHelper.CreateCompany(name: "Company 2");
+        var company1 = await _companyHelper.CreateCompany(name: "Company 1");
+        var company2 = await _companyHelper.CreateCompany(name: "Company 2");
 
         var product1 = ProductHelper.CreateProduct(
             company1,
@@ -546,7 +538,7 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
             name: "Product 2",
             sku: "SKU-0002");
 
-        await Fixture.Context.Companies.AddRangeAsync(company1, company2);
+        
         await Fixture.Context.Products.AddRangeAsync(product1, product2);
 
         await _forecastHelper.SeedForecastDependenciesAsync(product1, 100, 1000, Period.Monthly);
