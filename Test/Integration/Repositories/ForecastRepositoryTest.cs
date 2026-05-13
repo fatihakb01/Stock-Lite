@@ -1,4 +1,5 @@
-﻿using Domain.Enums;
+﻿using Domain.Entities.Core;
+using Domain.Enums;
 using Infrastructure.Repositories;
 using Test.Helper;
 using Test.Integration.Helper;
@@ -32,6 +33,16 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
         [Period.Weekly],
         [Period.Monthly]
     ];
+
+    private async Task SeedForecastDependenciesAsync(
+        Product product,
+        int quantity,
+        decimal revenue,
+        Period period)
+    {
+        await _salesHelper.CreateSalesAggregate(product, period, quantity, revenue);
+        await _seasonalityHelper.CreateSeasonality(product, 1);
+    }
 
     [Theory]
     [MemberData(nameof(UpdatePeriodData))]
@@ -386,8 +397,8 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
             name: "Product 2",
             sku: "SKU-0002");
 
-        await _forecastHelper.SeedForecastDependenciesAsync(product1, 100, 1000, Period.Monthly);
-        await _forecastHelper.SeedForecastDependenciesAsync(product2, 200, 2000, Period.Monthly);
+        await SeedForecastDependenciesAsync(product1, 100, 1000, Period.Monthly);
+        await SeedForecastDependenciesAsync(product2, 200, 2000, Period.Monthly);
 
         await repo.InsertForecastsAsync(
             company.Id,
@@ -427,8 +438,8 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
             name: "Product 2",
             sku: "SKU-0002");
 
-        await _forecastHelper.SeedForecastDependenciesAsync(product1, 100, 1000, Period.Monthly);
-        await _forecastHelper.SeedForecastDependenciesAsync(product2, 200, 2000, Period.Monthly);
+        await SeedForecastDependenciesAsync(product1, 100, 1000, Period.Monthly);
+        await SeedForecastDependenciesAsync(product2, 200, 2000, Period.Monthly);
 
         await repo.InsertForecastsAsync(
             company.Id,
@@ -469,8 +480,8 @@ public class ForecastRepositoryTest(DatabaseFixture fixture)
             name: "Product 2",
             sku: "SKU-0002");
 
-        await _forecastHelper.SeedForecastDependenciesAsync(product1, 100, 1000, Period.Monthly);
-        await _forecastHelper.SeedForecastDependenciesAsync(product2, 200, 2000, Period.Monthly);
+        await SeedForecastDependenciesAsync(product1, 100, 1000, Period.Monthly);
+        await SeedForecastDependenciesAsync(product2, 200, 2000, Period.Monthly);
 
         await repo.InsertForecastsAsync(
             company1.Id,
