@@ -11,6 +11,7 @@ namespace Test.Integration.Repositories
         private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
         private readonly ProductHelper _productHelper = new ProductHelper(fixture);
         private readonly SalesAggregateHelper _salesHelper = new SalesAggregateHelper(fixture);
+        private readonly SeasonalityHelper _seasonalityHelper = new SeasonalityHelper(fixture);
         private readonly DateTime _now = DateTime.UtcNow.Date;
 
         private SeasonalityRepository CreateRepository() =>
@@ -23,9 +24,7 @@ namespace Test.Integration.Repositories
             var company = await _companyHelper.CreateCompany();
             var product = await _productHelper.CreateProduct(company);
 
-            var seasonality = SeasonalityHelper.CreateSeasonality(product, 1.0m);
-            await Fixture.Context.Seasonality.AddAsync(seasonality);
-            await Fixture.Context.SaveChangesAsync();
+            await _seasonalityHelper.CreateSeasonality(product, 1.0m);
 
             var result = await repo.GetSeasonalityByProductAsync(product.Id);
 
@@ -52,15 +51,12 @@ namespace Test.Integration.Repositories
             var product = await _productHelper.CreateProduct(company);
 
             // Within 12 months — should be returned
-            var withinRange = SeasonalityHelper.CreateSeasonality(
+            var withinRange = await _seasonalityHelper.CreateSeasonality(
                 product, 1.0m, periodStartDate: _now.AddMonths(11));
 
             // Beyond 12 months — should be excluded
-            var beyondRange = SeasonalityHelper.CreateSeasonality(
+            await _seasonalityHelper.CreateSeasonality(
                 product, 1.0m, periodStartDate: _now.AddMonths(13));
-
-            await Fixture.Context.Seasonality.AddRangeAsync(withinRange, beyondRange);
-            await Fixture.Context.SaveChangesAsync();
 
             var result = await repo.GetSeasonalityByProductAsync(product.Id);
 
@@ -273,12 +269,9 @@ namespace Test.Integration.Repositories
             var company = await _companyHelper.CreateCompany();
             var product = await _productHelper.CreateProduct(company);
 
-            var pastSeasonality = SeasonalityHelper.CreateSeasonality(
+            await _seasonalityHelper.CreateSeasonality(
                 product, 1.0m,
                 periodStartDate: _now.AddMonths(-2));
-
-            await Fixture.Context.Seasonality.AddAsync(pastSeasonality);
-            await Fixture.Context.SaveChangesAsync();
 
             await repo.DeleteSeasonalityAsync(company.Id, [product.Id]);
             int count = await Fixture.Context.Seasonality
@@ -295,15 +288,12 @@ namespace Test.Integration.Repositories
             var product = await _productHelper.CreateProduct(company);
 
             // Current month
-            var currentMonth = SeasonalityHelper.CreateSeasonality(product, 1.0m);
+            await _seasonalityHelper.CreateSeasonality(product, 1.0m);
 
             // Future month
-            var futureMonth = SeasonalityHelper.CreateSeasonality(
+            await _seasonalityHelper.CreateSeasonality(
                 product, 1.0m,
                 periodStartDate: _now.AddMonths(3));
-
-            await Fixture.Context.Seasonality.AddRangeAsync(currentMonth, futureMonth);
-            await Fixture.Context.SaveChangesAsync();
 
             await repo.DeleteSeasonalityAsync(company.Id, [product.Id]);
             int count = await Fixture.Context.Seasonality
@@ -321,11 +311,8 @@ namespace Test.Integration.Repositories
             var product1 = await _productHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
             var product2 = await _productHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-            var past1 = SeasonalityHelper.CreateSeasonality(product1, 1.0m, periodStartDate: _now.AddMonths(-2));
-            var past2 = SeasonalityHelper.CreateSeasonality(product2, 1.0m, periodStartDate: _now.AddMonths(-2));
-
-            await Fixture.Context.Seasonality.AddRangeAsync(past1, past2);
-            await Fixture.Context.SaveChangesAsync();
+            await _seasonalityHelper.CreateSeasonality(product1, 1.0m, periodStartDate: _now.AddMonths(-2));
+            await _seasonalityHelper.CreateSeasonality(product2, 1.0m, periodStartDate: _now.AddMonths(-2));
 
             await repo.DeleteSeasonalityAsync(company.Id, [product1.Id]);
             int count1 = await Fixture.Context.Seasonality.CountAsync(s => s.ProductId == product1.Id);
@@ -344,11 +331,8 @@ namespace Test.Integration.Repositories
             var product1 = await _productHelper.CreateProduct(company, name: "Product 1", sku: "SKU-0001");
             var product2 = await _productHelper.CreateProduct(company, name: "Product 2", sku: "SKU-0002");
 
-            var past1 = SeasonalityHelper.CreateSeasonality(product1, 1.0m, periodStartDate: _now.AddMonths(-2));
-            var past2 = SeasonalityHelper.CreateSeasonality(product2, 1.0m, periodStartDate: _now.AddMonths(-2));
-
-            await Fixture.Context.Seasonality.AddRangeAsync(past1, past2);
-            await Fixture.Context.SaveChangesAsync();
+            await _seasonalityHelper.CreateSeasonality(product1, 1.0m, periodStartDate: _now.AddMonths(-2));
+            await _seasonalityHelper.CreateSeasonality(product2, 1.0m, periodStartDate: _now.AddMonths(-2));
 
             await repo.DeleteSeasonalityAsync(company.Id, []);
             int count1 = await Fixture.Context.Seasonality.CountAsync(s => s.ProductId == product1.Id);
@@ -369,11 +353,8 @@ namespace Test.Integration.Repositories
             var product1 = await _productHelper.CreateProduct(company1, name: "Product 1", sku: "SKU-0001");
             var product2 = await _productHelper.CreateProduct(company2, name: "Product 2", sku: "SKU-0002");
 
-            var past1 = SeasonalityHelper.CreateSeasonality(product1, 1.0m, periodStartDate: _now.AddMonths(-2));
-            var past2 = SeasonalityHelper.CreateSeasonality(product2, 1.0m, periodStartDate: _now.AddMonths(-2));
-
-            await Fixture.Context.Seasonality.AddRangeAsync(past1, past2);
-            await Fixture.Context.SaveChangesAsync();
+            await _seasonalityHelper.CreateSeasonality(product1, 1.0m, periodStartDate: _now.AddMonths(-2));
+            await _seasonalityHelper.CreateSeasonality(product2, 1.0m, periodStartDate: _now.AddMonths(-2));
 
             await repo.DeleteSeasonalityAsync(company1.Id, [product1.Id]);
             int count1 = await Fixture.Context.Seasonality.CountAsync(s => s.ProductId == product1.Id);

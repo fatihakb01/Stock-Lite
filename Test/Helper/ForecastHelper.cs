@@ -10,6 +10,7 @@ namespace Test.Helper
     {
         private readonly DatabaseFixture _fixture = fixture;
         private readonly SalesAggregateHelper _salesHelper = new SalesAggregateHelper(fixture);
+        private readonly SeasonalityHelper _seasonalityHelper = new SeasonalityHelper(fixture);
 
         internal async Task<Forecast> CreateForecast(
             Product product,
@@ -76,10 +77,7 @@ namespace Test.Helper
             Period period)
         {
             await _salesHelper.CreateSalesAggregate(product, period, quantity, revenue);
-            var seasonality = SeasonalityHelper.CreateSeasonality(product, 1);
-
-            await _fixture.Context.Seasonality.AddAsync(seasonality);
-            await _fixture.Context.SaveChangesAsync();
+            await _seasonalityHelper.CreateSeasonality(product, 1);
         }
 
         internal async Task<List<Forecast>> SeedWeeklyForecastsAsync(
