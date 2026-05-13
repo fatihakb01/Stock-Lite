@@ -10,6 +10,7 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
 {
     private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
     private readonly ProductHelper _productHelper = new ProductHelper(fixture);
+    private readonly TransactionHelper _transactionHelper = new TransactionHelper(fixture);
     private readonly SalesAggregateHelper _salesHelper = new SalesAggregateHelper(fixture);
     private readonly DateTime _now = DateTime.UtcNow.Date;
 
@@ -172,18 +173,13 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
         var repo = CreateRepository();
         var company = await _companyHelper.CreateCompany();
         var product = await _productHelper.CreateProduct(company);
-        var transaction = TransactionHelper.CreateTransaction(company, _now);
+        var transaction = await _transactionHelper.CreateTransaction(company, _now);
 
-        await Fixture.Context.Transactions.AddAsync(transaction);
-
-        var lineItem = TransactionHelper.CreateTransactionLineItem(
+        await _transactionHelper.CreateTransactionLineItem(
             transaction,
             product,
             quantity: 5,
             unitPrice: 10);
-
-        await Fixture.Context.TransactionLineItems.AddAsync(lineItem);
-        await Fixture.Context.SaveChangesAsync();
 
         await repo.InsertSalesAggregatesAsync(
             company.Id,
@@ -211,25 +207,19 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
         var product1 = await _productHelper.CreateProduct(company: company, name: "Test Product 1", sku: "SKU-0001");
         var product2 = await _productHelper.CreateProduct(company: company, name: "Test Product 2", sku: "SKU-0002");
 
-        var transaction = TransactionHelper.CreateTransaction(company,_now);
-        await Fixture.Context.Transactions.AddAsync(transaction);
+        var transaction = await _transactionHelper.CreateTransaction(company,_now);
 
-        var lineItem1 = TransactionHelper.CreateTransactionLineItem(
+        await _transactionHelper.CreateTransactionLineItem(
             transaction,
             product1,
             quantity: 5,
             unitPrice: 10);
 
-        var lineItem2 = TransactionHelper.CreateTransactionLineItem(
+        await _transactionHelper.CreateTransactionLineItem(
             transaction,
             product2,
             quantity: 20,
             unitPrice: 10);
-
-        await Fixture.Context.TransactionLineItems.AddRangeAsync(
-            lineItem1,
-            lineItem2);
-        await Fixture.Context.SaveChangesAsync();
 
         await repo.InsertSalesAggregatesAsync(
             company.Id,
@@ -260,27 +250,21 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
         var product1 = await _productHelper.CreateProduct(company: company, name: "Test Product 1", sku: "SKU-0001");
         var product2 = await _productHelper.CreateProduct(company: company, name: "Test Product 2", sku: "SKU-0002");
 
-        var transaction = TransactionHelper.CreateTransaction(
+        var transaction = await _transactionHelper.CreateTransaction(
             company,
             _now);
-        await Fixture.Context.Transactions.AddAsync(transaction);
 
-        var lineItem1 = TransactionHelper.CreateTransactionLineItem(
+        await _transactionHelper.CreateTransactionLineItem(
             transaction,
             product1,
             quantity: 5,
             unitPrice: 10);
 
-        var lineItem2 = TransactionHelper.CreateTransactionLineItem(
+        await _transactionHelper.CreateTransactionLineItem(
             transaction,
             product2,
             quantity: 20,
             unitPrice: 10);
-
-        await Fixture.Context.TransactionLineItems.AddRangeAsync(
-            lineItem1,
-            lineItem2);
-        await Fixture.Context.SaveChangesAsync();
 
         await repo.InsertSalesAggregatesAsync(
             company.Id,
@@ -309,17 +293,13 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
         var company = await _companyHelper.CreateCompany();
         var product = await _productHelper.CreateProduct(company);
 
-        var transaction = TransactionHelper.CreateTransaction(company,_now);
-        await Fixture.Context.Transactions.AddAsync(transaction);
+        var transaction = await _transactionHelper.CreateTransaction(company,_now);
 
-        var lineItem = TransactionHelper.CreateTransactionLineItem(
+        await _transactionHelper.CreateTransactionLineItem(
             transaction,
             product,
             quantity: 5,
             unitPrice: 10);
-
-        await Fixture.Context.TransactionLineItems.AddAsync(lineItem);
-        await Fixture.Context.SaveChangesAsync();
 
         await repo.InsertSalesAggregatesAsync(
             company.Id,
@@ -363,35 +343,25 @@ public class SalesAggregateRepositoryTest(DatabaseFixture fixture)
             name: "Product 2",
             sku: "SKU-0002");
 
-        var transaction1 = TransactionHelper.CreateTransaction(
+        var transaction1 = await _transactionHelper.CreateTransaction(
             company1,
             _now);
 
-        var transaction2 = TransactionHelper.CreateTransaction(
+        var transaction2 = await _transactionHelper.CreateTransaction(
             company2,
             _now);
 
-        await Fixture.Context.Transactions.AddRangeAsync(
-            transaction1,
-            transaction2);
-
-        var lineItem1 = TransactionHelper.CreateTransactionLineItem(
+        await _transactionHelper.CreateTransactionLineItem(
             transaction1,
             product1,
             quantity: 5,
             unitPrice: 10);
 
-        var lineItem2 = TransactionHelper.CreateTransactionLineItem(
+        await _transactionHelper.CreateTransactionLineItem(
             transaction2,
             product2,
             quantity: 20,
             unitPrice: 10);
-
-        await Fixture.Context.TransactionLineItems.AddRangeAsync(
-            lineItem1,
-            lineItem2);
-
-        await Fixture.Context.SaveChangesAsync();
 
         await repo.InsertSalesAggregatesAsync(
             company1.Id,

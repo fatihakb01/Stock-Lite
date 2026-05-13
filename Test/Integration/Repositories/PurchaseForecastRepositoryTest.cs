@@ -59,7 +59,7 @@ public class PurchaseForecastRepositoryTest(DatabaseFixture fixture)
 
         await _forecastHelper.SeedWeeklyForecastsAsync(product, forecastQuantity);
 
-        var stocklevel = StockLevelHelper.CreateStockLevel(
+        var stocklevel = StockLevelHelper.CreateStockLevelStatic(
             product: product,
             quantityOnHand: quantityOnHand,
             quantityOnOrder: quantityOnOrder,
