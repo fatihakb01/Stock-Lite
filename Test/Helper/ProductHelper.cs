@@ -50,7 +50,7 @@ internal class ProductHelper(DatabaseFixture fixture)
             stockAdjustment: 0
         );
 
-        product1.StockLevel = StockLevelHelper.CreateStockLevel(
+        product1.StockLevel = StockLevelHelper.CreateStockLevelStatic(
             product: product1,
             quantityOnHand: 15,
             quantityOnOrder: 0,
@@ -78,7 +78,7 @@ internal class ProductHelper(DatabaseFixture fixture)
             stockAdjustment: 0
         );
 
-        product2.StockLevel = StockLevelHelper.CreateStockLevel(
+        product2.StockLevel = StockLevelHelper.CreateStockLevelStatic(
             product: product2,
             quantityOnHand: 25,
             quantityOnOrder: 0,
