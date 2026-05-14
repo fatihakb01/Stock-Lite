@@ -1,8 +1,8 @@
-﻿using Domain.Entities.Core;
-using Domain.Enums;
+﻿using Domain.Enums;
 using Domain.Interfaces.Services.Export;
 using Infrastructure.Services.Export.Records;
 using Moq;
+using Test.Helper;
 
 namespace Test.Unit.Services.Export
 {
@@ -14,41 +14,6 @@ namespace Test.Unit.Services.Export
         {
             _helperMock = new Mock<IFileExportHelper>();
         }
-
-        // -------------------------------------------------------
-        // Helpers
-        // -------------------------------------------------------
-        private static ExportProfile CreateStandardProfile(
-            ExportType exportType = ExportType.StockLevels,
-            string? targetPath = null,
-            string name = "Test Export"
-        ) => new ExportProfile
-        {
-            Id = Guid.NewGuid(),
-            Name = name,
-            ExportType = exportType,
-            CustomSource = null,
-            CustomType = null,
-            TargetPath = targetPath,
-            CompanyId = Guid.NewGuid(),
-            Company = null!
-        };
-
-        private static ExportProfile CreateCustomProfile(
-            string customSource = "custom_my_proc",
-            CustomType customType = CustomType.Procedure,
-            string? targetPath = null
-        ) => new ExportProfile
-        {
-            Id = Guid.NewGuid(),
-            Name = "Custom Export",
-            ExportType = null,
-            CustomSource = customSource,
-            CustomType = customType,
-            TargetPath = targetPath,
-            CompanyId = Guid.NewGuid(),
-            Company = null!
-        };
 
         // -------------------------------------------------------
         // ExportToStreamAsync — ExportResult shape
@@ -99,7 +64,7 @@ namespace Test.Unit.Services.Export
         [Fact]
         public async Task ExportToStreamAsync_UnsupportedExportType_ThrowsInvalidOperationException()
         {
-            var profile = CreateStandardProfile((ExportType)99);
+            var profile = ExportProfileHelper.CreateStandardProfileStatic((ExportType)99);
 
             ExportType? exportType = (ExportType)99;
 
@@ -146,7 +111,7 @@ namespace Test.Unit.Services.Export
         [InlineData("   ")]
         public void FetchCustomRowsAsync_InvalidNaming_WouldThrow(string customSource)
         {
-            CreateCustomProfile(customSource);
+            ExportProfileHelper.CreateCustomProfileStatic(customSource);
 
             var isValid =
                 customSource.StartsWith("custom_", StringComparison.OrdinalIgnoreCase) ||
@@ -162,7 +127,7 @@ namespace Test.Unit.Services.Export
         [InlineData("DBO.CUSTOM_my_proc")]
         public void FetchCustomRowsAsync_ValidNaming_WouldNotThrowOnNameCheck(string customSource)
         {
-            CreateCustomProfile(customSource);
+            ExportProfileHelper.CreateCustomProfileStatic(customSource);
 
             var isValid =
                 customSource.StartsWith("custom_", StringComparison.OrdinalIgnoreCase) ||

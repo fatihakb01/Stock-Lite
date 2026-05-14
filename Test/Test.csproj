@@ -27,10 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Integration\Services\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="appsettings.Test.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
