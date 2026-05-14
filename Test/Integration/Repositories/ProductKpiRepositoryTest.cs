@@ -6,7 +6,7 @@ using Test.Integration.Helper;
 
 namespace Test.Integration.Repositories
 {
-    public class ProductKpiCompanyHelper(DatabaseFixture fixture)
+    public class ProductRepositoryTest(DatabaseFixture fixture)
         : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
     {
         private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
