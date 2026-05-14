@@ -8,12 +8,15 @@ public static class StockLevelInitializer
     public static async Task InitializeAsync(DataContext context, ILogger logger)
     {
         await CreatePfcWithinLeadTimeAgg(context, logger);
+        await DeleteProcAsync(context, logger);
         await InsertProcAsync(context, logger);
         await UpdateProcAsync(context, logger);
     }
 
     private static async Task CreatePfcWithinLeadTimeAgg(DataContext context, ILogger logger)
     {
+        logger.LogInformation("Ensuring dbo.PurchaseForecastWithinLeadTimeAgg view exist...");
+
         var sql = @"
         CREATE OR ALTER VIEW [dbo].[PurchaseForecastWithinLeadTimeAgg]
         AS
@@ -97,6 +100,32 @@ public static class StockLevelInitializer
             MAX(CASE WHEN ProjectedStockRowNumber = 1 THEN WeightedProjectedStock END)				AS ProjectedStockAtLeadTime
         FROM RankedForecast
         GROUP BY ProductId;
+        ";
+
+        await context.Database.ExecuteSqlRawAsync(sql);
+    }
+
+    private static async Task DeleteProcAsync(DataContext context, ILogger logger)
+    {
+        logger.LogInformation("Ensuring dbo.DeleteProcAsync stored procedures exist...");
+
+        var sql = @"
+        CREATE OR ALTER PROCEDURE dbo.DeleteStockLevels
+            @CompanyId UNIQUEIDENTIFIER,
+            @ProductIds dbo.GuidList READONLY
+        AS
+        BEGIN
+            SET NOCOUNT ON;
+            
+            DELETE s
+            FROM StockLevels s
+            JOIN Products p ON p.Id = s.ProductId
+            WHERE p.CompanyId = @CompanyId
+            AND (
+                NOT EXISTS (SELECT 1 FROM @ProductIds)
+                OR p.Id IN (SELECT Id FROM @ProductIds)
+            );
+        END
         ";
 
         await context.Database.ExecuteSqlRawAsync(sql);
