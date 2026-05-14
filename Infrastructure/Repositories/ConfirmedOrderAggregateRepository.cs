@@ -24,8 +24,8 @@ public class ConfirmedOrderAggregateRepository
         Guid productId,
         Period periodType)
     {
-        DateTime today = DateTime.UtcNow;
-        int diff = ((7 + (DateTime.UtcNow.DayOfWeek - DayOfWeek.Monday)) % 7) + 7;
+        DateTime today = DateTime.UtcNow.Date;
+        int diff = ((7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7) + 7;
 
         DateTime startDate = periodType switch
         {
@@ -84,5 +84,10 @@ public class ConfirmedOrderAggregateRepository
         };
 
         await _helper.ExecuteProcAsync(procedureName, companyId, productIds);
+    }
+
+    public async Task DeleteConfirmedOrderAggregatesAsync(Guid companyId, IEnumerable<Guid>? productIds = null, Period period = Period.Monthly)
+    {
+        await _helper.ExecuteProcAsync("dbo.DeletePastConfirmedOrderAggregates", companyId, productIds, period);
     }
 }

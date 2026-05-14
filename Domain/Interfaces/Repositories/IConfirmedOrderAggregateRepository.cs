@@ -18,6 +18,12 @@ public interface IConfirmedOrderAggregateRepository
         Period? periodType = null
     );
 
+    Task DeleteConfirmedOrderAggregatesAsync(
+        Guid companyId, 
+        IEnumerable<Guid>? productIds = null, 
+        Period period = Period.Monthly
+    );
+
     Task<IEnumerable<ConfirmedOrderAggregate>> GetByProductIdAsync(
         Guid productId,
         Period periodType
