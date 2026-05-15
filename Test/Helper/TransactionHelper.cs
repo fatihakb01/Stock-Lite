@@ -50,6 +50,30 @@ namespace Test.Helper
             return lineItem;
         }
 
+        private static string BuildCsvHeaders()
+        {
+            return "TransactionId;SKU;TransactionDate;PaymentMethod;Notes;Quantity\r\n";
+        }
+
+        internal static string BuildCsv(
+            string transactionId = "T-0001",
+            string sku = "SKU-0001",
+            string transactionDate = "2026-05-01",
+            string paymentMethod = "",
+            string notes = "",
+            int quantity = 10,
+            bool includeHeaders = true
+            )
+        {
+            string content = $"{transactionId};{sku};{transactionDate};{paymentMethod};{notes};{quantity}";
+            if (includeHeaders)
+            {
+                return BuildCsvHeaders() + $"{content}\r\n";
+            }
+
+            return $"{content}\r\n";
+        }
+
         internal async Task<int> CountTransactions(Guid companyId)
         {
             return await _fixture.Context.TransactionLineItems

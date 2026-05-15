@@ -96,6 +96,35 @@ internal class ProductHelper(DatabaseFixture fixture)
         return [product1, product2];
     }
 
+    private static string BuildCsvHeaders()
+    {
+        return
+            "SKU;Name;Price;Description;IsActive;LeadTimeDays;MinimumOrderQuantity;OrderIncrementQuantity;SafetyStock;StockAdjustment\r\n";
+    }
+
+    internal static string BuildCsv(
+        string sku = "SKU-0001",
+        string name = "Product Test",
+        decimal price = 10m,
+        string description = "",
+        bool isActive = true,
+        int leadTimeDays = 7,
+        int moq = 1,
+        int ioq = 1,
+        int safetyStock = 1,
+        int stockAdjustment = 0,
+        bool includeHeaders = true
+        )
+    {
+        string content = $"{sku};{name};{price};{description};{isActive};{leadTimeDays};{moq};{ioq};{safetyStock};{stockAdjustment}";
+        if (includeHeaders)
+        {
+            return BuildCsvHeaders() + $"{content}\r\n";
+        }
+
+        return $"{content}\r\n";
+    }
+
     internal async Task<int> CountProducts(Guid companyId)
     {
         return await _fixture.Context.Products

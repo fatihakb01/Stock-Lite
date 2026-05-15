@@ -59,6 +59,32 @@ namespace Test.Helper
             return poli;
         }
 
+        private static string BuildCsvHeaders()
+        {
+            return
+                "OrderNumber;SKU;OrderDate;ExpectedDeliveryDate;ReceivedDate;Quantity;ReceivedQuantity\r\n";
+        }
+
+        internal static string BuildCsv(
+            string orderNumber = "PO-0001",
+            string sku = "SKU-0001",
+            int quantity = 10,
+            int receivedQuantity = 10,
+            string orderDate = "2026-05-01",
+            string expectedDeliveryDate = "2026-05-02",
+            string? receivedDate = "2026-05-02",
+            bool includeHeaders = true
+            )
+        {
+            string content = $"{orderNumber};{sku};{orderDate};{expectedDeliveryDate};{receivedDate};{quantity};{receivedQuantity}";
+            if (includeHeaders)
+            {
+                return BuildCsvHeaders() + $"{content}\r\n";
+            }
+
+            return $"{content}\r\n";
+        }
+
         internal async Task<int> CountPurchaseOrders(Guid companyId)
         {
             return await _fixture.Context.PurchaseOrderLineItem

@@ -1,4 +1,5 @@
-﻿using Domain.Enums;
+﻿using Domain.Entities.Core;
+using Domain.Enums;
 using Domain.Interfaces.Services.Scheduler.Imports;
 using Infrastructure.Services.Scheduler.Imports;
 using Infrastructure.Services.Scheduler.Imports.Handlers;
@@ -66,25 +67,15 @@ public class ImportCoordinatorTest(DatabaseFixture fixture)
     {
         return type switch
         {
-            ImportDataType.Products =>
-                "SKU;Name;Price;Description;IsActive;LeadTimeDays;MinimumOrderQuantity;OrderIncrementQuantity;SafetyStock;StockAdjustment\n" +
-                $"{Sku};Product A;10.5;Desc;true;7;1;1;5;0",
+            ImportDataType.Products => ProductHelper.BuildCsv(sku: Sku),
 
-            ImportDataType.UserDefinedFields =>
-                "SKU;Key;Value\n" +
-                $"{Sku};Stock;10",
+            ImportDataType.UserDefinedFields => UserDefinedFieldHelper.BuildCsv(sku: Sku),
 
-            ImportDataType.ConfirmedOrders =>
-                "OrderNumber;SKU;OrderDate;ExpectedDeliveryDate;ReceivedDate;Quantity;SoldQuantity\n" +
-                $"CO-1;{Sku};2026-05-01;2026-05-05;2026-05-02;10;10",
+            ImportDataType.ConfirmedOrders => ConfirmedOrderHelper.BuildCsv(sku: Sku),
 
-            ImportDataType.PurchaseOrders =>
-                "OrderNumber;SKU;OrderDate;ExpectedDeliveryDate;ReceivedDate;Quantity;ReceivedQuantity\n" +
-                $"PO-1;{Sku};2026-05-01;2026-05-05;2026-05-02;10;10",
+            ImportDataType.PurchaseOrders => PurchaseOrderHelper.BuildCsv(sku: Sku),
 
-            ImportDataType.Transactions =>
-                "TransactionId;SKU;TransactionDate;PaymentMethod;Notes;Quantity\n" +
-                $"T-1;{Sku};2026-05-01;Cash;Note;10",
+            ImportDataType.Transactions => TransactionHelper.BuildCsv(sku: Sku),
 
             _ => throw new InvalidOperationException("Unsupported type")
         };
