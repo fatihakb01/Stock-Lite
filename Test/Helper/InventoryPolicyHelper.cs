@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Core;
+using Microsoft.EntityFrameworkCore;
 using Test.Integration.Helper;
 
 namespace Test.Helper
@@ -49,6 +50,18 @@ namespace Test.Helper
                 OrderIncrementQuantity = orderIncrementQuantity,
                 StockAdjustment = stockAdjustment
             };
+        }
+
+        internal async Task<ProductInventoryPolicy?> GetInventoryPolicy(
+            Guid companyId,
+            string sku)
+        {
+            return await _fixture.Context.ProductInventoryPolicies
+                .AsNoTracking()
+                .Include(x => x.Product)
+                .SingleOrDefaultAsync(x =>
+                    x.Product.CompanyId == companyId &&
+                    x.Product.SKU == sku);
         }
     }
 }

@@ -130,4 +130,15 @@ internal class ProductHelper(DatabaseFixture fixture)
         return await _fixture.Context.Products
             .CountAsync(p => p.CompanyId == companyId);
     }
+
+    internal async Task<Product?> GetProduct(
+        Guid companyId,
+        string sku)
+    {
+        return await _fixture.Context.Products
+            .AsNoTracking()
+            .SingleOrDefaultAsync(x =>
+                x.CompanyId == companyId &&
+                x.SKU == sku);
+    }
 }
