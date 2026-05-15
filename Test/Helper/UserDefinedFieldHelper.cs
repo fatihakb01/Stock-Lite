@@ -34,5 +34,19 @@ namespace Test.Helper
 
             return $"{content}\r\n";
         }
+
+        internal async Task<UserDefinedField?> GetField(
+            Guid companyId,
+            string sku,
+            string key)
+        {
+            return await _fixture.Context.UserDefinedFields
+                .AsNoTracking()
+                .Include(x => x.Product)
+                .SingleOrDefaultAsync(x =>
+                    x.CompanyId == companyId &&
+                    x.Product.SKU == sku &&
+                    x.Key == key);
+        }
     }
 }
