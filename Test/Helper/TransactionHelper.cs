@@ -79,5 +79,29 @@ namespace Test.Helper
             return await _fixture.Context.TransactionLineItems
                 .CountAsync(x => x.Product.CompanyId == companyId);
         }
+
+        internal async Task<Transaction?> GetTransaction(
+            Guid companyId,
+            string transactionId)
+        {
+            return await _fixture.Context.Transactions
+                .FirstOrDefaultAsync(x =>
+                    x.CompanyId == companyId &&
+                    x.TransactionId == transactionId);
+        }
+
+        internal async Task<TransactionLineItem?> GetLineItem(
+            Guid companyId,
+            string transactionId,
+            string sku)
+        {
+            return await _fixture.Context.TransactionLineItems
+                .Include(x => x.Transaction)
+                .Include(x => x.Product)
+                .FirstOrDefaultAsync(x =>
+                    x.Transaction.CompanyId == companyId &&
+                    x.Transaction.TransactionId == transactionId &&
+                    x.Product.SKU == sku);
+        }
     }
 }
