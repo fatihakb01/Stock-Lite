@@ -5,7 +5,7 @@ using Infrastructure.Services.Scheduler.Imports.Handlers;
 using Test.Helper;
 using Test.Integration.Helper;
 
-namespace Test.Integration.Services.Scheduler.Import;
+namespace Test.Integration.Services.Scheduler.Imports;
 
 public class ImportCoordinatorTest(DatabaseFixture fixture)
     : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
