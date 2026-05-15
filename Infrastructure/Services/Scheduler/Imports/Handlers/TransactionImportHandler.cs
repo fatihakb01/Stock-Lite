@@ -38,7 +38,7 @@ public class TransactionImportHandler(DataContext context) : IImportHandler
                 companyId,
                 r.TransactionId,
                 r.SKU,
-                r.TransactionDate,
+                r.TransactionDate.Date,
                 r.PaymentMethod ?? "",
                 r.Notes ?? "",
                 r.Quantity

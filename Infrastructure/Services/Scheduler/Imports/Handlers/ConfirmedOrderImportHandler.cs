@@ -39,9 +39,9 @@ public class ConfirmedOrderImportHandler(DataContext context) : IImportHandler
                 companyId,
                 r.OrderNumber,
                 r.SKU,
-                r.OrderDate,
-                r.ExpectedDeliveryDate,
-                r.ReceivedDate ?? null,
+                r.OrderDate.Date,
+                r.ExpectedDeliveryDate.Date,
+                r.ReceivedDate?.Date ?? null,
                 r.Quantity,
                 r.SoldQuantity
             );

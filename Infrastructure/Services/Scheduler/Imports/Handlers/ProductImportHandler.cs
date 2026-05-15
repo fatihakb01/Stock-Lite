@@ -46,7 +46,7 @@ public class ProductImportHandler(DataContext context) : IImportHandler
                 r.Price,
                 r.Description ?? "",
                 r.IsActive ?? true,
-                DateTime.UtcNow,
+                DateTime.UtcNow.Date,
                 r.LeadTimeDays,
                 r.MinimumOrderQuantity,
                 r.OrderIncrementQuantity,
