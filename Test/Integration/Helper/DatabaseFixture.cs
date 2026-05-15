@@ -72,13 +72,17 @@ namespace Test.Integration.Helper
                 // Exclude migration history table from reset
                 TablesToIgnore = ["__EFMigrationsHistory"]
             });
+
+            await connection.CloseAsync();
         }
 
         public async Task ResetAsync()
         {
             var connection = Context.Database.GetDbConnection();
+
             if (connection.State != System.Data.ConnectionState.Open)
                 await connection.OpenAsync();
+
             await _respawner.ResetAsync(connection);
         }
 

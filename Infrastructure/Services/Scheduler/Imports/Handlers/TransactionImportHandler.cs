@@ -45,20 +45,30 @@ public class TransactionImportHandler(DataContext context) : IImportHandler
             );
         }
 
-        using var connection = (SqlConnection)_context.Database.GetDbConnection();
-        await connection.OpenAsync(ct);
+        var connection = (SqlConnection)_context.Database.GetDbConnection();
+        var shouldClose = connection.State != ConnectionState.Open;
+        if (shouldClose)
+            await connection.OpenAsync(ct);
 
-        using var bulk = new SqlBulkCopy(connection)
+        try
         {
-            DestinationTableName = "dbo.StagingTransactions",
-            BatchSize = 50_000
-        };
+            using var bulk = new SqlBulkCopy(connection)
+            {
+                DestinationTableName = "dbo.StagingTransactions",
+                BatchSize = 50_000
+            };
 
-        await bulk.WriteToServerAsync(dataTable, ct);
+            await bulk.WriteToServerAsync(dataTable, ct);
 
-        await _context.Database.ExecuteSqlRawAsync(
-            "EXEC dbo.ProcessTransactions @CompanyId",
-            new SqlParameter("@CompanyId", companyId)
-        );
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC dbo.ProcessTransactions @CompanyId",
+                new SqlParameter("@CompanyId", companyId)
+            );
+        }
+        finally
+        {
+            if (shouldClose && connection.State == ConnectionState.Open)
+                await connection.CloseAsync();
+        }
     }
 }
