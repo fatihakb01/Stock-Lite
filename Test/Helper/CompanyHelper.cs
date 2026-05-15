@@ -11,6 +11,18 @@ namespace Test.Helper
             bool saveChanges = true
         )
         {
+            var company = CreateCompanyStatic(name);
+
+            await _fixture.Context.Companies.AddAsync(company);
+
+            if (saveChanges)
+                await _fixture.Context.SaveChangesAsync();
+
+            return company;
+        }
+
+        internal static Company CreateCompanyStatic(string name = "Test Company")
+        {
             var company = new Company
             {
                 Id = Guid.NewGuid(),
@@ -19,11 +31,6 @@ namespace Test.Helper
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             };
-
-            await _fixture.Context.Companies.AddAsync(company);
-
-            if (saveChanges)
-                await _fixture.Context.SaveChangesAsync();
 
             return company;
         }

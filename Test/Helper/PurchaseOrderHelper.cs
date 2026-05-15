@@ -1,5 +1,6 @@
 ﻿using Domain.Entities.Core;
 using Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 using Test.Integration.Helper;
 
 namespace Test.Helper
@@ -56,6 +57,12 @@ namespace Test.Helper
             await _fixture.Context.SaveChangesAsync();
 
             return poli;
+        }
+
+        internal async Task<int> CountPurchaseOrders(Guid companyId)
+        {
+            return await _fixture.Context.PurchaseOrderLineItem
+                .CountAsync(x => x.Product.CompanyId == companyId);
         }
     }
 }

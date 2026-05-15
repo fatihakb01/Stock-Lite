@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Core;
+using Microsoft.EntityFrameworkCore;
 using Test.Integration.Helper;
 
 namespace Test.Helper;
@@ -30,7 +31,6 @@ internal class ProductHelper(DatabaseFixture fixture)
 
         return product;
     }
-    
 
     internal async Task<List<Product>> CreateProducts(Company company)
     {
@@ -94,5 +94,11 @@ internal class ProductHelper(DatabaseFixture fixture)
         await _fixture.Context.SaveChangesAsync();
 
         return [product1, product2];
+    }
+
+    internal async Task<int> CountProducts(Guid companyId)
+    {
+        return await _fixture.Context.Products
+            .CountAsync(p => p.CompanyId == companyId);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Core;
+using Microsoft.EntityFrameworkCore;
 using Test.Integration.Helper;
 
 namespace Test.Helper
@@ -47,6 +48,12 @@ namespace Test.Helper
             await _fixture.Context.SaveChangesAsync();
 
             return lineItem;
+        }
+
+        internal async Task<int> CountTransactions(Guid companyId)
+        {
+            return await _fixture.Context.TransactionLineItems
+                .CountAsync(x => x.Product.CompanyId == companyId);
         }
     }
 }
