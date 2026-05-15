@@ -1,6 +1,5 @@
 ﻿using Infrastructure.Services.Scheduler.Imports.Handlers;
 using Microsoft.EntityFrameworkCore;
-using System.Text;
 using Test.Helper;
 using Test.Integration.Helper;
 
@@ -15,14 +14,6 @@ public class PurchaseOrderImportHandlerTest(DatabaseFixture fixture)
 
     private PurchaseOrderImportHandler CreateRepository()
         => new PurchaseOrderImportHandler(Fixture.Context);
-
-    // -------------------------------------------------------
-    // Helper
-    // -------------------------------------------------------
-    private static MemoryStream CreateCsvStream(string csv)
-    {
-        return new MemoryStream(Encoding.UTF8.GetBytes(csv));
-    }
 
     // -------------------------------------------------------
     // ImportAsync
@@ -46,7 +37,7 @@ public class PurchaseOrderImportHandlerTest(DatabaseFixture fixture)
             expectedDeliveryDate: "2026-05-05",
             receivedDate: "2026-05-02");
 
-        await using var stream = CreateCsvStream(csv);
+        await using var stream = FileStreamHelper.CreateCsvStream(csv);
 
         await handler.ImportAsync(
             stream,
@@ -84,7 +75,7 @@ public class PurchaseOrderImportHandlerTest(DatabaseFixture fixture)
             expectedDeliveryDate: "2026-05-05",
             receivedDate: "2026-05-02");
 
-        await using var stream = CreateCsvStream(csv);
+        await using var stream = FileStreamHelper.CreateCsvStream(csv);
 
         await handler.ImportAsync(
             stream,
@@ -120,7 +111,7 @@ public class PurchaseOrderImportHandlerTest(DatabaseFixture fixture)
             expectedDeliveryDate: "2026-05-05",
             receivedDate: "2026-05-02");
 
-        await using (var initialStream = CreateCsvStream(initialCsv))
+        await using (var initialStream = FileStreamHelper.CreateCsvStream(initialCsv))
         {
             await handler.ImportAsync(
                 initialStream,
@@ -137,7 +128,7 @@ public class PurchaseOrderImportHandlerTest(DatabaseFixture fixture)
             expectedDeliveryDate: "2026-05-10",
             receivedDate: "2026-05-08");
 
-        await using var updateStream = CreateCsvStream(updatedCsv);
+        await using var updateStream = FileStreamHelper.CreateCsvStream(updatedCsv);
 
         await handler.ImportAsync(
             updateStream,
@@ -170,7 +161,7 @@ public class PurchaseOrderImportHandlerTest(DatabaseFixture fixture)
             quantity: 10,
             receivedQuantity: 5);
 
-        await using var stream = CreateCsvStream(csv);
+        await using var stream = FileStreamHelper.CreateCsvStream(csv);
 
         await handler.ImportAsync(
             stream,
@@ -205,7 +196,7 @@ public class PurchaseOrderImportHandlerTest(DatabaseFixture fixture)
             expectedDeliveryDate: "2026-05-05",
             receivedDate: "");
 
-        await using var stream = CreateCsvStream(csv);
+        await using var stream = FileStreamHelper.CreateCsvStream(csv);
 
         await handler.ImportAsync(
             stream,
@@ -234,7 +225,7 @@ public class PurchaseOrderImportHandlerTest(DatabaseFixture fixture)
             orderNumber: "PO-0001",
             sku: "SKU-0001");
 
-        await using var stream = CreateCsvStream(csv);
+        await using var stream = FileStreamHelper.CreateCsvStream(csv);
 
         using var cts = new CancellationTokenSource();
         await cts.CancelAsync();
@@ -257,7 +248,7 @@ public class PurchaseOrderImportHandlerTest(DatabaseFixture fixture)
             "InvalidHeader\n" +
             "InvalidValue";
 
-        await using var stream = CreateCsvStream(invalidCsv);
+        await using var stream = FileStreamHelper.CreateCsvStream(invalidCsv);
 
         await Assert.ThrowsAnyAsync<Exception>(() =>
             handler.ImportAsync(
@@ -282,7 +273,7 @@ public class PurchaseOrderImportHandlerTest(DatabaseFixture fixture)
             orderNumber: "PO-0001",
             sku: "SKU-0001");
 
-        await using var stream = CreateCsvStream(csv);
+        await using var stream = FileStreamHelper.CreateCsvStream(csv);
 
         await handler.ImportAsync(
             stream,
