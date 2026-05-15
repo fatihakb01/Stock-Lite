@@ -85,6 +85,7 @@ namespace Test.Helper
             string transactionId)
         {
             return await _fixture.Context.Transactions
+                .AsNoTracking()
                 .FirstOrDefaultAsync(x =>
                     x.CompanyId == companyId &&
                     x.TransactionId == transactionId);
@@ -96,6 +97,7 @@ namespace Test.Helper
             string sku)
         {
             return await _fixture.Context.TransactionLineItems
+                .AsNoTracking()
                 .Include(x => x.Transaction)
                 .Include(x => x.Product)
                 .FirstOrDefaultAsync(x =>

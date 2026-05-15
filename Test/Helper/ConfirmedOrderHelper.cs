@@ -96,6 +96,7 @@ namespace Test.Helper
             string orderNumber)
         {
             return await _fixture.Context.ConfirmedOrder
+                .AsNoTracking()
                 .FirstOrDefaultAsync(x =>
                     x.CompanyId == companyId &&
                     x.OrderNumber == orderNumber);
@@ -107,6 +108,7 @@ namespace Test.Helper
             string sku)
         {
             return await _fixture.Context.ConfirmedOrderLineItem
+                .AsNoTracking()
                 .Include(x => x.Product)
                 .Include(x => x.ConfirmedOrder)
                 .FirstOrDefaultAsync(x =>
