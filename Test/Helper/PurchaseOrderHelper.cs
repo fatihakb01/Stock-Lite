@@ -90,5 +90,29 @@ namespace Test.Helper
             return await _fixture.Context.PurchaseOrderLineItem
                 .CountAsync(x => x.Product.CompanyId == companyId);
         }
+
+        internal async Task<PurchaseOrder?> GetPurchaseOrder(
+            Guid companyId,
+            string orderNumber)
+        {
+            return await _fixture.Context.PurchaseOrder
+                .FirstOrDefaultAsync(x =>
+                    x.CompanyId == companyId &&
+                    x.OrderNumber == orderNumber);
+        }
+
+        internal async Task<PurchaseOrderLineItem?> GetLineItem(
+            Guid companyId,
+            string orderNumber,
+            string sku)
+        {
+            return await _fixture.Context.PurchaseOrderLineItem
+                .Include(x => x.Product)
+                .Include(x => x.PurchaseOrder)
+                .FirstOrDefaultAsync(x =>
+                    x.Product.SKU == sku &&
+                    x.PurchaseOrder.OrderNumber == orderNumber &&
+                    x.PurchaseOrder.CompanyId == companyId);
+        }
     }
 }
