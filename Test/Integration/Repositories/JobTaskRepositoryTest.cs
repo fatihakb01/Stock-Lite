@@ -6,7 +6,7 @@ using Test.Integration.Helper;
 
 namespace Test.Integration.Repositories
 {
-    public class JobTaskCompanyHelper(DatabaseFixture fixture) 
+    public class JobTaskRepositoryTest(DatabaseFixture fixture) 
         : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
     {
         private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
