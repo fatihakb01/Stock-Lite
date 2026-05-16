@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Test.Helper;
 using Test.Integration.Helper;
 
-namespace Test.Integration.Configurations;
+namespace Test.Integration.Configurations.Core;
 
 public class ScheduledJobConfigurationTest(DatabaseFixture fixture)
     : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>

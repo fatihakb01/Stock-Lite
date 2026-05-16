@@ -2,7 +2,7 @@
 using Test.Helper;
 using Test.Integration.Helper;
 
-namespace Test.Integration.Configurations;
+namespace Test.Integration.Configurations.Core;
 
 public class JobTaskConfigurationTest(DatabaseFixture fixture)
     : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
