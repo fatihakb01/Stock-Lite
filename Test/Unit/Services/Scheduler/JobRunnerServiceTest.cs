@@ -28,7 +28,7 @@ namespace Test.Unit.Services.Scheduler
         [Fact]
         public async Task RunAsync_DispatchSucceeds_SetsJobResultToSucceeded()
         {
-            var (job, taskExecution) = SchedulerHelper.CreateTaskAndExecution();
+            var (_, job, taskExecution) = SchedulerHelper.CreateTaskAndExecutionStatic();
 
             _dispatcherMock
                 .Setup(d => d.DispatchAsync(job, It.IsAny<CancellationToken>()))
@@ -42,7 +42,7 @@ namespace Test.Unit.Services.Scheduler
         [Fact]
         public async Task RunAsync_DispatchThrows_SetsJobResultToFailed()
         {
-            var (job, taskExecution) = SchedulerHelper.CreateTaskAndExecution();
+            var (_, job, taskExecution) = SchedulerHelper.CreateTaskAndExecutionStatic();
 
             _dispatcherMock
                 .Setup(d => d.DispatchAsync(job, It.IsAny<CancellationToken>()))
@@ -56,7 +56,7 @@ namespace Test.Unit.Services.Scheduler
         [Fact]
         public async Task RunAsync_DispatchThrows_SetsErrorMessageOnExecution()
         {
-            var (job, taskExecution) = SchedulerHelper.CreateTaskAndExecution();
+            var (_, job, taskExecution) = SchedulerHelper.CreateTaskAndExecutionStatic();
             JobExecution? capturedExecution = null;
 
             _dispatcherMock
@@ -77,7 +77,7 @@ namespace Test.Unit.Services.Scheduler
         [Fact]
         public async Task RunAsync_DispatchSucceeds_SetsFinishedAt()
         {
-            var (job, taskExecution) = SchedulerHelper.CreateTaskAndExecution();
+            var (_, job, taskExecution) = SchedulerHelper.CreateTaskAndExecutionStatic();
             JobExecution? capturedExecution = null;
 
             _dispatcherMock
@@ -99,7 +99,7 @@ namespace Test.Unit.Services.Scheduler
         [Fact]
         public async Task RunAsync_DispatchThrows_StillSetsFinishedAt()
         {
-            var (job, taskExecution) = SchedulerHelper.CreateTaskAndExecution();
+            var (_, job, taskExecution) = SchedulerHelper.CreateTaskAndExecutionStatic();
             JobExecution? capturedExecution = null;
 
             _dispatcherMock
@@ -121,7 +121,7 @@ namespace Test.Unit.Services.Scheduler
         [Fact]
         public async Task RunAsync_Always_CallsUpdateAndSaveOnExecutionRepository()
         {
-            var (job, taskExecution) = SchedulerHelper.CreateTaskAndExecution();
+            var (_, job, taskExecution) = SchedulerHelper.CreateTaskAndExecutionStatic();
 
             _dispatcherMock
                 .Setup(d => d.DispatchAsync(job, It.IsAny<CancellationToken>()))

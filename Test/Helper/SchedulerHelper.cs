@@ -231,17 +231,18 @@ namespace Test.Helper
             Guid jobTaskId,
             Guid scheduledJobId,
             JobTriggerType triggerType = JobTriggerType.Scheduled,
-            JobExecutionStatus status = JobExecutionStatus.Running
+            JobExecutionStatus status = JobExecutionStatus.Running,
+            JobTaskExecution? jobTaskExecution = null
         )
         {
-            var jobTaskExecution = CreateJobTaskExecution(jobTaskId);
+            var taskExecution = jobTaskExecution ?? CreateJobTaskExecution(jobTaskId);
 
             return new JobExecution
             {
                 ScheduledJobId = scheduledJobId,
                 ScheduledJob = null!,
-                JobTaskExecutionId = jobTaskExecution.Id,
-                JobTaskExecution = jobTaskExecution,
+                JobTaskExecutionId = taskExecution.Id,
+                JobTaskExecution = taskExecution,
                 Status = status,
                 TriggerType = triggerType,
                 StartedAt = DateTime.UtcNow
@@ -252,29 +253,48 @@ namespace Test.Helper
             Guid jobTaskId,
             Guid scheduledJobId,
             JobTriggerType triggerType = JobTriggerType.Scheduled,
-            JobExecutionStatus status = JobExecutionStatus.Running
+            JobExecutionStatus status = JobExecutionStatus.Running,
+            JobTaskExecution? jobTaskExecution = null,
+            bool saveChanges = true
         )
         {
             var execution = CreateJobExecutionStatic(
                 jobTaskId: jobTaskId,
                 scheduledJobId: scheduledJobId,
                 triggerType: triggerType,
-                status: status
+                status: status,
+                jobTaskExecution: jobTaskExecution
             );
 
             await _fixture.Context.JobExecutions.AddAsync(execution);
-            await _fixture.Context.SaveChangesAsync();
+
+            if (saveChanges)
+                await _fixture.Context.SaveChangesAsync();
 
             return execution;
         }
 
-        internal static (ScheduledJob job, JobTaskExecution taskExecution) CreateTaskAndExecution()
+        internal static (JobTask task, ScheduledJob job, JobTaskExecution taskExecution) CreateTaskAndExecutionStatic()
         {
-            var jobTask = CreateJobTaskStatic();
-            var job = CreateScheduledJobStatic(task: jobTask);
-            var taskExecution = CreateJobTaskExecution(jobTask.Id);
+            var task = CreateJobTaskStatic();
+            var job = CreateScheduledJobStatic(task: task);
+            var taskExecution = CreateJobTaskExecution(task.Id);
 
-            return (job, taskExecution);
+            return (task, job, taskExecution);
+        }
+
+        internal async Task<(JobTask task, ScheduledJob job, JobTaskExecution taskExecution)> CreateTaskAndExecution(bool saveChanges = true)
+        {
+            var (task, job, taskExecution) = CreateTaskAndExecutionStatic();
+
+            await _fixture.Context.ScheduledJobs.AddAsync(job);
+            await _fixture.Context.JobTasks.AddAsync(task);
+            await _fixture.Context.JobTaskExecutions.AddAsync(taskExecution);
+
+            if (saveChanges)
+                await _fixture.Context.SaveChangesAsync();
+
+            return (task, job, taskExecution);
         }
 
         internal async Task<List<JobExecution>> CreateJobExecutions(Guid jobTaskId, List<ScheduledJob> jobs)
