@@ -25,7 +25,8 @@ namespace Test.Integration.Repositories
             int safetyStock = 10,
             int leadTimeDays = 7,
             int moq = 10,
-            int orderIncrement = 10)
+            int orderIncrement = 10,
+            decimal weeklyForecast = 1000)
         {
             var policy = await _policyHelper.CreateInventoryPolicy(
                 product,
@@ -34,7 +35,7 @@ namespace Test.Integration.Repositories
                 minimumOrderQuantity: moq,
                 orderIncrementQuantity: orderIncrement);
 
-            await _forecastHelper.SeedWeeklyForecastsAsync(product);
+            await _forecastHelper.SeedWeeklyForecastsAsync(product: product, predictedQuantity: weeklyForecast);
 
             var repo = new PurchaseForecastRepository(Fixture.Context);
             await repo.InsertPurchaseForecastsAsync(product.CompanyId, [product.Id]);
@@ -234,11 +235,15 @@ namespace Test.Integration.Repositories
             var company = await _companyHelper.CreateCompany();
             var product = await _productHelper.CreateProduct(company);
 
-            await SeedUpdatePrerequisitesAsync(product, safetyStock: 0);
+            await SeedUpdatePrerequisitesAsync(product: product, leadTimeDays: 1, safetyStock: 0, weeklyForecast: 0);
 
             // Seed received purchase orders to create QuantityOnHand
+            var startDate = DateHelper.GetPeriodStartDate(Period.Weekly);
             var po = await _poHelper.CreatePurchaseOrder(
-                company, status: PurchaseOrderStatus.PartiallyReceived);
+                company, 
+                status: PurchaseOrderStatus.Completed, 
+                expectedDeliveryDate: startDate.AddDays(2),
+                receivedDate: startDate);
 
             var poLine = await _poHelper.CreatePurchaseOrderLineItem(
                 po, product, quantity: 1000, receivedQuantity: 1000);
