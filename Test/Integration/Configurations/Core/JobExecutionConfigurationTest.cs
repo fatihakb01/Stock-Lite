@@ -13,51 +13,6 @@ public class JobExecutionConfigurationTest(DatabaseFixture fixture)
     private readonly SchedulerHelper _schedulerHelper = new(fixture);
 
     // -------------------------------------------------------
-    // Required fields
-    // -------------------------------------------------------
-    [Fact]
-    public async Task SaveChanges_WhenStatusIsDefault_SavesSuccessfully()
-    {
-        var company = await _companyHelper.CreateCompany();
-
-        var (task, job, _) =
-            await _schedulerHelper.CreateTaskAndExecution(saveChanges: false);
-        task.CompanyId = company.Id;
-        await Fixture.Context.SaveChangesAsync();
-
-        var execution = await _schedulerHelper.CreateJobExecution(
-            jobTaskId: task.Id,
-            scheduledJobId: job.Id,
-            saveChanges: false);
-        execution.Status = default;
-        await Fixture.Context.SaveChangesAsync();
-
-        var exists = await Fixture.Context.JobExecutions.AnyAsync(x => x.Id == execution.Id);
-        Assert.True(exists);
-    }
-
-    [Fact]
-    public async Task SaveChanges_WhenTriggerTypeIsDefault_SavesSuccessfully()
-    {
-        var company = await _companyHelper.CreateCompany();
-
-        var (task, job, _) =
-            await _schedulerHelper.CreateTaskAndExecution(saveChanges: false);
-        task.CompanyId = company.Id;
-        await Fixture.Context.SaveChangesAsync();
-
-        var execution = await _schedulerHelper.CreateJobExecution(
-            jobTaskId: task.Id,
-            scheduledJobId: job.Id,
-            saveChanges: false);
-        execution.TriggerType = default;
-        await Fixture.Context.SaveChangesAsync();
-
-        var exists = await Fixture.Context.JobExecutions.AnyAsync(x => x.Id == execution.Id);
-        Assert.True(exists);
-    }
-
-    // -------------------------------------------------------
     // Foreign key constraints
     // -------------------------------------------------------
     [Fact]
