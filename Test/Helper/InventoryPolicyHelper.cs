@@ -13,7 +13,8 @@ namespace Test.Helper
             int leadTimeDays = 7,
             int minimumOrderQuantity = 10,
             int orderIncrementQuantity = 10,
-            int stockAdjustment = 0
+            int stockAdjustment = 0,
+            bool saveChanges = true
         )
         {
             var policy = CreateInventoryPolicyStatic(
@@ -26,7 +27,9 @@ namespace Test.Helper
             );
 
             await _fixture.Context.ProductInventoryPolicies.AddAsync(policy);
-            await _fixture.Context.SaveChangesAsync();
+
+            if (saveChanges)
+                await _fixture.Context.SaveChangesAsync();
 
             return policy;
         }
