@@ -8,10 +8,12 @@ namespace Test.Helper
         private readonly DatabaseFixture _fixture = fixture;
         internal async Task<Company> CreateCompany(
             string name = "Test Company",
+            string email = "test@test.com",
+            bool isActive = true,
             bool saveChanges = true
         )
         {
-            var company = CreateCompanyStatic(name);
+            var company = CreateCompanyStatic(name, email, isActive);
 
             await _fixture.Context.Companies.AddAsync(company);
 
@@ -21,14 +23,18 @@ namespace Test.Helper
             return company;
         }
 
-        internal static Company CreateCompanyStatic(string name = "Test Company")
+        internal static Company CreateCompanyStatic(
+            string name = "Test Company",
+            string email = "test@test.com",
+            bool isActive = true
+        )
         {
             var company = new Company
             {
                 Id = Guid.NewGuid(),
                 Name = name,
-                Email = "test@test.com",
-                IsActive = true,
+                Email = email,
+                IsActive = isActive,
                 CreatedAt = DateTime.UtcNow
             };
 

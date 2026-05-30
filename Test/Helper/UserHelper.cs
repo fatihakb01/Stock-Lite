@@ -76,5 +76,19 @@ namespace Test.Helper
                 IsActive = true
             };
         }
+
+        internal async Task<User> CreateDummyUserAsync(
+            Company company,
+            string email = "test@test.com",
+            string userName = "testuser")
+        {
+            var user = CreateUser(company, email, userName);
+            user.PasswordHash = "dummy-hash";
+
+            _fixture.Context.Users.Add(user);
+            await _fixture.Context.SaveChangesAsync();
+
+            return user;
+        }
     }
 }
