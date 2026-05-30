@@ -213,7 +213,7 @@ namespace Test.Helper
             };
         }
 
-        private static JobTaskExecution CreateJobTaskExecution(
+        internal static JobTaskExecution CreateJobTaskExecution(
             Guid jobTaskId,
             JobTriggerType triggerType = JobTriggerType.Scheduled,
             JobExecutionStatus status = JobExecutionStatus.Running
