@@ -1,17 +1,18 @@
-﻿using Domain.Entities.Derived;
-using Domain.Enums;
+﻿using Domain.Enums;
 using Infrastructure.Repositories;
 using Test.Helper;
 using Test.Integration.Helper;
 
 namespace Test.Integration.Repositories
 {
-    public class ProductRepositoryTest(DatabaseFixture fixture)
+    public class ProductKpiRepositoryTest(DatabaseFixture fixture)
         : IntegrationTestBase(fixture), IClassFixture<DatabaseFixture>
     {
         private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
         private readonly ProductHelper _productHelper = new ProductHelper(fixture);
         private readonly SchedulerHelper _schedulerHelper = new SchedulerHelper(fixture);
+        private readonly ProductKpiHelper _productKpiHelper = new ProductKpiHelper(fixture);
+
         private ProductKpiRepository CreateRepository()
             => new ProductKpiRepository(Fixture.Context);
 
@@ -21,19 +22,13 @@ namespace Test.Integration.Repositories
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
 
-            var kpi = new ProductKpi
-            {
-                CompanyId = company.Id,
-                Company = company,
-                TotalProductCount = 10,
-                BelowSafetyStockCount = 5,
-                RecommendedOrdersCount = 15,
-                WithoutStockAtLeadTimeCount = 2,
-                WithoutForecastCount = 9
-            };
-
-            await Fixture.Context.ProductKpis.AddAsync(kpi);
-            await Fixture.Context.SaveChangesAsync();
+            await _productKpiHelper.CreateProductKpi(
+                company: company,
+                totalProductCount: 10,
+                belowSafetyStockCount: 5,
+                recommendedOrdersCount: 15,
+                withoutStockAtLeadTimeCount: 2,
+                withoutForecastCount: 9);
 
             var result = await repo.GetProductKpis(company.Id, CancellationToken.None);
 
@@ -128,17 +123,14 @@ namespace Test.Integration.Repositories
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
 
-            var kpi = new ProductKpi
-            {
-                CompanyId = company.Id,
-                Company = company,
-                SchedulerStatus = JobExecutionStatus.Pending
-            };
+            await _productKpiHelper.CreateProductKpi(
+                company: company,
+                status: JobExecutionStatus.Pending,
+                saveChanges: false);
 
             var task = await _schedulerHelper.CreateJobTask(companyId: company.Id);
             task.Result = JobExecutionStatus.Failed;
 
-            await Fixture.Context.ProductKpis.AddAsync(kpi);
             await Fixture.Context.SaveChangesAsync();
 
             await repo.UpdateSchedulerStatus(company.Id, CancellationToken.None);
@@ -178,19 +170,14 @@ namespace Test.Integration.Repositories
             var repo = CreateRepository();
             var company = await _companyHelper.CreateCompany();
 
-            var existing = new ProductKpi
-            {
-                CompanyId = company.Id,
-                Company = company,
-                TotalProductCount = 0,
-                BelowSafetyStockCount = 0,
-                RecommendedOrdersCount = 0,
-                WithoutForecastCount = 0,
-                WithoutStockAtLeadTimeCount = 0,
-                SchedulerStatus = JobExecutionStatus.Pending
-            };
-
-            await Fixture.Context.ProductKpis.AddAsync(existing);
+            await _productKpiHelper.CreateProductKpi(
+                company: company,
+                totalProductCount: 0,
+                belowSafetyStockCount: 0,
+                recommendedOrdersCount: 0,
+                withoutStockAtLeadTimeCount: 0,
+                withoutForecastCount: 0,
+                status: JobExecutionStatus.Pending);
 
             var task = await _schedulerHelper.CreateJobTask(companyId: company.Id);
             task.Result = JobExecutionStatus.Failed;
