@@ -8,6 +8,29 @@ namespace Test.Helper
     {
         private readonly DatabaseFixture _fixture = fixture;
 
+        internal async Task<UserDefinedField> CreateUserDefinedField(
+            Product product,
+            string key = "AdjustedStock",
+            string? value = "10",
+            bool saveChanges = true)
+        {
+            var field = new UserDefinedField
+            {
+                ProductId = product.Id,
+                Product = product,
+                CompanyId = product.CompanyId,
+                Key = key,
+                Value = value
+            };
+
+            await _fixture.Context.UserDefinedFields.AddAsync(field);
+
+            if (saveChanges)
+                await _fixture.Context.SaveChangesAsync();
+
+            return field;
+        }
+
         internal async Task<int> CountUserDefinedFields(Guid companyId)
         {
             return await _fixture.Context.UserDefinedFields
