@@ -10,6 +10,8 @@ namespace Test.Helper
         internal static ExportProfile CreateStandardProfileStatic(
             ExportType exportType = ExportType.StockLevels,
             string? targetPath = null,
+            string? customSource = null,
+            CustomType? type = null,
             string name = "Test Export",
             Company? company = null)
             => new()
@@ -17,8 +19,8 @@ namespace Test.Helper
                 Id = Guid.NewGuid(),
                 Name = name,
                 ExportType = exportType,
-                CustomSource = null,
-                CustomType = null,
+                CustomSource = customSource,
+                CustomType = type,
                 TargetPath = targetPath,
                 CompanyId =  company != null ? company.Id : Guid.NewGuid(),
                 Company = company ?? null!
