@@ -58,22 +58,7 @@ public class UserDefinedFieldConfigurationTest(DatabaseFixture fixture)
     // -------------------------------------------------------
     // Required relationship behavior
     // -------------------------------------------------------
-    [Fact]
-    public async Task SaveChanges_WhenProductDeleted_UserDefinedFieldsAreDeleted()
-    {
-        var company = await _companyHelper.CreateCompany();
-        var product = await _productHelper.CreateProduct(company);
-
-        await _udfHelper.CreateUserDefinedField(product);
-
-        Fixture.Context.Products.Remove(product);
-        await Fixture.Context.SaveChangesAsync();
-
-        var exists = await Fixture.Context.UserDefinedFields
-            .AnyAsync(x => x.ProductId == product.Id);
-
-        Assert.False(exists);
-    }
+    // see DeleteProduct_DeletesAssociatedUserDefinedFields inside ProductConfigurationTest.cs
 
     // -------------------------------------------------------
     // Required fields

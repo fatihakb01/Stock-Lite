@@ -13,8 +13,8 @@ namespace Test.Helper
         internal async Task<ConfirmedOrderAggregate> CreateConfirmedOrderAggregate(
             Product product,
             Period period,
-            int totalConfirmedQuantity,
-            decimal totalConfirmedRevenue,
+            int totalConfirmedQuantity = 10,
+            decimal totalConfirmedRevenue = 1000,
             DateTime? periodStartDate = null,
             DateTime? periodEndDate = null
         )

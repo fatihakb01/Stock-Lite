@@ -7,6 +7,24 @@ namespace Test.Helper;
 internal class ProductHelper(DatabaseFixture fixture)
 {
     private readonly DatabaseFixture _fixture = fixture;
+
+    internal static Product CreateProductStatic(
+        Company company,
+        string name = "Test Product",
+        string sku = "SKU-0001",
+        decimal price = 10
+    )
+    {
+        return new Product
+        {
+            Name = name,
+            SKU = sku,
+            Price = price,
+            CompanyId = company.Id,
+            Company = company
+        };
+    }
+
     internal async Task<Product> CreateProduct(
         Company company,
         string name = "Test Product",
@@ -15,14 +33,7 @@ internal class ProductHelper(DatabaseFixture fixture)
         bool saveChanges = true
     )
     {
-        var product = new Product
-        {
-            Name = name,
-            SKU = sku,
-            Price = price,
-            CompanyId = company.Id,
-            Company = company
-        };
+        var product = CreateProductStatic(company, name, sku, price);
 
         await _fixture.Context.Products.AddAsync(product);
 
