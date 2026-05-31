@@ -34,7 +34,8 @@ namespace Test.Helper
             Transaction transaction,
             Product product,
             int quantity,
-            decimal unitPrice
+            decimal unitPrice,
+            bool saveChanges = true
         )
         {
             var lineItem = new TransactionLineItem
@@ -48,7 +49,9 @@ namespace Test.Helper
             };
 
             await _fixture.Context.TransactionLineItems.AddAsync(lineItem);
-            await _fixture.Context.SaveChangesAsync();
+
+            if (saveChanges)
+                await _fixture.Context.SaveChangesAsync();
 
             return lineItem;
         }
