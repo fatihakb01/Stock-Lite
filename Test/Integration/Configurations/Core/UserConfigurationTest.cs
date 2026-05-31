@@ -40,8 +40,6 @@ public class UserConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -56,8 +54,6 @@ public class UserConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -72,8 +68,6 @@ public class UserConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     // -------------------------------------------------------
@@ -91,8 +85,6 @@ public class UserConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -122,8 +114,6 @@ public class UserConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -138,8 +128,6 @@ public class UserConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -154,8 +142,6 @@ public class UserConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -170,8 +156,6 @@ public class UserConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -186,8 +170,6 @@ public class UserConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -217,8 +199,6 @@ public class UserConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -258,8 +238,6 @@ public class UserConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -277,8 +255,6 @@ public class UserConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]

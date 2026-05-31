@@ -54,8 +54,6 @@ public class ProductConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -69,8 +67,6 @@ public class ProductConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     // -------------------------------------------------------
@@ -88,8 +84,6 @@ public class ProductConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -119,8 +113,6 @@ public class ProductConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -153,8 +145,6 @@ public class ProductConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -185,8 +175,6 @@ public class ProductConfigurationTest
                 company,
                 sku: "SKU-001",
                 name: "Different Product"));
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -201,8 +189,6 @@ public class ProductConfigurationTest
                 company,
                 name: "Product",
                 sku: "SKU-002"));
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -382,8 +368,6 @@ public class ProductConfigurationTest
 
         Assert.ThrowsAny<InvalidOperationException>(() =>
             Fixture.Context.Products.Remove(product));
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -398,8 +382,6 @@ public class ProductConfigurationTest
 
         Assert.ThrowsAny<InvalidOperationException>(() =>
             Fixture.Context.Products.Remove(product));
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -414,7 +396,5 @@ public class ProductConfigurationTest
 
         Assert.ThrowsAny<InvalidOperationException>(() =>
             Fixture.Context.Products.Remove(product));
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 }

@@ -36,8 +36,6 @@ public class ProductInventoryPolicyConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -53,8 +51,6 @@ public class ProductInventoryPolicyConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -101,8 +97,6 @@ public class ProductInventoryPolicyConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -118,8 +112,6 @@ public class ProductInventoryPolicyConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -152,8 +144,6 @@ public class ProductInventoryPolicyConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -169,8 +159,6 @@ public class ProductInventoryPolicyConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]

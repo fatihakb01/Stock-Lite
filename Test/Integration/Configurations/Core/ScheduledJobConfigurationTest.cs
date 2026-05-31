@@ -31,8 +31,6 @@ public class ScheduledJobConfigurationTest(DatabaseFixture fixture)
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     // -------------------------------------------------------
@@ -54,8 +52,6 @@ public class ScheduledJobConfigurationTest(DatabaseFixture fixture)
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -97,8 +93,6 @@ public class ScheduledJobConfigurationTest(DatabaseFixture fixture)
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -147,8 +141,6 @@ public class ScheduledJobConfigurationTest(DatabaseFixture fixture)
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -194,8 +186,6 @@ public class ScheduledJobConfigurationTest(DatabaseFixture fixture)
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     // -------------------------------------------------------
@@ -219,8 +209,6 @@ public class ScheduledJobConfigurationTest(DatabaseFixture fixture)
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -241,8 +229,6 @@ public class ScheduledJobConfigurationTest(DatabaseFixture fixture)
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -263,8 +249,6 @@ public class ScheduledJobConfigurationTest(DatabaseFixture fixture)
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -285,8 +269,6 @@ public class ScheduledJobConfigurationTest(DatabaseFixture fixture)
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -307,8 +289,6 @@ public class ScheduledJobConfigurationTest(DatabaseFixture fixture)
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]

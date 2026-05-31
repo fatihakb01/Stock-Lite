@@ -41,8 +41,6 @@ public class JobExecutionConfigurationTest(DatabaseFixture fixture)
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -64,8 +62,6 @@ public class JobExecutionConfigurationTest(DatabaseFixture fixture)
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     // -------------------------------------------------------
@@ -110,8 +106,6 @@ public class JobExecutionConfigurationTest(DatabaseFixture fixture)
 
         Assert.ThrowsAny<InvalidOperationException>(() =>
             Fixture.Context.JobTaskExecutions.Remove(taskExecution));
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     // -------------------------------------------------------

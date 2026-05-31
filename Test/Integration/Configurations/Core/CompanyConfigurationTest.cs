@@ -57,8 +57,6 @@ public class CompanyConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -71,8 +69,6 @@ public class CompanyConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     // -------------------------------------------------------
@@ -88,8 +84,6 @@ public class CompanyConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -116,8 +110,6 @@ public class CompanyConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -144,8 +136,6 @@ public class CompanyConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -172,8 +162,6 @@ public class CompanyConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -260,8 +248,6 @@ public class CompanyConfigurationTest
 
         Assert.ThrowsAny<InvalidOperationException>(() =>
             Fixture.Context.Companies.Remove(company));
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -274,8 +260,6 @@ public class CompanyConfigurationTest
 
         Assert.ThrowsAny<InvalidOperationException>(() =>
             Fixture.Context.Companies.Remove(company));
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -287,8 +271,6 @@ public class CompanyConfigurationTest
 
         Assert.ThrowsAny<InvalidOperationException>(() =>
             Fixture.Context.Companies.Remove(company));
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -300,7 +282,5 @@ public class CompanyConfigurationTest
 
         Assert.ThrowsAny<InvalidOperationException>(() =>
             Fixture.Context.Companies.Remove(company));
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 }

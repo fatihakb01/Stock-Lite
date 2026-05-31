@@ -35,8 +35,6 @@ public class PurchaseOrderConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     // -------------------------------------------------------
@@ -54,8 +52,6 @@ public class PurchaseOrderConfigurationTest
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -87,8 +83,6 @@ public class PurchaseOrderConfigurationTest
             _purchaseOrderHelper.CreatePurchaseOrder(
                 company,
                 orderNumber: "PO-0001"));
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -151,7 +145,5 @@ public class PurchaseOrderConfigurationTest
 
         Assert.ThrowsAny<InvalidOperationException>(() =>
             Fixture.Context.Companies.Remove(company));
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 }

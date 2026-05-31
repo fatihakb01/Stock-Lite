@@ -5,6 +5,12 @@
         protected readonly DatabaseFixture Fixture = fixture;
 
         public Task InitializeAsync() => Fixture.ResetAsync();
-        public Task DisposeAsync() => Task.CompletedTask;
+
+        public Task DisposeAsync()
+        {
+            Fixture.Context.ChangeTracker.Clear();
+
+            return Task.CompletedTask;
+        }
     }
 }

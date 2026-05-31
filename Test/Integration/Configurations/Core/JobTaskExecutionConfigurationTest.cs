@@ -26,8 +26,6 @@ public class JobTaskExecutionConfigurationTest(DatabaseFixture fixture)
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     // -------------------------------------------------------
@@ -77,8 +75,6 @@ public class JobTaskExecutionConfigurationTest(DatabaseFixture fixture)
 
         Assert.ThrowsAny<InvalidOperationException>(() =>
             Fixture.Context.JobTaskExecutions.Remove(taskExecution));
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     // -------------------------------------------------------

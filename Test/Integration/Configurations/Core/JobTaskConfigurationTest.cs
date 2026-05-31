@@ -27,8 +27,6 @@ public class JobTaskConfigurationTest(DatabaseFixture fixture)
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -45,8 +43,6 @@ public class JobTaskConfigurationTest(DatabaseFixture fixture)
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     // -------------------------------------------------------
@@ -65,8 +61,6 @@ public class JobTaskConfigurationTest(DatabaseFixture fixture)
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -102,8 +96,6 @@ public class JobTaskConfigurationTest(DatabaseFixture fixture)
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -140,8 +132,6 @@ public class JobTaskConfigurationTest(DatabaseFixture fixture)
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -185,8 +175,6 @@ public class JobTaskConfigurationTest(DatabaseFixture fixture)
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
@@ -226,8 +214,6 @@ public class JobTaskConfigurationTest(DatabaseFixture fixture)
 
         await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
             Fixture.Context.SaveChangesAsync());
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     // -------------------------------------------------------
@@ -293,7 +279,5 @@ public class JobTaskConfigurationTest(DatabaseFixture fixture)
 
         Assert.ThrowsAny<InvalidOperationException>(() =>
             Fixture.Context.JobTasks.Remove(jobTask));
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 }

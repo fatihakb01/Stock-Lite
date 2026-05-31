@@ -51,8 +51,6 @@ public class UserDefinedFieldConfigurationTest(DatabaseFixture fixture)
 
         Assert.ThrowsAny<InvalidOperationException>(() =>
             Fixture.Context.UserDefinedFields.Add(duplicate));
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     // -------------------------------------------------------
@@ -79,8 +77,6 @@ public class UserDefinedFieldConfigurationTest(DatabaseFixture fixture)
 
         Assert.ThrowsAny<InvalidOperationException>(() =>
             Fixture.Context.UserDefinedFields.Add(field));
-
-        Fixture.Context.ChangeTracker.Clear();
     }
 
     [Fact]
