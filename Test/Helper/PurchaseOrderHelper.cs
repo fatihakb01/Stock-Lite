@@ -14,7 +14,8 @@ namespace Test.Helper
             string orderNumber = "PO-0001",
             DateTime? expectedDeliveryDate = null,
             DateTime? receivedDate = null,
-            PurchaseOrderStatus status = PurchaseOrderStatus.Completed
+            PurchaseOrderStatus status = PurchaseOrderStatus.Completed,
+            bool saveChanges = true
         )
         {
             var po = new PurchaseOrder
@@ -29,7 +30,9 @@ namespace Test.Helper
             };
 
             await _fixture.Context.PurchaseOrder.AddAsync(po);
-            await _fixture.Context.SaveChangesAsync();
+
+            if (saveChanges)
+                await _fixture.Context.SaveChangesAsync();
 
             return po;
         }
