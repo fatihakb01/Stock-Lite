@@ -10,7 +10,8 @@ namespace Test.Helper
         internal async Task<Transaction> CreateTransaction(
             Company company,
             DateTime transactionDate,
-            string transactionId = "TR-000001"
+            string transactionId = "TR-000001",
+            bool saveChanges = true
         )
         {
             var transaction = new Transaction
@@ -22,7 +23,9 @@ namespace Test.Helper
             };
 
             await _fixture.Context.Transactions.AddAsync(transaction);
-            await _fixture.Context.SaveChangesAsync();
+
+            if (saveChanges)
+                await _fixture.Context.SaveChangesAsync();
 
             return transaction;
         }
