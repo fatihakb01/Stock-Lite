@@ -42,7 +42,8 @@ namespace Test.Helper
             Product product,
             int quantity = 20,
             int receivedQuantity = 0,
-            decimal unitCost = 10
+            decimal unitCost = 10,
+            bool saveChanges = true
         )
         {
             var poli = new PurchaseOrderLineItem
@@ -57,7 +58,9 @@ namespace Test.Helper
             };
 
             await _fixture.Context.PurchaseOrderLineItem.AddAsync(poli);
-            await _fixture.Context.SaveChangesAsync();
+
+            if (saveChanges)
+                await _fixture.Context.SaveChangesAsync();
 
             return poli;
         }
