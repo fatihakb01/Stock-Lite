@@ -14,7 +14,8 @@ namespace Test.Helper
             string orderNumber = "CO-0001",
             DateTime? expectedDeliveryDate = null,
             DateTime? receivedDate = null,
-            ConfirmedOrderStatus status = ConfirmedOrderStatus.Confirmed
+            ConfirmedOrderStatus status = ConfirmedOrderStatus.Confirmed,
+            bool saveChanges = true
         )
         {
             var co = new ConfirmedOrder
@@ -29,7 +30,9 @@ namespace Test.Helper
             };
 
             await _fixture.Context.ConfirmedOrder.AddAsync(co);
-            await _fixture.Context.SaveChangesAsync();
+
+            if (saveChanges)
+                await _fixture.Context.SaveChangesAsync();
 
             return co;
         }
