@@ -42,7 +42,8 @@ namespace Test.Helper
             Product product,
             int quantity = 10,
             int soldQuantity = 0,
-            decimal unitCost = 10
+            decimal unitCost = 10,
+            bool saveChanges = true
         )
         {
             var coli = new ConfirmedOrderLineItem
@@ -57,7 +58,9 @@ namespace Test.Helper
             };
 
             await _fixture.Context.ConfirmedOrderLineItem.AddAsync(coli);
-            await _fixture.Context.SaveChangesAsync();
+
+            if (saveChanges)
+                await _fixture.Context.SaveChangesAsync();
 
             return coli;
         }
