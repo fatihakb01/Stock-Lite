@@ -15,7 +15,8 @@ namespace Test.Helper
             int totalQuantity = 100,
             decimal totalRevenue = 1000,
             DateTime? periodStartDate = null,
-            DateTime? periodEndDate = null
+            DateTime? periodEndDate = null,
+            bool saveChanges = true
         )
         {
             var sales = CreateSalesAggregateStatic(
@@ -28,7 +29,9 @@ namespace Test.Helper
             );
 
             await _fixture.Context.SalesAggregates.AddAsync(sales);
-            await _fixture.Context.SaveChangesAsync();
+
+            if (saveChanges)
+                await _fixture.Context.SaveChangesAsync();
 
             return sales;
         }
