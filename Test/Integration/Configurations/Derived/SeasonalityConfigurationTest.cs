@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 using Test.Helper;
 using Test.Integration.Helper;
 
@@ -106,7 +107,7 @@ public class SeasonalityConfigurationTest
         var company = await _companyHelper.CreateCompany();
         var product = await _productHelper.CreateProduct(company);
 
-        var date1 = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+        var date1 = DateHelper.GetPeriodStartDate(Period.Daily);
         var date2 = date1.AddMonths(1);
 
         await _seasonalityHelper.CreateSeasonality(product, factor: 1m, periodStartDate: date1);
@@ -127,7 +128,7 @@ public class SeasonalityConfigurationTest
         var product2 = await _productHelper.CreateProduct(
             company, name: "Product 2", sku: "SKU-0002");
 
-        var periodStartDate = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+        var periodStartDate = DateHelper.GetPeriodStartDate(Period.Daily);
 
         await _seasonalityHelper.CreateSeasonality(
             product1, factor: 1m, periodStartDate: periodStartDate);

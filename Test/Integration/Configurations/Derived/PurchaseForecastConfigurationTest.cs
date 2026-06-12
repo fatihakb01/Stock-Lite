@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Domain.Entities.Core;
+using Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 using Test.Helper;
 using Test.Integration.Helper;
 
@@ -158,6 +160,46 @@ public class PurchaseForecastConfigurationTest
             _purchaseForecastHelper.CreatePurchaseForecast(
                 product,
                 weekStartDate: startDate));
+    }
+
+    [Fact]
+    public async Task SaveChanges_WhenSameProductDifferentWeekStartDate_Succeeds()
+    {
+        var company = await _companyHelper.CreateCompany();
+        var product = await _productHelper.CreateProduct(company);
+
+        var date1 = DateHelper.GetPeriodStartDate(Period.Weekly);
+        var date2 = date1.AddDays(7);
+
+        await _purchaseForecastHelper.CreatePurchaseForecast(product, weekStartDate: date1);
+        await _purchaseForecastHelper.CreatePurchaseForecast(product, weekStartDate: date2);
+
+        int count = await Fixture.Context.PurchaseForecasts
+            .CountAsync(s => s.ProductId == product.Id);
+
+        Assert.Equal(2, count);
+    }
+
+    [Fact]
+    public async Task SaveChanges_WhenSameWeekStartDateDifferentProduct_Succeeds()
+    {
+        var company = await _companyHelper.CreateCompany();
+        var product1 = await _productHelper.CreateProduct(
+            company, name: "Product 1", sku: "SKU-0001");
+        var product2 = await _productHelper.CreateProduct(
+            company, name: "Product 2", sku: "SKU-0002");
+
+        var date = DateHelper.GetPeriodStartDate(Period.Weekly);
+
+        await _purchaseForecastHelper.CreatePurchaseForecast(product1, weekStartDate: date);
+        await _purchaseForecastHelper.CreatePurchaseForecast(product2, weekStartDate: date);
+
+        int count = await Fixture.Context.PurchaseForecasts
+            .CountAsync(s =>
+                s.WeekStartDate == date &&
+                (s.ProductId == product1.Id || s.ProductId == product2.Id));
+
+        Assert.Equal(2, count);
     }
 
     // -------------------------------------------------------

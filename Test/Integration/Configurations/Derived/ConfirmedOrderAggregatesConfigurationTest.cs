@@ -1,7 +1,9 @@
-﻿using Domain.Enums;
+﻿using Domain.Entities.Core;
+using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Test.Helper;
 using Test.Integration.Helper;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Test.Integration.Configurations.Derived;
 
@@ -111,6 +113,46 @@ public class ConfirmedOrderAggregateConfigurationTest
                 product,
                 Period.Daily,
                 periodStartDate: startDate));
+    }
+
+    [Fact]
+    public async Task SaveChanges_WhenSameProductDifferentPeriodStartDate_Succeeds()
+    {
+        var company = await _companyHelper.CreateCompany();
+        var product = await _productHelper.CreateProduct(company);
+
+        var date1 = DateHelper.GetPeriodStartDate(Period.Daily);
+        var date2 = date1.AddMonths(1);
+
+        await _aggregateHelper.CreateConfirmedOrderAggregate(product, Period.Daily, periodStartDate: date1, periodEndDate: date1);
+        await _aggregateHelper.CreateConfirmedOrderAggregate(product, Period.Daily, periodStartDate: date2, periodEndDate: date2);
+
+        int count = await Fixture.Context.ConfirmedOrderAggregates
+            .CountAsync(s => s.ProductId == product.Id);
+
+        Assert.Equal(2, count);
+    }
+
+    [Fact]
+    public async Task SaveChanges_WhenSamePeriodStartDateDifferentProduct_Succeeds()
+    {
+        var company = await _companyHelper.CreateCompany();
+        var product1 = await _productHelper.CreateProduct(
+            company, name: "Product 1", sku: "SKU-0001");
+        var product2 = await _productHelper.CreateProduct(
+            company, name: "Product 2", sku: "SKU-0002");
+
+        var periodStartDate = DateHelper.GetPeriodStartDate(Period.Daily);
+
+        await _aggregateHelper.CreateConfirmedOrderAggregate(product1, Period.Daily, periodStartDate: periodStartDate);
+        await _aggregateHelper.CreateConfirmedOrderAggregate(product2, Period.Daily, periodStartDate: periodStartDate);
+
+        int count = await Fixture.Context.ConfirmedOrderAggregates
+            .CountAsync(s =>
+                s.PeriodStartDate == periodStartDate &&
+                (s.ProductId == product1.Id || s.ProductId == product2.Id));
+
+        Assert.Equal(2, count);
     }
 
     // -------------------------------------------------------

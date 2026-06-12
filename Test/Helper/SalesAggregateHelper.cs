@@ -24,8 +24,8 @@ namespace Test.Helper
                 period: period,
                 totalQuantity: totalQuantity,
                 totalRevenue: totalRevenue,
-                periodStartDate: periodStartDate,
-                periodEndDate: periodEndDate
+                periodStartDate: periodStartDate ?? DateHelper.GetPeriodStartDate(period),
+                periodEndDate: periodEndDate ?? DateHelper.GetPeriodEndDate(period)
             );
 
             await _fixture.Context.SalesAggregates.AddAsync(sales);
