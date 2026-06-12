@@ -16,7 +16,8 @@ namespace Test.Helper
             int totalConfirmedQuantity = 10,
             decimal totalConfirmedRevenue = 1000,
             DateTime? periodStartDate = null,
-            DateTime? periodEndDate = null
+            DateTime? periodEndDate = null,
+            bool saveChanges = true
         )
         {
             var co = new ConfirmedOrderAggregate
@@ -31,7 +32,9 @@ namespace Test.Helper
             };
 
             await _fixture.Context.ConfirmedOrderAggregates.AddAsync(co);
-            await _fixture.Context.SaveChangesAsync();
+
+            if (saveChanges)
+                await _fixture.Context.SaveChangesAsync();
 
             return co;
         }
