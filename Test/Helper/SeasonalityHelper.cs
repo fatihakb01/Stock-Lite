@@ -11,7 +11,8 @@ namespace Test.Helper
         internal async Task<Seasonality> CreateSeasonality(
             Product product,
             decimal factor,
-            DateTime? periodStartDate = null
+            DateTime? periodStartDate = null,
+            bool saveChanges = true
         )
         {
             var seasonality = new Seasonality
@@ -23,7 +24,9 @@ namespace Test.Helper
             };
 
             await _fixture.Context.Seasonality.AddAsync(seasonality);
-            await _fixture.Context.SaveChangesAsync();
+
+            if (saveChanges)
+                await _fixture.Context.SaveChangesAsync();
 
             return seasonality;
         }
