@@ -15,8 +15,10 @@ namespace Test.Helper
             Period period,
             decimal predictedQuantity = 100,
             decimal predictedRevenue = 1000,
+            double confidence = 0.50,
             DateTime? periodStartDate = null,
-            DateTime? periodEndDate = null
+            DateTime? periodEndDate = null,
+            bool saveChanges = true
         ) 
         {
             var forecast = new Forecast
@@ -28,11 +30,13 @@ namespace Test.Helper
                 PeriodEndDate = periodEndDate ?? DateHelper.GetPeriodEndDate(period),
                 PredictedQuantity = predictedQuantity,
                 PredictedRevenue = predictedRevenue,
-                Confidence = 0.50
+                Confidence = confidence
             };
 
             await _fixture.Context.Forecasts.AddAsync(forecast);
-            await _fixture.Context.SaveChangesAsync();
+
+            if (saveChanges)
+                await _fixture.Context.SaveChangesAsync();
 
             return forecast;
         }
