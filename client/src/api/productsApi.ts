@@ -16,8 +16,3 @@ export const getProduct = async (id: string): Promise<ProductDetail> => {
   const res = await api.get(`/product/${id}`);
   return res.data;
 };
-
-export const getProductKpi = async (): Promise<ProductKpi> => {
-  const res = await api.get('/productkpi');
-  return res.data;
-}
