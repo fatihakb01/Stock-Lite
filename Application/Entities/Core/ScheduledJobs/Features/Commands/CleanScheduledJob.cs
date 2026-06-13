@@ -1,5 +1,6 @@
 ﻿using Application.Core;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 
@@ -14,6 +15,7 @@ namespace Application.Entities.Core.ScheduledJobs.Features.Commands
 
         public class Handler(
             IScheduledJobRepository scheduledJobRepository,
+            ICacheService cacheService,
             ICurrentUserService currentUser
         ) : IRequestHandler<Command, Result<Unit>>
         {
@@ -22,13 +24,16 @@ namespace Application.Entities.Core.ScheduledJobs.Features.Commands
                 var scheduledJob = await scheduledJobRepository.SingleOrDefaultAsync(x =>
                     x.Id == request.Id &&
                     x.JobTask.CompanyId == currentUser.CompanyId,
-                    ct
+                    ct,
+                    x => x.JobTask
                 );
 
                 if (scheduledJob == null)
                     return Result<Unit>.Failure("ScheduledJob not found", 404);
 
                 await scheduledJobRepository.CleanScheduledJob(scheduledJob.Id, ct);
+
+                await cacheService.RemoveAsync($"jobtask:{scheduledJob.JobTask.Id}", ct);
 
                 return Result<Unit>.Success(Unit.Value);
             }

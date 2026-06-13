@@ -3,6 +3,7 @@ using Application.Entities.Core.JobTasks.DTOs;
 using AutoMapper;
 using Domain.Entities.Core;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 
@@ -17,6 +18,7 @@ public class CreateJobTask
 
     public class Handler(
         IJobTaskRepository repository,
+        ICacheService cacheService,
         IMapper mapper,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<JobTaskDetailDto>>
@@ -54,6 +56,9 @@ public class CreateJobTask
                 return Result<JobTaskDetailDto>.Failure("Failed to create JobTask", 400);
 
             var createdJobTaskDto = mapper.Map<JobTaskDetailDto>(jobTask);
+
+            await cacheService.RemoveAsync("jobtasks", ct);
+            await cacheService.RemoveAsync($"jobtask:{jobTask.Id}", ct);
 
             return Result<JobTaskDetailDto>.Success(createdJobTaskDto);
         }

@@ -1,5 +1,7 @@
 using Application.Core;
+using Domain.Entities.Core;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 
@@ -14,24 +16,40 @@ public class DeleteScheduledJob
 
     public class Handler(
         IScheduledJobRepository repository,
+        IJobTaskRepository jobTaskRepository,
+        ICacheService cacheService,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<Unit>>
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
-            var scheduledJobs = await repository.ExistsAsync(x =>
-                x.Id == request.Id && x.JobTask.CompanyId == currentUser.CompanyId,
+            var exist = await repository.ExistsAsync(x =>
+                x.Id == request.Id &&
+                x.JobTask.CompanyId == currentUser.CompanyId,
                 ct
             );
 
-            if (!scheduledJobs)
+            if (!exist)
                 return Result<Unit>.Failure("ScheduledJob not found", 404);
 
-            await repository.DeleteScheduledJobAsync(request.Id, ct);
-            var result = await repository.SaveChangesAsync(ct);
-            
+            var jobTask = await jobTaskRepository.SingleOrDefaultAsync(x =>
+                x.Jobs.Any(j => j.Id == request.Id), 
+                ct
+            );
+
+            var result = await repository.DeleteScheduledJobAsync(request.Id, ct);
             if (!result)
                 return Result<Unit>.Failure("Failed to delete ScheduledJob", 400);
+
+            await cacheService.RemoveAsync($"scheduledjob:{request.Id}", ct);
+            await cacheService.RemoveAsync($"scheduledjob:history:{request.Id}", ct);
+
+            if (jobTask != null)
+            {
+                await cacheService.RemoveAsync($"jobtask:{jobTask.Id}", ct);
+                await cacheService.RemoveAsync($"jobtask:history:{jobTask.Id}", ct);
+                await cacheService.RemoveAsync($"jobtask:recent:history", ct);
+            }
 
             return Result<Unit>.Success(Unit.Value);
         }

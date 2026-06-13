@@ -36,24 +36,29 @@ public class ScheduledJobRepository(DataContext context)
         _context.ScheduledJobs.Add(job);
     }
 
-    public async Task DeleteScheduledJobAsync(Guid jobId, CancellationToken ct)
+    public async Task<bool> DeleteScheduledJobAsync(Guid jobId, CancellationToken ct)
     {
         var job = await _context.ScheduledJobs.FindAsync(jobId, ct);
-        if (job == null) return;
+        if (job == null) return false;
 
         var jobTaskId = job.JobTaskId;
         _context.ScheduledJobs.Remove(job);
-        await _context.SaveChangesAsync(ct);
 
-        var remaining = await _context.ScheduledJobs
-            .Where(j => j.JobTaskId == jobTaskId)
-            .OrderBy(j => j.ExecutionOrder)
-            .ToListAsync(ct);
-
-        for (var i = 0; i < remaining.Count; i++)
+        var result = await _context.SaveChangesAsync(ct) > 0;
+        if (result)
         {
-            remaining[i].ExecutionOrder = i;
+            var remaining = await _context.ScheduledJobs
+                .Where(j => j.JobTaskId == jobTaskId)
+                .OrderBy(j => j.ExecutionOrder)
+                .ToListAsync(ct);
+
+            for (var i = 0; i < remaining.Count; i++)
+            {
+                remaining[i].ExecutionOrder = i;
+            }
         }
+
+        return result;
     }
 
     public async Task ReorderScheduledJobAsync(List<Guid> orderedScheduledJobIds, Guid companyId, CancellationToken ct)

@@ -8,7 +8,7 @@ public interface IScheduledJobRepository : IRepository<ScheduledJob>
         ScheduledJob job, 
         CancellationToken ct
     );
-    Task DeleteScheduledJobAsync(
+    Task<bool> DeleteScheduledJobAsync(
         Guid jobId, 
         CancellationToken ct
     );

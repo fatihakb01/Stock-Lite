@@ -3,6 +3,7 @@ using Application.Entities.Core.ScheduledJobs.DTOs;
 using AutoMapper;
 using Domain.Entities.Core;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 
@@ -18,6 +19,7 @@ public class CreateScheduledJob
     public class Handler(
         IScheduledJobRepository repository,
         IJobTaskRepository jobTaskRepository,
+        ICacheService cacheService,
         ICurrentUserService currentUser,
         IMapper mapper
     ) : IRequestHandler<Command, Result<ScheduledJobDto>>
@@ -25,11 +27,10 @@ public class CreateScheduledJob
         public async Task<Result<ScheduledJobDto>> Handle(Command request, CancellationToken ct)
         {
             var dto = request.CreateScheduledJobDto;
-
             var scheduledJob = mapper.Map<ScheduledJob>(dto);
 
             var jobTask = await jobTaskRepository.SingleOrDefaultAsync(x =>
-                x.JobTaskKey == dto.JobTaskKey && 
+                x.JobTaskKey == dto.JobTaskKey &&
                 currentUser.CompanyId == x.CompanyId,
                 ct
             );
@@ -49,6 +50,8 @@ public class CreateScheduledJob
                 return Result<ScheduledJobDto>.Failure("Failed to create ScheduledJob", 400);
 
             var createdScheduledJob = mapper.Map<ScheduledJobDto>(scheduledJob);
+
+            await cacheService.RemoveAsync($"jobtask:{jobTask.Id}", ct);
 
             return Result<ScheduledJobDto>.Success(createdScheduledJob);
         }

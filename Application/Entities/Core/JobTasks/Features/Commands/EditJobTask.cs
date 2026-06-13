@@ -2,6 +2,7 @@ using Application.Core;
 using Application.Entities.Core.JobTasks.DTOs;
 using AutoMapper;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 
@@ -16,7 +17,8 @@ public class EditJobTask
     }
 
     public class Handler(
-        IJobTaskRepository repository, 
+        IJobTaskRepository repository,
+        ICacheService cacheService,
         IMapper mapper,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<JobTaskDetailDto>>
@@ -42,6 +44,11 @@ public class EditJobTask
                 return Result<JobTaskDetailDto>.Failure("Failed to update JobTask", 400);
 
             var updatedJobTask = mapper.Map<JobTaskDetailDto>(jobTask);
+
+            await cacheService.RemoveAsync("jobtasks", ct);
+            await cacheService.RemoveAsync($"jobtask:{request.Id}", ct);
+            await cacheService.RemoveAsync($"jobtask:history:{request.Id}", ct);
+            await cacheService.RemoveAsync($"jobtask:recent:history", ct);
 
             return Result<JobTaskDetailDto>.Success(updatedJobTask);
         }

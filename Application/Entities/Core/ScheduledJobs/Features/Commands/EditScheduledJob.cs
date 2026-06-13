@@ -2,6 +2,7 @@ using Application.Core;
 using Application.Entities.Core.ScheduledJobs.DTOs;
 using AutoMapper;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 
@@ -18,6 +19,7 @@ public class EditScheduledJob
     public class Handler(
         IScheduledJobRepository repository,
         IJobTaskRepository jobTaskRepo,
+        ICacheService cacheService,
         ICurrentUserService currentUser,
         IMapper mapper
     ) : IRequestHandler<Command, Result<ScheduledJobDto>>
@@ -36,7 +38,7 @@ public class EditScheduledJob
             var dto = request.EditScheduledJobDto;
 
             var jobTask = await jobTaskRepo.SingleOrDefaultAsync(x =>
-                x.JobTaskKey == dto.JobTaskKey && 
+                x.JobTaskKey == dto.JobTaskKey &&
                 x.CompanyId == currentUser.CompanyId,
                 ct
             );
@@ -52,6 +54,12 @@ public class EditScheduledJob
                 return Result<ScheduledJobDto>.Failure("Failed to update ScheduledJob", 400);
 
             var updatedScheduledJob = mapper.Map<ScheduledJobDto>(scheduledJob);
+
+            await cacheService.RemoveAsync($"scheduledjob:{request.Id}", ct);
+            await cacheService.RemoveAsync($"scheduledjob:history:{request.Id}", ct);
+            await cacheService.RemoveAsync($"jobtask:{jobTask.Id}", ct);
+            await cacheService.RemoveAsync($"jobtask:history:{jobTask.Id}", ct);
+            await cacheService.RemoveAsync($"jobtask:recent:history", ct);
 
             return Result<ScheduledJobDto>.Success(updatedScheduledJob);
         }

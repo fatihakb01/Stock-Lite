@@ -1,8 +1,11 @@
 using Application.Core;
 using Application.Entities.Core.ScheduledJobs.DTOs;
+using Domain.Entities.Core;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
 using MediatR;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Application.Entities.Core.ScheduledJobs.Features.Commands;
 
@@ -15,6 +18,7 @@ public class ReorderScheduledJobs
 
     public class Handler(
         IScheduledJobRepository repository,
+        ICacheService cacheService,
         ICurrentUserService currentUserService
     ) : IRequestHandler<Command, Result<Unit>>
     {
@@ -27,6 +31,18 @@ public class ReorderScheduledJobs
             var result = await repository.SaveChangesAsync(ct);
             if (!result)
                 return Result<Unit>.Failure("Failed to save the order of scheduled jobs", 400);
+
+            var scheduledJob = await repository.SingleOrDefaultAsync(x => 
+                x.Id == dto[0] &&
+                x.JobTask.CompanyId == currentUserService.CompanyId, 
+                ct,
+                x => x.JobTask
+            );
+
+            if (scheduledJob != null)
+            {
+                await cacheService.RemoveAsync($"jobtask:{scheduledJob.JobTask.Id}", ct);
+            }
 
             return Result<Unit>.Success(Unit.Value);
         }

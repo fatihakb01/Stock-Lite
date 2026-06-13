@@ -2,6 +2,7 @@ using Application.Core;
 using Domain.Entities.Core;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler;
 using Domain.Interfaces.Services.Users;
 using MediatR;
@@ -17,6 +18,7 @@ public class RunScheduledJob
 
     public class Handler(
         IScheduledJobRepository repository,
+        ICacheService cacheService,
         IJobRunnerService jobRunnerService,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<Unit>>
@@ -49,6 +51,12 @@ public class RunScheduledJob
             await jobRunnerService.RunAsync(scheduledJob, jobTaskExecution, ct);
             scheduledJob.Result = JobExecutionStatus.Pending;
             await repository.SaveChangesAsync(ct);
+
+            await cacheService.RemoveAsync($"scheduledjob:{request.Id}", ct);
+            await cacheService.RemoveAsync($"scheduledjob:history:{request.Id}", ct);
+            await cacheService.RemoveAsync($"jobtask:{scheduledJob.JobTask.Id}", ct);
+            await cacheService.RemoveAsync($"jobtask:history:{scheduledJob.JobTask.Id}", ct);
+            await cacheService.RemoveAsync($"jobtask:recent:history", ct);
 
             return Result<Unit>.Success(Unit.Value);
         }

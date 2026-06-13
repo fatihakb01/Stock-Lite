@@ -1,6 +1,7 @@
 using Application.Core;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler;
 using Domain.Interfaces.Services.Users;
 using MediatR;
@@ -16,6 +17,7 @@ public class RunJobTask
 
     public class Handler(
         IJobTaskRepository repository,
+        ICacheService cacheService,
         IJobTaskRunnerService jobTaskRunnerService,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<Unit>>
@@ -35,6 +37,11 @@ public class RunJobTask
                 return Result<Unit>.Failure("JobTask already running", 400);
 
             await jobTaskRunnerService.RunAsync(jobTask, JobTriggerType.Manual, ct);
+
+            await cacheService.RemoveAsync("jobtasks", ct);
+            await cacheService.RemoveAsync($"jobtask:{request.Id}", ct);
+            await cacheService.RemoveAsync($"jobtask:history:{request.Id}", ct);
+            await cacheService.RemoveAsync($"jobtask:recent:history", ct);
 
             return Result<Unit>.Success(Unit.Value);
         }

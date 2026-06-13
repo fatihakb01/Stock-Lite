@@ -1,6 +1,7 @@
 using Application.Core;
 using Application.Entities.Core.ScheduledJobs.DTOs;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 
@@ -15,11 +16,18 @@ public class GetJobTaskHistory
 
     public class Handler(
         IJobTaskRepository repository,
+        ICacheService cacheService,
         ICurrentUserService currentUser
     ) : IRequestHandler<Query, Result<IReadOnlyList<JobExecutionDto>>>
     {
         public async Task<Result<IReadOnlyList<JobExecutionDto>>> Handle(Query request, CancellationToken ct)
         {
+            var cacheKey = $"jobtask:history:{request.Id}";
+
+            var cached = await cacheService.GetAsync<IReadOnlyList<JobExecutionDto>>(cacheKey, ct);
+            if (cached != null)
+                return Result<IReadOnlyList<JobExecutionDto>>.Success(cached);
+
             var executions = await repository
                 .GetJobsAndExecutionsAsync(request.Id, currentUser.CompanyId, ct);
 
@@ -37,6 +45,8 @@ public class GetJobTaskHistory
                 FinishedAt = e.FinishedAt,
                 ErrorMessage = e.ErrorMessage
             }).ToList();
+
+            await cacheService.SetAsync(cacheKey, dto, TimeSpan.FromMinutes(15), ct);
 
             return Result<IReadOnlyList<JobExecutionDto>>.Success(dto);
         }
