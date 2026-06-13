@@ -1,9 +1,7 @@
-﻿using Domain.Entities.Core;
-using Domain.Enums;
+﻿using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Test.Helper;
 using Test.Integration.Helper;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Test.Integration.Configurations.Derived;
 

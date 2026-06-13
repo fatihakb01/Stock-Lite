@@ -1,5 +1,4 @@
-﻿using Domain.Entities.Core;
-using Domain.Enums;
+﻿using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Test.Helper;
 using Test.Integration.Helper;
