@@ -44,6 +44,13 @@ public static class DependencyInjection
         // ---------- MIDDLEWARE ----------
         services.AddTransient<ExceptionMiddleware>();
 
+        // ---------- REDIS CACHING ----------
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = config["Redis"];
+            options.InstanceName = "StockLite:";
+        });
+
         return services;
     }
 }

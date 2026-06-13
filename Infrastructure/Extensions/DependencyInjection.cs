@@ -21,6 +21,8 @@ using Infrastructure.Services.Scheduler.Imports;
 using Infrastructure.Services.Scheduler;
 using Domain.Interfaces.Services.Export;
 using Infrastructure.Services.Export;
+using Domain.Interfaces.Services.Redis;
+using Infrastructure.Services.Redis;
 
 namespace Infrastructure.Extensions;
 
@@ -129,6 +131,8 @@ public static class DependencyInjection
 
         services.AddScoped<IExportService, ExportService>();
         services.AddScoped<IFileExportHelper, FileExportHelper>();
+
+        services.AddScoped<ICacheService, CacheService>();
 
         // --- External Services ---
         services.AddOptions();
