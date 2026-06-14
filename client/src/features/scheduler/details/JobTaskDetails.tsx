@@ -11,7 +11,7 @@ export default function JobTaskDetails({ jobTaskId, user } : { jobTaskId: string
   const showAll = false;
   const isNotSuperAdmin = user && user.role !== "SuperAdmin";
 
-  const { data, isLoading } = useJobTask(jobTaskId);
+  const { data, isLoading, isError } = useJobTask(jobTaskId);
   const runJobTask = useRunJobTask(jobTaskId);
   const cleanJobTask = useCleanJobTask(jobTaskId);
   const deleteJobTask = useDeleteJobTask(jobTaskId);
@@ -19,6 +19,10 @@ export default function JobTaskDetails({ jobTaskId, user } : { jobTaskId: string
 
   if (isLoading || !data) {
     return <Typography>Loading job task…</Typography>;
+  }
+
+  if (isError || !data) {
+      return <Typography>Job task not found.</Typography>
   }
 
   if (isEditing) {

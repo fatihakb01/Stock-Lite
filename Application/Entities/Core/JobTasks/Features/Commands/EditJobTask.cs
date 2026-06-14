@@ -45,10 +45,10 @@ public class EditJobTask
 
             var updatedJobTask = mapper.Map<JobTaskDetailDto>(jobTask);
 
-            await cacheService.RemoveAsync("jobtasks", ct);
+            await cacheService.RemoveAsync($"jobtasks:{currentUser.CompanyId}", ct);
             await cacheService.RemoveAsync($"jobtask:{request.Id}", ct);
             await cacheService.RemoveAsync($"jobtask:history:{request.Id}", ct);
-            await cacheService.RemoveAsync($"jobtask:recent:history", ct);
+            await cacheService.RemoveAsync($"jobtasks:recent:history:{currentUser.CompanyId}", ct);
 
             return Result<JobTaskDetailDto>.Success(updatedJobTask);
         }

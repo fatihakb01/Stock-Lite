@@ -38,7 +38,7 @@ public class GetJobTask
             );
 
             if (jobTask == null)
-                return Result<JobTaskDetailDto>.Failure("JobTasks not found", 404);
+                return Result<JobTaskDetailDto>.Failure("JobTask not found", 404);
 
             var jobTaskDto = mapper.Map<JobTaskDetailDto>(jobTask);
 

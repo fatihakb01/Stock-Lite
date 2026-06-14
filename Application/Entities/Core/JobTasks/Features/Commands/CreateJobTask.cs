@@ -57,8 +57,7 @@ public class CreateJobTask
 
             var createdJobTaskDto = mapper.Map<JobTaskDetailDto>(jobTask);
 
-            await cacheService.RemoveAsync("jobtasks", ct);
-            await cacheService.RemoveAsync($"jobtask:{jobTask.Id}", ct);
+            await cacheService.RemoveAsync($"jobtasks:{currentUser.CompanyId}", ct);
 
             return Result<JobTaskDetailDto>.Success(createdJobTaskDto);
         }

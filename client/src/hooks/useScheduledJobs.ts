@@ -31,7 +31,7 @@ export const useScheduledJob = (id: string | null) => {
 
 export const useScheduledJobHistory = (id: string | null, enabled: boolean) => {
     return useQuery<ScheduledJobExecution[]>({
-        queryKey: ["scheduledjob-history", id],
+        queryKey: ["scheduledjob", "history", id],
         queryFn: () => GetScheduledJobHistory(id!),
         enabled: !!id && enabled
     })
@@ -56,7 +56,6 @@ export const useCleanScheduledJob = (id: string | null) => {
     return useMutation<void>({
         mutationFn: () => CleanScheduledJob(id!),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["jobtasks"] });
             queryClient.invalidateQueries({ queryKey: ["jobtask"] });
             queryClient.invalidateQueries({ queryKey: ["scheduledjob"] });
         }
@@ -69,7 +68,6 @@ export const useReorderScheduledJobs = () => {
     return useMutation<void, Error, ReorderScheduledJobsDto>({
         mutationFn: (dto) => ReorderScheduledJobs(dto),
         onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ["jobtasks"]});
             queryClient.invalidateQueries({queryKey: ["jobtask"]});
             queryClient.invalidateQueries({queryKey: ["scheduledjob"]});
         }
@@ -82,7 +80,6 @@ export const useCreateScheduledJob = () => {
     return useMutation<ScheduledJob, Error, CreateScheduledJobDto>({
         mutationFn: (dto) => CreateScheduledJob(dto),
         onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ["jobtasks"]});
             queryClient.invalidateQueries({queryKey: ["jobtask"]});
             queryClient.invalidateQueries({queryKey: ["scheduledjob"]});
         }
@@ -95,7 +92,6 @@ export const useEditScheduledJob = (id: string | null) => {
     return useMutation<ScheduledJob, Error, EditScheduledJobDto>({
         mutationFn: (dto) => EditScheduledJob(id!, dto),
         onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ["jobtasks"]});
             queryClient.invalidateQueries({queryKey: ["jobtask"]});
             queryClient.invalidateQueries({queryKey: ["scheduledjob"]});
         }
@@ -108,7 +104,6 @@ export const useDeleteScheduledJob = (id: string | null) => {
     return useMutation<void>({
         mutationFn: () => DeleteScheduledJob(id!),
         onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ["jobtasks"]});
             queryClient.invalidateQueries({queryKey: ["jobtask"]});
             queryClient.invalidateQueries({queryKey: ["scheduledjob"]});
         }

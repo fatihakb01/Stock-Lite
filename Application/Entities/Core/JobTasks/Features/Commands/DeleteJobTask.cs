@@ -36,10 +36,10 @@ public class DeleteJobTask
             if (!result)
                 return Result<Unit>.Failure("Failed to delete JobTask", 400);
 
-            await cacheService.RemoveAsync("jobtasks", ct);
+            await cacheService.RemoveAsync($"jobtasks:{currentUser.CompanyId}", ct);
             await cacheService.RemoveAsync($"jobtask:{request.Id}", ct);
             await cacheService.RemoveAsync($"jobtask:history:{request.Id}", ct);
-            await cacheService.RemoveAsync($"jobtask:recent:history", ct);
+            await cacheService.RemoveAsync($"jobtasks:recent:history:{currentUser.CompanyId}", ct);
 
             return Result<Unit>.Success(Unit.Value);
         }

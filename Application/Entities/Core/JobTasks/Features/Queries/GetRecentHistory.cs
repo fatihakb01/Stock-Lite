@@ -1,5 +1,7 @@
 using Application.Core;
+using Application.Entities.Core.JobTasks.DTOs;
 using Application.Entities.Core.ScheduledJobs.DTOs;
+using Domain.Entities.Core;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
@@ -22,7 +24,7 @@ public class GetRecentHistory
     {
         public async Task<Result<List<JobExecutionDto>>> Handle(Query request, CancellationToken ct)
         {
-            var cacheKey = $"jobtasks:recent:history";
+            var cacheKey = $"jobtasks:recent:history:{currentUser.CompanyId}";
 
             var cached = await cacheService.GetAsync<List<JobExecutionDto>>(cacheKey, ct);
             if (cached != null)
@@ -30,7 +32,10 @@ public class GetRecentHistory
 
             var executions = await repository.GetRecentExecutionAsync(currentUser.CompanyId, 30, ct);
             if (!executions.Any())
-                return Result<List<JobExecutionDto>>.Failure("JobExecutions not found", 404);
+            {
+                await cacheService.SetAsync(cacheKey, executions, TimeSpan.FromMinutes(15), ct);
+                return Result<List<JobExecutionDto>>.Success(new List<JobExecutionDto>());
+            }
 
             var dto = executions.Select(e => new JobExecutionDto
             {

@@ -24,7 +24,7 @@ public class GetJobTasks
     {
         public async Task<Result<List<JobTaskDto>>> Handle(Query request, CancellationToken ct)
         {
-            var cacheKey = "jobtasks";
+            var cacheKey = $"jobtasks:{currentUser.CompanyId}";
 
             var cached = await cacheService.GetAsync<List<JobTaskDto>>(cacheKey, ct);
             if (cached != null)
@@ -36,7 +36,10 @@ public class GetJobTasks
             );
 
             if (!jobTasks.Any())
-                return Result<List<JobTaskDto>>.Failure("JobTasks not found", 404);
+            {
+                await cacheService.SetAsync(cacheKey, jobTasks, TimeSpan.FromMinutes(5), ct);
+                return Result<List<JobTaskDto>>.Success(new List<JobTaskDto>());
+            }
 
             jobTasks = jobTasks.OrderBy(j => j.NextRunAt);
             var jobTaskDtos = mapper.Map<List<JobTaskDto>>(jobTasks);

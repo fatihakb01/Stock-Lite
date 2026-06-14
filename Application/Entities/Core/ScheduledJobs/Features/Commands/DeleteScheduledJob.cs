@@ -33,7 +33,8 @@ public class DeleteScheduledJob
                 return Result<Unit>.Failure("ScheduledJob not found", 404);
 
             var jobTask = await jobTaskRepository.SingleOrDefaultAsync(x =>
-                x.Jobs.Any(j => j.Id == request.Id), 
+                x.Jobs.Any(j => j.Id == request.Id) &&
+                x.CompanyId == currentUser.CompanyId, 
                 ct
             );
 
@@ -48,7 +49,7 @@ public class DeleteScheduledJob
             {
                 await cacheService.RemoveAsync($"jobtask:{jobTask.Id}", ct);
                 await cacheService.RemoveAsync($"jobtask:history:{jobTask.Id}", ct);
-                await cacheService.RemoveAsync($"jobtask:recent:history", ct);
+                await cacheService.RemoveAsync($"jobtasks:recent:history:{currentUser.CompanyId}", ct);
             }
 
             return Result<Unit>.Success(Unit.Value);

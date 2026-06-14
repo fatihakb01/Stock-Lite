@@ -54,9 +54,10 @@ public class RunScheduledJob
 
             await cacheService.RemoveAsync($"scheduledjob:{request.Id}", ct);
             await cacheService.RemoveAsync($"scheduledjob:history:{request.Id}", ct);
+            await cacheService.RemoveAsync($"jobtasks:{currentUser.CompanyId}", ct);
             await cacheService.RemoveAsync($"jobtask:{scheduledJob.JobTask.Id}", ct);
             await cacheService.RemoveAsync($"jobtask:history:{scheduledJob.JobTask.Id}", ct);
-            await cacheService.RemoveAsync($"jobtask:recent:history", ct);
+            await cacheService.RemoveAsync($"jobtasks:recent:history:{currentUser.CompanyId}", ct);
 
             return Result<Unit>.Success(Unit.Value);
         }

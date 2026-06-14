@@ -24,7 +24,7 @@ import {
 
 export const useJobTaskHistory = (id: string | null, enabled: boolean) => {
     return useQuery<JobTaskExecution[]>({
-        queryKey: ["jobtask-history", id],
+        queryKey: ["jobtask", "history", id],
         queryFn: () => GetJobTaskHistory(id!),
         enabled: !!id && enabled
     });
@@ -47,7 +47,7 @@ export const useJobTask = (id: string | null) => {
 
 export const useRecentHistory = () => {
     return useQuery<JobTaskExecution[]>({
-        queryKey: ["jobtask-recent-history"],
+        queryKey: ["jobtask", "recent-history"],
         queryFn: () => GetRecentHistory()
     })
 }

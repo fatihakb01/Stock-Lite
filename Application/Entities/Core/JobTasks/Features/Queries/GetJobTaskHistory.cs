@@ -32,8 +32,10 @@ public class GetJobTaskHistory
                 .GetJobsAndExecutionsAsync(request.Id, currentUser.CompanyId, ct);
 
             if (!executions.Any())
-                return Result<IReadOnlyList<JobExecutionDto>>
-                    .Failure("No executions found", 404);
+            {
+                await cacheService.SetAsync(cacheKey, executions, TimeSpan.FromMinutes(15), ct);
+                return Result<IReadOnlyList<JobExecutionDto>>.Success(new List<JobExecutionDto>());
+            }
 
             var dto = executions.Select(e => new JobExecutionDto
             {

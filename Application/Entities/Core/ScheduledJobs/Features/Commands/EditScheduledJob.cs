@@ -59,7 +59,7 @@ public class EditScheduledJob
             await cacheService.RemoveAsync($"scheduledjob:history:{request.Id}", ct);
             await cacheService.RemoveAsync($"jobtask:{jobTask.Id}", ct);
             await cacheService.RemoveAsync($"jobtask:history:{jobTask.Id}", ct);
-            await cacheService.RemoveAsync($"jobtask:recent:history", ct);
+            await cacheService.RemoveAsync($"jobtasks:recent:history:{currentUser.CompanyId}", ct);
 
             return Result<ScheduledJobDto>.Success(updatedScheduledJob);
         }
