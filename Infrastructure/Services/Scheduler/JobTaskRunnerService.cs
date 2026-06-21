@@ -1,6 +1,7 @@
 using Domain.Entities.Core;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler;
 
 namespace Infrastructure.Services.Scheduler;
@@ -8,12 +9,14 @@ namespace Infrastructure.Services.Scheduler;
 public class JobTaskRunnerService(
     IJobTaskExecutionRepository executionRepo,
     IJobTaskDispatcher dispatcher,
-    IProductKpiRepository productKpiRepository
+    IProductKpiRepository productKpiRepository,
+    ISchedulerCacheService cacheService
 ) : IJobTaskRunnerService
 {
     private readonly IJobTaskExecutionRepository _executionRepo = executionRepo;
     private readonly IJobTaskDispatcher _dispatcher = dispatcher;
     private readonly IProductKpiRepository _productKpiRepository = productKpiRepository;
+    private readonly ISchedulerCacheService _cacheService = cacheService;
 
     public async Task<JobExecutionStatus> RunAsync(JobTask jobTask, JobTriggerType triggerType, CancellationToken ct)
     {
@@ -32,6 +35,7 @@ public class JobTaskRunnerService(
 
         try
         {
+            await _cacheService.RemoveJobTaskKeysAsync(jobTask, ct);
             await _dispatcher.DispatchAsync(jobTask, execution, ct);
 
             if (jobTask.Result == JobExecutionStatus.Failed)
@@ -50,8 +54,11 @@ public class JobTaskRunnerService(
         }
         finally
         {
+            await _cacheService.RemoveJobTaskKeysAsync(jobTask, ct);
+
             execution.FinishedAt = DateTime.UtcNow;
             _executionRepo.Update(execution);
+
             await _executionRepo.SaveChangesAsync(ct);
             await _productKpiRepository.UpdateSchedulerStatus(jobTask.CompanyId, ct);
         }

@@ -1,6 +1,7 @@
 ﻿using Domain.Entities.Core;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler;
 
 namespace Infrastructure.Services.Scheduler
@@ -8,12 +9,14 @@ namespace Infrastructure.Services.Scheduler
     public class JobTaskDispatcher (
         IJobTaskRepository jobTaskRepo,
         IScheduledJobRepository scheduledJobRepo,
-        IJobRunnerService jobRunnerService
+        IJobRunnerService jobRunnerService,
+        ISchedulerCacheService cacheService
     ) : IJobTaskDispatcher
     {
         private readonly IJobTaskRepository _jobTaskRepo = jobTaskRepo;
         private readonly IScheduledJobRepository _scheduledJobRepo = scheduledJobRepo;
         private readonly IJobRunnerService _jobRunnerService = jobRunnerService;
+        private readonly ISchedulerCacheService _cacheService = cacheService;
 
         public async Task DispatchAsync(JobTask jobTask, JobTaskExecution jobTaskExecution, CancellationToken ct)
         {
@@ -23,8 +26,9 @@ namespace Infrastructure.Services.Scheduler
                  x.JobTaskId == jobTask.Id && 
                  !x.IsArchived && 
                  x.Result != JobExecutionStatus.Succeeded,
-                 ct
-             );
+                 ct,
+                 x => x.JobTask
+            );
             jobs = jobs.OrderBy(x => x.ExecutionOrder);
 
             bool failed = false;
@@ -49,6 +53,8 @@ namespace Infrastructure.Services.Scheduler
                         job.Result = JobExecutionStatus.Succeeded;
                         await _scheduledJobRepo.SaveChangesAsync(ct);
                     }
+
+                    await _cacheService.RemoveScheduledJobKeysAsync(job, ct);
                 }
             }
 

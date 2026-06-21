@@ -18,7 +18,6 @@ public class RunScheduledJob
 
     public class Handler(
         IScheduledJobRepository repository,
-        ICacheService cacheService,
         IJobRunnerService jobRunnerService,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<Unit>>
@@ -51,13 +50,6 @@ public class RunScheduledJob
             await jobRunnerService.RunAsync(scheduledJob, jobTaskExecution, ct);
             scheduledJob.Result = JobExecutionStatus.Pending;
             await repository.SaveChangesAsync(ct);
-
-            await cacheService.RemoveAsync($"scheduledjob:{request.Id}", ct);
-            await cacheService.RemoveAsync($"scheduledjob:history:{request.Id}", ct);
-            await cacheService.RemoveAsync($"jobtasks:{currentUser.CompanyId}", ct);
-            await cacheService.RemoveAsync($"jobtask:{scheduledJob.JobTask.Id}", ct);
-            await cacheService.RemoveAsync($"jobtask:history:{scheduledJob.JobTask.Id}", ct);
-            await cacheService.RemoveAsync($"jobtasks:recent:history:{currentUser.CompanyId}", ct);
 
             return Result<Unit>.Success(Unit.Value);
         }

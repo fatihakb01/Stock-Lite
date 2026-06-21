@@ -133,6 +133,7 @@ public static class DependencyInjection
         services.AddScoped<IFileExportHelper, FileExportHelper>();
 
         services.AddScoped<ICacheService, CacheService>();
+        services.AddScoped<ISchedulerCacheService, SchedulerCacheService>();
 
         // --- External Services ---
         services.AddOptions();

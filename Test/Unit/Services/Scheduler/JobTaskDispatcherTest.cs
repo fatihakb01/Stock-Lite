@@ -1,6 +1,7 @@
 ﻿using Domain.Entities.Core;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler;
 using Infrastructure.Services.Scheduler;
 using Moq;
@@ -14,6 +15,7 @@ namespace Test.Unit.Services.Scheduler
         private readonly Mock<IJobTaskRepository> _jobTaskRepoMock;
         private readonly Mock<IScheduledJobRepository> _scheduledJobRepoMock;
         private readonly Mock<IJobRunnerService> _jobRunnerServiceMock;
+        private readonly Mock<ISchedulerCacheService> _cacheServiceMock;
         private readonly JobTaskDispatcher _dispatcher;
 
         public JobTaskDispatcherTest()
@@ -21,11 +23,13 @@ namespace Test.Unit.Services.Scheduler
             _jobTaskRepoMock = new Mock<IJobTaskRepository>();
             _scheduledJobRepoMock = new Mock<IScheduledJobRepository>();
             _jobRunnerServiceMock = new Mock<IJobRunnerService>();
+            _cacheServiceMock = new Mock<ISchedulerCacheService>();
 
             _dispatcher = new JobTaskDispatcher(
                 _jobTaskRepoMock.Object,
                 _scheduledJobRepoMock.Object,
-                _jobRunnerServiceMock.Object
+                _jobRunnerServiceMock.Object,
+                _cacheServiceMock.Object
             );
         }
 

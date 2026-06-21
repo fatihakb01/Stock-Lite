@@ -1,17 +1,20 @@
 using Domain.Entities.Core;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler;
 
 namespace Infrastructure.Services.Scheduler;
 
 public class JobRunnerService(
     IJobExecutionRepository executionRepo,
-    IJobDispatcher dispatcher
+    IJobDispatcher dispatcher,
+    ISchedulerCacheService cacheService
     ) : IJobRunnerService
 {
     private readonly IJobExecutionRepository _executionRepo = executionRepo;
     private readonly IJobDispatcher _dispatcher = dispatcher;
+    private readonly ISchedulerCacheService _cacheService = cacheService;
 
     public async Task<JobExecutionStatus> RunAsync(ScheduledJob job, JobTaskExecution jobTaskExecution, CancellationToken ct)
     {
@@ -31,6 +34,7 @@ public class JobRunnerService(
 
         try
         {
+            await _cacheService.RemoveScheduledJobKeysAsync(job, ct);
             await _dispatcher.DispatchAsync(job, ct);
             execution.Status = JobExecutionStatus.Succeeded;
             return JobExecutionStatus.Succeeded;

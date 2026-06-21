@@ -1,6 +1,7 @@
 ﻿using Domain.Entities.Core;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler;
 using Infrastructure.Services.Scheduler;
 using Moq;
@@ -12,16 +13,19 @@ namespace Test.Unit.Services.Scheduler
     {
         private readonly Mock<IJobExecutionRepository> _executionRepoMock;
         private readonly Mock<IJobDispatcher> _dispatcherMock;
+        private readonly Mock<ISchedulerCacheService> _cacheServiceMock;
         private readonly JobRunnerService _service;
 
         public JobRunnerServiceTest()
         {
             _executionRepoMock = new Mock<IJobExecutionRepository>();
             _dispatcherMock = new Mock<IJobDispatcher>();
+            _cacheServiceMock = new Mock<ISchedulerCacheService>();
 
             _service = new JobRunnerService(
                 _executionRepoMock.Object,
-                _dispatcherMock.Object
+                _dispatcherMock.Object,
+                _cacheServiceMock.Object
             );
         }
 
@@ -33,6 +37,10 @@ namespace Test.Unit.Services.Scheduler
             _dispatcherMock
                 .Setup(d => d.DispatchAsync(job, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
+
+            //_cacheServiceMock
+            //    .Setup(c => c.RemoveAsync($"scheduledjob:{job.Id}", It.IsAny<CancellationToken>()))
+            //    .Returns(Task.CompletedTask);
 
             var result = await _service.RunAsync(job, taskExecution, CancellationToken.None);
 
