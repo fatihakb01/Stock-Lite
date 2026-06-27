@@ -46,9 +46,9 @@ namespace Infrastructure.Services.Redis
                 await _cacheService.RemoveAsync($"jobtask:{jobTask.Id}", ct);
         }
 
-        public async Task RemoveJobTasksKeyAsync(JobTask? jobTask, CancellationToken ct)
+        public async Task RemoveJobTasksKeyAsync(JobTask? jobTask, CancellationToken ct, bool isAutomatedRun = false)
         {
-            if (jobTask != null)
+            if (jobTask != null && !isAutomatedRun)
                 await _cacheService.RemoveAsync($"jobtasks:{jobTask.CompanyId}", ct);
         }
 

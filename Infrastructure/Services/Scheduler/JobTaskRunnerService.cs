@@ -35,7 +35,7 @@ public class JobTaskRunnerService(
 
         try
         {
-            await _cacheService.RemoveJobTaskKeysAsync(jobTask, ct);
+            await _cacheService.RemoveJobTaskKeysAsync(jobTask, ct, true);
             await _dispatcher.DispatchAsync(jobTask, execution, ct);
 
             if (jobTask.Result == JobExecutionStatus.Failed)
@@ -54,7 +54,7 @@ public class JobTaskRunnerService(
         }
         finally
         {
-            await _cacheService.RemoveJobTaskKeysAsync(jobTask, ct);
+            await _cacheService.RemoveJobTaskKeysAsync(jobTask, ct, true);
 
             execution.FinishedAt = DateTime.UtcNow;
             _executionRepo.Update(execution);
