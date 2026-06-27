@@ -16,7 +16,7 @@ namespace Application.Entities.Core.JobTasks.Features.Commands
 
         public class Handler(
             IJobTaskRepository jobTaskRepository,
-            ICacheService cacheService,
+            ISchedulerCacheService cacheService,
             IScheduledJobRepository scheduledJobRepository,
             ICurrentUserService currentUser
         ) : IRequestHandler<Command, Result<Unit>>
@@ -34,9 +34,7 @@ namespace Application.Entities.Core.JobTasks.Features.Commands
 
                 await jobTaskRepository.CleanJobTask(request.Id, ct);
                 await scheduledJobRepository.CleanScheduledJobs(request.Id, ct);
-
-                await cacheService.RemoveAsync($"jobtasks:{currentUser.CompanyId}", ct);
-                await cacheService.RemoveAsync($"jobtask:{request.Id}", ct);
+                await cacheService.RemoveJobTaskKeysAsync(jobTask, ct, false);
 
                 return Result<Unit>.Success(Unit.Value);
             }

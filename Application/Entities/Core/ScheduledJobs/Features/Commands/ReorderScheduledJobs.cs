@@ -1,11 +1,9 @@
 using Application.Core;
 using Application.Entities.Core.ScheduledJobs.DTOs;
-using Domain.Entities.Core;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
 using MediatR;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Application.Entities.Core.ScheduledJobs.Features.Commands;
 
@@ -18,7 +16,7 @@ public class ReorderScheduledJobs
 
     public class Handler(
         IScheduledJobRepository repository,
-        ICacheService cacheService,
+        ISchedulerCacheService cacheService,
         ICurrentUserService currentUserService
     ) : IRequestHandler<Command, Result<Unit>>
     {
@@ -40,9 +38,7 @@ public class ReorderScheduledJobs
             );
 
             if (scheduledJob != null)
-            {
-                await cacheService.RemoveAsync($"jobtask:{scheduledJob.JobTask.Id}", ct);
-            }
+                await cacheService.RemoveScheduledJobKeysAsync(scheduledJob, ct);
 
             return Result<Unit>.Success(Unit.Value);
         }

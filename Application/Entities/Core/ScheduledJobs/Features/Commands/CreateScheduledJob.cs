@@ -19,7 +19,7 @@ public class CreateScheduledJob
     public class Handler(
         IScheduledJobRepository repository,
         IJobTaskRepository jobTaskRepository,
-        ICacheService cacheService,
+        ISchedulerCacheService cacheService,
         ICurrentUserService currentUser,
         IMapper mapper
     ) : IRequestHandler<Command, Result<ScheduledJobDto>>
@@ -51,7 +51,7 @@ public class CreateScheduledJob
 
             var createdScheduledJob = mapper.Map<ScheduledJobDto>(scheduledJob);
 
-            await cacheService.RemoveAsync($"jobtask:{jobTask.Id}", ct);
+            await cacheService.RemoveJobTaskKeyAsync(jobTask, ct);
 
             return Result<ScheduledJobDto>.Success(createdScheduledJob);
         }

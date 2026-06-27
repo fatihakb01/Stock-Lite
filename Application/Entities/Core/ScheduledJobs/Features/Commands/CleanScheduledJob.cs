@@ -15,7 +15,7 @@ namespace Application.Entities.Core.ScheduledJobs.Features.Commands
 
         public class Handler(
             IScheduledJobRepository scheduledJobRepository,
-            ICacheService cacheService,
+            ISchedulerCacheService cacheService,
             ICurrentUserService currentUser
         ) : IRequestHandler<Command, Result<Unit>>
         {
@@ -32,8 +32,7 @@ namespace Application.Entities.Core.ScheduledJobs.Features.Commands
                     return Result<Unit>.Failure("ScheduledJob not found", 404);
 
                 await scheduledJobRepository.CleanScheduledJob(scheduledJob.Id, ct);
-
-                await cacheService.RemoveAsync($"jobtask:{scheduledJob.JobTask.Id}", ct);
+                await cacheService.RemoveJobTaskKeyAsync(scheduledJob.JobTask, ct);
 
                 return Result<Unit>.Success(Unit.Value);
             }

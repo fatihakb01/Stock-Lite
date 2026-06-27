@@ -18,7 +18,7 @@ public class EditJobTask
 
     public class Handler(
         IJobTaskRepository repository,
-        ICacheService cacheService,
+        ISchedulerCacheService cacheService,
         IMapper mapper,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<JobTaskDetailDto>>
@@ -45,10 +45,7 @@ public class EditJobTask
 
             var updatedJobTask = mapper.Map<JobTaskDetailDto>(jobTask);
 
-            await cacheService.RemoveAsync($"jobtasks:{currentUser.CompanyId}", ct);
-            await cacheService.RemoveAsync($"jobtask:{request.Id}", ct);
-            await cacheService.RemoveAsync($"jobtask:history:{request.Id}", ct);
-            await cacheService.RemoveAsync($"jobtasks:recent:history:{currentUser.CompanyId}", ct);
+            await cacheService.RemoveJobTaskKeysAsync(jobTask, ct);
 
             return Result<JobTaskDetailDto>.Success(updatedJobTask);
         }

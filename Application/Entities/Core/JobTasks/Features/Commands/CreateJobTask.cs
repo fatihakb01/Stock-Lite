@@ -18,7 +18,7 @@ public class CreateJobTask
 
     public class Handler(
         IJobTaskRepository repository,
-        ICacheService cacheService,
+        ISchedulerCacheService cacheService,
         IMapper mapper,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<JobTaskDetailDto>>
@@ -57,7 +57,7 @@ public class CreateJobTask
 
             var createdJobTaskDto = mapper.Map<JobTaskDetailDto>(jobTask);
 
-            await cacheService.RemoveAsync($"jobtasks:{currentUser.CompanyId}", ct);
+            await cacheService.RemoveJobTasksKeyAsync(jobTask, ct);
 
             return Result<JobTaskDetailDto>.Success(createdJobTaskDto);
         }

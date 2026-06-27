@@ -15,7 +15,7 @@ public class DeleteJobTask
 
     public class Handler(
         IJobTaskRepository repository,
-        ICacheService cacheService,
+        ISchedulerCacheService cacheService,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<Unit>>
     {
@@ -36,10 +36,7 @@ public class DeleteJobTask
             if (!result)
                 return Result<Unit>.Failure("Failed to delete JobTask", 400);
 
-            await cacheService.RemoveAsync($"jobtasks:{currentUser.CompanyId}", ct);
-            await cacheService.RemoveAsync($"jobtask:{request.Id}", ct);
-            await cacheService.RemoveAsync($"jobtask:history:{request.Id}", ct);
-            await cacheService.RemoveAsync($"jobtasks:recent:history:{currentUser.CompanyId}", ct);
+            await cacheService.RemoveJobTaskKeysAsync(jobTask, ct);
 
             return Result<Unit>.Success(Unit.Value);
         }

@@ -2,7 +2,6 @@ using Application.Core;
 using Domain.Entities.Core;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
-using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler;
 using Domain.Interfaces.Services.Users;
 using MediatR;
