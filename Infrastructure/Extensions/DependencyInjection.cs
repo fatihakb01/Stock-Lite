@@ -1,28 +1,28 @@
 using Domain.Entities.Core;
+using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Export;
+using Domain.Interfaces.Services.Redis;
+using Domain.Interfaces.Services.Scheduler;
+using Domain.Interfaces.Services.Scheduler.Calculations;
+using Domain.Interfaces.Services.Scheduler.Imports;
+using Domain.Interfaces.Services.Users;
 using Infrastructure.Context;
+using Infrastructure.Repositories;
+using Infrastructure.Services.Export;
+using Infrastructure.Services.Redis;
+using Infrastructure.Services.Scheduler;
+using Infrastructure.Services.Scheduler.Calculations;
+using Infrastructure.Services.Scheduler.Imports;
+using Infrastructure.Services.Scheduler.Imports.Handlers;
+using Infrastructure.Services.Users;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Infrastructure.Repositories;
 using Resend;
-using Domain.Interfaces.Repositories;
-using Domain.Interfaces.Services.Scheduler.Imports;
-using Domain.Interfaces.Services.Scheduler.Calculations;
-using Domain.Interfaces.Services.Scheduler;
-using Infrastructure.Services.Scheduler.Imports.Handlers;
-using Infrastructure.Services.Scheduler.Calculations;
-using Infrastructure.Services.Users;
-using Domain.Interfaces.Services.Users;
-using Infrastructure.Services.Scheduler.Imports;
-using Infrastructure.Services.Scheduler;
-using Domain.Interfaces.Services.Export;
-using Infrastructure.Services.Export;
-using Domain.Interfaces.Services.Redis;
-using Infrastructure.Services.Redis;
+using System.Text;
 
 namespace Infrastructure.Extensions;
 
@@ -74,6 +74,19 @@ public static class DependencyInjection
                         Encoding.UTF8.GetBytes(jwtSettings["Key"]!)
                     ),
                     RoleClaimType = "role" 
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/scheduler"))
+                            context.Token = accessToken;
+
+                        return Task.CompletedTask;
+                    }
                 };
             });
 

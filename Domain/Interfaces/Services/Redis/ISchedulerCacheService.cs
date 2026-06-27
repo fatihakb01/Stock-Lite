@@ -9,6 +9,6 @@ namespace Domain.Interfaces.Services.Redis
         Task RemoveScheduledJobKeyAsync(ScheduledJob job, CancellationToken ct);
         Task RemoveJobTaskKeysAsync(JobTask? jobTask, CancellationToken ct, bool removeHistory = true);
         Task RemoveJobTaskKeyAsync(JobTask? jobTask, CancellationToken ct);
-        Task RemoveJobTasksKeyAsync(JobTask? jobTask, CancellationToken ct);
+        Task RemoveJobTasksKeyAsync(JobTask? jobTask, CancellationToken ct, bool isAutomatedRun = false);
     }
 }

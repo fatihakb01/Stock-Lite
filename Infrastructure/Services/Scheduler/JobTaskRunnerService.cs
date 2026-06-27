@@ -3,6 +3,7 @@ using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler;
+using Domain.Interfaces.Services.SignalR;
 
 namespace Infrastructure.Services.Scheduler;
 
@@ -10,13 +11,15 @@ public class JobTaskRunnerService(
     IJobTaskExecutionRepository executionRepo,
     IJobTaskDispatcher dispatcher,
     IProductKpiRepository productKpiRepository,
-    ISchedulerCacheService cacheService
+    ISchedulerCacheService cacheService,
+    ISchedulerNotificationService notifier
 ) : IJobTaskRunnerService
 {
     private readonly IJobTaskExecutionRepository _executionRepo = executionRepo;
     private readonly IJobTaskDispatcher _dispatcher = dispatcher;
     private readonly IProductKpiRepository _productKpiRepository = productKpiRepository;
     private readonly ISchedulerCacheService _cacheService = cacheService;
+    private readonly ISchedulerNotificationService _notifier = notifier;
 
     public async Task<JobExecutionStatus> RunAsync(JobTask jobTask, JobTriggerType triggerType, CancellationToken ct)
     {
@@ -55,6 +58,7 @@ public class JobTaskRunnerService(
         finally
         {
             await _cacheService.RemoveJobTaskKeysAsync(jobTask, ct, true);
+            await _notifier.NotifyJobTaskUpdated(jobTask.CompanyId, jobTask.Id, ct);
 
             execution.FinishedAt = DateTime.UtcNow;
             _executionRepo.Update(execution);

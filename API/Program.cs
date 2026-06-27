@@ -1,7 +1,7 @@
-using Infrastructure.Context;
-using Application.Core;
 using API.Extensions;
+using API.Hubs;
 using API.Middleware;
+using Application.Core;
 using Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,5 +26,7 @@ app.UseCors("CorsPolicyName");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+app.MapHub<SchedulerHub>("/hubs/scheduler");
 
 app.Run();

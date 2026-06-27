@@ -1,6 +1,10 @@
-using MediatR;
+using API.Hubs;
 using API.Middleware;
 using Application.Behaviors;
+using Domain.Interfaces.Services.SignalR;
+using Infrastructure.Services.SignalR;
+using MediatR;
+using Microsoft.AspNetCore.SignalR;
 using System.Text.Json.Serialization;
 
 namespace API.Extensions;
@@ -43,6 +47,15 @@ public static class DependencyInjection
 
         // ---------- MIDDLEWARE ----------
         services.AddTransient<ExceptionMiddleware>();
+
+        // ---------- SIGNALR ----------
+        services.AddSignalR();
+
+        services.AddScoped<ISchedulerNotificationService>(provider =>
+        {
+            var hubContext = provider.GetRequiredService<IHubContext<SchedulerHub>>();
+            return new SchedulerNotificationService(hubContext.Clients);
+        });
 
         // ---------- REDIS CACHING ----------
         services.AddStackExchangeRedisCache(options =>
