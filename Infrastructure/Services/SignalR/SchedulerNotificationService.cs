@@ -1,4 +1,5 @@
-﻿using Domain.Interfaces.Services.SignalR;
+﻿using Domain.Entities.Core;
+using Domain.Interfaces.Services.SignalR;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Infrastructure.Services.SignalR
@@ -17,5 +18,19 @@ namespace Infrastructure.Services.SignalR
             await clients.Group($"company-{companyId}")
                 .SendAsync("ScheduledJobUpdated", scheduledJobId, ct);
         }
+
+        public async Task NotifySchedulerFinished(List<JobTask> jobTasks, CancellationToken ct)
+        {
+            foreach (JobTask jobTask in jobTasks)
+            {
+                await NotifyJobTaskUpdated(jobTask.CompanyId, jobTask.Id, ct);
+
+                foreach (var job in jobTask.Jobs)
+                {
+                    await NotifyScheduledJobUpdated(jobTask.CompanyId, job.Id, ct);
+                }
+            }
+        }
     }
 }
+

@@ -16,8 +16,6 @@ namespace Test.Unit.Services.Scheduler
         private readonly Mock<IJobTaskRepository> _jobTaskRepoMock;
         private readonly Mock<IScheduledJobRepository> _scheduledJobRepoMock;
         private readonly Mock<IJobRunnerService> _jobRunnerServiceMock;
-        private readonly Mock<ISchedulerCacheService> _cacheServiceMock;
-        private readonly Mock<ISchedulerNotificationService> _notificationServiceMock;
         private readonly JobTaskDispatcher _dispatcher;
 
         public JobTaskDispatcherTest()
@@ -25,15 +23,11 @@ namespace Test.Unit.Services.Scheduler
             _jobTaskRepoMock = new Mock<IJobTaskRepository>();
             _scheduledJobRepoMock = new Mock<IScheduledJobRepository>();
             _jobRunnerServiceMock = new Mock<IJobRunnerService>();
-            _cacheServiceMock = new Mock<ISchedulerCacheService>();
-            _notificationServiceMock = new Mock<ISchedulerNotificationService>();
 
             _dispatcher = new JobTaskDispatcher(
                 _jobTaskRepoMock.Object,
                 _scheduledJobRepoMock.Object,
-                _jobRunnerServiceMock.Object,
-                _cacheServiceMock.Object,
-                _notificationServiceMock.Object
+                _jobRunnerServiceMock.Object
             );
         }
 

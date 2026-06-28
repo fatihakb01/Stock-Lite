@@ -38,7 +38,7 @@ public class ReorderScheduledJobs
             );
 
             if (scheduledJob != null)
-                await cacheService.RemoveScheduledJobKeysAsync(scheduledJob, ct);
+                await cacheService.RemoveScheduledJobKeysAsync(scheduledJob, ct, false);
 
             return Result<Unit>.Success(Unit.Value);
         }

@@ -1,31 +1,21 @@
 ﻿using Domain.Entities.Core;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
-using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler;
-using Domain.Interfaces.Services.SignalR;
 
 namespace Infrastructure.Services.Scheduler
 {
-    public class JobTaskDispatcher (
+    public class JobTaskDispatcher(
         IJobTaskRepository jobTaskRepo,
         IScheduledJobRepository scheduledJobRepo,
-        IJobRunnerService jobRunnerService,
-        ISchedulerCacheService cacheService,
-        ISchedulerNotificationService notifier
+        IJobRunnerService jobRunnerService
     ) : IJobTaskDispatcher
     {
-        private readonly IJobTaskRepository _jobTaskRepo = jobTaskRepo;
-        private readonly IScheduledJobRepository _scheduledJobRepo = scheduledJobRepo;
-        private readonly IJobRunnerService _jobRunnerService = jobRunnerService;
-        private readonly ISchedulerCacheService _cacheService = cacheService;
-        private readonly ISchedulerNotificationService _notifier = notifier;
-
         public async Task DispatchAsync(JobTask jobTask, JobTaskExecution jobTaskExecution, CancellationToken ct)
         {
             jobTask.LastStartedAt = DateTime.UtcNow;
 
-            var jobs = await _scheduledJobRepo.FindAsync(x =>
+            var jobs = await scheduledJobRepo.FindAsync(x =>
                  x.JobTaskId == jobTask.Id && 
                  !x.IsArchived && 
                  x.Result != JobExecutionStatus.Succeeded,
@@ -38,16 +28,8 @@ namespace Infrastructure.Services.Scheduler
 
             foreach (var job in jobs)
             {
-                var locked = await _scheduledJobRepo.TryLockTaskAsync(job.Id);
-
-                if (locked)
-                {
-                    result = await _jobRunnerService.RunAsync(job, jobTaskExecution, ct);
-
-                    await UpdateScheduledJob(jobTask, job, result, ct);
-
-                    if (result == JobExecutionStatus.Failed) break;
-                }
+                result = await jobRunnerService.RunAsync(job, jobTaskExecution, ct);
+                if (result == JobExecutionStatus.Failed) break;
             }
 
             if (result == JobExecutionStatus.Failed)
@@ -72,11 +54,11 @@ namespace Infrastructure.Services.Scheduler
                     jobTask.ScheduledAt = CalculateNextRun(jobTask.ScheduledAt, jobTask.PeriodType);
                 }
 
-                await _jobTaskRepo.SaveChangesAsync(ct);
-                await _jobTaskRepo.ResetScheduler(jobTask.CompanyId, ct);
+                await jobTaskRepo.SaveChangesAsync(ct);
+                await jobTaskRepo.ResetScheduler(jobTask.CompanyId, ct);
             }
 
-            await _jobTaskRepo.SaveChangesAsync(ct);
+            await jobTaskRepo.SaveChangesAsync(ct);
         }
 
         internal static DateTime? CalculateNextRun(DateTime? current, Period? period)
@@ -88,14 +70,6 @@ namespace Infrastructure.Services.Scheduler
                 Period.Monthly => current.Value.AddMonths(1),
                 _ => throw new InvalidOperationException()
             } : null;
-        }
-
-        private async Task UpdateScheduledJob(JobTask task, ScheduledJob job, JobExecutionStatus result, CancellationToken ct)
-        {
-            job.Result = result;
-            await _scheduledJobRepo.SaveChangesAsync(ct);
-            await _cacheService.RemoveScheduledJobKeysAsync(job, ct);
-            await _notifier.NotifyScheduledJobUpdated(task.CompanyId, job.Id, ct);
         }
     }
 }

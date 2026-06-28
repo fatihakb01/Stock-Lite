@@ -7,14 +7,20 @@ namespace Infrastructure.Services.Redis
     {
         private readonly ICacheService _cacheService = cacheService;
 
-        public async Task RemoveSchedulerKeys(ScheduledJob job, CancellationToken ct)
+        public async Task RemoveSchedulerKeys(List<JobTask> jobTasks, CancellationToken ct)
         {
-            if (job.JobTask != null)
+            foreach (var jobTask in jobTasks)
             {
-                await RemoveJobTaskKeysAsync(job.JobTask, ct);
+                await RemoveJobTaskKeysAsync(jobTask, ct);
+
+                foreach(var job in jobTask.Jobs)
+                {
+                    await RemoveScheduledJobKeyAsync(job, ct);
+                    await RemoveScheduledJobHistoryKeyAsync(job, ct);
+                }
             }
-            await RemoveScheduledJobKeysAsync(job, ct);
         }
+
         public async Task RemoveScheduledJobKeysAsync(ScheduledJob job, CancellationToken ct, bool removeHistory = true)
         {
             await RemoveScheduledJobKeyAsync(job, ct);
@@ -46,9 +52,9 @@ namespace Infrastructure.Services.Redis
                 await _cacheService.RemoveAsync($"jobtask:{jobTask.Id}", ct);
         }
 
-        public async Task RemoveJobTasksKeyAsync(JobTask? jobTask, CancellationToken ct, bool isAutomatedRun = false)
+        public async Task RemoveJobTasksKeyAsync(JobTask? jobTask, CancellationToken ct)
         {
-            if (jobTask != null && !isAutomatedRun)
+            if (jobTask != null)
                 await _cacheService.RemoveAsync($"jobtasks:{jobTask.CompanyId}", ct);
         }
 

@@ -1,6 +1,8 @@
 ﻿using Domain.Enums;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler;
+using Domain.Interfaces.Services.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -32,6 +34,15 @@ namespace Infrastructure.Services.Scheduler
             var service = provider
                 .GetRequiredService<IJobTaskRunnerService>();
 
+            var productKpiRepository = provider
+                .GetRequiredService<IProductKpiRepository>();
+
+            var cacheService = provider
+                .GetRequiredService<ISchedulerCacheService>();
+
+            var notifier = provider
+                .GetRequiredService<ISchedulerNotificationService>();
+
             var companyIds = await companyRepository.GetCompanyIds(ct);
 
             foreach (var companyId in companyIds)
@@ -46,15 +57,20 @@ namespace Infrastructure.Services.Scheduler
                 if (task == null)
                     continue;
 
-                var locked = await jobTaskRepository.TryLockTaskAsync(task.Id, DateTime.UtcNow);
+                JobTriggerType triggerType = task.Retries == 0
+                ? JobTriggerType.Scheduled
+                : JobTriggerType.Retry;
 
-                if (locked)
+                await service.RunAsync(task, triggerType, ct);
+
+                var schedulerStatus = await productKpiRepository.GetSchedulerStatus(companyId, ct);
+
+                if (schedulerStatus == JobExecutionStatus.Pending)
                 {
-                    JobTriggerType triggerType = task.Retries == 0
-                        ? JobTriggerType.Scheduled
-                        : JobTriggerType.Retry;
-
-                    await service.RunAsync(task, triggerType, ct);
+                    var jobTasks = await jobTaskRepository.FindAsync(x => x.CompanyId == companyId, ct);
+                    var tasks = jobTasks.ToList();
+                    await cacheService.RemoveSchedulerKeys(tasks, ct);
+                    await notifier.NotifySchedulerFinished(tasks, ct);
                 }
             }
         }

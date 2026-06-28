@@ -12,7 +12,7 @@ export function useSchedulerRealtime() {
 
         connection.on("JobTaskUpdated", () => {
             queryClient.invalidateQueries({ queryKey: ["jobtask"] });
-            queryClient.invalidateQueries({ queryKey: ["scheduledjob"] });
+            queryClient.invalidateQueries({ queryKey: ["jobtasks"] });
         });
 
         connection.on("ScheduledJobUpdated", () => {

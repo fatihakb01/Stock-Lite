@@ -8,19 +8,18 @@ using Domain.Interfaces.Services.SignalR;
 namespace Infrastructure.Services.Scheduler;
 
 public class JobRunnerService(
+    IScheduledJobRepository scheduledJobRepo,
     IJobExecutionRepository executionRepo,
     IJobDispatcher dispatcher,
     ISchedulerCacheService cacheService,
     ISchedulerNotificationService notifier
     ) : IJobRunnerService
 {
-    private readonly IJobExecutionRepository _executionRepo = executionRepo;
-    private readonly IJobDispatcher _dispatcher = dispatcher;
-    private readonly ISchedulerCacheService _cacheService = cacheService;
-    private readonly ISchedulerNotificationService _notifier = notifier;
-
     public async Task<JobExecutionStatus> RunAsync(ScheduledJob job, JobTaskExecution jobTaskExecution, CancellationToken ct)
     {
+        JobExecutionStatus result = JobExecutionStatus.Running;
+        await RefetchScheduledJob(job, result, ct);
+        
         var execution = new JobExecution
         {
             ScheduledJobId = job.Id,
@@ -31,36 +30,38 @@ public class JobRunnerService(
             Status = JobExecutionStatus.Running,
             TriggerType = jobTaskExecution.TriggerType
         };
-
-        await _executionRepo.AddAsync(execution, ct);
-        await _executionRepo.SaveChangesAsync(ct);
-
-        //var locked = await _scheduledJobRepo.TryLockTaskAsync(job.Id);
-
-        //if (locked)
-        //{
-        // potentially move try/catch block in here
-        //}
-
+        
+        await executionRepo.AddAsync(execution, ct);
+        await executionRepo.SaveChangesAsync(ct);
+                
         try
         {
-            await _cacheService.RemoveScheduledJobKeysAsync(job, ct);
-            await _notifier.NotifyScheduledJobUpdated(job.JobTask.CompanyId, job.Id, ct);
-            await _dispatcher.DispatchAsync(job, ct);
+            await dispatcher.DispatchAsync(job, ct);
             execution.Status = JobExecutionStatus.Succeeded;
-            return JobExecutionStatus.Succeeded;
+            result = JobExecutionStatus.Succeeded;
+            return result;
         }
         catch (Exception ex)
         {
             execution.Status = JobExecutionStatus.Failed;
             execution.ErrorMessage = ex.ToString()[..^1];
-            return JobExecutionStatus.Failed;
+            result = JobExecutionStatus.Failed;
+            return result;
         }
         finally
         {
             execution.FinishedAt = DateTime.UtcNow;
-            _executionRepo.Update(execution);
-            await _executionRepo.SaveChangesAsync(ct);
+            executionRepo.Update(execution);
+            await executionRepo.SaveChangesAsync(ct);
+            await RefetchScheduledJob(job, result, ct);
         }
+    }
+
+    private async Task RefetchScheduledJob(ScheduledJob job, JobExecutionStatus result, CancellationToken ct)
+    {
+        job.Result = result;
+        await scheduledJobRepo.SaveChangesAsync(ct);
+        await cacheService.RemoveScheduledJobKeysAsync(job, ct);
+        await notifier.NotifyScheduledJobUpdated(job.JobTask.CompanyId, job.Id, ct);
     }
 }

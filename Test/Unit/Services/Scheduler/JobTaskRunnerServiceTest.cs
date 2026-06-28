@@ -12,6 +12,7 @@ namespace Test.Unit.Services.Scheduler
 {
     public class JobTaskRunnerServiceTest
     {
+        private readonly Mock<IJobTaskRepository> _jobTaskRepoMock;
         private readonly Mock<IJobTaskExecutionRepository> _executionRepoMock;
         private readonly Mock<IJobTaskDispatcher> _dispatcherMock;
         private readonly Mock<ISchedulerCacheService> _cacheServiceMock;
@@ -21,6 +22,7 @@ namespace Test.Unit.Services.Scheduler
 
         public JobTaskRunnerServiceTest()
         {
+            _jobTaskRepoMock = new Mock<IJobTaskRepository>();
             _executionRepoMock = new Mock<IJobTaskExecutionRepository>();
             _dispatcherMock = new Mock<IJobTaskDispatcher>();
             _productKpiRepoMock = new Mock<IProductKpiRepository>();
@@ -28,6 +30,7 @@ namespace Test.Unit.Services.Scheduler
             _notificationServiceMock = new Mock<ISchedulerNotificationService>();
 
             _service = new JobTaskRunnerService(
+                _jobTaskRepoMock.Object,
                 _executionRepoMock.Object,
                 _dispatcherMock.Object,
                 _productKpiRepoMock.Object,

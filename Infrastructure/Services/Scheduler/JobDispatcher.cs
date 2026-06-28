@@ -12,9 +12,6 @@ namespace Infrastructure.Services.Scheduler;
 
 public class JobDispatcher(IServiceProvider provider, DataContext context) : IJobDispatcher
 {
-    private readonly IServiceProvider _provider = provider;
-    private readonly DataContext _context = context;
-
     public async Task DispatchAsync(
         ScheduledJob job,
         CancellationToken ct
@@ -47,7 +44,7 @@ public class JobDispatcher(IServiceProvider provider, DataContext context) : IJo
         if (string.IsNullOrWhiteSpace(job.Source))
             throw new InvalidOperationException("Import job requires a Source.");
 
-        using var scope = _provider.CreateScope();
+        using var scope = provider.CreateScope();
 
         var coordinator = scope.ServiceProvider
             .GetRequiredService<IImportCoordinator>();
@@ -64,7 +61,7 @@ public class JobDispatcher(IServiceProvider provider, DataContext context) : IJo
         ScheduledJob job,
         CancellationToken ct)
     {
-        using var scope = _provider.CreateScope();
+        using var scope = provider.CreateScope();
 
         var companyId = job.JobTask.CompanyId;
         var period = job.PeriodType;
@@ -147,7 +144,7 @@ public class JobDispatcher(IServiceProvider provider, DataContext context) : IJo
             ? job.Target
             : $"dbo.{job.Target}";
 
-        var exists = await _context.Database
+        var exists = await context.Database
             .SqlQueryRaw<int>(
                 @"
                 SELECT COUNT(*) AS Value
@@ -163,6 +160,6 @@ public class JobDispatcher(IServiceProvider provider, DataContext context) : IJo
             throw new InvalidOperationException($"Stored procedure '{procName}' does not exist.");
 
         // Execute procedure
-        await _context.Database.ExecuteSqlAsync($"EXEC {procName}", ct);
+        await context.Database.ExecuteSqlAsync($"EXEC {procName}", ct);
     }
 }
