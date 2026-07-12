@@ -1,4 +1,5 @@
 using Application.Core;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler.Calculations;
 using Domain.Interfaces.Services.Users;
 using MediatR;
@@ -11,12 +12,15 @@ public class UpdateProductKpis
 
     public class Handler(
         IProductKpiCalculation repository,
+        ISchedulerCacheService schedulerCacheService,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<Unit>>
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
             await repository.RunAsync(currentUser.CompanyId, ct);
+
+            await schedulerCacheService.RemoveSchedulerStatusKeyAsync(currentUser.CompanyId, ct);
 
             return Result<Unit>.Success(Unit.Value);
         }

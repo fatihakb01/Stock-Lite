@@ -18,7 +18,7 @@ public class ProductKpiController(IMediator mediator) : BaseApiController(mediat
     }
 
     [HttpGet("schedulerStatus")]
-    public async Task<ActionResult<JobExecutionStatus>> GetSchedulerStatus()
+    public async Task<ActionResult<SchedulerStatusDto>> GetSchedulerStatus()
     {
         return HandleResult(await Mediator.Send(new GetSchedulerStatus.Query()));
     }

@@ -6,3 +6,7 @@ export type ProductKpi = {
     withoutStockAtLeadTimeCount: number,
     withoutForecastCount: number
 }
+
+export type SchedulerStatus = {
+    status: string
+}

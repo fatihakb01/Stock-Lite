@@ -9,7 +9,7 @@ import { useSchedulerRealtime } from "../../hooks/useSchedulerRealtime";
 
 export default function SchedulerPage() {
     const [tab, setTab] = useState(0);
-    const { data: schedulerStatus } = useSchedulerStatus();
+    const { data: scheduler } = useSchedulerStatus();
 
     useSchedulerRealtime();
 
@@ -21,7 +21,7 @@ export default function SchedulerPage() {
                     <Tab label="Job execution history" sx={{ mr: "auto" }} />
                 </Tabs>
                 <Box sx={{ pr: 2 }}>
-                    <SchedulerStatusBadge status={schedulerStatus} label={"Scheduler"} />
+                    <SchedulerStatusBadge status={scheduler?.status} label={"Scheduler"} />
                 </Box>
             </Box>
 

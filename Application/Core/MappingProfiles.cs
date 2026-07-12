@@ -49,6 +49,7 @@ public class MappingProfiles : Profile
         CreateMap<StockLevel, ProductStockDto>();
         CreateMap<ProductInventoryPolicy, ProductInventoryPolicyDto>();
         CreateMap<ProductKpi, ProductKpiDto>();
+        CreateMap<ProductKpi, SchedulerStatusDto>();
 
         // PurchaseOrder entity
         CreateMap<PurchaseOrder, PurchaseOrderDto>();

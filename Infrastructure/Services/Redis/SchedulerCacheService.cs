@@ -44,6 +44,14 @@ namespace Infrastructure.Services.Redis
 
             if (removeHistory)
                 await RemoveJobTaskHistoryKeysAsync(jobTask, ct);
+
+            if (jobTask != null)
+                await RemoveSchedulerStatusKeyAsync(jobTask.CompanyId, ct);
+        }
+
+        public async Task RemoveSchedulerStatusKeyAsync(Guid companyId, CancellationToken ct)
+        {
+            await _cacheService.RemoveAsync($"productkpis:{companyId}", ct);
         }
 
         public async Task RemoveJobTaskKeyAsync(JobTask? jobTask, CancellationToken ct)

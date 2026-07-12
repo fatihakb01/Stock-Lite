@@ -5,7 +5,7 @@ import SchedulerStatusBadge from "../scheduler/components/SchedulerStatusBadge";
 
 export default function HomePage() {
   const { data: data } = useProductKpi();
-  const { data: schedulerStatus } = useSchedulerStatus();
+  const { data: scheduler } = useSchedulerStatus();
   const navigate = useNavigate();
 
   const kpis = [
@@ -92,7 +92,7 @@ export default function HomePage() {
               
               <Box mt={1}>
                   {kpi.filter === "SchedulerStatus" ? (
-                      <SchedulerStatusBadge status={schedulerStatus} label={"Scheduler"} />
+                            <SchedulerStatusBadge status={scheduler?.status} label={"Scheduler"} />
                   ) : (
                       <Typography variant="h4">{kpi.value}</Typography>
                   )}

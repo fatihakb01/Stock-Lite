@@ -13,6 +13,7 @@ export function useSchedulerRealtime() {
         connection.on("JobTaskUpdated", () => {
             queryClient.invalidateQueries({ queryKey: ["jobtask"] });
             queryClient.invalidateQueries({ queryKey: ["jobtasks"] });
+            queryClient.invalidateQueries({ queryKey: ["productkpi", "schedulerStatus"] });
         });
 
         connection.on("ScheduledJobUpdated", () => {
