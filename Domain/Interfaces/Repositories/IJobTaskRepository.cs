@@ -19,10 +19,6 @@ public interface IJobTaskRepository : IRepository<JobTask>
         Guid companyId,
         CancellationToken ct
     );
-    Task<bool> TryLockTaskAsync(
-        Guid jobTaskId,
-        DateTime now
-    );
     Task CleanJobTask(
         Guid jobTaskId,
         CancellationToken ct

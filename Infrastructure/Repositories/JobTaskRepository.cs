@@ -56,23 +56,6 @@ public class JobTaskRepository(DataContext context)
             .AnyAsync(ct);
     }
 
-    public async Task<bool> TryLockTaskAsync(Guid jobTaskId, DateTime now)
-    {
-        var affected = await _context.Database.ExecuteSqlRawAsync(
-            """
-            UPDATE JobTasks
-            SET Result = 1,
-                LastStartedAt = {0}
-            WHERE Id = {1}
-            AND Result <> 1
-            """,
-            now,
-            jobTaskId
-        );
-
-        return affected == 1;
-    }
-
     public async Task CleanJobTask(Guid jobTaskId, CancellationToken ct)
     {
         await _context.Database.ExecuteSqlRawAsync(

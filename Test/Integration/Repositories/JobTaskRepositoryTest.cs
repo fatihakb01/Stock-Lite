@@ -140,41 +140,6 @@ namespace Test.Integration.Repositories
         }
 
         [Fact]
-        public async Task TryLockTaskAsync_WhenUnlocked_UpdatesRow()
-        {
-            var repo = CreateRepository();
-            var company = await _companyHelper.CreateCompany();
-            var task = await _schedulerHelper.CreateJobTask(companyId: company.Id);
-
-            task.Result = JobExecutionStatus.Pending;
-            await Fixture.Context.SaveChangesAsync();
-
-            var result = await repo.TryLockTaskAsync(task.Id, DateTime.UtcNow);
-
-            Assert.True(result);
-
-            Fixture.Context.ChangeTracker.Clear();
-
-            var updated = await Fixture.Context.JobTasks.FindAsync(task.Id);
-            Assert.Equal(JobExecutionStatus.Running, updated!.Result);
-        }
-
-        [Fact]
-        public async Task TryLockTaskAsync_WhenAlreadyRunning_ReturnsFalse()
-        {
-            var repo = CreateRepository();
-            var company = await _companyHelper.CreateCompany();
-            var task = await _schedulerHelper.CreateJobTask(companyId: company.Id);
-
-            task.Result = JobExecutionStatus.Running;
-            await Fixture.Context.SaveChangesAsync();
-
-            var result = await repo.TryLockTaskAsync(task.Id, DateTime.UtcNow);
-
-            Assert.False(result);
-        }
-
-        [Fact]
         public async Task CleanJobTask_ResetsFields()
         {
             var repo = CreateRepository();

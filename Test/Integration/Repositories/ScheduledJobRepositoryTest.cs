@@ -187,45 +187,5 @@ namespace Test.Integration.Repositories
             Assert.Equal(0, updatedTask!.Retries);
             Assert.Equal(JobExecutionStatus.Pending, updatedJob!.Result);
         }
-
-        [Fact]
-        public async Task TryLockTaskAsync_WhenUnlocked_ReturnsTrue()
-        {
-            var repo = CreateRepository();
-            var company = await _companyHelper.CreateCompany();
-
-            var task = await _schedulerHelper.CreateJobTask(companyId: company.Id);
-            var job = await _schedulerHelper.CreateScheduledJob(task: task);
-            
-            job.Result = JobExecutionStatus.Pending;
-            await Fixture.Context.SaveChangesAsync();
-
-            var result = await repo.TryLockTaskAsync(job.Id);
-
-            Assert.True(result);
-
-            Fixture.Context.ChangeTracker.Clear();
-
-            var updated = await Fixture.Context.ScheduledJobs.FindAsync(job.Id);
-
-            Assert.Equal(JobExecutionStatus.Running, updated!.Result);
-        }
-
-        [Fact]
-        public async Task TryLockTaskAsync_WhenAlreadyRunning_ReturnsFalse()
-        {
-            var repo = CreateRepository();
-            var company = await _companyHelper.CreateCompany();
-
-            var task = await _schedulerHelper.CreateJobTask(companyId: company.Id);
-            var job = await _schedulerHelper.CreateScheduledJob(task: task);
-
-            job.Result = JobExecutionStatus.Running;
-            await Fixture.Context.SaveChangesAsync();
-
-            var result = await repo.TryLockTaskAsync(job.Id);
-
-            Assert.False(result);
-        }
     }
 }

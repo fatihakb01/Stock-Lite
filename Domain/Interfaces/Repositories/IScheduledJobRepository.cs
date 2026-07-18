@@ -30,5 +30,4 @@ public interface IScheduledJobRepository : IRepository<ScheduledJob>
         Guid jobId,
         CancellationToken ct
     );
-    Task<bool> TryLockTaskAsync(Guid jobId);
 }
