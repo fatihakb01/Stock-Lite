@@ -1,7 +1,9 @@
 ﻿using Domain.Entities.Core;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler;
+using Domain.Interfaces.Services.SignalR;
 using Infrastructure.Services.Scheduler;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -14,7 +16,10 @@ public class SchedulerWorkerTest
     private static IServiceScope CreateScopeFactory(
         Mock<ICompanyRepository> companyRepo,
         Mock<IJobTaskRepository> jobTaskRepo,
-        Mock<IJobTaskRunnerService> runnerService)
+        Mock<IJobTaskRunnerService> runnerService,
+        Mock<IProductKpiRepository> productKpiRepo,
+        Mock<ISchedulerCacheService> schedulerCacheService,
+        Mock<ISchedulerNotificationService> schedulerNotificationService)
     {
         var scopedProvider = new Mock<IServiceProvider>();
 
@@ -27,6 +32,15 @@ public class SchedulerWorkerTest
         scopedProvider.Setup(x => x.GetService(typeof(IJobTaskRunnerService)))
             .Returns(runnerService.Object);
 
+        scopedProvider.Setup(x => x.GetService(typeof(IProductKpiRepository)))
+            .Returns(productKpiRepo.Object);
+
+        scopedProvider.Setup(x => x.GetService(typeof(ISchedulerCacheService)))
+            .Returns(schedulerCacheService.Object);
+
+        scopedProvider.Setup(x => x.GetService(typeof(ISchedulerNotificationService)))
+            .Returns(schedulerNotificationService.Object);
+
         var scope = new Mock<IServiceScope>();
         scope.Setup(x => x.ServiceProvider).Returns(scopedProvider.Object);
 
@@ -37,7 +51,6 @@ public class SchedulerWorkerTest
     public async Task ExecuteAsync_WhenTaskAvailable_RunsTask()
     {
         var companyId = Guid.NewGuid();
-
         var jobTask = SchedulerHelper.CreateJobTaskStatic();
         jobTask.CompanyId = companyId;
 
@@ -52,11 +65,11 @@ public class SchedulerWorkerTest
         jobTaskRepo.Setup(x => x.GetNextDueTaskAsync(companyId, It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(jobTask);
 
-        jobTaskRepo.Setup(x => x.TryLockTaskAsync(jobTask.Id, It.IsAny<DateTime>()))
-            .ReturnsAsync(true);
-
         var runner = new Mock<IJobTaskRunnerService>();
-        var scope = CreateScopeFactory(companyRepo, jobTaskRepo, runner);
+        var productKpiRepo = new Mock<IProductKpiRepository>();
+        var schedulerCache = new Mock<ISchedulerCacheService>();
+        var schedulerNotification = new Mock<ISchedulerNotificationService>();
+        var scope = CreateScopeFactory(companyRepo, jobTaskRepo, runner, productKpiRepo, schedulerCache, schedulerNotification);
 
         var cts = new CancellationTokenSource();
         cts.CancelAfter(100);
@@ -66,13 +79,72 @@ public class SchedulerWorkerTest
         runner.Verify(x =>
             x.RunAsync(jobTask, JobTriggerType.Scheduled, It.IsAny<CancellationToken>()),
             Times.Once);
+
+        productKpiRepo.Verify(x =>
+            x.GetSchedulerStatus(companyId, It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WhenMultipleCompaniesAvailable_RunsTaskMultipleTimes()
+    {
+        var companyId1 = Guid.NewGuid();
+        var jobTask1 = SchedulerHelper.CreateJobTaskStatic();
+        jobTask1.CompanyId = companyId1;
+
+        var companyId2 = Guid.NewGuid();
+        var jobTask2 = SchedulerHelper.CreateJobTaskStatic();
+        jobTask2.CompanyId = companyId2;
+
+        var companyRepo = new Mock<ICompanyRepository>();
+        companyRepo.Setup(x => x.GetCompanyIds(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Guid> { companyId1, companyId2 });
+
+        var jobTaskRepo = new Mock<IJobTaskRepository>();
+        jobTaskRepo.Setup(x => x.HasExhaustedTaskAsync(companyId1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        jobTaskRepo.Setup(x => x.GetNextDueTaskAsync(companyId1, It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(jobTask1);
+
+        jobTaskRepo.Setup(x => x.HasExhaustedTaskAsync(companyId2, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        jobTaskRepo.Setup(x => x.GetNextDueTaskAsync(companyId2, It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(jobTask2);
+
+        var runner = new Mock<IJobTaskRunnerService>();
+        var productKpiRepo = new Mock<IProductKpiRepository>();
+        var schedulerCache = new Mock<ISchedulerCacheService>();
+        var schedulerNotification = new Mock<ISchedulerNotificationService>();
+        var scope = CreateScopeFactory(companyRepo, jobTaskRepo, runner, productKpiRepo, schedulerCache, schedulerNotification);
+
+        var cts = new CancellationTokenSource();
+        cts.CancelAfter(100);
+
+        await SchedulerWorker.ExecuteOnceAsync(scope.ServiceProvider, cts.Token);
+
+        runner.Verify(x =>
+            x.RunAsync(jobTask1, JobTriggerType.Scheduled, It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        productKpiRepo.Verify(x =>
+            x.GetSchedulerStatus(companyId1, It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        runner.Verify(x =>
+            x.RunAsync(jobTask2, JobTriggerType.Scheduled, It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        productKpiRepo.Verify(x =>
+            x.GetSchedulerStatus(companyId2, It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact]
     public async Task ExecuteAsync_WhenTaskIsBlocked_DoesNotRun()
     {
         var companyId = Guid.NewGuid();
-
         var companyRepo = new Mock<ICompanyRepository>();
         companyRepo.Setup(x => x.GetCompanyIds(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Guid> { companyId });
@@ -82,7 +154,10 @@ public class SchedulerWorkerTest
             .ReturnsAsync(true);
 
         var runner = new Mock<IJobTaskRunnerService>();
-        var scope = CreateScopeFactory(companyRepo, jobTaskRepo, runner);
+        var productKpiRepo = new Mock<IProductKpiRepository>();
+        var schedulerCache = new Mock<ISchedulerCacheService>();
+        var schedulerNotification = new Mock<ISchedulerNotificationService>();
+        var scope = CreateScopeFactory(companyRepo, jobTaskRepo, runner, productKpiRepo, schedulerCache, schedulerNotification);
 
         var cts = new CancellationTokenSource();
         cts.CancelAfter(100);
@@ -94,13 +169,16 @@ public class SchedulerWorkerTest
             Times.Never);
     }
 
-    [Fact]
-    public async Task ExecuteAsync_WhenLockFails_DoesNotRun()
+    [Theory]
+    [InlineData(JobExecutionStatus.Pending, 1)]
+    [InlineData(JobExecutionStatus.Succeeded, 0)]
+    [InlineData(JobExecutionStatus.Failed, 0)]
+    public async Task ExecuteAsync_WhenSchedulerStatus_NotifySchedulerFinished(JobExecutionStatus status, int numberOfTimes)
     {
         var companyId = Guid.NewGuid();
-
-        var jobTask = SchedulerHelper.CreateJobTaskStatic();
-        jobTask.CompanyId = companyId;
+        var jobTasks = SchedulerHelper.CreateJobTasksStatic();
+        jobTasks.ForEach(x => x.CompanyId = companyId);
+        var jobTask = jobTasks[0];
 
         var companyRepo = new Mock<ICompanyRepository>();
         companyRepo.Setup(x => x.GetCompanyIds(It.IsAny<CancellationToken>()))
@@ -113,19 +191,24 @@ public class SchedulerWorkerTest
         jobTaskRepo.Setup(x => x.GetNextDueTaskAsync(companyId, It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(jobTask);
 
-        jobTaskRepo.Setup(x => x.TryLockTaskAsync(jobTask.Id, It.IsAny<DateTime>()))
-            .ReturnsAsync(false);
-
         var runner = new Mock<IJobTaskRunnerService>();
-        var scope = CreateScopeFactory(companyRepo, jobTaskRepo, runner);
+        var productKpiRepo = new Mock<IProductKpiRepository>();
+        productKpiRepo.Setup(x => x.GetSchedulerStatus(companyId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(status);
+
+        jobTaskRepo.Setup(x => x.FindAsync(x => x.CompanyId == companyId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(jobTasks);
+
+        var cacheService = new Mock<ISchedulerCacheService>();
+        var schedulerNotification = new Mock<ISchedulerNotificationService>();
+        var scope = CreateScopeFactory(companyRepo, jobTaskRepo, runner, productKpiRepo, cacheService, schedulerNotification);
 
         var cts = new CancellationTokenSource();
         cts.CancelAfter(100);
 
         await SchedulerWorker.ExecuteOnceAsync(scope.ServiceProvider, cts.Token);
 
-        runner.Verify(x =>
-            x.RunAsync(It.IsAny<JobTask>(), It.IsAny<JobTriggerType>(), It.IsAny<CancellationToken>()),
-            Times.Never);
+        cacheService.Verify(x => x.RemoveSchedulerKeys(jobTasks, It.IsAny<CancellationToken>()), Times.Exactly(numberOfTimes));
+        schedulerNotification.Verify(x => x.NotifySchedulerFinished(jobTasks, It.IsAny<CancellationToken>()), Times.Exactly(numberOfTimes));
     }
 }

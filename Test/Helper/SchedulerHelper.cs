@@ -66,7 +66,7 @@ namespace Test.Helper
             Company = null!
         };
 
-        internal async Task<List<JobTask>> CreateJobTasks(int total = 5, bool saveChanges = true)
+        internal static List<JobTask> CreateJobTasksStatic(int total = 5)
         {
             List<JobTask> tasks = new List<JobTask>();
 
@@ -77,6 +77,13 @@ namespace Test.Helper
                 JobTask task = CreateJobTaskStatic(name: name, jobTaskKey: jobTaskKey);
                 tasks.Add(task);
             }
+
+            return tasks;
+        }
+
+        internal async Task<List<JobTask>> CreateJobTasks(int total = 5, bool saveChanges = true)
+        {
+            List<JobTask> tasks = CreateJobTasksStatic(total);
 
             await _fixture.Context.JobTasks.AddRangeAsync(tasks);
 
