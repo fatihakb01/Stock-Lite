@@ -39,32 +39,11 @@ namespace Test.Unit.Services.Scheduler
             );
         }
 
-        internal static JobTaskExecution CreateExecution(
-            JobTask jobTask, JobTriggerType
-            triggerType = JobTriggerType.Scheduled
-        ) => new JobTaskExecution
+        [Fact]
+        public async Task RunAsync_DispatchSucceeds_SetsJobTaskResultToSucceeded()
         {
-            Id = Guid.NewGuid(),
-            JobTaskId = jobTask.Id,
-            JobTask = jobTask,
-            StartedAt = DateTime.UtcNow,
-            Status = JobExecutionStatus.Running,
-            TriggerType = triggerType
-        };
-
-        [Theory]
-        [InlineData(JobTriggerType.Manual, true)]
-        [InlineData(JobTriggerType.Scheduled, false)]
-        [InlineData(JobTriggerType.Retry, false)]
-        public async Task RunAsync_DispatchSucceeds_SetsJobTaskResultToSucceeded(
-            JobTriggerType triggerType, 
-            bool allowManualTriggerOnly
-        )
-        {
-            var jobTask = SchedulerHelper.CreateJobTaskStatic(
-                allowManualTriggerOnly: allowManualTriggerOnly,
-                scheduledAt: allowManualTriggerOnly ? null : new DateTime(2026, 1, 1)
-            );
+            var scheduledAt = new DateTime(2026, 1, 1);
+            var jobTask = SchedulerHelper.CreateJobTaskStatic(scheduledAt: scheduledAt);
 
             _dispatcherMock
                 .Setup(d => d.DispatchAsync(jobTask, It.IsAny<JobTaskExecution>(), It.IsAny<CancellationToken>()))
@@ -72,25 +51,17 @@ namespace Test.Unit.Services.Scheduler
                     jt.Result = JobExecutionStatus.Succeeded)
                 .Returns(Task.CompletedTask);
 
-            var result = await _service.RunAsync(jobTask, triggerType, CancellationToken.None);
+            var result = await _service.RunAsync(jobTask, JobTriggerType.Scheduled, CancellationToken.None);
 
             Assert.Equal(JobExecutionStatus.Succeeded, result);
             Assert.Equal(JobExecutionStatus.Succeeded, jobTask.Result);
         }
 
-        [Theory]
-        [InlineData(JobTriggerType.Manual, true)]
-        [InlineData(JobTriggerType.Scheduled, false)]
-        [InlineData(JobTriggerType.Retry, false)]
-        public async Task RunAsync_DispatchThrows_SetsJobTaskResultToFailed(
-            JobTriggerType triggerType,
-            bool allowManualTriggerOnly
-        )
+        [Fact]
+        public async Task RunAsync_DispatchThrows_SetsJobTaskResultToFailed()
         {
-            var jobTask = SchedulerHelper.CreateJobTaskStatic(
-                allowManualTriggerOnly: allowManualTriggerOnly,
-                scheduledAt: allowManualTriggerOnly ? null : new DateTime(2026, 1, 1)
-            );
+            var scheduledAt = new DateTime(2026, 1, 1);
+            var jobTask = SchedulerHelper.CreateJobTaskStatic(scheduledAt: scheduledAt);
 
             _dispatcherMock
                 .Setup(d => d.DispatchAsync(jobTask, It.IsAny<JobTaskExecution>(), It.IsAny<CancellationToken>()))
@@ -98,25 +69,17 @@ namespace Test.Unit.Services.Scheduler
                     jt.Result = JobExecutionStatus.Failed)
                 .ThrowsAsync(new Exception("Dispatch failed"));
 
-            var result = await _service.RunAsync(jobTask, triggerType, CancellationToken.None);
+            var result = await _service.RunAsync(jobTask, JobTriggerType.Scheduled, CancellationToken.None);
 
             Assert.Equal(JobExecutionStatus.Failed, result);
             Assert.Equal(JobExecutionStatus.Failed, jobTask.Result);
         }
 
-        [Theory]
-        [InlineData(JobTriggerType.Manual, true)]
-        [InlineData(JobTriggerType.Scheduled, false)]
-        [InlineData(JobTriggerType.Retry, false)]
-        public async Task RunAsync_DispatchThrows_SetsErrorMessageOnExecution(
-            JobTriggerType triggerType,
-            bool allowManualTriggerOnly
-        )
+        [Fact]
+        public async Task RunAsync_DispatchThrows_SetsErrorMessageOnExecution()
         {
-            var jobTask = SchedulerHelper.CreateJobTaskStatic(
-                allowManualTriggerOnly: allowManualTriggerOnly,
-                scheduledAt: allowManualTriggerOnly ? null : new DateTime(2026, 1, 1)
-            );
+            var scheduledAt = new DateTime(2026, 1, 1);
+            var jobTask = SchedulerHelper.CreateJobTaskStatic(scheduledAt: scheduledAt);
             JobTaskExecution? capturedExecution = null;
 
             _dispatcherMock
@@ -130,26 +93,18 @@ namespace Test.Unit.Services.Scheduler
                 .Setup(r => r.Update(It.IsAny<JobTaskExecution>()))
                 .Callback<JobTaskExecution>(e => capturedExecution = e);
 
-            await _service.RunAsync(jobTask, triggerType, CancellationToken.None);
+            await _service.RunAsync(jobTask, JobTriggerType.Scheduled, CancellationToken.None);
 
             Assert.NotNull(capturedExecution);
             Assert.Equal(JobExecutionStatus.Failed, capturedExecution!.Status);
             Assert.NotNull(capturedExecution.ErrorMessage);
         }
 
-        [Theory]
-        [InlineData(JobTriggerType.Manual, true)]
-        [InlineData(JobTriggerType.Scheduled, false)]
-        [InlineData(JobTriggerType.Retry, false)]
-        public async Task RunAsync_DispatchSucceeds_SetsExecutionStatusToSucceeded(
-            JobTriggerType triggerType,
-            bool allowManualTriggerOnly
-        )
+        [Fact]
+        public async Task RunAsync_DispatchSucceeds_SetsExecutionStatusToSucceeded()
         {
-            var jobTask = SchedulerHelper.CreateJobTaskStatic(
-                allowManualTriggerOnly: allowManualTriggerOnly,
-                scheduledAt: allowManualTriggerOnly ? null : new DateTime(2026, 1, 1)
-            );
+            var scheduledAt = new DateTime(2026, 1, 1);
+            var jobTask = SchedulerHelper.CreateJobTaskStatic(scheduledAt: scheduledAt);
             JobTaskExecution? capturedExecution = null;
 
             _dispatcherMock
@@ -162,25 +117,17 @@ namespace Test.Unit.Services.Scheduler
                 .Setup(r => r.Update(It.IsAny<JobTaskExecution>()))
                 .Callback<JobTaskExecution>(e => capturedExecution = e);
 
-            await _service.RunAsync(jobTask, triggerType, CancellationToken.None);
+            await _service.RunAsync(jobTask, JobTriggerType.Scheduled, CancellationToken.None);
 
             Assert.NotNull(capturedExecution);
             Assert.Equal(JobExecutionStatus.Succeeded, capturedExecution!.Status);
         }
 
-        [Theory]
-        [InlineData(JobTriggerType.Manual, true)]
-        [InlineData(JobTriggerType.Scheduled, false)]
-        [InlineData(JobTriggerType.Retry, false)]
-        public async Task RunAsync_DispatchSucceeds_SetsFinishedAt(
-            JobTriggerType triggerType,
-            bool allowManualTriggerOnly
-        )
+        [Fact]
+        public async Task RunAsync_DispatchSucceeds_SetsFinishedAt()
         {
-            var jobTask = SchedulerHelper.CreateJobTaskStatic(
-                allowManualTriggerOnly: allowManualTriggerOnly,
-                scheduledAt: allowManualTriggerOnly ? null : new DateTime(2026, 1, 1)
-            );
+            var scheduledAt = new DateTime(2026, 1, 1);
+            var jobTask = SchedulerHelper.CreateJobTaskStatic(scheduledAt: scheduledAt);
             JobTaskExecution? capturedExecution = null;
 
             _dispatcherMock
@@ -194,26 +141,18 @@ namespace Test.Unit.Services.Scheduler
                 .Callback<JobTaskExecution>(e => capturedExecution = e);
 
             var before = DateTime.UtcNow;
-            await _service.RunAsync(jobTask, triggerType, CancellationToken.None);
+            await _service.RunAsync(jobTask, JobTriggerType.Scheduled, CancellationToken.None);
             var after = DateTime.UtcNow;
 
             Assert.NotNull(capturedExecution?.FinishedAt);
             Assert.InRange(capturedExecution.FinishedAt.Value, before, after);
         }
 
-        [Theory]
-        [InlineData(JobTriggerType.Manual, true)]
-        [InlineData(JobTriggerType.Scheduled, false)]
-        [InlineData(JobTriggerType.Retry, false)]
-        public async Task RunAsync_DispatchThrows_StillSetsFinishedAt(
-            JobTriggerType triggerType,
-            bool allowManualTriggerOnly
-        )
+        [Fact]
+        public async Task RunAsync_DispatchThrows_StillSetsFinishedAt()
         {
-            var jobTask = SchedulerHelper.CreateJobTaskStatic(
-                allowManualTriggerOnly: allowManualTriggerOnly,
-                scheduledAt: allowManualTriggerOnly ? null : new DateTime(2026, 1, 1)
-            );
+            var scheduledAt = new DateTime(2026, 1, 1);
+            var jobTask = SchedulerHelper.CreateJobTaskStatic(scheduledAt: scheduledAt);
             JobTaskExecution? capturedExecution = null;
 
             _dispatcherMock
@@ -227,7 +166,7 @@ namespace Test.Unit.Services.Scheduler
                 .Callback<JobTaskExecution>(e => capturedExecution = e);
 
             var before = DateTime.UtcNow;
-            await _service.RunAsync(jobTask, triggerType, CancellationToken.None);
+            await _service.RunAsync(jobTask, JobTriggerType.Scheduled, CancellationToken.None);
             var after = DateTime.UtcNow;
 
             // FinishedAt must be set even when dispatch fails — it lives in the finally block
@@ -235,19 +174,11 @@ namespace Test.Unit.Services.Scheduler
             Assert.InRange(capturedExecution!.FinishedAt!.Value, before, after);
         }
 
-        [Theory]
-        [InlineData(JobTriggerType.Manual, true)]
-        [InlineData(JobTriggerType.Scheduled, false)]
-        [InlineData(JobTriggerType.Retry, false)]
-        public async Task RunAsync_Always_CallsUpdateAndSaveOnExecutionRepository(
-            JobTriggerType triggerType,
-            bool allowManualTriggerOnly
-        )
+        [Fact]
+        public async Task RunAsync_Always_CallsUpdateAndSaveOnExecutionRepository()
         {
-            var jobTask = SchedulerHelper.CreateJobTaskStatic(
-                allowManualTriggerOnly: allowManualTriggerOnly,
-                scheduledAt: allowManualTriggerOnly ? null : new DateTime(2026, 1, 1)
-            );
+            var scheduledAt = new DateTime(2026, 1, 1);
+            var jobTask = SchedulerHelper.CreateJobTaskStatic(scheduledAt: scheduledAt);
 
             _dispatcherMock
                 .Setup(d => d.DispatchAsync(jobTask, It.IsAny<JobTaskExecution>(), It.IsAny<CancellationToken>()))
@@ -255,7 +186,7 @@ namespace Test.Unit.Services.Scheduler
                     jt.Result = JobExecutionStatus.Failed)
                 .ThrowsAsync(new Exception("Dispatch failed"));
 
-            await _service.RunAsync(jobTask, triggerType, CancellationToken.None);
+            await _service.RunAsync(jobTask, JobTriggerType.Scheduled, CancellationToken.None);
 
             _executionRepoMock.Verify(
                 r => r.Update(It.IsAny<JobTaskExecution>()),
@@ -263,22 +194,14 @@ namespace Test.Unit.Services.Scheduler
 
             _executionRepoMock.Verify(
                 r => r.SaveChangesAsync(It.IsAny<CancellationToken>()),
-                Times.AtLeast(2)); // once after AddAsync, once in finally
+                Times.Exactly(2)); // once after AddAsync, once in finally
         }
 
-        [Theory]
-        [InlineData(JobTriggerType.Manual, true)]
-        [InlineData(JobTriggerType.Scheduled, false)]
-        [InlineData(JobTriggerType.Retry, false)]
-        public async Task RunAsync_DispatchSucceeds_CallsUpdateSchedulerStatus(
-            JobTriggerType triggerType,
-            bool allowManualTriggerOnly
-        )
+        [Fact]
+        public async Task RunAsync_DispatchSucceeds_CallsUpdateSchedulerStatus()
         {
-            var jobTask = SchedulerHelper.CreateJobTaskStatic(
-                allowManualTriggerOnly: allowManualTriggerOnly,
-                scheduledAt: allowManualTriggerOnly ? null : new DateTime(2026, 1, 1)
-            );
+            var scheduledAt = new DateTime(2026, 1, 1);
+            var jobTask = SchedulerHelper.CreateJobTaskStatic(scheduledAt: scheduledAt);
 
             _dispatcherMock
                 .Setup(d => d.DispatchAsync(jobTask, It.IsAny<JobTaskExecution>(), It.IsAny<CancellationToken>()))
@@ -286,26 +209,18 @@ namespace Test.Unit.Services.Scheduler
                     jt.Result = JobExecutionStatus.Succeeded)
                 .Returns(Task.CompletedTask);
 
-            await _service.RunAsync(jobTask, triggerType, CancellationToken.None);
+            await _service.RunAsync(jobTask, JobTriggerType.Scheduled, CancellationToken.None);
 
             _productKpiRepoMock.Verify(
                 r => r.UpdateSchedulerStatus(jobTask.CompanyId, It.IsAny<CancellationToken>()),
                 Times.Once);
         }
 
-        [Theory]
-        [InlineData(JobTriggerType.Manual, true)]
-        [InlineData(JobTriggerType.Scheduled, false)]
-        [InlineData(JobTriggerType.Retry, false)]
-        public async Task RunAsync_DispatchThrows_StillCallsUpdateSchedulerStatus(
-            JobTriggerType triggerType,
-            bool allowManualTriggerOnly
-        )
+        [Fact]
+        public async Task RunAsync_DispatchThrows_StillCallsUpdateSchedulerStatus()
         {
-            var jobTask = SchedulerHelper.CreateJobTaskStatic(
-                allowManualTriggerOnly: allowManualTriggerOnly,
-                scheduledAt: allowManualTriggerOnly ? null : new DateTime(2026, 1, 1)
-            );
+            var scheduledAt = new DateTime(2026, 1, 1);
+            var jobTask = SchedulerHelper.CreateJobTaskStatic(scheduledAt: scheduledAt);
 
             _dispatcherMock
                 .Setup(d => d.DispatchAsync(jobTask, It.IsAny<JobTaskExecution>(), It.IsAny<CancellationToken>()))
@@ -313,12 +228,31 @@ namespace Test.Unit.Services.Scheduler
                     jt.Result = JobExecutionStatus.Failed)
                 .ThrowsAsync(new Exception("Dispatch failed"));
 
-            await _service.RunAsync(jobTask, triggerType, CancellationToken.None);
+            await _service.RunAsync(jobTask, JobTriggerType.Scheduled, CancellationToken.None);
 
             // UpdateSchedulerStatus lives in finally — must always be called
             _productKpiRepoMock.Verify(
                 r => r.UpdateSchedulerStatus(jobTask.CompanyId, It.IsAny<CancellationToken>()),
                 Times.Once);
+        }
+
+        [Fact]
+        public async Task RunAsync_CallsRefetchJobTaskTwice()
+        {
+            var scheduledAt = new DateTime(2026, 1, 1);
+            var jobTask = SchedulerHelper.CreateJobTaskStatic(scheduledAt: scheduledAt);
+
+            _dispatcherMock
+                .Setup(d => d.DispatchAsync(jobTask, It.IsAny<JobTaskExecution>(), It.IsAny<CancellationToken>()))
+                .Callback<JobTask, JobTaskExecution, CancellationToken>((jt, _, _) =>
+                    jt.Result = JobExecutionStatus.Succeeded)
+                .Returns(Task.CompletedTask);
+
+            var result = await _service.RunAsync(jobTask, JobTriggerType.Scheduled, CancellationToken.None);
+
+            _jobTaskRepoMock.Verify(r => r.SaveChangesAsync(CancellationToken.None), Times.Exactly(2));
+            _cacheServiceMock.Verify(r => r.RemoveJobTaskKeysAsync(jobTask, CancellationToken.None), Times.Exactly(2));
+            _notificationServiceMock.Verify(r => r.NotifyJobTaskUpdated(jobTask.CompanyId, jobTask.Id, CancellationToken.None), Times.Exactly(2));
         }
     }
 }
