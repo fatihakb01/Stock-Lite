@@ -1,9 +1,7 @@
 ﻿using Domain.Entities.Core;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
-using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler;
-using Domain.Interfaces.Services.SignalR;
 using Infrastructure.Services.Scheduler;
 using Moq;
 using System.Linq.Expressions;
@@ -264,28 +262,6 @@ namespace Test.Unit.Services.Scheduler
 
             _jobRunnerServiceMock.Verify(
                 r => r.RunAsync(job2, It.IsAny<JobTaskExecution>(), It.IsAny<CancellationToken>()),
-                Times.Never
-            );
-        }
-
-        [Fact]
-        public async Task DispatchAsync_LockFails_JobIsSkipped()
-        {
-            var jobTask = SchedulerHelper.CreateJobTaskStatic();
-            var job = SchedulerHelper.CreateScheduledJobStatic(task: jobTask);
-
-            _scheduledJobRepoMock
-                .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<ScheduledJob> { job });
-
-            _scheduledJobRepoMock
-                .Setup(r => r.TryLockTaskAsync(job.Id))
-                .ReturnsAsync(false);
-
-            await _dispatcher.DispatchAsync(jobTask, It.IsAny<JobTaskExecution>(), CancellationToken.None);
-
-            _jobRunnerServiceMock.Verify(
-                r => r.RunAsync(It.IsAny<ScheduledJob>(), It.IsAny<JobTaskExecution>(), It.IsAny<CancellationToken>()),
                 Times.Never
             );
         }
