@@ -36,12 +36,12 @@ namespace Test.Unit.Services.Scheduler
             var job = SchedulerHelper.CreateScheduledJobStatic(task: jobTask);
 
             _scheduledJobRepoMock
-                .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))
+                .Setup(r => r.FindAsync(
+                    It.IsAny<Expression<Func<ScheduledJob, bool>>>(),
+                    It.IsAny<CancellationToken>(),
+                    It.IsAny<Expression<Func<ScheduledJob, object>>[]?>()
+                ))
                 .ReturnsAsync(new List<ScheduledJob> { job });
-
-            _scheduledJobRepoMock
-                .Setup(r => r.TryLockTaskAsync(job.Id))
-                .ReturnsAsync(true);
 
             _jobRunnerServiceMock
                 .Setup(r => r.RunAsync(job, It.IsAny<JobTaskExecution>(), It.IsAny<CancellationToken>()))
@@ -54,33 +54,29 @@ namespace Test.Unit.Services.Scheduler
         }
 
         [Theory]
-        [InlineData(JobExecutionStatus.Failed, JobExecutionStatus.Pending)]
-        [InlineData(JobExecutionStatus.Succeeded, JobExecutionStatus.Succeeded)]
-        public async Task DispatchAsync_FirstJobResult_SetsJobResult(
-            JobExecutionStatus statusJob1,
-            JobExecutionStatus statusJob2
-        )
+        [InlineData(JobExecutionStatus.Failed)]
+        [InlineData(JobExecutionStatus.Succeeded)]
+        public async Task DispatchAsync_FirstJobResult_SetsJobResult(JobExecutionStatus statusJob)
         {
             var jobTask = SchedulerHelper.CreateJobTaskStatic();
             var job1 = SchedulerHelper.CreateScheduledJobStatic(executionOrder: 0, task: jobTask);
             var job2 = SchedulerHelper.CreateScheduledJobStatic(executionOrder: 1, task: jobTask);
 
             _scheduledJobRepoMock
-                .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))
+                .Setup(r => r.FindAsync(
+                    It.IsAny<Expression<Func<ScheduledJob, bool>>>(), 
+                    It.IsAny<CancellationToken>(),
+                    It.IsAny<Expression<Func<ScheduledJob, object>>[]?>()
+                ))
                 .ReturnsAsync(new List<ScheduledJob> { job1, job2 });
-
-            _scheduledJobRepoMock
-                .Setup(r => r.TryLockTaskAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(true);
 
             _jobRunnerServiceMock
                 .Setup(r => r.RunAsync(job1, It.IsAny<JobTaskExecution>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(statusJob1);
+                .ReturnsAsync(statusJob);
 
             await _dispatcher.DispatchAsync(jobTask, It.IsAny<JobTaskExecution>(), CancellationToken.None);
 
-            Assert.Equal(statusJob1, job1.Result);
-            Assert.Equal(statusJob2, job2.Result);
+            Assert.Equal(statusJob, jobTask.Result);
         }
 
         [Fact]
@@ -90,12 +86,12 @@ namespace Test.Unit.Services.Scheduler
             var job = SchedulerHelper.CreateScheduledJobStatic(task: jobTask);
 
             _scheduledJobRepoMock
-                .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))
+                .Setup(r => r.FindAsync(
+                    It.IsAny<Expression<Func<ScheduledJob, bool>>>(),
+                    It.IsAny<CancellationToken>(),
+                    It.IsAny<Expression<Func<ScheduledJob, object>>[]?>()
+                ))
                 .ReturnsAsync(new List<ScheduledJob> { job });
-
-            _scheduledJobRepoMock
-                .Setup(r => r.TryLockTaskAsync(job.Id))
-                .ReturnsAsync(true);
 
             _jobRunnerServiceMock
                 .Setup(r => r.RunAsync(job, It.IsAny<JobTaskExecution>(), It.IsAny<CancellationToken>()))
@@ -117,12 +113,12 @@ namespace Test.Unit.Services.Scheduler
             var job = SchedulerHelper.CreateScheduledJobStatic(task: jobTask);
 
             _scheduledJobRepoMock
-                .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))
+                .Setup(r => r.FindAsync(
+                    It.IsAny<Expression<Func<ScheduledJob, bool>>>(),
+                    It.IsAny<CancellationToken>(),
+                    It.IsAny<Expression<Func<ScheduledJob, object>>[]?>()
+                ))
                 .ReturnsAsync(new List<ScheduledJob> { job });
-
-            _scheduledJobRepoMock
-                .Setup(r => r.TryLockTaskAsync(job.Id))
-                .ReturnsAsync(true);
 
             _jobRunnerServiceMock
                 .Setup(r => r.RunAsync(job, It.IsAny<JobTaskExecution>(), It.IsAny<CancellationToken>()))
@@ -141,12 +137,12 @@ namespace Test.Unit.Services.Scheduler
             var job = SchedulerHelper.CreateScheduledJobStatic(task: jobTask);
 
             _scheduledJobRepoMock
-                .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))
+                .Setup(r => r.FindAsync(
+                    It.IsAny<Expression<Func<ScheduledJob, bool>>>(),
+                    It.IsAny<CancellationToken>(),
+                    It.IsAny<Expression<Func<ScheduledJob, object>>[]?>()
+                ))
                 .ReturnsAsync(new List<ScheduledJob> { job });
-
-            _scheduledJobRepoMock
-                .Setup(r => r.TryLockTaskAsync(job.Id))
-                .ReturnsAsync(true);
 
             _jobRunnerServiceMock
                 .Setup(r => r.RunAsync(job, It.IsAny<JobTaskExecution>(), It.IsAny<CancellationToken>()))
@@ -166,12 +162,12 @@ namespace Test.Unit.Services.Scheduler
             var job = SchedulerHelper.CreateScheduledJobStatic(task: jobTask);
 
             _scheduledJobRepoMock
-                .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))
+                .Setup(r => r.FindAsync(
+                    It.IsAny<Expression<Func<ScheduledJob, bool>>>(),
+                    It.IsAny<CancellationToken>(),
+                    It.IsAny<Expression<Func<ScheduledJob, object>>[]?>()
+                ))
                 .ReturnsAsync(new List<ScheduledJob> { job });
-
-            _scheduledJobRepoMock
-                .Setup(r => r.TryLockTaskAsync(job.Id))
-                .ReturnsAsync(true);
 
             _jobRunnerServiceMock
                 .Setup(r => r.RunAsync(job, It.IsAny<JobTaskExecution>(), It.IsAny<CancellationToken>()))
@@ -196,12 +192,12 @@ namespace Test.Unit.Services.Scheduler
             var job = SchedulerHelper.CreateScheduledJobStatic(task: jobTask);
 
             _scheduledJobRepoMock
-                .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))
+                .Setup(r => r.FindAsync(
+                    It.IsAny<Expression<Func<ScheduledJob, bool>>>(),
+                    It.IsAny<CancellationToken>(),
+                    It.IsAny<Expression<Func<ScheduledJob, object>>[]?>()
+                ))
                 .ReturnsAsync(new List<ScheduledJob> { job });
-
-            _scheduledJobRepoMock
-                .Setup(r => r.TryLockTaskAsync(job.Id))
-                .ReturnsAsync(true);
 
             _jobRunnerServiceMock
                 .Setup(r => r.RunAsync(job, It.IsAny<JobTaskExecution>(), It.IsAny<CancellationToken>()))
@@ -221,12 +217,12 @@ namespace Test.Unit.Services.Scheduler
             var job = SchedulerHelper.CreateScheduledJobStatic(task: jobTask);
 
             _scheduledJobRepoMock
-                .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))
+                .Setup(r => r.FindAsync(
+                    It.IsAny<Expression<Func<ScheduledJob, bool>>>(),
+                    It.IsAny<CancellationToken>(),
+                    It.IsAny<Expression<Func<ScheduledJob, object>>[]?>()
+                ))
                 .ReturnsAsync(new List<ScheduledJob> { job });
-
-            _scheduledJobRepoMock
-                .Setup(r => r.TryLockTaskAsync(job.Id))
-                .ReturnsAsync(true);
 
             _jobRunnerServiceMock
                 .Setup(r => r.RunAsync(job, It.IsAny<JobTaskExecution>(), It.IsAny<CancellationToken>()))
@@ -247,12 +243,12 @@ namespace Test.Unit.Services.Scheduler
             var job2 = SchedulerHelper.CreateScheduledJobStatic(executionOrder: 1, task: jobTask);
 
             _scheduledJobRepoMock
-                .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))
+                .Setup(r => r.FindAsync(
+                    It.IsAny<Expression<Func<ScheduledJob, bool>>>(),
+                    It.IsAny<CancellationToken>(),
+                    It.IsAny<Expression<Func<ScheduledJob, object>>[]?>()
+                ))
                 .ReturnsAsync(new List<ScheduledJob> { job1, job2 });
-
-            _scheduledJobRepoMock
-                .Setup(r => r.TryLockTaskAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(true);
 
             _jobRunnerServiceMock
                 .Setup(r => r.RunAsync(job1, It.IsAny<JobTaskExecution>(), It.IsAny<CancellationToken>()))
@@ -272,7 +268,11 @@ namespace Test.Unit.Services.Scheduler
             var jobTask = SchedulerHelper.CreateJobTaskStatic();
 
             _scheduledJobRepoMock
-                .Setup(r => r.FindAsync(It.IsAny<Expression<Func<ScheduledJob, bool>>>(), It.IsAny<CancellationToken>()))
+                .Setup(r => r.FindAsync(
+                    It.IsAny<Expression<Func<ScheduledJob, bool>>>(),
+                    It.IsAny<CancellationToken>(),
+                    It.IsAny<Expression<Func<ScheduledJob, object>>[]?>()
+                ))
                 .ReturnsAsync(new List<ScheduledJob>());
 
             await _dispatcher.DispatchAsync(jobTask, It.IsAny<JobTaskExecution>(), CancellationToken.None);
