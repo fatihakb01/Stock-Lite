@@ -152,5 +152,29 @@ namespace Test.Unit.Services.Scheduler
                 r => r.SaveChangesAsync(It.IsAny<CancellationToken>()),
                 Times.AtLeast(2));
         }
+
+        [Fact]
+        public async Task RunAsync_Always_CallsRefetchScheduledJob()
+        {
+            var (_, job, taskExecution) = SchedulerHelper.CreateTaskAndExecutionStatic();
+
+            _dispatcherMock
+                .Setup(d => d.DispatchAsync(job, It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            await _service.RunAsync(job, taskExecution, CancellationToken.None);
+
+            _scheduledJobRepoMock.Verify(
+                r => r.SaveChangesAsync(CancellationToken.None),
+                Times.Exactly(2));
+
+            _cacheServiceMock.Verify(
+                r => r.RemoveScheduledJobKeysAsync(job, CancellationToken.None),
+                Times.Exactly(2));
+
+            _notifierMock.Verify(
+                r => r.NotifyScheduledJobUpdated(job.JobTask.CompanyId, job.Id, CancellationToken.None),
+                Times.Exactly(2));
+        }
     }
 }
