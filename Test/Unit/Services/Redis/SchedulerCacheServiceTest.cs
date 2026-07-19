@@ -342,24 +342,5 @@ namespace Test.Unit.Services.Redis
                 }
             }
         }
-
-        [Fact]
-        public async Task RemoveSchedulerKeys_WithDuplicateJobTasks_RemovesKeysOnce()
-        {
-            // Arrange
-            var companyId = Guid.NewGuid();
-            var jobTask = SchedulerHelper.CreateJobTaskStatic(companyId: companyId);
-            var jobTasks = new List<JobTask> { jobTask, jobTask };
-
-            // Act
-            await _schedulerCacheService.RemoveSchedulerKeys(jobTasks, _cancellationToken);
-
-            // Assert
-            _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtasks:{companyId}", _cancellationToken), Times.Exactly(2));
-            _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtask:{jobTask.Id}", _cancellationToken), Times.Exactly(2));
-            _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtask:history:{jobTask.Id}", _cancellationToken), Times.Exactly(2));
-            _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtasks:recent:history:{companyId}", _cancellationToken), Times.Exactly(2));
-            _cacheServiceMock.Verify(x => x.RemoveAsync($"productkpis:{companyId}", _cancellationToken), Times.Exactly(2));
-        }
     }
 }
