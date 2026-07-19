@@ -49,7 +49,8 @@ namespace Test.Helper
             bool allowManualTriggerOnly = false,
             Period? periodType = Period.Daily,
             DateTime? scheduledAt = null,
-            Guid? companyId = null
+            Guid? companyId = null,
+            List<ScheduledJob>? jobs = null
         ) => new JobTask
         {
             Id = Guid.NewGuid(),
@@ -63,7 +64,8 @@ namespace Test.Helper
             ScheduledAt = scheduledAt,
             NextRunAt = scheduledAt,
             CompanyId = companyId ?? Guid.NewGuid(),
-            Company = null!
+            Company = null!,
+            Jobs = jobs ?? [],
         };
 
         internal static List<JobTask> CreateJobTasksStatic(int total = 5)
@@ -132,7 +134,7 @@ namespace Test.Helper
             return job;
         }
 
-        internal async Task<List<ScheduledJob>> CreateScheduledJobs(JobTask jobTask, JobType jobType = JobType.Import, int total = 5)
+        internal static List<ScheduledJob> CreateScheduledJobsStatic(JobTask jobTask, JobType jobType = JobType.Import, int total = 5)
         {
             List<ScheduledJob> jobs = new List<ScheduledJob>();
 
@@ -143,6 +145,13 @@ namespace Test.Helper
 
                 jobs.Add(job);
             }
+
+            return jobs;
+        }
+
+        internal async Task<List<ScheduledJob>> CreateScheduledJobs(JobTask jobTask, JobType jobType = JobType.Import, int total = 5)
+        {
+            List<ScheduledJob> jobs = CreateScheduledJobsStatic(jobTask, jobType, total);
 
             await _fixture.Context.ScheduledJobs.AddRangeAsync(jobs);
             await _fixture.Context.SaveChangesAsync();
