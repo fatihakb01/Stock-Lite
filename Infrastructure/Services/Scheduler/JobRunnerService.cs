@@ -50,10 +50,10 @@ public class JobRunnerService(
         }
         finally
         {
+            await RefetchScheduledJob(job, result, ct);
             execution.FinishedAt = DateTime.UtcNow;
             executionRepo.Update(execution);
             await executionRepo.SaveChangesAsync(ct);
-            await RefetchScheduledJob(job, result, ct);
         }
     }
 
