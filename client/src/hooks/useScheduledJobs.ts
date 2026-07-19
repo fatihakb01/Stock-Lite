@@ -45,7 +45,8 @@ export const useRunScheduledJob = (id: string | null) => {
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ["jobtasks"]});
             queryClient.invalidateQueries({queryKey: ["jobtask"]});
-            queryClient.invalidateQueries({queryKey: ["scheduledjob"]});
+            queryClient.invalidateQueries({ queryKey: ["scheduledjob"] });
+            queryClient.invalidateQueries({ queryKey: ["productkpi", "schedulerStatus"] });
         }
     })
 }

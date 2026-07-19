@@ -21,18 +21,13 @@ namespace Application.Entities.Derived.ProductKpis.Features.Queries
             public async Task<Result<SchedulerStatusDto>> Handle(Query request, CancellationToken ct)
             {
                 var dto = new SchedulerStatusDto { Status = JobExecutionStatus.Pending };
-                var cacheKey = $"productkpis:{currentUser.CompanyId}";
-                var cached = await cacheService.GetAsync<ProductKpiDto>(cacheKey, ct);
-
+                var cacheKey = $"productkpis-schedulerstatus:{currentUser.CompanyId}";
+                var cached = await cacheService.GetAsync<SchedulerStatusDto>(cacheKey, ct);
                 if (cached != null)
-                {
-                    dto.Status = cached.SchedulerStatus;
-                    return Result<SchedulerStatusDto>.Success(dto);
-                }
+                    return Result<SchedulerStatusDto>.Success(cached);
 
                 var schedulerStatus = await repository.GetSchedulerStatus(currentUser.CompanyId, ct);
                 dto.Status = schedulerStatus;
-
                 await cacheService.SetAsync(cacheKey, dto, TimeSpan.FromMinutes(5), ct);
 
                 return Result<SchedulerStatusDto>.Success(dto);

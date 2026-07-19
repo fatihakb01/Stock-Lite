@@ -40,7 +40,7 @@ namespace Test.Unit.Services.Redis
             _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtask:history:{jobTask1.Id}", _cancellationToken), Times.Once);
             _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtask:history:{jobTask2.Id}", _cancellationToken), Times.Once);
             _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtasks:recent:history:{companyId}", _cancellationToken), Times.Exactly(2));
-            _cacheServiceMock.Verify(x => x.RemoveAsync($"productkpis:{companyId}", _cancellationToken), Times.Exactly(2));
+            _cacheServiceMock.Verify(x => x.RemoveAsync($"productkpis-schedulerstatus:{companyId}", _cancellationToken), Times.Exactly(2));
 
             foreach (var job in jobTask1.Jobs)
             {
@@ -84,7 +84,7 @@ namespace Test.Unit.Services.Redis
             _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtask:{jobTask.Id}", _cancellationToken), Times.Once);
             _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtask:history:{jobTask.Id}", _cancellationToken), Times.Once);
             _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtasks:recent:history:{companyId}", _cancellationToken), Times.Once);
-            _cacheServiceMock.Verify(x => x.RemoveAsync($"productkpis:{companyId}", _cancellationToken), Times.Once);
+            _cacheServiceMock.Verify(x => x.RemoveAsync($"productkpis-schedulerstatus:{companyId}", _cancellationToken), Times.Once);
 
             // Verify no scheduled job keys were removed
             _cacheServiceMock.Verify(x => x.RemoveAsync(It.Is<string>(s => s.StartsWith("scheduledjob:")), _cancellationToken), Times.Never);
@@ -111,7 +111,7 @@ namespace Test.Unit.Services.Redis
             _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtask:{jobTask.Id}", _cancellationToken), Times.Once);
             _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtask:history:{jobTask.Id}", _cancellationToken), Times.Exactly(count));
             _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtasks:recent:history:{jobTask.CompanyId}", _cancellationToken), Times.Exactly(count));
-            _cacheServiceMock.Verify(x => x.RemoveAsync($"productkpis:{jobTask.CompanyId}", _cancellationToken), Times.Once);
+            _cacheServiceMock.Verify(x => x.RemoveAsync($"productkpis-schedulerstatus:{jobTask.CompanyId}", _cancellationToken), Times.Once);
         }
 
         [Fact]
@@ -128,7 +128,7 @@ namespace Test.Unit.Services.Redis
             _cacheServiceMock.Verify(x => x.RemoveAsync($"scheduledjob:{job.Id}", _cancellationToken), Times.Once);
             _cacheServiceMock.Verify(x => x.RemoveAsync($"scheduledjob:history:{job.Id}", _cancellationToken), Times.Once);
             _cacheServiceMock.Verify(x => x.RemoveAsync(It.Is<string>(s => s.StartsWith("jobtask:")), _cancellationToken), Times.Never);
-            _cacheServiceMock.Verify(x => x.RemoveAsync(It.Is<string>(s => s.StartsWith("productkpis:")), _cancellationToken), Times.Never);
+            _cacheServiceMock.Verify(x => x.RemoveAsync(It.Is<string>(s => s.StartsWith("productkpis-schedulerstatus:")), _cancellationToken), Times.Never);
         }
 
         [Fact]
@@ -177,7 +177,7 @@ namespace Test.Unit.Services.Redis
             _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtask:{jobTask.Id}", _cancellationToken), Times.Once);
             _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtask:history:{jobTask.Id}", _cancellationToken), Times.Exactly(count));
             _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtasks:recent:history:{jobTask.CompanyId}", _cancellationToken), Times.Exactly(count));
-            _cacheServiceMock.Verify(x => x.RemoveAsync($"productkpis:{jobTask.CompanyId}", _cancellationToken), Times.Once);
+            _cacheServiceMock.Verify(x => x.RemoveAsync($"productkpis-schedulerstatus:{jobTask.CompanyId}", _cancellationToken), Times.Once);
         }
 
         [Fact]
@@ -204,7 +204,7 @@ namespace Test.Unit.Services.Redis
             await _schedulerCacheService.RemoveJobTaskKeysAsync(jobTask, _cancellationToken, removeHistory: true);
 
             // Assert
-            _cacheServiceMock.Verify(x => x.RemoveAsync($"productkpis:{companyId}", _cancellationToken), Times.Once);
+            _cacheServiceMock.Verify(x => x.RemoveAsync($"productkpis-schedulerstatus:{companyId}", _cancellationToken), Times.Once);
         }
 
         [Fact]
@@ -217,7 +217,7 @@ namespace Test.Unit.Services.Redis
             await _schedulerCacheService.RemoveSchedulerStatusKeyAsync(companyId, _cancellationToken);
 
             // Assert
-            _cacheServiceMock.Verify(x => x.RemoveAsync($"productkpis:{companyId}", _cancellationToken), Times.Once);
+            _cacheServiceMock.Verify(x => x.RemoveAsync($"productkpis-schedulerstatus:{companyId}", _cancellationToken), Times.Once);
         }
 
         [Fact]
@@ -232,8 +232,8 @@ namespace Test.Unit.Services.Redis
             await _schedulerCacheService.RemoveSchedulerStatusKeyAsync(companyId2, _cancellationToken);
 
             // Assert
-            _cacheServiceMock.Verify(x => x.RemoveAsync($"productkpis:{companyId1}", _cancellationToken), Times.Once);
-            _cacheServiceMock.Verify(x => x.RemoveAsync($"productkpis:{companyId2}", _cancellationToken), Times.Once);
+            _cacheServiceMock.Verify(x => x.RemoveAsync($"productkpis-schedulerstatus:{companyId1}", _cancellationToken), Times.Once);
+            _cacheServiceMock.Verify(x => x.RemoveAsync($"productkpis-schedulerstatus:{companyId2}", _cancellationToken), Times.Once);
         }
 
         [Fact]
@@ -325,7 +325,7 @@ namespace Test.Unit.Services.Redis
             _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtask:{jobTask.Id}", _cancellationToken), Times.Once);
             _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtask:history:{jobTask.Id}", _cancellationToken), Times.Once);
             _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtasks:recent:history:{companyId}", _cancellationToken), Times.Once);
-            _cacheServiceMock.Verify(x => x.RemoveAsync($"productkpis:{companyId}", _cancellationToken), Times.Once);
+            _cacheServiceMock.Verify(x => x.RemoveAsync($"productkpis-schedulerstatus:{companyId}", _cancellationToken), Times.Once);
 
             // Verify only the specific scheduled job keys are removed
             foreach (var scheduledJob in jobTask.Jobs)

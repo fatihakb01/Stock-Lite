@@ -61,6 +61,7 @@ export const useRunJobTask = (id: string | null) => {
             queryClient.invalidateQueries({ queryKey: ["jobtask"] });
             queryClient.invalidateQueries({ queryKey: ["jobtasks"] });
             queryClient.invalidateQueries({ queryKey: ["scheduledjob"] });
+            queryClient.invalidateQueries({ queryKey: ["productkpi", "schedulerStatus"] });
         }
     })
 }

@@ -51,7 +51,7 @@ namespace Infrastructure.Services.Redis
 
         public async Task RemoveSchedulerStatusKeyAsync(Guid companyId, CancellationToken ct)
         {
-            await _cacheService.RemoveAsync($"productkpis:{companyId}", ct);
+            await _cacheService.RemoveAsync($"productkpis-schedulerstatus:{companyId}", ct);
         }
 
         public async Task RemoveJobTaskKeyAsync(JobTask? jobTask, CancellationToken ct)
