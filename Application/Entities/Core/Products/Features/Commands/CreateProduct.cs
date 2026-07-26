@@ -2,7 +2,9 @@ using Application.Core;
 using Application.Entities.Core.Products.DTOs;
 using AutoMapper;
 using Domain.Entities.Core;
+using Domain.Enums.Keys;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 
@@ -16,7 +18,8 @@ public class CreateProduct
     }
 
     public class Handler(
-        IProductRepository repository, 
+        IProductRepository repository,
+        IProductCacheService cacheService,
         IMapper mapper,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<ProductListDto>>
@@ -52,6 +55,9 @@ public class CreateProduct
                 return Result<ProductListDto>.Failure("Failed to create product", 400);
 
             var createdProductDto = mapper.Map<ProductListDto>(product);
+
+            var cacheKey = cacheService.GetKey(currentUser.CompanyId, ProductKey.Products);
+            await cacheService.RemoveAsync(cacheKey, ct);
 
             return Result<ProductListDto>.Success(createdProductDto);
         }

@@ -1,7 +1,9 @@
 using Application.Core;
 using Application.Entities.Core.Products.DTOs;
 using AutoMapper;
+using Domain.Enums.Keys;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 
@@ -16,7 +18,8 @@ public class EditProduct
     }
 
     public class Handler(
-        IProductRepository repository, 
+        IProductRepository repository,
+        IProductCacheService cacheService,
         IMapper mapper,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<ProductListDto>>
@@ -61,6 +64,9 @@ public class EditProduct
                 return Result<ProductListDto>.Failure("Failed to update product", 400);
 
             var updatedProductDto = mapper.Map<ProductListDto>(product);
+
+            var cacheKey = cacheService.GetKey(request.Id, ProductKey.Product);
+            await cacheService.RemoveAsync(cacheKey, ct);
 
             return Result<ProductListDto>.Success(updatedProductDto);
         }
