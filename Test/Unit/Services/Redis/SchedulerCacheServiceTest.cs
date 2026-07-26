@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Core;
+using Domain.Enums.Keys;
 using Domain.Interfaces.Services.Redis;
 using Infrastructure.Services.Redis;
 using Moq;
@@ -17,6 +18,139 @@ namespace Test.Unit.Services.Redis
             _cacheServiceMock = new Mock<ICacheService>();
             _schedulerCacheService = new SchedulerCacheService(_cacheServiceMock.Object);
             _cancellationToken = CancellationToken.None;
+        }
+
+        [Fact]
+        public async Task GetAsync_WithValidKey_ReturnsValue()
+        {
+            // Arrange
+            var key = "test-key";
+            var expectedValue = "test-value";
+
+            _cacheServiceMock
+                .Setup(x => x.GetAsync<string>(key, _cancellationToken))
+                .ReturnsAsync(expectedValue);
+
+            // Act
+            var result = await _schedulerCacheService.GetAsync<string>(key, _cancellationToken);
+
+            // Assert
+            Assert.Equal(expectedValue, result);
+            _cacheServiceMock.Verify(x => x.GetAsync<string>(key, _cancellationToken), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetAsync_WithNonExistentKey_ReturnsDefault()
+        {
+            // Arrange
+            var key = "non-existent-key";
+
+            _cacheServiceMock
+                .Setup(x => x.GetAsync<string>(key, _cancellationToken))
+                .ReturnsAsync((string?)null);
+
+            // Act
+            var result = await _schedulerCacheService.GetAsync<string>(key, _cancellationToken);
+
+            // Assert
+            Assert.Null(result);
+            _cacheServiceMock.Verify(x => x.GetAsync<string>(key, _cancellationToken), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetAsync_WithComplexType_ReturnsDeserializedValue()
+        {
+            // Arrange
+            var key = "test-key";
+            var expectedValue = new TestClass { Id = 1, Name = "Test" };
+
+            _cacheServiceMock
+                .Setup(x => x.GetAsync<TestClass>(key, _cancellationToken))
+                .ReturnsAsync(expectedValue);
+
+            // Act
+            var result = await _schedulerCacheService.GetAsync<TestClass>(key, _cancellationToken);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(expectedValue.Id, result.Id);
+            Assert.Equal(expectedValue.Name, result.Name);
+            _cacheServiceMock.Verify(x => x.GetAsync<TestClass>(key, _cancellationToken), Times.Once);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData(30)]
+        public async Task SetAsync_WithValueAndExpiry_StoresValue(int? expiryInMinutes)
+        {
+            // Arrange
+            var key = "test-key";
+            var value = "test-value";
+            TimeSpan? expiry = expiryInMinutes.HasValue ? 
+                TimeSpan.FromMinutes(expiryInMinutes.Value) : 
+                null;
+
+            // Act
+            await _schedulerCacheService.SetAsync(key, value, expiry, _cancellationToken);
+
+            // Assert
+            _cacheServiceMock.Verify(
+                x => x.SetAsync(key, value, expiry, _cancellationToken),
+                Times.Once);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData(30)]
+        public async Task SetAsync_WithComplexType_StoresValue(int? expiryInMinutes)
+        {
+            // Arrange
+            var key = "test-key";
+            var value = new TestClass { Id = 1, Name = "Test" };
+            TimeSpan? expiry = expiryInMinutes.HasValue ? 
+                TimeSpan.FromMinutes(expiryInMinutes.Value) : 
+                null;
+
+            // Act
+            await _schedulerCacheService.SetAsync(key, value, expiry, _cancellationToken);
+
+            // Assert
+            _cacheServiceMock.Verify(
+                x => x.SetAsync(key, value, expiry, _cancellationToken),
+                Times.Once);
+        }
+
+        [Theory]
+        [InlineData(SchedulerKey.JobTask, "jobtask:")]
+        [InlineData(SchedulerKey.JobTasks, "jobtasks:")]
+        [InlineData(SchedulerKey.JobTaskHistory, "jobtask:history:")]
+        [InlineData(SchedulerKey.JobTaskRecentHistory, "jobtasks:recent:history:")]
+        [InlineData(SchedulerKey.ScheduledJob, "scheduledjob:")]
+        [InlineData(SchedulerKey.ScheduledJobHistory, "scheduledjob:history:")]
+        [InlineData(SchedulerKey.SchedulerStatus, "productkpis-schedulerstatus:")]
+        public void GetKey_WithValidSchedulerKey_ReturnsCorrectKeyFormat(SchedulerKey schedulerKey, string expectedPrefix)
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var expectedKey = $"{expectedPrefix}{id}";
+
+            // Act
+            var result = _schedulerCacheService.GetKey(id, schedulerKey);
+
+            // Assert
+            Assert.Equal(expectedKey, result);
+        }
+
+        [Fact]
+        public void GetKey_WithUnsupportedSchedulerKey_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var invalidKey = (SchedulerKey)999;
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() =>
+                _schedulerCacheService.GetKey(id, invalidKey));
         }
 
         [Fact]
@@ -93,7 +227,7 @@ namespace Test.Unit.Services.Redis
         [Theory]
         [InlineData(true, 1)]
         [InlineData(false, 0)]
-        public async Task RemoveScheduledJobKeysAsync_JobAndHistory_RemovesAllKeys(bool removeHistory, int count)
+        public async Task RemoveScheduledJobKeysAsync_JobAndHistory_RemovesAllKeys(bool removeHistory, int historyCallCount)
         {
             // Arrange
             var companyId = Guid.NewGuid();
@@ -106,11 +240,11 @@ namespace Test.Unit.Services.Redis
 
             // Assert
             _cacheServiceMock.Verify(x => x.RemoveAsync($"scheduledjob:{job.Id}", _cancellationToken), Times.Once);
-            _cacheServiceMock.Verify(x => x.RemoveAsync($"scheduledjob:history:{job.Id}", _cancellationToken), Times.Exactly(count));
+            _cacheServiceMock.Verify(x => x.RemoveAsync($"scheduledjob:history:{job.Id}", _cancellationToken), Times.Exactly(historyCallCount));
             _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtasks:{jobTask.CompanyId}", _cancellationToken), Times.Once);
             _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtask:{jobTask.Id}", _cancellationToken), Times.Once);
-            _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtask:history:{jobTask.Id}", _cancellationToken), Times.Exactly(count));
-            _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtasks:recent:history:{jobTask.CompanyId}", _cancellationToken), Times.Exactly(count));
+            _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtask:history:{jobTask.Id}", _cancellationToken), Times.Exactly(historyCallCount));
+            _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtasks:recent:history:{jobTask.CompanyId}", _cancellationToken), Times.Exactly(historyCallCount));
             _cacheServiceMock.Verify(x => x.RemoveAsync($"productkpis-schedulerstatus:{jobTask.CompanyId}", _cancellationToken), Times.Once);
         }
 
@@ -163,7 +297,7 @@ namespace Test.Unit.Services.Redis
         [Theory]
         [InlineData(true, 1)]
         [InlineData(false, 0)]
-        public async Task RemoveJobTaskKeysAsync_JobTaskAndHistory_RemovesAllKeys(bool removeHistory, int count)
+        public async Task RemoveJobTaskKeysAsync_JobTaskAndHistory_RemovesAllKeys(bool removeHistory, int historyCallCount)
         {
             // Arrange
             var companyId = Guid.NewGuid();
@@ -175,8 +309,8 @@ namespace Test.Unit.Services.Redis
             // Assert
             _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtasks:{jobTask.CompanyId}", _cancellationToken), Times.Once);
             _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtask:{jobTask.Id}", _cancellationToken), Times.Once);
-            _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtask:history:{jobTask.Id}", _cancellationToken), Times.Exactly(count));
-            _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtasks:recent:history:{jobTask.CompanyId}", _cancellationToken), Times.Exactly(count));
+            _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtask:history:{jobTask.Id}", _cancellationToken), Times.Exactly(historyCallCount));
+            _cacheServiceMock.Verify(x => x.RemoveAsync($"jobtasks:recent:history:{jobTask.CompanyId}", _cancellationToken), Times.Exactly(historyCallCount));
             _cacheServiceMock.Verify(x => x.RemoveAsync($"productkpis-schedulerstatus:{jobTask.CompanyId}", _cancellationToken), Times.Once);
         }
 

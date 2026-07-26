@@ -1,7 +1,6 @@
 using Application.Core;
-using Application.Entities.Core.JobTasks.DTOs;
 using Application.Entities.Core.ScheduledJobs.DTOs;
-using Domain.Entities.Core;
+using Domain.Enums.Keys;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
@@ -18,14 +17,13 @@ public class GetRecentHistory
 
     public class Handler(
         IJobExecutionRepository repository,
-        ICacheService cacheService,
+        ISchedulerCacheService cacheService,
         ICurrentUserService currentUser
     ) : IRequestHandler<Query, Result<List<JobExecutionDto>>>
     {
         public async Task<Result<List<JobExecutionDto>>> Handle(Query request, CancellationToken ct)
         {
-            var cacheKey = $"jobtasks:recent:history:{currentUser.CompanyId}";
-
+            var cacheKey = cacheService.GetKey(currentUser.CompanyId, SchedulerKey.JobTaskRecentHistory);
             var cached = await cacheService.GetAsync<List<JobExecutionDto>>(cacheKey, ct);
             if (cached != null)
                 return Result<List<JobExecutionDto>>.Success(cached);

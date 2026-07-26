@@ -1,6 +1,7 @@
 using Application.Core;
 using Application.Entities.Core.JobTasks.DTOs;
 using AutoMapper;
+using Domain.Enums.Keys;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
@@ -17,15 +18,14 @@ public class GetJobTask
 
     public class Handler(
         IJobTaskRepository repository,
-        ICacheService cacheService,
+        ISchedulerCacheService cacheService,
         IMapper mapper,
         ICurrentUserService currentUser
     ) : IRequestHandler<Query, Result<JobTaskDetailDto>>
     {
         public async Task<Result<JobTaskDetailDto>> Handle(Query request, CancellationToken ct)
         {
-            var cacheKey = $"jobtask:{request.Id}";
-
+            var cacheKey = cacheService.GetKey(request.Id, SchedulerKey.JobTask);
             var cached = await cacheService.GetAsync<JobTaskDetailDto>(cacheKey, ct);
             if (cached != null)
                 return Result<JobTaskDetailDto>.Success(cached);
