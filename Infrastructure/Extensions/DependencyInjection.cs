@@ -14,6 +14,7 @@ using Infrastructure.Services.Scheduler;
 using Infrastructure.Services.Scheduler.Calculations;
 using Infrastructure.Services.Scheduler.Imports;
 using Infrastructure.Services.Scheduler.Imports.Handlers;
+using Infrastructure.Services.Scheduler.Imports.Helper;
 using Infrastructure.Services.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -134,6 +135,7 @@ public static class DependencyInjection
         services.AddScoped<IImportHandler, PurchaseOrderImportHandler>();
         services.AddScoped<IImportHandler, UserDefinedFieldImportHandler>();
 
+        services.AddScoped<IImportHelper, ImportHelper>();
         services.AddScoped<IImportCoordinator, ImportCoordinator>();
 
         services.AddScoped<IJobDispatcher, JobDispatcher>();

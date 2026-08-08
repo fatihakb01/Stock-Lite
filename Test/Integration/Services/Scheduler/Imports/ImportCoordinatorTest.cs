@@ -1,8 +1,9 @@
-﻿using Domain.Entities.Core;
-using Domain.Enums;
+﻿using Domain.Enums;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler.Imports;
 using Infrastructure.Services.Scheduler.Imports;
 using Infrastructure.Services.Scheduler.Imports.Handlers;
+using Moq;
 using Test.Helper;
 using Test.Integration.Helper;
 
@@ -17,6 +18,8 @@ public class ImportCoordinatorTest(DatabaseFixture fixture)
     private readonly ConfirmedOrderHelper _coHelper = new ConfirmedOrderHelper(fixture);
     private readonly PurchaseOrderHelper _poHelper = new PurchaseOrderHelper(fixture);
     private readonly UserDefinedFieldHelper _udfHelper = new UserDefinedFieldHelper(fixture);
+    private readonly Mock<IProductCacheService> _productCacheService = new Mock<IProductCacheService>();
+    private readonly Mock<IImportHelper> _importHelper = new Mock<IImportHelper>();
     private readonly string Sku = "SKU-0001";
 
     private ImportCoordinator CreateCoordinator(IEnumerable<IImportHandler> handlers)
@@ -52,7 +55,7 @@ public class ImportCoordinatorTest(DatabaseFixture fixture)
     {
         return new IImportHandler[]
         {
-            new ProductImportHandler(Fixture.Context),
+            new ProductImportHandler(_importHelper.Object, _productCacheService.Object),
             new TransactionImportHandler(Fixture.Context),
             new ConfirmedOrderImportHandler(Fixture.Context),
             new PurchaseOrderImportHandler(Fixture.Context),

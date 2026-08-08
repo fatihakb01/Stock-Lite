@@ -20,6 +20,9 @@ public class ProductImportObjects
         BEGIN
             CREATE TABLE dbo.StagingProducts
             (
+                Version INT NOT NULL,
+                ImportTimeStamp DATETIME NOT NULL,
+                ProductId UNIQUEIDENTIFIER NOT NULL,
                 CompanyId UNIQUEIDENTIFIER NOT NULL,
                 SKU NVARCHAR(50) NOT NULL,
                 Name NVARCHAR(200) NOT NULL,
@@ -50,6 +53,40 @@ public class ProductImportObjects
         BEGIN
             SET NOCOUNT ON;
 
+            -- Update ProductIds in staging table
+            UPDATE s
+            SET s.ProductId = p.Id
+            FROM dbo.StagingProducts s
+            JOIN dbo.Products p
+                ON s.CompanyId = p.CompanyId
+                AND s.SKU = p.SKU
+            WHERE p.CompanyId = @CompanyId
+            AND s.Version = 0;
+
+            -- Create staging temp table 
+            SELECT
+                s.Version,
+                s.ImportTimeStamp,
+                s.ProductId,
+                s.CompanyId,
+                s.SKU,
+                s.Name,
+                s.Price,
+                s.Description,
+                s.IsActive,
+                s.CreatedAt,
+                s.LeadTimeDays,
+                s.MinimumOrderQuantity,
+                s.OrderIncrementQuantity,
+                s.SafetyStock,
+                s.StockAdjustment
+            INTO #StagingProducts
+            FROM dbo.StagingProducts s
+            WHERE s.CompanyId = @CompanyId
+            AND s.Version = 0;
+
+            CREATE CLUSTERED INDEX IX_ProductId ON #StagingProducts(ProductId);
+
             -- Insert missing products
             INSERT INTO Products
             (
@@ -63,21 +100,19 @@ public class ProductImportObjects
                 CreatedAt
             )
             SELECT
-                NEWID(),
+                s.ProductId,
                 s.CompanyId,
                 s.SKU,
                 s.Name,
                 s.Price,
-                ISNULL(s.Description, ''),
-                ISNULL(s.IsActive, 1),
-                GETDATE()
-            FROM dbo.StagingProducts s
-            WHERE s.CompanyId = @CompanyId
-            AND NOT EXISTS (
+                s.Description,
+                s.IsActive,
+                s.CreatedAt
+            FROM #StagingProducts s
+            WHERE NOT EXISTS (
                 SELECT 1
                 FROM Products p
-                WHERE p.CompanyId = s.CompanyId
-                    AND p.SKU = s.SKU
+                WHERE p.Id = s.ProductId
             );
 
             -- Update products
@@ -85,14 +120,11 @@ public class ProductImportObjects
             SET
                 p.Name = s.Name,
                 p.Price = s.Price,
-                p.Description = ISNULL(s.Description, ''),
-                p.IsActive = ISNULL(s.IsActive, 1),
-                p.CreatedAt = ISNULL(s.CreatedAt, GETDATE())
+                p.Description = s.Description,
+                p.IsActive = s.IsActive,
+                p.CreatedAt = s.CreatedAt
             FROM Products p
-            JOIN dbo.StagingProducts s
-                ON s.CompanyId = p.CompanyId
-                AND s.SKU = p.SKU
-            WHERE p.CompanyId = @CompanyId;
+            JOIN #StagingProducts s ON s.ProductId = p.Id;
 
             -- Insert missing inventory policies
             INSERT INTO ProductInventoryPolicies
@@ -105,20 +137,18 @@ public class ProductImportObjects
                 StockAdjustment
             )
             SELECT
-                p.Id,
+                s.ProductId,
                 s.LeadTimeDays,
                 ISNULL(s.MinimumOrderQuantity, 1),
                 ISNULL(s.OrderIncrementQuantity, 1),
                 s.SafetyStock,
                 ISNULL(s.StockAdjustment, 0)
-            FROM dbo.StagingProducts s
-            JOIN Products p
-                ON p.CompanyId = s.CompanyId
-                AND p.SKU = s.SKU
-            LEFT JOIN ProductInventoryPolicies ip
-                ON ip.ProductId = p.Id
-            WHERE s.CompanyId = @CompanyId
-            AND ip.ProductId IS NULL;
+            FROM #StagingProducts s
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM dbo.ProductInventoryPolicies ip
+                WHERE ip.ProductId = s.ProductId
+            );
 
             -- Update inventory policies
             UPDATE ip
@@ -129,13 +159,11 @@ public class ProductImportObjects
                 ip.SafetyStock = s.SafetyStock,
                 ip.StockAdjustment = ISNULL(s.StockAdjustment, 0)
             FROM ProductInventoryPolicies ip
-            JOIN Products p ON p.Id = ip.ProductId
-            JOIN dbo.StagingProducts s
-                ON s.CompanyId = p.CompanyId
-                AND s.SKU = p.SKU
-            WHERE p.CompanyId = @CompanyId;
+            JOIN #StagingProducts s ON s.ProductId = ip.ProductId;
 
-            DELETE FROM dbo.StagingProducts WHERE CompanyId = @CompanyId;
+            SELECT ProductId FROM #StagingProducts;
+
+            DROP TABLE #StagingProducts;
         END
         ";
 

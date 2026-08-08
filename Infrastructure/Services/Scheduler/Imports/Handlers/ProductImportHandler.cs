@@ -1,21 +1,34 @@
-using System.Data;
-using System.Globalization;
 using CsvHelper;
 using Domain.Enums;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler.Imports;
-using Infrastructure.Context;
 using Infrastructure.Services.Scheduler.Imports.Records;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+using System.Data;
+using System.Globalization;
 
 namespace Infrastructure.Services.Scheduler.Imports.Handlers;
 
-public class ProductImportHandler(DataContext context) : IImportHandler
+public class ProductImportHandler(
+    IImportHelper importHelper,
+    IProductCacheService cacheService
+) : IImportHandler
 {
-    private readonly DataContext _context = context;
+    private readonly IProductCacheService _cacheService = cacheService;
     public ImportDataType DataType => ImportDataType.Products;
 
     public async Task ImportAsync(Stream file, Guid companyId, CancellationToken ct)
+    {
+        var dataTable = await ParseCsvToDataTableAsync(file, companyId);
+
+        var result = await importHelper.ProcessImportAsync(DataType, companyId, dataTable, ct);
+
+        if (result.HasAffectedIds && result.AffectedIds.Count > 0)
+        {
+            await _cacheService.RemoveProductKeys(result.AffectedIds, companyId, ct);
+        }
+    }
+
+    private static async Task<DataTable> ParseCsvToDataTableAsync(Stream file, Guid companyId)
     {
         using var reader = new StreamReader(file);
         using var csv = new CsvReader(reader, new CsvHelper.Configuration.CsvConfiguration(CultureInfo.InvariantCulture)
@@ -23,7 +36,13 @@ public class ProductImportHandler(DataContext context) : IImportHandler
             Delimiter = ";"
         });
 
-        using var dataTable = new DataTable();
+        var dataTable = new DataTable();
+        var now = DateTime.UtcNow;
+
+        // Define columns
+        dataTable.Columns.Add("Version", typeof(int));
+        dataTable.Columns.Add("ImportTimeStamp", typeof(DateTime));
+        dataTable.Columns.Add("ProductId", typeof(Guid));
         dataTable.Columns.Add("CompanyId", typeof(Guid));
         dataTable.Columns.Add("SKU", typeof(string));
         dataTable.Columns.Add("Name", typeof(string));
@@ -40,13 +59,16 @@ public class ProductImportHandler(DataContext context) : IImportHandler
         foreach (var r in csv.GetRecords<ProductRecord>())
         {
             dataTable.Rows.Add(
+                0,
+                now,
+                Guid.NewGuid(),
                 companyId,
                 r.SKU,
                 r.Name,
                 r.Price,
                 r.Description ?? "",
                 r.IsActive ?? true,
-                DateTime.UtcNow.Date,
+                now.Date,
                 r.LeadTimeDays,
                 r.MinimumOrderQuantity,
                 r.OrderIncrementQuantity,
@@ -55,30 +77,6 @@ public class ProductImportHandler(DataContext context) : IImportHandler
             );
         }
 
-        var connection = (SqlConnection)_context.Database.GetDbConnection();
-        var shouldClose = connection.State != ConnectionState.Open;
-        if (shouldClose)
-            await connection.OpenAsync(ct);
-
-        try
-        {
-            using var bulk = new SqlBulkCopy(connection)
-            {
-                DestinationTableName = "dbo.StagingProducts",
-                BatchSize = 50_000
-            };
-
-            await bulk.WriteToServerAsync(dataTable, ct);
-
-            await _context.Database.ExecuteSqlRawAsync(
-                "EXEC dbo.ProcessProducts @CompanyId",
-                new SqlParameter("@CompanyId", companyId)
-            );
-        }
-        finally
-        {
-            if (shouldClose && connection.State == ConnectionState.Open)
-                await connection.CloseAsync();
-        }
+        return dataTable;
     }
 }
