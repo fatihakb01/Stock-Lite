@@ -74,7 +74,7 @@ namespace Infrastructure.Services.Scheduler.Imports.Helper
             return result;
         }
 
-        private async Task RefreshStagingTableAsync(SqlConnection connection, SqlTransaction transaction, ImportDataType dataType, Guid companyId, CancellationToken ct)
+        private static async Task RefreshStagingTableAsync(SqlConnection connection, SqlTransaction transaction, ImportDataType dataType, Guid companyId, CancellationToken ct)
         {
             using var command = connection.CreateCommand();
             command.Transaction = transaction;

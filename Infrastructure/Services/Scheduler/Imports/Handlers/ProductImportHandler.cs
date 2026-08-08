@@ -1,45 +1,23 @@
-using CsvHelper;
+using Domain.Entities.Helper;
 using Domain.Enums;
 using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler.Imports;
 using Infrastructure.Services.Scheduler.Imports.Records;
 using System.Data;
-using System.Globalization;
 
 namespace Infrastructure.Services.Scheduler.Imports.Handlers;
 
 public class ProductImportHandler(
     IImportHelper importHelper,
     IProductCacheService cacheService
-) : IImportHandler
+) : BaseImportHandler<ProductRecord>(importHelper), IImportHandler
 {
     private readonly IProductCacheService _cacheService = cacheService;
-    public ImportDataType DataType => ImportDataType.Products;
+    public override ImportDataType DataType => ImportDataType.Products;
 
-    public async Task ImportAsync(Stream file, Guid companyId, CancellationToken ct)
+    protected override DataTable CreateDataTable()
     {
-        var dataTable = await ParseCsvToDataTableAsync(file, companyId);
-
-        var result = await importHelper.ProcessImportAsync(DataType, companyId, dataTable, ct);
-
-        if (result.HasAffectedIds && result.AffectedIds.Count > 0)
-        {
-            await _cacheService.RemoveProductKeys(result.AffectedIds, companyId, ct);
-        }
-    }
-
-    private static async Task<DataTable> ParseCsvToDataTableAsync(Stream file, Guid companyId)
-    {
-        using var reader = new StreamReader(file);
-        using var csv = new CsvReader(reader, new CsvHelper.Configuration.CsvConfiguration(CultureInfo.InvariantCulture)
-        {
-            Delimiter = ";"
-        });
-
         var dataTable = new DataTable();
-        var now = DateTime.UtcNow;
-
-        // Define columns
         dataTable.Columns.Add("Version", typeof(int));
         dataTable.Columns.Add("ImportTimeStamp", typeof(DateTime));
         dataTable.Columns.Add("ProductId", typeof(Guid));
@@ -55,28 +33,35 @@ public class ProductImportHandler(
         dataTable.Columns.Add("OrderIncrementQuantity", typeof(int));
         dataTable.Columns.Add("SafetyStock", typeof(int));
         dataTable.Columns.Add("StockAdjustment", typeof(int));
-
-        foreach (var r in csv.GetRecords<ProductRecord>())
-        {
-            dataTable.Rows.Add(
-                0,
-                now,
-                Guid.NewGuid(),
-                companyId,
-                r.SKU,
-                r.Name,
-                r.Price,
-                r.Description ?? "",
-                r.IsActive ?? true,
-                now.Date,
-                r.LeadTimeDays,
-                r.MinimumOrderQuantity,
-                r.OrderIncrementQuantity,
-                r.SafetyStock,
-                r.StockAdjustment
-            );
-        }
-
         return dataTable;
+    }
+
+    protected override void PopulateDataRow(DataTable dataTable, ProductRecord record, Guid companyId, DateTime now)
+    {
+        dataTable.Rows.Add(
+            0,
+            now,
+            Guid.NewGuid(),
+            companyId,
+            record.SKU,
+            record.Name,
+            record.Price,
+            record.Description ?? "",
+            record.IsActive ?? true,
+            now.Date,
+            record.LeadTimeDays,
+            record.MinimumOrderQuantity,
+            record.OrderIncrementQuantity,
+            record.SafetyStock,
+            record.StockAdjustment
+        );
+    }
+
+    protected override async Task OnAfterImportAsync(ImportResult result, Guid companyId, CancellationToken ct)
+    {
+        if (result.HasAffectedIds && result.AffectedIds.Count > 0)
+        {
+            await _cacheService.RemoveProductKeys(result.AffectedIds, companyId, ct);
+        }
     }
 }
