@@ -19,7 +19,7 @@ public class CreateProduct
 
     public class Handler(
         IProductRepository repository,
-        IProductCacheService cacheService,
+        IBaseCacheService<Product> cacheService,
         IMapper mapper,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<ProductListDto>>

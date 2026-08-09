@@ -1,4 +1,5 @@
 using Application.Core;
+using Domain.Entities.Core;
 using Domain.Enums.Keys;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Redis;
@@ -16,7 +17,7 @@ public class DeleteProduct
 
     public class Handler(
         IProductRepository repository,
-        IProductCacheService cacheService,
+        IBaseCacheService<Product> cacheService,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<Unit>>
     {

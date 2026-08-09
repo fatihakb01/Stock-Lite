@@ -1,5 +1,7 @@
+using Domain.Entities.Core;
 using Domain.Entities.Helper;
 using Domain.Enums;
+using Domain.Enums.Keys;
 using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler.Imports;
 using Infrastructure.Services.Scheduler.Imports.Records;
@@ -9,10 +11,10 @@ namespace Infrastructure.Services.Scheduler.Imports.Handlers;
 
 public class ProductImportHandler(
     IImportHelper importHelper,
-    IProductCacheService cacheService
+    IBaseCacheService<Product> cacheService
 ) : BaseImportHandler<ProductRecord>(importHelper), IImportHandler
 {
-    private readonly IProductCacheService _cacheService = cacheService;
+    private readonly IBaseCacheService<Product> _cacheService = cacheService;
     public override ImportDataType DataType => ImportDataType.Products;
 
     protected override DataTable CreateDataTable()
@@ -59,9 +61,15 @@ public class ProductImportHandler(
 
     protected override async Task OnAfterImportAsync(ImportResult result, Guid companyId, CancellationToken ct)
     {
+        // Remove product cache after import
         if (result.HasAffectedIds && result.AffectedIds.Count > 0)
         {
-            await _cacheService.RemoveProductKeys(result.AffectedIds, companyId, ct);
+            await _cacheService.RemoveAsync(_cacheService.GetKey(companyId, ProductKey.Product), ct);
+
+            var tasks = result.AffectedIds.Select(productId => 
+                _cacheService.RemoveAsync(_cacheService.GetKey(productId, ProductKey.Products), ct));
+
+            await Task.WhenAll(tasks);
         }
     }
 }

@@ -1,23 +1,25 @@
-﻿using Domain.Enums.Keys;
-using Domain.Interfaces.Services.Redis;
+﻿using Domain.Interfaces.Services.Redis;
 
 namespace Infrastructure.Services.Redis
 {
-    public abstract class BaseCacheService(ICacheService cacheService) : ICacheService
+    public abstract class BaseCacheService<T>(ICacheService cacheService) 
+        : IBaseCacheService<T> where T : class
     {
         protected readonly ICacheService _cacheService = cacheService;
 
-        public virtual async Task<T?> GetAsync<T>(string key, CancellationToken ct = default)
+        public abstract string GetKey(Guid id, object key);
+
+        public async Task<T1?> GetAsync<T1>(string key, CancellationToken ct = default)
         {
-            return await _cacheService.GetAsync<T>(key, ct);
+            return await _cacheService.GetAsync<T1>(key, ct);
         }
 
-        public virtual async Task SetAsync<T>(string key, T value, TimeSpan? expiry = null, CancellationToken ct = default)
+        public async Task SetAsync<T1>(string key, T1 value, TimeSpan? expiry = null, CancellationToken ct = default)
         {
             await _cacheService.SetAsync(key, value, expiry, ct);
         }
 
-        public virtual async Task RemoveAsync(string key, CancellationToken ct = default)
+        public async Task RemoveAsync(string key, CancellationToken ct = default)
         {
             await _cacheService.RemoveAsync(key, ct);
         }

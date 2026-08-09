@@ -1,6 +1,7 @@
 using Application.Core;
 using Application.Entities.Core.Products.DTOs;
 using AutoMapper;
+using Domain.Entities.Core;
 using Domain.Enums.Keys;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Redis;
@@ -19,7 +20,7 @@ public class EditProduct
 
     public class Handler(
         IProductRepository repository,
-        IProductCacheService cacheService,
+        IBaseCacheService<Product> cacheService,
         IMapper mapper,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<ProductListDto>>

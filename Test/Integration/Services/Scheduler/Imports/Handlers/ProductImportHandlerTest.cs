@@ -1,4 +1,5 @@
-﻿using Domain.Interfaces.Services.Redis;
+﻿using Domain.Entities.Core;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler.Imports;
 using Infrastructure.Services.Scheduler.Imports.Handlers;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +15,7 @@ public class ProductImportHandlerTest(DatabaseFixture fixture)
     private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
     private readonly ProductHelper _productHelper = new ProductHelper(fixture);
     private readonly InventoryPolicyHelper _policyHelper = new InventoryPolicyHelper(fixture);
-    private readonly Mock<IProductCacheService> _cacheService = new Mock<IProductCacheService>();
+    private readonly Mock<IBaseCacheService<Product>> _cacheService = new Mock<IBaseCacheService<Product>>();
     private readonly Mock<IImportHelper> _importHelper = new Mock<IImportHelper>();
 
     private ProductImportHandler CreateRepository()

@@ -1,6 +1,7 @@
 using Application.Core;
 using Application.Entities.Core.Products.DTOs;
 using AutoMapper;
+using Domain.Entities.Core;
 using Domain.Enums;
 using Domain.Enums.Keys;
 using Domain.Interfaces.Repositories;
@@ -19,14 +20,14 @@ public class GetProducts
 
     public class Handler(
         IProductRepository repository,
-        IProductCacheService cacheService,
+        IBaseCacheService<Product> cacheService,
         IMapper mapper,
         ICurrentUserService currentUser
     ) : IRequestHandler<Query, Result<List<ProductListDto>>>
     {
         public async Task<Result<List<ProductListDto>>> Handle(Query request, CancellationToken ct)
         {
-            var cacheKey = cacheService.GetKey(currentUser.CompanyId, ProductKey.Product);
+            var cacheKey = cacheService.GetKey(currentUser.CompanyId, ProductKey.Products);
             var cached = await cacheService.GetAsync<List<ProductListDto>>(cacheKey, ct);
             if (cached != null)
                 return Result<List<ProductListDto>>.Success(cached);
