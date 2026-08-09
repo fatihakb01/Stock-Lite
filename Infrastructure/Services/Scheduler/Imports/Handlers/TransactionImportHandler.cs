@@ -1,29 +1,28 @@
-using System.Data;
-using System.Globalization;
-using CsvHelper;
+using Domain.Entities.Core;
+using Domain.Entities.Helper;
 using Domain.Enums;
+using Domain.Enums.Keys;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler.Imports;
-using Infrastructure.Context;
 using Infrastructure.Services.Scheduler.Imports.Records;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Infrastructure.Services.Scheduler.Imports.Handlers;
 
-public class TransactionImportHandler(DataContext context) : IImportHandler
+public class TransactionImportHandler(
+    IImportHelper importHelper,
+    IBaseCacheService<Transaction> cacheService
+) : BaseImportHandler<TransactionRecord>(importHelper), IImportHandler
 {
-    private readonly DataContext _context = context;
-    public ImportDataType DataType => ImportDataType.Transactions;
+    private readonly IBaseCacheService<Transaction> _cacheService = cacheService;
+    public override ImportDataType DataType => ImportDataType.Transactions;
 
-    public async Task ImportAsync(Stream file, Guid companyId, CancellationToken ct)
+    protected override DataTable CreateDataTable()
     {
-        using var reader = new StreamReader(file);
-        using var csv = new CsvReader(reader, new CsvHelper.Configuration.CsvConfiguration(CultureInfo.InvariantCulture)
-        {
-            Delimiter = ";"
-        });
-
-        using var dataTable = new DataTable();
+        var dataTable = new DataTable();
+        dataTable.Columns.Add("Version", typeof(int));
+        dataTable.Columns.Add("ImportTimeStamp", typeof(DateTime));
+        dataTable.Columns.Add("Id", typeof(Guid));
         dataTable.Columns.Add("CompanyId", typeof(Guid));
         dataTable.Columns.Add("TransactionId", typeof(string));
         dataTable.Columns.Add("SKU", typeof(string));
@@ -31,44 +30,36 @@ public class TransactionImportHandler(DataContext context) : IImportHandler
         dataTable.Columns.Add("PaymentMethod", typeof(string));
         dataTable.Columns.Add("Notes", typeof(string));
         dataTable.Columns.Add("Quantity", typeof(int));
+        return dataTable;
+    }
 
-        foreach (var r in csv.GetRecords<TransactionRecord>())
+    protected override void PopulateDataRow(DataTable dataTable, TransactionRecord record, Guid companyId, DateTime now)
+    {
+        dataTable.Rows.Add(
+            0,
+            now,
+            Guid.NewGuid(),
+            companyId,
+            record.TransactionId,
+            record.SKU,
+            record.TransactionDate.Date,
+            record.PaymentMethod ?? "",
+            record.Notes ?? "",
+            record.Quantity
+        );
+    }
+
+    protected override async Task OnAfterImportAsync(ImportResult result, Guid companyId, CancellationToken ct)
+    {
+        // Remove transaction cache after import
+        if (result.HasAffectedIds && result.AffectedIds.Count > 0)
         {
-            dataTable.Rows.Add(
-                companyId,
-                r.TransactionId,
-                r.SKU,
-                r.TransactionDate.Date,
-                r.PaymentMethod ?? "",
-                r.Notes ?? "",
-                r.Quantity
-            );
-        }
+            await _cacheService.RemoveAsync(_cacheService.GetKey(companyId, TransactionKey.Transactions), ct);
 
-        var connection = (SqlConnection)_context.Database.GetDbConnection();
-        var shouldClose = connection.State != ConnectionState.Open;
-        if (shouldClose)
-            await connection.OpenAsync(ct);
+            var tasks = result.AffectedIds.Select(transactionId =>
+                _cacheService.RemoveAsync(_cacheService.GetKey(transactionId, TransactionKey.Transaction), ct));
 
-        try
-        {
-            using var bulk = new SqlBulkCopy(connection)
-            {
-                DestinationTableName = "dbo.StagingTransactions",
-                BatchSize = 50_000
-            };
-
-            await bulk.WriteToServerAsync(dataTable, ct);
-
-            await _context.Database.ExecuteSqlRawAsync(
-                "EXEC dbo.ProcessTransactions @CompanyId",
-                new SqlParameter("@CompanyId", companyId)
-            );
-        }
-        finally
-        {
-            if (shouldClose && connection.State == ConnectionState.Open)
-                await connection.CloseAsync();
+            await Task.WhenAll(tasks);
         }
     }
 }

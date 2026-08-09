@@ -25,30 +25,41 @@ namespace Infrastructure.Services.Scheduler.Imports.Helper
 
             var mapping = await GetMappingAsync(dataType, ct);
             var connection = (SqlConnection)_context.Database.GetDbConnection();
-            await using var transaction = await _context.Database.BeginTransactionAsync(ct);
+            await using var outerTransaction = await _context.Database.BeginTransactionAsync(ct);
 
             try
             {
                 // Step 0: Get the sql transaction
-                SqlTransaction sqlTransaction = (SqlTransaction)transaction.GetDbTransaction();
+                SqlTransaction outerSqlTransaction = (SqlTransaction)outerTransaction.GetDbTransaction();
 
                 // Step 1: Refresh staging table (versioning)
-                await RefreshStagingTableAsync(connection, sqlTransaction, dataType, companyId, ct);
+                await RefreshStagingTableAsync(connection, outerSqlTransaction, dataType, companyId, ct);
 
                 // Step 2: Bulk insert into staging table
-                await BulkInsertAsync(connection, sqlTransaction, dataTable, mapping.TableName, ct);
+                await BulkInsertAsync(connection, outerSqlTransaction, dataTable, mapping.TableName, ct);
+                await outerTransaction.CommitAsync(ct);
+                await using var innerTransacton = await _context.Database.BeginTransactionAsync(ct);
 
-                // Step 3: Execute stored procedure
-                var result = await ExecuteStoredProcedureAsync(connection, sqlTransaction, mapping.ProcedureName, companyId, ct);
-                result.RowsProcessed = dataTable.Rows.Count;
+                try
+                {
+                    // Step 3: Execute stored procedure
+                    SqlTransaction innerSqlTransaction = (SqlTransaction)innerTransacton.GetDbTransaction();
+                    var result = await ExecuteStoredProcedureAsync(connection, innerSqlTransaction, mapping.ProcedureName, companyId, ct);
+                    result.RowsProcessed = dataTable.Rows.Count;
 
-                await transaction.CommitAsync(ct);
-                return result;
+                    await innerTransacton.CommitAsync(ct);
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    await innerTransacton.RollbackAsync(ct);
+                    throw new Exception($"Inner transaction failed to import {dataType} for company {companyId}", ex);
+                }
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync(ct);
-                throw new Exception($"Failed to import {dataType} for company {companyId}", ex);
+                await outerTransaction.RollbackAsync(ct);
+                throw new Exception($"Outer transaction failed to import {dataType} for company {companyId}", ex);
             }
         }
 
