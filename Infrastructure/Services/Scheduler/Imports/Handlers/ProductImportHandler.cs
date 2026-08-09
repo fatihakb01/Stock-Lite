@@ -64,10 +64,10 @@ public class ProductImportHandler(
         // Remove product cache after import
         if (result.HasAffectedIds && result.AffectedIds.Count > 0)
         {
-            await _cacheService.RemoveAsync(_cacheService.GetKey(companyId, ProductKey.Product), ct);
+            await _cacheService.RemoveAsync(_cacheService.GetKey(companyId, ProductKey.Products), ct);
 
             var tasks = result.AffectedIds.Select(productId => 
-                _cacheService.RemoveAsync(_cacheService.GetKey(productId, ProductKey.Products), ct));
+                _cacheService.RemoveAsync(_cacheService.GetKey(productId, ProductKey.Product), ct));
 
             await Task.WhenAll(tasks);
         }
