@@ -27,6 +27,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-app.MapHub<SchedulerHub>("/hubs/scheduler");
+app.MapHub<CompanyHub>("/hubs/company");
+app.MapHub<ProductHub>("/hubs/product");
 
 app.Run();

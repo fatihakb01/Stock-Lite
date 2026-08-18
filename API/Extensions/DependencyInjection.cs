@@ -51,10 +51,28 @@ public static class DependencyInjection
         // ---------- SIGNALR ----------
         services.AddSignalR();
 
-        services.AddScoped<ISchedulerNotificationService>(provider =>
+        services.AddKeyedScoped<INotificationService>("company", (provider, key) =>
         {
-            var hubContext = provider.GetRequiredService<IHubContext<SchedulerHub>>();
-            return new SchedulerNotificationService(hubContext.Clients);
+            var hubContext = provider.GetRequiredService<IHubContext<CompanyHub>>();
+            return new NotificationService(hubContext.Clients);
+        });
+
+        services.AddKeyedScoped<INotificationService>("product", (provider, key) =>
+        {
+            var hubContext = provider.GetRequiredService<IHubContext<ProductHub>>();
+            return new NotificationService(hubContext.Clients);
+        });
+
+        services.AddScoped<ICompanyNotificationService>(provider =>
+        {
+            var notificationService = provider.GetRequiredKeyedService<INotificationService>("company");
+            return new CompanyNotificationService(notificationService);
+        });
+
+        services.AddScoped<IProductNotificationService>(provider =>
+        {
+            var notificationService = provider.GetRequiredKeyedService<INotificationService>("product");
+            return new ProductNotificationService(notificationService);
         });
 
         // ---------- REDIS CACHING ----------

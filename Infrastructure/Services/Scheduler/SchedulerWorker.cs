@@ -41,7 +41,7 @@ namespace Infrastructure.Services.Scheduler
                 .GetRequiredService<ISchedulerCacheService>();
 
             var notifier = provider
-                .GetRequiredService<ISchedulerNotificationService>();
+                .GetRequiredService<ICompanyNotificationService>();
 
             var companyIds = await companyRepository.GetCompanyIds(ct);
 

@@ -12,7 +12,7 @@ public class JobRunnerService(
     IJobExecutionRepository executionRepo,
     IJobDispatcher dispatcher,
     ISchedulerCacheService cacheService,
-    ISchedulerNotificationService notifier
+    ICompanyNotificationService notifier
     ) : IJobRunnerService
 {
     public async Task<JobExecutionStatus> RunAsync(ScheduledJob job, JobTaskExecution jobTaskExecution, CancellationToken ct)
@@ -62,6 +62,6 @@ public class JobRunnerService(
         job.Result = result;
         await scheduledJobRepo.SaveChangesAsync(ct);
         await cacheService.RemoveScheduledJobKeysAsync(job, ct);
-        await notifier.NotifyScheduledJobUpdated(job.JobTask.CompanyId, job.Id, ct);
+        await notifier.NotifyScheduledJobUpdated(job.JobTask.CompanyId, job, ct);
     }
 }

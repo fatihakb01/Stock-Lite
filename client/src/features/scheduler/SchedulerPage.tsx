@@ -5,13 +5,10 @@ import SchedulerOverviewTab from "./tabs/SchedulerOverviewTab";
 import RecentHistoryTab from "./tabs/RecentHistoryTab";
 import { useSchedulerStatus } from "../../hooks/useProductKpis";
 import SchedulerStatusBadge from "./components/SchedulerStatusBadge";
-import { useSchedulerRealtime } from "../../hooks/useSchedulerRealtime";
 
 export default function SchedulerPage() {
     const [tab, setTab] = useState(0);
     const { data: scheduler } = useSchedulerStatus();
-
-    useSchedulerRealtime();
 
     return (
         <Box sx={{ m: "auto" }}>

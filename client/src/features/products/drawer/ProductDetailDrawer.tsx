@@ -11,6 +11,7 @@ import ProductPfcTab from "./tabs/ProductPfcTab";
 import ProductCoTab from "./tabs/ProductCoTab";
 import DrawerResizeHandle from "./handle/DrawerResizeHandle";
 import ProductUdfTab from "./tabs/ProductUdfTab";
+import { useProductRealtime } from "../../../hooks/useProductRealtime";
 
 interface ProductDetailDrawerProps {
   productId: string | null;
@@ -26,6 +27,8 @@ export default function ProductDetailDrawer({
     isLoading: isLoadingProduct, 
     isError: isErrorProduct 
   } = useProduct(productId);
+
+  useProductRealtime(productId);
 
   const [tab, setTab] = useState(0);
   const [drawerWidthPct, setDrawerWidthPct] = useState(50);

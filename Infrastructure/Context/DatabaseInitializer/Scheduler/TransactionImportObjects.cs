@@ -162,8 +162,8 @@ public class TransactionImportObjects
 				ON li.TransactionId = s.Id
 				AND li.ProductId = s.ProductId;
 	
-			-- Return affected IDs
-			SELECT DISTINCT Id FROM #StagingTransactions;
+			-- Return affected ProductIds
+			SELECT DISTINCT ProductId FROM #StagingTransactions;
 
 			DROP TABLE #StagingTransactions;
 		END

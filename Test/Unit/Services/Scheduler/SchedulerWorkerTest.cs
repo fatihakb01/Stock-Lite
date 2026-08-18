@@ -19,7 +19,7 @@ public class SchedulerWorkerTest
         Mock<IJobTaskRunnerService> runnerService,
         Mock<IProductKpiRepository> productKpiRepo,
         Mock<ISchedulerCacheService> schedulerCacheService,
-        Mock<ISchedulerNotificationService> schedulerNotificationService)
+        Mock<ICompanyNotificationService> schedulerNotificationService)
     {
         var scopedProvider = new Mock<IServiceProvider>();
 
@@ -38,7 +38,7 @@ public class SchedulerWorkerTest
         scopedProvider.Setup(x => x.GetService(typeof(ISchedulerCacheService)))
             .Returns(schedulerCacheService.Object);
 
-        scopedProvider.Setup(x => x.GetService(typeof(ISchedulerNotificationService)))
+        scopedProvider.Setup(x => x.GetService(typeof(ICompanyNotificationService)))
             .Returns(schedulerNotificationService.Object);
 
         var scope = new Mock<IServiceScope>();
@@ -68,7 +68,7 @@ public class SchedulerWorkerTest
         var runner = new Mock<IJobTaskRunnerService>();
         var productKpiRepo = new Mock<IProductKpiRepository>();
         var schedulerCache = new Mock<ISchedulerCacheService>();
-        var schedulerNotification = new Mock<ISchedulerNotificationService>();
+        var schedulerNotification = new Mock<ICompanyNotificationService>();
         var scope = CreateScopeFactory(companyRepo, jobTaskRepo, runner, productKpiRepo, schedulerCache, schedulerNotification);
 
         var cts = new CancellationTokenSource();
@@ -116,7 +116,7 @@ public class SchedulerWorkerTest
         var runner = new Mock<IJobTaskRunnerService>();
         var productKpiRepo = new Mock<IProductKpiRepository>();
         var schedulerCache = new Mock<ISchedulerCacheService>();
-        var schedulerNotification = new Mock<ISchedulerNotificationService>();
+        var schedulerNotification = new Mock<ICompanyNotificationService>();
         var scope = CreateScopeFactory(companyRepo, jobTaskRepo, runner, productKpiRepo, schedulerCache, schedulerNotification);
 
         var cts = new CancellationTokenSource();
@@ -156,7 +156,7 @@ public class SchedulerWorkerTest
         var runner = new Mock<IJobTaskRunnerService>();
         var productKpiRepo = new Mock<IProductKpiRepository>();
         var schedulerCache = new Mock<ISchedulerCacheService>();
-        var schedulerNotification = new Mock<ISchedulerNotificationService>();
+        var schedulerNotification = new Mock<ICompanyNotificationService>();
         var scope = CreateScopeFactory(companyRepo, jobTaskRepo, runner, productKpiRepo, schedulerCache, schedulerNotification);
 
         var cts = new CancellationTokenSource();
@@ -200,7 +200,7 @@ public class SchedulerWorkerTest
             .ReturnsAsync(jobTasks);
 
         var cacheService = new Mock<ISchedulerCacheService>();
-        var schedulerNotification = new Mock<ISchedulerNotificationService>();
+        var schedulerNotification = new Mock<ICompanyNotificationService>();
         var scope = CreateScopeFactory(companyRepo, jobTaskRepo, runner, productKpiRepo, cacheService, schedulerNotification);
 
         var cts = new CancellationTokenSource();

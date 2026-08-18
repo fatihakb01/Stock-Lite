@@ -15,9 +15,7 @@ namespace Test.Unit.Services.Scheduler
         private readonly Mock<IJobTaskRepository> _jobTaskRepoMock;
         private readonly Mock<IJobTaskExecutionRepository> _executionRepoMock;
         private readonly Mock<IJobTaskDispatcher> _dispatcherMock;
-        private readonly Mock<ISchedulerCacheService> _cacheServiceMock;
         private readonly Mock<IProductKpiRepository> _productKpiRepoMock;
-        private readonly Mock<ISchedulerNotificationService> _notificationServiceMock;
         private readonly JobTaskRunnerService _service;
 
         public JobTaskRunnerServiceTest()
@@ -26,16 +24,12 @@ namespace Test.Unit.Services.Scheduler
             _executionRepoMock = new Mock<IJobTaskExecutionRepository>();
             _dispatcherMock = new Mock<IJobTaskDispatcher>();
             _productKpiRepoMock = new Mock<IProductKpiRepository>();
-            _cacheServiceMock = new Mock<ISchedulerCacheService>();
-            _notificationServiceMock = new Mock<ISchedulerNotificationService>();
 
             _service = new JobTaskRunnerService(
                 _jobTaskRepoMock.Object,
                 _executionRepoMock.Object,
                 _dispatcherMock.Object,
-                _productKpiRepoMock.Object,
-                _cacheServiceMock.Object,
-                _notificationServiceMock.Object
+                _productKpiRepoMock.Object
             );
         }
 
@@ -251,8 +245,6 @@ namespace Test.Unit.Services.Scheduler
             var result = await _service.RunAsync(jobTask, JobTriggerType.Scheduled, CancellationToken.None);
 
             _jobTaskRepoMock.Verify(r => r.SaveChangesAsync(CancellationToken.None), Times.Exactly(2));
-            _cacheServiceMock.Verify(r => r.RemoveJobTaskKeysAsync(jobTask, CancellationToken.None), Times.Exactly(2));
-            _notificationServiceMock.Verify(r => r.NotifyJobTaskUpdated(jobTask.CompanyId, jobTask.Id, CancellationToken.None), Times.Exactly(2));
         }
     }
 }

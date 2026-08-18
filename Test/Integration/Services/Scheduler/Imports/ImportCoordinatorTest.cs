@@ -2,6 +2,7 @@
 using Domain.Enums;
 using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler.Imports;
+using Domain.Interfaces.Services.SignalR;
 using Infrastructure.Services.Scheduler.Imports;
 using Infrastructure.Services.Scheduler.Imports.Handlers;
 using Moq;
@@ -20,6 +21,9 @@ public class ImportCoordinatorTest(DatabaseFixture fixture)
     private readonly PurchaseOrderHelper _poHelper = new PurchaseOrderHelper(fixture);
     private readonly UserDefinedFieldHelper _udfHelper = new UserDefinedFieldHelper(fixture);
     private readonly Mock<IBaseCacheService<Product>> _productCacheService = new Mock<IBaseCacheService<Product>>();
+    private readonly Mock<IBaseCacheService<Transaction>> _transactionCacheService = new Mock<IBaseCacheService<Transaction>>();
+    private readonly Mock<ICompanyNotificationService> _companyNotificationService = new Mock<ICompanyNotificationService>();
+    private readonly Mock<IProductNotificationService> _productNotificationService = new Mock<IProductNotificationService>();
     private readonly Mock<IImportHelper> _importHelper = new Mock<IImportHelper>();
     private readonly string Sku = "SKU-0001";
 
@@ -56,8 +60,8 @@ public class ImportCoordinatorTest(DatabaseFixture fixture)
     {
         return new IImportHandler[]
         {
-            new ProductImportHandler(_importHelper.Object, _productCacheService.Object),
-            new TransactionImportHandler(Fixture.Context),
+            new ProductImportHandler(_importHelper.Object, _productCacheService.Object, _companyNotificationService.Object, _productNotificationService.Object),
+            new TransactionImportHandler(_importHelper.Object, _transactionCacheService.Object, _productNotificationService.Object),
             new ConfirmedOrderImportHandler(Fixture.Context),
             new PurchaseOrderImportHandler(Fixture.Context),
             new UserDefinedFieldImportHandler(Fixture.Context)

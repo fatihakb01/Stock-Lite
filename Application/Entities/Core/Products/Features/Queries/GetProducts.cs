@@ -28,6 +28,7 @@ public class GetProducts
         public async Task<Result<List<ProductListDto>>> Handle(Query request, CancellationToken ct)
         {
             var cacheKey = cacheService.GetKey(currentUser.CompanyId, ProductKey.Products);
+            cacheKey = request.Filter != null ? cacheKey + ":" + request.Filter : cacheKey;
             var cached = await cacheService.GetAsync<List<ProductListDto>>(cacheKey, ct);
             if (cached != null)
                 return Result<List<ProductListDto>>.Success(cached);

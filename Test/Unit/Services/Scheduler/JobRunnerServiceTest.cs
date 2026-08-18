@@ -16,7 +16,7 @@ namespace Test.Unit.Services.Scheduler
         private readonly Mock<IJobExecutionRepository> _executionRepoMock;
         private readonly Mock<IJobDispatcher> _dispatcherMock;
         private readonly Mock<ISchedulerCacheService> _cacheServiceMock;
-        private readonly Mock<ISchedulerNotificationService> _notifierMock;
+        private readonly Mock<ICompanyNotificationService> _notifierMock;
         private readonly JobRunnerService _service;
 
         public JobRunnerServiceTest()
@@ -25,7 +25,7 @@ namespace Test.Unit.Services.Scheduler
             _executionRepoMock = new Mock<IJobExecutionRepository>();
             _dispatcherMock = new Mock<IJobDispatcher>();
             _cacheServiceMock = new Mock<ISchedulerCacheService>();
-            _notifierMock = new Mock<ISchedulerNotificationService>();
+            _notifierMock = new Mock<ICompanyNotificationService>();
 
             _service = new JobRunnerService(
                 _scheduledJobRepoMock.Object,
@@ -173,7 +173,7 @@ namespace Test.Unit.Services.Scheduler
                 Times.Exactly(2));
 
             _notifierMock.Verify(
-                r => r.NotifyScheduledJobUpdated(job.JobTask.CompanyId, job.Id, CancellationToken.None),
+                r => r.NotifyScheduledJobUpdated(job.JobTask.CompanyId, job, CancellationToken.None),
                 Times.Exactly(2));
         }
     }

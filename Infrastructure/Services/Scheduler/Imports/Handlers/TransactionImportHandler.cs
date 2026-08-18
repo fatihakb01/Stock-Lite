@@ -4,6 +4,7 @@ using Domain.Enums;
 using Domain.Enums.Keys;
 using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler.Imports;
+using Domain.Interfaces.Services.SignalR;
 using Infrastructure.Services.Scheduler.Imports.Records;
 using System.Data;
 
@@ -11,10 +12,12 @@ namespace Infrastructure.Services.Scheduler.Imports.Handlers;
 
 public class TransactionImportHandler(
     IImportHelper importHelper,
-    IBaseCacheService<Transaction> cacheService
+    IBaseCacheService<Transaction> cacheService,
+    IProductNotificationService notificationService
 ) : BaseImportHandler<TransactionRecord>(importHelper), IImportHandler
 {
     private readonly IBaseCacheService<Transaction> _cacheService = cacheService;
+    private readonly IProductNotificationService _notificationService = notificationService;
     public override ImportDataType DataType => ImportDataType.Transactions;
 
     protected override DataTable CreateDataTable()
@@ -60,6 +63,8 @@ public class TransactionImportHandler(
                 _cacheService.RemoveAsync(_cacheService.GetKey(transactionId, TransactionKey.Transaction), ct));
 
             await Task.WhenAll(tasks);
+
+            await _notificationService.NotifyProductTransactionsUpdated(result.AffectedIds, ct);
         }
     }
 }

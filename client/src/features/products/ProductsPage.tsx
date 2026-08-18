@@ -7,7 +7,7 @@ import ProductDetailDrawer from "./drawer/ProductDetailDrawer";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 function Filter({ filter } : { filter: string }) {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
   return (
     <FormControl sx={{ width: 300 }}>

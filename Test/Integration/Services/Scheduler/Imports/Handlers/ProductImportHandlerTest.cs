@@ -1,6 +1,7 @@
 ﻿using Domain.Entities.Core;
 using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler.Imports;
+using Domain.Interfaces.Services.SignalR;
 using Infrastructure.Services.Scheduler.Imports.Handlers;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -16,10 +17,12 @@ public class ProductImportHandlerTest(DatabaseFixture fixture)
     private readonly ProductHelper _productHelper = new ProductHelper(fixture);
     private readonly InventoryPolicyHelper _policyHelper = new InventoryPolicyHelper(fixture);
     private readonly Mock<IBaseCacheService<Product>> _cacheService = new Mock<IBaseCacheService<Product>>();
+    private readonly Mock<ICompanyNotificationService> _companyNotificationService = new Mock<ICompanyNotificationService>();
+    private readonly Mock<IProductNotificationService> _productNotificationService = new Mock<IProductNotificationService>();
     private readonly Mock<IImportHelper> _importHelper = new Mock<IImportHelper>();
 
     private ProductImportHandler CreateRepository()
-        => new ProductImportHandler(_importHelper.Object, _cacheService.Object);
+        => new ProductImportHandler(_importHelper.Object, _cacheService.Object, _companyNotificationService.Object, _productNotificationService.Object);
 
     // -------------------------------------------------------
     // ImportAsync

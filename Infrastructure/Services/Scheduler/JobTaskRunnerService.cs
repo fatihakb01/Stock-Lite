@@ -11,9 +11,7 @@ public class JobTaskRunnerService(
     IJobTaskRepository jobTaskRepo,
     IJobTaskExecutionRepository executionRepo,
     IJobTaskDispatcher dispatcher,
-    IProductKpiRepository productKpiRepository,
-    ISchedulerCacheService cacheService,
-    ISchedulerNotificationService notifier
+    IProductKpiRepository productKpiRepository
 ) : IJobTaskRunnerService
 {
 
@@ -65,7 +63,5 @@ public class JobTaskRunnerService(
     {
         task.Result = result;
         await jobTaskRepo.SaveChangesAsync(ct);
-        await cacheService.RemoveJobTaskKeysAsync(task, ct);
-        await notifier.NotifyJobTaskUpdated(task.CompanyId, task.Id, ct);
     }
 }

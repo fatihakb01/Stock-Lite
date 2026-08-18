@@ -4,6 +4,7 @@ using Domain.Enums;
 using Domain.Enums.Keys;
 using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler.Imports;
+using Domain.Interfaces.Services.SignalR;
 using Infrastructure.Services.Scheduler.Imports.Records;
 using System.Data;
 
@@ -11,10 +12,14 @@ namespace Infrastructure.Services.Scheduler.Imports.Handlers;
 
 public class ProductImportHandler(
     IImportHelper importHelper,
-    IBaseCacheService<Product> cacheService
+    IBaseCacheService<Product> cacheService,
+    ICompanyNotificationService companyNotificationService,
+    IProductNotificationService productNotificationService
 ) : BaseImportHandler<ProductRecord>(importHelper), IImportHandler
 {
     private readonly IBaseCacheService<Product> _cacheService = cacheService;
+    private readonly ICompanyNotificationService _companyNotificationService = companyNotificationService;
+    private readonly IProductNotificationService _productNotificationService = productNotificationService;
     public override ImportDataType DataType => ImportDataType.Products;
 
     protected override DataTable CreateDataTable()
@@ -66,10 +71,18 @@ public class ProductImportHandler(
         {
             await _cacheService.RemoveAsync(_cacheService.GetKey(companyId, ProductKey.Products), ct);
 
-            var tasks = result.AffectedIds.Select(productId => 
-                _cacheService.RemoveAsync(_cacheService.GetKey(productId, ProductKey.Product), ct));
+            var filters = Enum.GetValues<ProductFilter>();
+            var tasks = filters.Select(async filter =>
+                await _cacheService.RemoveAsync(_cacheService.GetKey(companyId, ProductKey.Products) + ":" + filter, ct));
 
             await Task.WhenAll(tasks);
+            await _companyNotificationService.NotifyProductsUpdated(companyId, ct);
+
+            var jobs = result.AffectedIds.Select(async productId =>
+                await _cacheService.RemoveAsync(_cacheService.GetKey(productId, ProductKey.Product), ct));
+
+            await Task.WhenAll(jobs);
+            await _productNotificationService.NotifyProductsUpdated(result.AffectedIds, ct);
         }
     }
 }

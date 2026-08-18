@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Core;
+using Domain.Interfaces.Services.SignalR;
 using Infrastructure.Services.SignalR;
 using Microsoft.AspNetCore.SignalR;
 using Moq;
@@ -10,20 +11,22 @@ namespace Test.Unit.Services.SignalR
     {
         private readonly Mock<IHubClients> _hubClientsMock;
         private readonly Mock<IClientProxy> _clientProxyMock;
-        private readonly SchedulerNotificationService _notificationService;
+        private readonly Mock<INotificationService> _notificationServiceMock;
+        private readonly CompanyNotificationService _notificationService;
         private readonly CancellationToken _cancellationToken;
 
         public SchedulerNotificationServiceTest()
         {
             _hubClientsMock = new Mock<IHubClients>();
             _clientProxyMock = new Mock<IClientProxy>();
+            _notificationServiceMock = new Mock<INotificationService>();
 
             // Setup the Group method to return the client proxy mock
             _hubClientsMock
                 .Setup(x => x.Group(It.IsAny<string>()))
                 .Returns(_clientProxyMock.Object);
 
-            _notificationService = new SchedulerNotificationService(_hubClientsMock.Object);
+            _notificationService = new CompanyNotificationService(_notificationServiceMock.Object);
             _cancellationToken = CancellationToken.None;
         }
 
@@ -117,11 +120,11 @@ namespace Test.Unit.Services.SignalR
         {
             // Arrange
             var companyId = Guid.NewGuid();
-            var scheduledJobId = Guid.NewGuid();
+            var scheduledJob = SchedulerHelper.CreateScheduledJobStatic();
             var expectedGroup = $"company-{companyId}";
 
             // Act
-            await _notificationService.NotifyScheduledJobUpdated(companyId, scheduledJobId, _cancellationToken);
+            await _notificationService.NotifyScheduledJobUpdated(companyId, scheduledJob, _cancellationToken);
 
             // Assert
             _hubClientsMock.Verify(x => x.Group(expectedGroup), Times.Once);
@@ -129,7 +132,7 @@ namespace Test.Unit.Services.SignalR
             _clientProxyMock.Verify(
                 x => x.SendCoreAsync(
                     "ScheduledJobUpdated",
-                    It.Is<object[]>(o => o.Length == 1 && (Guid)o[0] == scheduledJobId),
+                    It.Is<object[]>(o => o.Length == 1 && (Guid)o[0] == scheduledJob.Id),
                     _cancellationToken),
                 Times.Once);
         }
@@ -140,12 +143,12 @@ namespace Test.Unit.Services.SignalR
             // Arrange
             var companyId1 = Guid.NewGuid();
             var companyId2 = Guid.NewGuid();
-            var scheduledJobId1 = Guid.NewGuid();
-            var scheduledJobId2 = Guid.NewGuid();
+            var scheduledJob1 = SchedulerHelper.CreateScheduledJobStatic();
+            var scheduledJob2 = SchedulerHelper.CreateScheduledJobStatic();
 
             // Act
-            await _notificationService.NotifyScheduledJobUpdated(companyId1, scheduledJobId1, _cancellationToken);
-            await _notificationService.NotifyScheduledJobUpdated(companyId2, scheduledJobId2, _cancellationToken);
+            await _notificationService.NotifyScheduledJobUpdated(companyId1, scheduledJob1, _cancellationToken);
+            await _notificationService.NotifyScheduledJobUpdated(companyId2, scheduledJob2, _cancellationToken);
 
             // Assert
             _hubClientsMock.Verify(x => x.Group($"company-{companyId1}"), Times.Once);
@@ -154,14 +157,14 @@ namespace Test.Unit.Services.SignalR
             _clientProxyMock.Verify(
                 x => x.SendCoreAsync(
                     "ScheduledJobUpdated",
-                    It.Is<object[]>(o => o.Length == 1 && (Guid)o[0] == scheduledJobId1),
+                    It.Is<object[]>(o => o.Length == 1 && (Guid)o[0] == scheduledJob1.Id),
                     _cancellationToken),
                 Times.Once);
 
             _clientProxyMock.Verify(
                 x => x.SendCoreAsync(
                     "ScheduledJobUpdated",
-                    It.Is<object[]>(o => o.Length == 1 && (Guid)o[0] == scheduledJobId2),
+                    It.Is<object[]>(o => o.Length == 1 && (Guid)o[0] == scheduledJob2.Id),
                     _cancellationToken),
                 Times.Once);
         }
@@ -171,12 +174,12 @@ namespace Test.Unit.Services.SignalR
         {
             // Arrange
             var companyId = Guid.NewGuid();
-            var scheduledJobId1 = Guid.NewGuid();
-            var scheduledJobId2 = Guid.NewGuid();
+            var scheduledJob1 = SchedulerHelper.CreateScheduledJobStatic();
+            var scheduledJob2 = SchedulerHelper.CreateScheduledJobStatic();
 
             // Act
-            await _notificationService.NotifyScheduledJobUpdated(companyId, scheduledJobId1, _cancellationToken);
-            await _notificationService.NotifyScheduledJobUpdated(companyId, scheduledJobId2, _cancellationToken);
+            await _notificationService.NotifyScheduledJobUpdated(companyId, scheduledJob1, _cancellationToken);
+            await _notificationService.NotifyScheduledJobUpdated(companyId, scheduledJob2, _cancellationToken);
 
             // Assert
             _hubClientsMock.Verify(x => x.Group($"company-{companyId}"), Times.Exactly(2));
@@ -184,14 +187,14 @@ namespace Test.Unit.Services.SignalR
             _clientProxyMock.Verify(
                 x => x.SendCoreAsync(
                     "ScheduledJobUpdated",
-                    It.Is<object[]>(o => o.Length == 1 && (Guid)o[0] == scheduledJobId1),
+                    It.Is<object[]>(o => o.Length == 1 && (Guid)o[0] == scheduledJob1.Id),
                     _cancellationToken),
                 Times.Once);
 
             _clientProxyMock.Verify(
                 x => x.SendCoreAsync(
                     "ScheduledJobUpdated",
-                    It.Is<object[]>(o => o.Length == 1 && (Guid)o[0] == scheduledJobId2),
+                    It.Is<object[]>(o => o.Length == 1 && (Guid)o[0] == scheduledJob2.Id),
                     _cancellationToken),
                 Times.Once);
         }
@@ -398,7 +401,7 @@ namespace Test.Unit.Services.SignalR
             var clientProxyMock = new Mock<IClientProxy>();
             hubClientsMock.Setup(x => x.Group(It.IsAny<string>())).Returns(clientProxyMock.Object);
 
-            var notificationService = new SchedulerNotificationService(hubClientsMock.Object);
+            var notificationService = new CompanyNotificationService(_notificationServiceMock.Object);
 
             // Act
             await notificationService.NotifySchedulerFinished(jobTasks, _cancellationToken);
