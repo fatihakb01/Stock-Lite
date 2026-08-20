@@ -59,8 +59,8 @@ public class TransactionImportHandler(
         {
             await _cacheService.RemoveAsync(_cacheService.GetKey(companyId, TransactionKey.Transactions), ct);
 
-            var tasks = result.AffectedIds.Select(transactionId =>
-                _cacheService.RemoveAsync(_cacheService.GetKey(transactionId, TransactionKey.Transaction), ct));
+            var tasks = result.AffectedIds.Select(productId =>
+                _cacheService.RemoveAsync(_cacheService.GetKey(productId, TransactionKey.Transaction), ct));
 
             await Task.WhenAll(tasks);
 

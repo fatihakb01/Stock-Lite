@@ -51,18 +51,24 @@ public class TransactionImportObjects
 		BEGIN
 			SET NOCOUNT ON;
 	
-			-- Update Ids and ProductId in staging table
+			-- Update ProductId in staging table
+			UPDATE s
+			SET s.ProductId = p.Id
+			FROM dbo.StagingTransactions s
+			INNER JOIN dbo.Products p
+				ON p.SKU = s.SKU
+				AND p.CompanyId = s.CompanyId
+			WHERE s.CompanyId = @CompanyId
+			AND s.Version = 0;
+
+			-- Update Ids in staging table
 			UPDATE s
 			SET 
-				s.Id = t.Id,
-				s.ProductId = p.Id
+				s.Id = t.Id
 			FROM dbo.StagingTransactions s
 			INNER JOIN dbo.Transactions t
 				ON s.CompanyId = t.CompanyId
 				AND s.TransactionId = t.TransactionId
-			INNER JOIN dbo.Products p
-				ON p.SKU = s.SKU
-				AND p.CompanyId = s.CompanyId
 			WHERE s.CompanyId = @CompanyId
 			AND s.Version = 0;
 	
