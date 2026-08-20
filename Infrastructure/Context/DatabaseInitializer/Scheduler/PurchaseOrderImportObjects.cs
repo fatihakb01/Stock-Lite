@@ -20,6 +20,9 @@ public class PurchaseOrderImportObjects
         BEGIN
             CREATE TABLE dbo.StagingPurchaseOrders
             (
+                Version INT NOT NULL,
+                ImportTimeStamp DATETIME NOT NULL,
+                Id UNIQUEIDENTIFIER NOT NULL,
                 CompanyId UNIQUEIDENTIFIER NOT NULL,
                 OrderNumber NVARCHAR(50) NOT NULL,
                 SKU NVARCHAR(50) NOT NULL,
@@ -27,7 +30,9 @@ public class PurchaseOrderImportObjects
                 ExpectedDeliveryDate DATE NOT NULL,
                 ReceivedDate DATE NULL,
                 Quantity INT NOT NULL,
-                ReceivedQuantity INT NOT NULL
+                ReceivedQuantity INT NOT NULL,
+				UnitCost NUMERIC(18,2) NULL,
+				ProductId UNIQUEIDENTIFIER NULL
             );
         END
         ";
@@ -46,24 +51,41 @@ public class PurchaseOrderImportObjects
         BEGIN
             SET NOCOUNT ON;
 
-            -- Insert missing orders
-            INSERT INTO PurchaseOrder
-            (
-                Id,
-                CompanyId,
-                OrderNumber,
-                OrderDate,
-                ExpectedDeliveryDate,
-                ReceivedDate,
-                Status
-            )
-            SELECT
-                NEWID(),
-                s.CompanyId,
-                s.OrderNumber,
-                MIN(s.OrderDate),
-                MIN(s.ExpectedDeliveryDate),
-                MIN(s.ReceivedDate),
+			-- Update ProductId in staging table
+			UPDATE s
+			SET s.ProductId = p.Id
+			FROM dbo.StagingPurchaseOrders s
+			INNER JOIN dbo.Products p
+				ON p.SKU = s.SKU
+				AND p.CompanyId = s.CompanyId
+			WHERE s.CompanyId = @CompanyId
+			AND s.Version = 0;
+
+			-- Update Id in staging table
+			UPDATE s
+			SET s.Id = po.Id
+			FROM dbo.StagingPurchaseOrders s
+			INNER JOIN dbo.PurchaseOrder po
+				ON s.CompanyId = po.CompanyId
+				AND s.OrderNumber = po.OrderNumber
+			WHERE s.CompanyId = @CompanyId
+			AND s.Version = 0;
+
+			-- Create staging temp table with all necessary data
+			SELECT
+				s.Version,
+				s.ImportTimeStamp,
+				s.Id,
+				s.CompanyId,
+				s.OrderNumber,
+				s.SKU,
+				s.OrderDate,
+                s.ExpectedDeliveryDate,
+                s.ReceivedDate,
+                s.Quantity,
+                s.ReceivedQuantity,
+                s.UnitCost,
+				s.ProductId,
                 CASE 
                     WHEN SUM((s.Quantity - s.ReceivedQuantity) % s.Quantity) = 0
                         THEN 0
@@ -73,15 +95,56 @@ public class PurchaseOrderImportObjects
                         THEN 3
                     ELSE 4
                 END AS Status
-            FROM dbo.StagingPurchaseOrders s
-            WHERE s.CompanyId = @CompanyId
-            AND NOT EXISTS (
-                SELECT 1
-                FROM PurchaseOrder o
-                WHERE o.CompanyId = s.CompanyId
-                    AND o.OrderNumber = s.OrderNumber
+			INTO #StagingPurchaseOrders
+			FROM dbo.StagingPurchaseOrders s
+			WHERE s.CompanyId = @CompanyId
+			AND s.Version = 0
+			AND s.ProductId IS NOT NULL
+            GROUP BY 
+                s.Version,
+                s.ImportTimeStamp,
+                s.Id,
+                s.CompanyId,
+                s.OrderNumber,
+                s.SKU,
+                s.OrderDate,
+                s.ExpectedDeliveryDate,
+                s.ReceivedDate,
+                s.Quantity,
+                s.ReceivedQuantity,
+                s.UnitCost,
+                s.ProductId;
+	        
+			-- Add indexes for performance
+			CREATE CLUSTERED INDEX IX_Id ON #StagingPurchaseOrders(Id);
+			CREATE NONCLUSTERED INDEX IX_ProductId ON #StagingPurchaseOrders(ProductId);
+
+            -- Insert missing orders
+            INSERT INTO dbo.PurchaseOrder
+            (
+				Id,
+                CompanyId,
+                OrderNumber,
+                OrderDate,
+                ExpectedDeliveryDate,
+                ReceivedDate,
+                Status
             )
-            GROUP BY s.CompanyId, s.OrderNumber;
+            SELECT
+                s.Id,
+                s.CompanyId,
+                s.OrderNumber,
+                s.OrderDate,
+                s.ExpectedDeliveryDate,
+                s.ReceivedDate,
+                s.Status
+            FROM #StagingPurchaseOrders s
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM dbo.PurchaseOrder o
+                WHERE o.CompanyId = s.CompanyId
+                AND o.OrderNumber = s.OrderNumber
+            );
 
             -- Update orders
             UPDATE o
@@ -91,30 +154,11 @@ public class PurchaseOrderImportObjects
                 o.ReceivedDate = s.ReceivedDate,
                 o.Status = s.Status
             FROM PurchaseOrder o
-            JOIN (
-                SELECT
-                    CompanyId,
-                    OrderNumber,
-                    MIN(OrderDate) AS OrderDate,
-                    MIN(ExpectedDeliveryDate) AS ExpectedDeliveryDate,
-                    MIN(ReceivedDate) AS ReceivedDate,
-                    CASE 
-                        WHEN SUM((s.Quantity - s.ReceivedQuantity) % s.Quantity) = 0
-                            THEN 0
-                        WHEN SUM(s.Quantity - s.ReceivedQuantity) > 0
-                            THEN 2
-                        WHEN SUM(s.Quantity - s.ReceivedQuantity) = 0
-                            THEN 3
-                        ELSE 4
-                    END AS Status
-                FROM dbo.StagingPurchaseOrders s
-                WHERE CompanyId = @CompanyId
-                GROUP BY CompanyId, OrderNumber
-            ) s ON s.CompanyId = o.CompanyId
-            AND s.OrderNumber = o.OrderNumber;
+            INNER JOIN #StagingPurchaseOrders s 
+				ON s.Id = o.Id;
 
             -- Insert missing line items
-            INSERT INTO PurchaseOrderLineItem
+            INSERT INTO dbo.PurchaseOrderLineItem
             (
                 PurchaseOrderId,
                 ProductId,
@@ -123,40 +167,34 @@ public class PurchaseOrderImportObjects
                 UnitCost
             )
             SELECT
-                o.Id,
-                p.Id,
+                s.Id,
+                s.ProductId,
                 s.Quantity,
                 s.ReceivedQuantity,
-                p.Price
-            FROM dbo.StagingPurchaseOrders s
-            JOIN Products p
-                ON p.SKU = s.SKU
-                AND p.CompanyId = s.CompanyId
-            JOIN PurchaseOrder o
-                ON o.OrderNumber = s.OrderNumber
-                AND o.CompanyId = s.CompanyId
-            LEFT JOIN PurchaseOrderLineItem li
-                ON li.PurchaseOrderId = o.Id
-                AND li.ProductId = p.Id
-            WHERE s.CompanyId = @CompanyId
-            AND li.ProductId IS NULL;
+                s.UnitCost
+			FROM #StagingPurchaseOrders s
+			WHERE NOT EXISTS (
+				SELECT 1
+				FROM dbo.PurchaseOrderLineItem li
+				WHERE li.PurchaseOrderId = s.Id
+				AND li.ProductId = s.ProductId
+			);
 
             -- Update line items
             UPDATE li
             SET
                 li.Quantity = s.Quantity,
                 li.ReceivedQuantity = s.ReceivedQuantity,
-                li.UnitCost = p.Price
-            FROM PurchaseOrderLineItem li
-            JOIN PurchaseOrder o ON o.Id = li.PurchaseOrderId
-            JOIN Products p ON p.Id = li.ProductId
-            JOIN dbo.StagingPurchaseOrders s
-                ON s.OrderNumber = o.OrderNumber
-                AND s.SKU = p.SKU
-                AND s.CompanyId = o.CompanyId
-            WHERE o.CompanyId = @CompanyId;
+                li.UnitCost = s.UnitCost
+			FROM dbo.PurchaseOrderLineItem li
+			INNER JOIN #StagingPurchaseOrders s
+				ON li.PurchaseOrderId = s.Id
+				AND li.ProductId = s.ProductId;
 
-            DELETE FROM dbo.StagingPurchaseOrders WHERE CompanyId = @CompanyId;
+            -- Return affected ProductIds
+			SELECT DISTINCT ProductId FROM #StagingPurchaseOrders;
+
+			DROP TABLE #StagingPurchaseOrders;
         END
         ";
 

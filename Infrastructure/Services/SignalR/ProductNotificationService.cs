@@ -13,5 +13,10 @@ namespace Infrastructure.Services.SignalR
         {
             await notificationService.NotifyProductGroups(productIds, "ProductTransactionsUpdated", ct);
         }
+
+        public async Task NotifyProductPurchaseOrdersUpdated(List<Guid> productIds, CancellationToken ct)
+        {
+            await notificationService.NotifyProductGroups(productIds, "ProductPurchaseOrdersUpdated", ct);
+        }
     }
 }

@@ -2,7 +2,9 @@ using Application.Core;
 using Application.Entities.Core.PurchaseOrders.DTOs;
 using AutoMapper;
 using Domain.Entities.Core;
+using Domain.Enums.Keys;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 
@@ -17,6 +19,7 @@ public class GetPurchaseOrdersByProductId
 
     public class Handler(
         IRepository<PurchaseOrder> repository,
+        IBaseCacheService<PurchaseOrder> cacheService,
         IMapper mapper,
         ICurrentUserService currentUser
     ) : IRequestHandler<Query, Result<List<PurchaseOrderDto>>>
@@ -25,6 +28,11 @@ public class GetPurchaseOrdersByProductId
             Query request,
             CancellationToken ct)
         {
+            var cacheKey = cacheService.GetKey(request.ProductId, PurchaseOrderKey.PurchaseOrder);
+            var cached = await cacheService.GetAsync<List<PurchaseOrderDto>>(cacheKey, ct);
+            if (cached != null)
+                return Result<List<PurchaseOrderDto>>.Success(cached);
+
             var purchaseOrders = await repository.FindAsync(
                 po =>
                     po.CompanyId == currentUser.CompanyId &&

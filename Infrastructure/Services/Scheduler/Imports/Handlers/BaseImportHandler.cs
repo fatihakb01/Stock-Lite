@@ -16,9 +16,6 @@ namespace Infrastructure.Services.Scheduler.Imports.Handlers
         {
             var dataTable = await ParseCsvToDataTableAsync(file, companyId);
 
-            if (dataTable.Rows.Count == 0)
-                return;
-
             var result = await _importHelper.ProcessImportAsync(DataType, companyId, dataTable, ct);
 
             await OnAfterImportAsync(result, companyId, ct);

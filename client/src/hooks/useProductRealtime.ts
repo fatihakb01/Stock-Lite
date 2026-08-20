@@ -24,11 +24,18 @@ export function useProductRealtime(productId?: string | null) {
             }
         });
 
+        connection.on("ProductPurchaseOrdersUpdated", (updatedProductId: string) => {
+            if (productId === updatedProductId) {
+                queryClient.invalidateQueries({ queryKey: ["purchaseorder", updatedProductId] });
+            }
+        });
+
         startProductConnection(connection, productId);
 
         return () => {
             connection.off("ProductUpdated");
             connection.off("ProductTransactionsUpdated");
+            connection.off("ProductPurchaseOrdersUpdated");
             leaveProductGroup(connection, productId);
         };
     }, [queryClient, productId]);
