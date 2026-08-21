@@ -48,6 +48,8 @@ public class GetPurchaseOrdersByProductId
 
             var dto = mapper.Map<List<PurchaseOrderDto>>(purchaseOrders);
 
+            await cacheService.SetAsync(cacheKey, dto, TimeSpan.FromMinutes(5), ct);
+
             return Result<List<PurchaseOrderDto>>.Success(dto);
         }
     }

@@ -46,6 +46,8 @@ public class GetConfirmedOrdersByProductId
 
             var resultDto = mapper.Map<List<ConfirmedOrderDto>>(confirmedOrders);
 
+            await cacheService.SetAsync(cacheKey, resultDto, TimeSpan.FromMinutes(5), ct);
+
             return Result<List<ConfirmedOrderDto>>.Success(resultDto);
         }
     }

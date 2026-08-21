@@ -58,7 +58,7 @@ public class PurchaseOrderImportHandler(
 
     protected override async Task OnAfterImportAsync(ImportResult result, Guid companyId, CancellationToken ct)
     {
-        // Remove transaction cache after import
+        // Remove purchase order cache after import
         if (result.HasAffectedIds && result.AffectedIds.Count > 0)
         {
             await _cacheService.RemoveAsync(_cacheService.GetKey(companyId, PurchaseOrderKey.PurchaseOrders), ct);

@@ -23,30 +23,30 @@ public class ProductController(IMediator mediator) : BaseApiController(mediator)
         return HandleResult(await Mediator.Send(new GetProducts.Query { Filter = filter }));
     }    
     
-    [Authorize(Policy = "AdminOrSuperAdmin")]
-    [HttpPost]
-    public async Task<ActionResult<ProductListDto>> CreateProduct(
-        [FromBody] CreateProductDto productDto)
-    {
-        return HandleResult(await Mediator.Send(new CreateProduct.Command { ProductDto = productDto }));
-    }
+    //[Authorize(Policy = "AdminOrSuperAdmin")]
+    //[HttpPost]
+    //public async Task<ActionResult<ProductListDto>> CreateProduct(
+    //    [FromBody] CreateProductDto productDto)
+    //{
+    //    return HandleResult(await Mediator.Send(new CreateProduct.Command { ProductDto = productDto }));
+    //}
 
-    [Authorize(Policy = "AdminOrSuperAdmin")]
-    [HttpPut("{id}")]
-    public async Task<ActionResult<ProductListDto>> EditProduct(Guid id,
-        [FromBody] EditProductDto productDto)
-    {
-        return HandleResult(await Mediator.Send(new EditProduct.Command
-        {
-            Id = id,
-            ProductDto = productDto
-        }));
-    }
+    //[Authorize(Policy = "AdminOrSuperAdmin")]
+    //[HttpPut("{id}")]
+    //public async Task<ActionResult<ProductListDto>> EditProduct(Guid id,
+    //    [FromBody] EditProductDto productDto)
+    //{
+    //    return HandleResult(await Mediator.Send(new EditProduct.Command
+    //    {
+    //        Id = id,
+    //        ProductDto = productDto
+    //    }));
+    //}
 
-    [Authorize(Policy = "SuperAdminOnly")]
-    [HttpDelete("{id}")]
-    public async Task<ActionResult<Unit>> DeleteProduct(Guid id)
-    {
-        return HandleResult(await Mediator.Send(new DeleteProduct.Command { Id = id }));
-    }
+    //[Authorize(Policy = "SuperAdminOnly")]
+    //[HttpDelete("{id}")]
+    //public async Task<ActionResult<Unit>> DeleteProduct(Guid id)
+    //{
+    //    return HandleResult(await Mediator.Send(new DeleteProduct.Command { Id = id }));
+    //}
 }

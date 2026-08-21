@@ -39,6 +39,8 @@ public class GetPurchaseOrders
 
             var resultDto = mapper.Map<List<PurchaseOrderDto>>(pos);
 
+            await cacheService.SetAsync(cacheKey, resultDto, TimeSpan.FromMinutes(5), ct);
+
             return Result<List<PurchaseOrderDto>>.Success(resultDto);
         }
     }
