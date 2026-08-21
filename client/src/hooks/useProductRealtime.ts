@@ -36,6 +36,12 @@ export function useProductRealtime(productId?: string | null) {
             }
         });
 
+        connection.on("ProductUserDefinedFieldsUpdated", (updatedProductId: string) => {
+            if (productId === updatedProductId) {
+                queryClient.invalidateQueries({ queryKey: ["userdefinedfield", updatedProductId] });
+            }
+        });
+
         startProductConnection(connection, productId);
 
         return () => {
@@ -43,6 +49,7 @@ export function useProductRealtime(productId?: string | null) {
             connection.off("ProductTransactionsUpdated");
             connection.off("ProductPurchaseOrdersUpdated");
             connection.off("ProductConfirmedOrdersUpdated");
+            connection.off("ProductUserDefinedFieldsUpdated");
             leaveProductGroup(connection, productId);
         };
     }, [queryClient, productId]);

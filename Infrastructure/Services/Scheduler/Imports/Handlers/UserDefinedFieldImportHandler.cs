@@ -1,68 +1,60 @@
-using System.Data;
-using System.Globalization;
-using CsvHelper;
+using Domain.Entities.Core;
+using Domain.Entities.Helper;
 using Domain.Enums;
+using Domain.Enums.Keys;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler.Imports;
-using Infrastructure.Context;
+using Domain.Interfaces.Services.SignalR;
 using Infrastructure.Services.Scheduler.Imports.Records;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Infrastructure.Services.Scheduler.Imports.Handlers;
 
-public class UserDefinedFieldImportHandler(DataContext context) : IImportHandler
+public class UserDefinedFieldImportHandler(
+    IImportHelper importHelper,
+    IBaseCacheService<UserDefinedField> cacheService,
+    IProductNotificationService notificationService
+) : BaseImportHandler<UserDefinedFieldRecord>(importHelper), IImportHandler
 {
-    private readonly DataContext _context = context;
-    public ImportDataType DataType => ImportDataType.UserDefinedFields;
+    private readonly IBaseCacheService<UserDefinedField> _cacheService = cacheService;
+    private readonly IProductNotificationService _notificationService = notificationService;
+    public override ImportDataType DataType => ImportDataType.UserDefinedFields;
 
-    public async Task ImportAsync(Stream file, Guid companyId, CancellationToken ct)
+    protected override DataTable CreateDataTable()
     {
-        using var reader = new StreamReader(file);
-        using var csv = new CsvReader(reader, new CsvHelper.Configuration.CsvConfiguration(CultureInfo.InvariantCulture)
-        {
-            Delimiter = ";"
-        });
-
-        using var dataTable = new DataTable();
+        var dataTable = new DataTable();
+        dataTable.Columns.Add("Version", typeof(int));
+        dataTable.Columns.Add("ImportTimeStamp", typeof(DateTime));
         dataTable.Columns.Add("CompanyId", typeof(Guid));
         dataTable.Columns.Add("SKU", typeof(string));
         dataTable.Columns.Add("Key", typeof(string));
         dataTable.Columns.Add("Value", typeof(string));
+        return dataTable;
+    }
 
-        foreach (var r in csv.GetRecords<UserDefinedFieldRecord>())
+    protected override void PopulateDataRow(DataTable dataTable, UserDefinedFieldRecord record, Guid companyId, DateTime now)
+    {
+        dataTable.Rows.Add(
+            0,
+            now,
+            companyId,
+            record.SKU,
+            record.Key,
+            record.Value ?? ""
+        );
+    }
+
+    protected override async Task OnAfterImportAsync(ImportResult result, Guid companyId, CancellationToken ct)
+    {
+        // Remove user defined field cache after import
+        if (result.HasAffectedIds && result.AffectedIds.Count > 0)
         {
-            dataTable.Rows.Add(
-                companyId,
-                r.SKU,
-                r.Key,
-                r.Value ?? ""
-            );
-        }
+            var tasks = result.AffectedIds.Select(productId =>
+                _cacheService.RemoveAsync(_cacheService.GetKey(productId, UserDefinedFieldKey.UserDefinedField), ct));
 
-        var connection = (SqlConnection)_context.Database.GetDbConnection();
-        var shouldClose = connection.State != ConnectionState.Open;
-        if (shouldClose)
-            await connection.OpenAsync(ct);
+            await Task.WhenAll(tasks);
 
-        try
-        {
-            using var bulk = new SqlBulkCopy(connection)
-            {
-                DestinationTableName = "dbo.StagingUserDefinedFields",
-                BatchSize = 50_000
-            };
-
-            await bulk.WriteToServerAsync(dataTable, ct);
-
-            await _context.Database.ExecuteSqlRawAsync(
-                "EXEC dbo.ProcessUserDefinedFields @CompanyId",
-                new SqlParameter("@CompanyId", companyId)
-            );
-        }
-        finally
-        {
-            if (shouldClose && connection.State == ConnectionState.Open)
-                await connection.CloseAsync();
+            await _notificationService.NotifyProductUserDefinedFieldsUpdated(result.AffectedIds, ct);
         }
     }
 }

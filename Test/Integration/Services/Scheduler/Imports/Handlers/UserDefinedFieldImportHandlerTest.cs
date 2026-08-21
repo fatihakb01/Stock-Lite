@@ -1,5 +1,10 @@
-﻿using Infrastructure.Services.Scheduler.Imports.Handlers;
+﻿using Domain.Entities.Core;
+using Domain.Interfaces.Services.Redis;
+using Domain.Interfaces.Services.Scheduler.Imports;
+using Domain.Interfaces.Services.SignalR;
+using Infrastructure.Services.Scheduler.Imports.Handlers;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using Test.Helper;
 using Test.Integration.Helper;
 
@@ -11,9 +16,12 @@ public class UserDefinedFieldImportHandlerTest(DatabaseFixture fixture)
     private readonly CompanyHelper _companyHelper = new(fixture);
     private readonly ProductHelper _productHelper = new(fixture);
     private readonly UserDefinedFieldHelper _udfHelper = new(fixture);
+    private readonly Mock<IImportHelper> _importHelper = new Mock<IImportHelper>();
+    private readonly Mock<IBaseCacheService<UserDefinedField>> _userDefinedFieldCacheService = new Mock<IBaseCacheService<UserDefinedField>>();
+    private readonly Mock<IProductNotificationService> _productNotificationService = new Mock<IProductNotificationService>();
 
     private UserDefinedFieldImportHandler CreateRepository()
-        => new(Fixture.Context);
+        => new(_importHelper.Object, _userDefinedFieldCacheService.Object, _productNotificationService.Object);
 
     // -------------------------------------------------------
     // ImportAsync

@@ -20,10 +20,13 @@ public class UserDefinedFieldImportObjects
         BEGIN
             CREATE TABLE dbo.StagingUserDefinedFields
             (
+                Version INT NOT NULL,
+                ImportTimeStamp DATETIME NOT NULL,
                 CompanyId UNIQUEIDENTIFIER NOT NULL,
                 SKU NVARCHAR(50) NOT NULL,
                 [Key] NVARCHAR(50) NOT NULL,
-                [Value] NVARCHAR(200) NULL
+                [Value] NVARCHAR(200) NULL,
+                ProductId UNIQUEIDENTIFIER NULL
             );
         END
         ";
@@ -42,25 +45,51 @@ public class UserDefinedFieldImportObjects
         BEGIN
             SET NOCOUNT ON;
 
+			-- Update ProductId in staging table
+			UPDATE s
+			SET s.ProductId = p.Id
+			FROM dbo.StagingUserDefinedFields s
+			INNER JOIN dbo.Products p
+				ON p.SKU = s.SKU
+                AND p.CompanyId = s.CompanyId
+			WHERE p.CompanyId = @CompanyId
+            AND s.Version = 0;
+
+			-- Create staging temp table with all necessary data
+			SELECT
+				Version,
+				ImportTimeStamp,
+                ProductId,
+                SKU,
+                [Key],
+                [Value],
+                CompanyId
+			INTO #StagingUserDefinedFields
+			FROM dbo.StagingUserDefinedFields s
+			WHERE s.CompanyId = @CompanyId
+			AND s.Version = 0
+			AND s.ProductId IS NOT NULL;
+
+            CREATE CLUSTERED INDEX IX_Id ON #StagingUserDefinedFields(ProductId, CompanyId, [Key]);
+
             -- Insert new keys for products
             INSERT INTO UserDefinedFields (
-                [ProductId],
+                ProductId,
                 [Key],
                 [Value],
                 CompanyId
             )
             SELECT
-                p.Id,
+                s.ProductId,
                 [Key],
                 [Value],
-                @CompanyId
-            FROM StagingUserDefinedFields s
-            INNER JOIN Products p ON p.SKU = s.SKU
+                s.CompanyId
+            FROM #StagingUserDefinedFields s
             WHERE NOT EXISTS (
                 SELECT 1
                 FROM UserDefinedFields u
-                WHERE u.ProductId = p.Id
-                AND u.CompanyId = @CompanyId
+                WHERE u.ProductId = s.ProductId
+                AND u.CompanyId = s.CompanyId
                 AND u.[Key] = s.[Key]
             );
 
@@ -68,16 +97,16 @@ public class UserDefinedFieldImportObjects
             UPDATE u
             SET u.[Key] = s.[Key],
                 u.[Value] = s.[Value]
-            FROM StagingUserDefinedFields s
-            INNER JOIN Products p 
-                ON p.SKU = s.SKU
+            FROM #StagingUserDefinedFields s
             INNER JOIN UserDefinedFields u 
-                ON u.ProductId = p.Id
-                AND u.CompanyId = @CompanyId
+                ON u.ProductId = s.ProductId
+                AND u.CompanyId = s.CompanyId
                 AND u.[Key] = s.[Key];
 
-            -- Reset staging table
-            DELETE FROM dbo.StagingUserDefinedFields WHERE CompanyId = @CompanyId;
+            -- Return affected ProductIds
+			SELECT DISTINCT ProductId FROM #StagingUserDefinedFields;
+
+			DROP TABLE #StagingUserDefinedFields;
         END
         ";
 

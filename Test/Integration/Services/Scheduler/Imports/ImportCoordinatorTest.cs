@@ -24,6 +24,7 @@ public class ImportCoordinatorTest(DatabaseFixture fixture)
     private readonly Mock<IBaseCacheService<Transaction>> _transactionCacheService = new Mock<IBaseCacheService<Transaction>>();
     private readonly Mock<IBaseCacheService<PurchaseOrder>> _purchaseOrderCacheService = new Mock<IBaseCacheService<PurchaseOrder>>();
     private readonly Mock<IBaseCacheService<ConfirmedOrder>> _confirmedOrderCacheService = new Mock<IBaseCacheService<ConfirmedOrder>>();
+    private readonly Mock<IBaseCacheService<UserDefinedField>> _userDefinedFieldCacheService = new Mock<IBaseCacheService<UserDefinedField>>();
     private readonly Mock<ICompanyNotificationService> _companyNotificationService = new Mock<ICompanyNotificationService>();
     private readonly Mock<IProductNotificationService> _productNotificationService = new Mock<IProductNotificationService>();
     private readonly Mock<IImportHelper> _importHelper = new Mock<IImportHelper>();
@@ -66,7 +67,7 @@ public class ImportCoordinatorTest(DatabaseFixture fixture)
             new TransactionImportHandler(_importHelper.Object, _transactionCacheService.Object, _productNotificationService.Object),
             new ConfirmedOrderImportHandler(_importHelper.Object, _confirmedOrderCacheService.Object, _productNotificationService.Object),
             new PurchaseOrderImportHandler(_importHelper.Object, _purchaseOrderCacheService.Object, _productNotificationService.Object),
-            new UserDefinedFieldImportHandler(Fixture.Context)
+            new UserDefinedFieldImportHandler(_importHelper.Object, _userDefinedFieldCacheService.Object, _productNotificationService.Object)
         };
     }
 
