@@ -82,7 +82,7 @@ public class ProductImportHandler(
                 await _cacheService.RemoveAsync(_cacheService.GetKey(productId, ProductKey.Product), ct));
 
             await Task.WhenAll(jobs);
-            await _productNotificationService.NotifyProductsUpdated(result.AffectedIds, ct);
+            await _productNotificationService.NotifyProductUpdated(result.AffectedIds, ct);
         }
     }
 }

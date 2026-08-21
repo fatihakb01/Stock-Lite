@@ -16,7 +16,7 @@ public class GetPurchaseOrders
 
     public class Handler(
         IRepository<PurchaseOrder> repository,
-        IBaseCacheService<Transaction> cacheService,
+        IBaseCacheService<PurchaseOrder> cacheService,
         IMapper mapper,
         ICurrentUserService currentUser
     ) : IRequestHandler<Query, Result<List<PurchaseOrderDto>>>

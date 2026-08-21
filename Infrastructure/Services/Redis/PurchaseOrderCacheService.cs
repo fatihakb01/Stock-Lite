@@ -5,7 +5,7 @@ using Domain.Interfaces.Services.Redis;
 namespace Infrastructure.Services.Redis
 {
     public class PurchaseOrderCacheService(ICacheService cacheService)
-        : BaseCacheService<Product>(cacheService), IBaseCacheService<PurchaseOrder>
+        : BaseCacheService<PurchaseOrder>(cacheService), IBaseCacheService<PurchaseOrder>
     {
         public override string GetKey(Guid id, object key)
         {

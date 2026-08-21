@@ -87,33 +87,19 @@ public class PurchaseOrderImportObjects
                 s.UnitCost,
 				s.ProductId,
                 CASE 
-                    WHEN SUM((s.Quantity - s.ReceivedQuantity) % s.Quantity) = 0
+                    WHEN SUM(s.ReceivedQuantity) OVER(PARTITION BY s.Id) = 0
                         THEN 0
-                    WHEN SUM(s.Quantity - s.ReceivedQuantity) > 0
-                        THEN 2
-                    WHEN SUM(s.Quantity - s.ReceivedQuantity) = 0
+                    WHEN SUM(s.Quantity - s.ReceivedQuantity) OVER(PARTITION BY s.Id) <= 0
                         THEN 3
+                    WHEN SUM(s.Quantity - s.ReceivedQuantity) OVER(PARTITION BY s.Id) > 0
+                        THEN 2
                     ELSE 4
                 END AS Status
 			INTO #StagingPurchaseOrders
 			FROM dbo.StagingPurchaseOrders s
 			WHERE s.CompanyId = @CompanyId
 			AND s.Version = 0
-			AND s.ProductId IS NOT NULL
-            GROUP BY 
-                s.Version,
-                s.ImportTimeStamp,
-                s.Id,
-                s.CompanyId,
-                s.OrderNumber,
-                s.SKU,
-                s.OrderDate,
-                s.ExpectedDeliveryDate,
-                s.ReceivedDate,
-                s.Quantity,
-                s.ReceivedQuantity,
-                s.UnitCost,
-                s.ProductId;
+			AND s.ProductId IS NOT NULL;
 	        
 			-- Add indexes for performance
 			CREATE CLUSTERED INDEX IX_Id ON #StagingPurchaseOrders(Id);
@@ -142,20 +128,17 @@ public class PurchaseOrderImportObjects
             WHERE NOT EXISTS (
                 SELECT 1
                 FROM dbo.PurchaseOrder o
-                WHERE o.CompanyId = s.CompanyId
-                AND o.OrderNumber = s.OrderNumber
+                WHERE o.Id = s.Id
             );
 
             -- Update orders
             UPDATE o
-            SET
-                o.OrderDate = s.OrderDate,
+            SET o.OrderDate = s.OrderDate,
                 o.ExpectedDeliveryDate = s.ExpectedDeliveryDate,
                 o.ReceivedDate = s.ReceivedDate,
                 o.Status = s.Status
             FROM PurchaseOrder o
-            INNER JOIN #StagingPurchaseOrders s 
-				ON s.Id = o.Id;
+            INNER JOIN #StagingPurchaseOrders s ON s.Id = o.Id;
 
             -- Insert missing line items
             INSERT INTO dbo.PurchaseOrderLineItem
@@ -182,8 +165,7 @@ public class PurchaseOrderImportObjects
 
             -- Update line items
             UPDATE li
-            SET
-                li.Quantity = s.Quantity,
+            SET li.Quantity = s.Quantity,
                 li.ReceivedQuantity = s.ReceivedQuantity,
                 li.UnitCost = s.UnitCost
 			FROM dbo.PurchaseOrderLineItem li
