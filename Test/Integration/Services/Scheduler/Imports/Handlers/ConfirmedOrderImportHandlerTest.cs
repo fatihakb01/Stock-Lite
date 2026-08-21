@@ -1,5 +1,10 @@
-﻿using Infrastructure.Services.Scheduler.Imports.Handlers;
+﻿using Domain.Entities.Core;
+using Domain.Interfaces.Services.Redis;
+using Domain.Interfaces.Services.Scheduler.Imports;
+using Domain.Interfaces.Services.SignalR;
+using Infrastructure.Services.Scheduler.Imports.Handlers;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using Test.Helper;
 using Test.Integration.Helper;
 
@@ -11,9 +16,12 @@ public class ConfirmedOrderImportHandlerTest(DatabaseFixture fixture)
     private readonly CompanyHelper _companyHelper = new CompanyHelper(fixture);
     private readonly ProductHelper _productHelper = new ProductHelper(fixture);
     private readonly ConfirmedOrderHelper _coHelper = new ConfirmedOrderHelper(fixture);
+    private readonly Mock<IImportHelper> _importHelper = new Mock<IImportHelper>();
+    private readonly Mock<IProductNotificationService> _productNotificationService = new Mock<IProductNotificationService>();
+    private readonly Mock<IBaseCacheService<ConfirmedOrder>> _confirmedOrderCacheService = new Mock<IBaseCacheService<ConfirmedOrder>>();
 
     private ConfirmedOrderImportHandler CreateRepository()
-        => new(Fixture.Context);
+        => new(_importHelper.Object, _confirmedOrderCacheService.Object, _productNotificationService.Object);
 
     // -------------------------------------------------------
     // ImportAsync

@@ -30,12 +30,19 @@ export function useProductRealtime(productId?: string | null) {
             }
         });
 
+        connection.on("ProductConfirmedOrdersUpdated", (updatedProductId: string) => {
+            if (productId === updatedProductId) {
+                queryClient.invalidateQueries({ queryKey: ["confirmedorder", updatedProductId] });
+            }
+        });
+
         startProductConnection(connection, productId);
 
         return () => {
             connection.off("ProductUpdated");
             connection.off("ProductTransactionsUpdated");
             connection.off("ProductPurchaseOrdersUpdated");
+            connection.off("ProductConfirmedOrdersUpdated");
             leaveProductGroup(connection, productId);
         };
     }, [queryClient, productId]);

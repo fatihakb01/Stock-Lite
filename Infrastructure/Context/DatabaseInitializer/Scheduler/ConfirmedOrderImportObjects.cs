@@ -20,6 +20,9 @@ internal static class ConfirmedOrderImportObjects
         BEGIN
             CREATE TABLE dbo.StagingConfirmedOrders
             (
+                Version INT NOT NULL,
+                ImportTimeStamp DATETIME NOT NULL,
+                Id UNIQUEIDENTIFIER NOT NULL,
                 CompanyId UNIQUEIDENTIFIER NOT NULL,
                 OrderNumber NVARCHAR(50) NOT NULL,
                 SKU NVARCHAR(50) NOT NULL,
@@ -27,7 +30,9 @@ internal static class ConfirmedOrderImportObjects
                 ExpectedDeliveryDate DATE NULL,
                 ReceivedDate DATE NULL,
                 Quantity INT NOT NULL,
-                SoldQuantity INT NOT NULL
+                SoldQuantity INT NOT NULL,
+                UnitCost NUMERIC(18,2) NULL,
+                ProductId UNIQUEIDENTIFIER NULL
             );
         END
         ";
@@ -46,6 +51,60 @@ internal static class ConfirmedOrderImportObjects
         BEGIN
             SET NOCOUNT ON;
 
+			-- Update ProductId in staging table
+			UPDATE s
+			SET s.ProductId = p.Id
+			FROM dbo.StagingConfirmedOrders s
+			INNER JOIN dbo.Products p
+				ON p.SKU = s.SKU
+				AND p.CompanyId = s.CompanyId
+			WHERE s.CompanyId = @CompanyId
+			AND s.Version = 0;
+
+			-- Update Id in staging table
+			UPDATE s
+			SET s.Id = co.Id
+			FROM dbo.StagingConfirmedOrders s
+			INNER JOIN dbo.ConfirmedOrder co
+				ON s.CompanyId = co.CompanyId
+				AND s.OrderNumber = co.OrderNumber
+			WHERE s.CompanyId = @CompanyId
+			AND s.Version = 0;
+
+			-- Create staging temp table with all necessary data
+			SELECT
+				s.Version,
+				s.ImportTimeStamp,
+				s.Id,
+				s.CompanyId,
+				s.OrderNumber,
+				s.SKU,
+				s.OrderDate,
+                s.ExpectedDeliveryDate,
+                s.ReceivedDate,
+                s.Quantity,
+                s.SoldQuantity,
+                s.UnitCost,
+				s.ProductId,
+                CASE 
+                    WHEN SUM(s.SoldQuantity) OVER(PARTITION BY s.Id) = 0
+                        THEN 0
+                    WHEN SUM(s.Quantity - s.SoldQuantity) OVER(PARTITION BY s.Id) <= 0
+                        THEN 3
+                    WHEN SUM(s.Quantity - s.SoldQuantity) OVER(PARTITION BY s.Id) > 0
+                        THEN 2
+                    ELSE 4
+                END AS Status
+			INTO #StagingConfirmedOrders
+			FROM dbo.StagingConfirmedOrders s
+			WHERE s.CompanyId = @CompanyId
+			AND s.Version = 0
+			AND s.ProductId IS NOT NULL;
+	        
+			-- Add indexes for performance
+			CREATE CLUSTERED INDEX IX_Id ON #StagingConfirmedOrders(Id);
+			CREATE NONCLUSTERED INDEX IX_ProductId ON #StagingConfirmedOrders(ProductId);
+
             -- Insert missing orders
             INSERT INTO ConfirmedOrder (
                 Id, 
@@ -57,59 +116,28 @@ internal static class ConfirmedOrderImportObjects
                 Status
             )
             SELECT
-                NEWID(),
+                s.Id,
                 s.CompanyId,
                 s.OrderNumber,
-                MIN(s.OrderDate),
-                MIN(s.ExpectedDeliveryDate),
-                MIN(s.ReceivedDate),
-                CASE 
-                    WHEN SUM((s.Quantity - s.SoldQuantity) % s.Quantity) = 0
-                        THEN 0
-                    WHEN SUM(s.Quantity - s.SoldQuantity) > 0
-                        THEN 1   
-                    WHEN SUM(s.Quantity - s.SoldQuantity) = 0
-                        THEN 2
-                    ELSE 3
-                END
-            FROM dbo.StagingConfirmedOrders s
-            WHERE s.CompanyId = @CompanyId
-              AND NOT EXISTS (
-                  SELECT 1
-                  FROM ConfirmedOrder o
-                  WHERE o.CompanyId = s.CompanyId
-                    AND o.OrderNumber = s.OrderNumber
-              )
-            GROUP BY s.CompanyId, s.OrderNumber;
+                s.OrderDate,
+                s.ExpectedDeliveryDate,
+                s.ReceivedDate,
+                s.Status
+            FROM #StagingConfirmedOrders s
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM dbo.ConfirmedOrder o
+                WHERE o.Id = s.Id
+            );
 
             -- Update existing orders
             UPDATE o
-            SET
-                o.OrderDate = s.OrderDate,
+            SET o.OrderDate = s.OrderDate,
                 o.ExpectedDeliveryDate = s.ExpectedDeliveryDate,
                 o.ReceivedDate = s.ReceivedDate,
                 o.Status = s.Status
             FROM ConfirmedOrder o
-            JOIN (
-                SELECT
-                    CompanyId,
-                    OrderNumber,
-                    MIN(OrderDate) AS OrderDate,
-                    MIN(ExpectedDeliveryDate) AS ExpectedDeliveryDate,
-                    MIN(ReceivedDate) AS ReceivedDate,
-                    CASE 
-                        WHEN SUM((s.Quantity - s.SoldQuantity) % s.Quantity) = 0
-                            THEN 0
-                        WHEN SUM(s.Quantity - s.SoldQuantity) > 0
-                            THEN 1   
-                        WHEN SUM(s.Quantity - s.SoldQuantity) = 0
-                            THEN 2
-                        ELSE 3
-                    END AS Status
-                FROM dbo.StagingConfirmedOrders s
-                WHERE CompanyId = @CompanyId
-                GROUP BY CompanyId, OrderNumber
-            ) s ON s.CompanyId = o.CompanyId AND s.OrderNumber = o.OrderNumber;
+            INNER JOIN #StagingConfirmedOrders s ON s.Id = o.Id;
 
             -- Insert missing line items
             INSERT INTO ConfirmedOrderLineItem
@@ -121,43 +149,33 @@ internal static class ConfirmedOrderImportObjects
                 UnitCost
             )
             SELECT
-                o.Id,
-                p.Id,
+                s.Id,
+                s.ProductId,
                 s.Quantity,
                 s.SoldQuantity,
-                p.Price
-            FROM dbo.StagingConfirmedOrders s
-            JOIN Products p
-                ON p.SKU = s.SKU
-                AND p.CompanyId = s.CompanyId
-            JOIN ConfirmedOrder o
-                ON o.OrderNumber = s.OrderNumber
-                AND o.CompanyId = s.CompanyId
-            LEFT JOIN ConfirmedOrderLineItem li
-                ON li.ConfirmedOrderId = o.Id
-                AND li.ProductId = p.Id
-            WHERE s.CompanyId = @CompanyId
-            AND li.ProductId IS NULL;
+                s.UnitCost
+			FROM #StagingConfirmedOrders s
+			WHERE NOT EXISTS (
+				SELECT 1
+				FROM dbo.ConfirmedOrderLineItem li
+				WHERE li.ConfirmedOrderId = s.Id
+				AND li.ProductId = s.ProductId
+			);
 
             -- Update existing line items
             UPDATE li
-            SET
-                li.Quantity = s.Quantity,
+            SET li.Quantity = s.Quantity,
                 li.SoldQuantity = s.SoldQuantity,
-                li.UnitCost = p.Price
-            FROM ConfirmedOrderLineItem li
-            JOIN ConfirmedOrder o
-                ON o.Id = li.ConfirmedOrderId
-            JOIN Products p
-                ON p.Id = li.ProductId
-            JOIN dbo.StagingConfirmedOrders s
-                ON s.OrderNumber = o.OrderNumber
-                AND s.SKU = p.SKU
-                AND s.CompanyId = o.CompanyId
-            WHERE o.CompanyId = @CompanyId;
+                li.UnitCost = s.UnitCost
+			FROM dbo.ConfirmedOrderLineItem li
+			INNER JOIN #StagingConfirmedOrders s
+				ON li.ConfirmedOrderId = s.Id
+				AND li.ProductId = s.ProductId;
 
-            -- Cleanup
-            DELETE FROM dbo.StagingConfirmedOrders WHERE CompanyId = @CompanyId;
+            -- Return affected ProductIds
+			SELECT DISTINCT ProductId FROM #StagingConfirmedOrders;
+
+			DROP TABLE #StagingConfirmedOrders;
         END
         ";
 

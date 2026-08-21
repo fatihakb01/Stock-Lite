@@ -1,29 +1,31 @@
-using System.Data;
-using System.Globalization;
-using CsvHelper;
+using Domain.Entities.Core;
+using Domain.Entities.Helper;
 using Domain.Enums;
+using Domain.Enums.Keys;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler.Imports;
-using Infrastructure.Context;
+using Domain.Interfaces.Services.SignalR;
 using Infrastructure.Services.Scheduler.Imports.Records;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Infrastructure.Services.Scheduler.Imports.Handlers;
 
-public class ConfirmedOrderImportHandler(DataContext context) : IImportHandler
+public class ConfirmedOrderImportHandler(
+    IImportHelper importHelper,
+    IBaseCacheService<ConfirmedOrder> cacheService,
+    IProductNotificationService notificationService
+) : BaseImportHandler<ConfirmedOrderRecord>(importHelper), IImportHandler
 {
-    private readonly DataContext _context = context;
-    public ImportDataType DataType => ImportDataType.ConfirmedOrders;
+    private readonly IBaseCacheService<ConfirmedOrder> _cacheService = cacheService;
+    private readonly IProductNotificationService _notificationService = notificationService;
+    public override ImportDataType DataType => ImportDataType.ConfirmedOrders;
 
-    public async Task ImportAsync(Stream file, Guid companyId, CancellationToken ct)
+    protected override DataTable CreateDataTable()
     {
-        using var reader = new StreamReader(file);
-        using var csv = new CsvReader(reader, new CsvHelper.Configuration.CsvConfiguration(CultureInfo.InvariantCulture)
-        {
-            Delimiter = ";"
-        });
-
-        using var dataTable = new DataTable();
+        var dataTable = new DataTable();
+        dataTable.Columns.Add("Version", typeof(int));
+        dataTable.Columns.Add("ImportTimeStamp", typeof(DateTime));
+        dataTable.Columns.Add("Id", typeof(Guid));
         dataTable.Columns.Add("CompanyId", typeof(Guid));
         dataTable.Columns.Add("OrderNumber", typeof(string));
         dataTable.Columns.Add("SKU", typeof(string));
@@ -32,45 +34,41 @@ public class ConfirmedOrderImportHandler(DataContext context) : IImportHandler
         dataTable.Columns.Add("ReceivedDate", typeof(DateTime));
         dataTable.Columns.Add("Quantity", typeof(int));
         dataTable.Columns.Add("SoldQuantity", typeof(int));
+        dataTable.Columns.Add("UnitCost", typeof(decimal));
+        return dataTable;
+    }
 
-        foreach (var r in csv.GetRecords<ConfirmedOrderRecord>())
+    protected override void PopulateDataRow(DataTable dataTable, ConfirmedOrderRecord record, Guid companyId, DateTime now)
+    {
+        dataTable.Rows.Add(
+            0,
+            now,
+            Guid.NewGuid(),
+            companyId,
+            record.OrderNumber,
+            record.SKU,
+            record.OrderDate.Date,
+            record.ExpectedDeliveryDate.Date,
+            record.ReceivedDate?.Date ?? null,
+            record.Quantity,
+            record.SoldQuantity,
+            record.UnitCost
+        );
+    }
+
+    protected override async Task OnAfterImportAsync(ImportResult result, Guid companyId, CancellationToken ct)
+    {
+        // Remove transaction cache after import
+        if (result.HasAffectedIds && result.AffectedIds.Count > 0)
         {
-            dataTable.Rows.Add(
-                companyId,
-                r.OrderNumber,
-                r.SKU,
-                r.OrderDate.Date,
-                r.ExpectedDeliveryDate.Date,
-                r.ReceivedDate?.Date ?? null,
-                r.Quantity,
-                r.SoldQuantity
-            );
-        }
+            await _cacheService.RemoveAsync(_cacheService.GetKey(companyId, ConfirmedOrderKey.ConfirmedOrders), ct);
 
-        var connection = (SqlConnection)_context.Database.GetDbConnection();
-        var shouldClose = connection.State != ConnectionState.Open;
-        if (shouldClose)
-            await connection.OpenAsync(ct);
+            var tasks = result.AffectedIds.Select(productId =>
+                _cacheService.RemoveAsync(_cacheService.GetKey(productId, ConfirmedOrderKey.ConfirmedOrder), ct));
 
-        try
-        {
-            using var bulk = new SqlBulkCopy(connection)
-            {
-                DestinationTableName = "dbo.StagingConfirmedOrders",
-                BatchSize = 50_000
-            };
+            await Task.WhenAll(tasks);
 
-            await bulk.WriteToServerAsync(dataTable, ct);
-
-            await _context.Database.ExecuteSqlRawAsync(
-                "EXEC dbo.ProcessConfirmedOrders @CompanyId",
-                new SqlParameter("@CompanyId", companyId)
-            );
-        }
-        finally
-        {
-            if (shouldClose && connection.State == ConnectionState.Open)
-                await connection.CloseAsync();
+            await _notificationService.NotifyProductConfirmedOrdersUpdated(result.AffectedIds, ct);
         }
     }
 }

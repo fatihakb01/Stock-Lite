@@ -2,7 +2,9 @@ using Application.Core;
 using Application.Entities.Core.ConfirmedOrders.DTOs;
 using AutoMapper;
 using Domain.Entities.Core;
+using Domain.Enums.Keys;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 
@@ -17,12 +19,18 @@ public class GetConfirmedOrdersByProductId
 
     public class Handler(
         IRepository<ConfirmedOrder> repository,
+        IBaseCacheService<ConfirmedOrder> cacheService,
         IMapper mapper,
         ICurrentUserService currentUser
     ) : IRequestHandler<Query, Result<List<ConfirmedOrderDto>>>
     {
         public async Task<Result<List<ConfirmedOrderDto>>> Handle(Query request, CancellationToken ct)
         {
+            var cacheKey = cacheService.GetKey(request.ProductId, ConfirmedOrderKey.ConfirmedOrder);
+            var cached = await cacheService.GetAsync<List<ConfirmedOrderDto>>(cacheKey, ct);
+            if (cached != null)
+                return Result<List<ConfirmedOrderDto>>.Success(cached);
+
             var confirmedOrders = await repository.FindAsync(
                 co =>
                     co.CompanyId == currentUser.CompanyId &&

@@ -11,4 +11,6 @@ public sealed class ConfirmedOrderRecord
     public required int SoldQuantity { get; set; }
 
     public DateTime? ReceivedDate { get; set; }
+
+    public required decimal UnitCost { get; set; }
 }
