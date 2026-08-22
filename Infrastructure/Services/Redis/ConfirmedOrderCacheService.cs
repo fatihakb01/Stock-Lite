@@ -16,5 +16,15 @@ namespace Infrastructure.Services.Redis
                 _ => throw new InvalidOperationException($"Unsupported confirmed order key type: {key}")
             };
         }
+
+        public override async Task RemoveKeysAsync(Guid companyId, List<Guid> ids, CancellationToken ct)
+        {
+            await _cacheService.RemoveAsync(GetKey(companyId, ConfirmedOrderKey.ConfirmedOrders), ct);
+
+            var tasks = ids.Select(async productId =>
+                await _cacheService.RemoveAsync(GetKey(productId, ConfirmedOrderKey.ConfirmedOrder), ct));
+
+            await Task.WhenAll(tasks);
+        }
     }
 }

@@ -15,5 +15,13 @@ namespace Infrastructure.Services.Redis
                 _ => throw new InvalidOperationException($"Unsupported user defined field key type: {key}")
             };
         }
+
+        public override async Task RemoveKeysAsync(Guid companyId, List<Guid> ids, CancellationToken ct)
+        {
+            var tasks = ids.Select(async productId =>
+                await _cacheService.RemoveAsync(GetKey(productId, UserDefinedFieldKey.UserDefinedField), ct));
+
+            await Task.WhenAll(tasks);
+        }
     }
 }

@@ -61,13 +61,7 @@ public class ConfirmedOrderImportHandler(
         // Remove confirmed order cache after import
         if (result.HasAffectedIds && result.AffectedIds.Count > 0)
         {
-            await _cacheService.RemoveAsync(_cacheService.GetKey(companyId, ConfirmedOrderKey.ConfirmedOrders), ct);
-
-            var tasks = result.AffectedIds.Select(productId =>
-                _cacheService.RemoveAsync(_cacheService.GetKey(productId, ConfirmedOrderKey.ConfirmedOrder), ct));
-
-            await Task.WhenAll(tasks);
-
+            await _cacheService.RemoveKeysAsync(companyId, result.AffectedIds, ct);
             await _notificationService.NotifyProductConfirmedOrdersUpdated(result.AffectedIds, ct);
         }
     }

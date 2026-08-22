@@ -49,11 +49,7 @@ public class UserDefinedFieldImportHandler(
         // Remove user defined field cache after import
         if (result.HasAffectedIds && result.AffectedIds.Count > 0)
         {
-            var tasks = result.AffectedIds.Select(productId =>
-                _cacheService.RemoveAsync(_cacheService.GetKey(productId, UserDefinedFieldKey.UserDefinedField), ct));
-
-            await Task.WhenAll(tasks);
-
+            await _cacheService.RemoveKeysAsync(companyId, result.AffectedIds, ct);
             await _notificationService.NotifyProductUserDefinedFieldsUpdated(result.AffectedIds, ct);
         }
     }

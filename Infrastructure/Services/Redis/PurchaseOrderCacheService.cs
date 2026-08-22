@@ -16,5 +16,15 @@ namespace Infrastructure.Services.Redis
                 _ => throw new InvalidOperationException($"Unsupported purchase order key type: {key}")
             };
         }
+
+        public override async Task RemoveKeysAsync(Guid companyId, List<Guid> ids, CancellationToken ct)
+        {
+            await _cacheService.RemoveAsync(GetKey(companyId, PurchaseOrderKey.PurchaseOrders), ct);
+
+            var tasks = ids.Select(async productId =>
+                await _cacheService.RemoveAsync(GetKey(productId, PurchaseOrderKey.PurchaseOrder), ct));
+
+            await Task.WhenAll(tasks);
+        }
     }
 }

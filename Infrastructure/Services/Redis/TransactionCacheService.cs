@@ -16,5 +16,15 @@ namespace Infrastructure.Services.Redis
                 _ => throw new InvalidOperationException($"Unsupported transaction key type: {key}")
             };
         }
+
+        public override async Task RemoveKeysAsync(Guid companyId, List<Guid> ids, CancellationToken ct)
+        {
+            await _cacheService.RemoveAsync(GetKey(companyId, TransactionKey.Transactions), ct);
+
+            var tasks = ids.Select(async productId =>
+                await _cacheService.RemoveAsync(GetKey(productId, TransactionKey.Transaction), ct));
+
+            await Task.WhenAll(tasks);
+        }
     }
 }
