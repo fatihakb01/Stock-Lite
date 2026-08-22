@@ -8,7 +8,7 @@ namespace Infrastructure.Services.Redis
         protected readonly ICacheService _cacheService = cacheService;
 
         public abstract string GetKey(Guid id, object key);
-        public abstract Task RemoveKeysAsync(Guid companyId, List<Guid> ids, CancellationToken ct);
+        public abstract Task RemoveKeysAsync(Guid companyId, List<Guid>? ids, object? key, CancellationToken ct = default);
 
         public async Task<T1?> GetAsync<T1>(string key, CancellationToken ct = default)
         {

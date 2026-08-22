@@ -17,13 +17,13 @@ namespace Infrastructure.Services.Redis
             };
         }
 
-        public override async Task RemoveKeysAsync(Guid companyId, List<Guid> ids, CancellationToken ct)
+        public override async Task RemoveKeysAsync(Guid companyId, List<Guid>? ids, object? key, CancellationToken ct = default)
         {
             await _cacheService.RemoveAsync(GetKey(companyId, PurchaseOrderKey.PurchaseOrders), ct);
 
-            var tasks = ids.Select(async productId =>
+            List<Guid> productIds = ids ?? new List<Guid>();
+            var tasks = productIds.Select(async productId =>
                 await _cacheService.RemoveAsync(GetKey(productId, PurchaseOrderKey.PurchaseOrder), ct));
-
             await Task.WhenAll(tasks);
         }
     }
