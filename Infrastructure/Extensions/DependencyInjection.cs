@@ -116,7 +116,7 @@ public static class DependencyInjection
         services.AddScoped<ICompanyRepository, CompanyRepository>();
 
         // --- Internal Services ---
-        services.AddScoped<ITokenService, TokenService>();
+        services.AddSingleton<ITokenService, TokenService>();
         
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
@@ -147,15 +147,15 @@ public static class DependencyInjection
         services.AddScoped<IExportService, ExportService>();
         services.AddScoped<IFileExportHelper, FileExportHelper>();
 
-        services.AddScoped<ICacheService, CacheService>();
-        services.AddScoped<ISchedulerCacheService, SchedulerCacheService>();
-        services.AddScoped<IBaseCacheService<Product>, ProductCacheService>();
-        services.AddScoped<IBaseCacheService<Transaction>, TransactionCacheService>();
-        services.AddScoped<IBaseCacheService<PurchaseOrder>, PurchaseOrderCacheService>();
-        services.AddScoped<IBaseCacheService<ConfirmedOrder>, ConfirmedOrderCacheService>();
-        services.AddScoped<IBaseCacheService<UserDefinedField>, UserDefinedFieldCacheService>();
-        services.AddScoped<IBaseCacheService<User>, UserCacheService>();
-        services.AddScoped<IBaseCacheService<ExportProfile>, ExportProfileCacheService>();
+        services.AddSingleton<ICacheService, CacheService>();
+        services.AddSingleton<ISchedulerCacheService, SchedulerCacheService>();
+        services.AddSingleton<IBaseCacheService<Product>, ProductCacheService>();
+        services.AddSingleton<IBaseCacheService<Transaction>, TransactionCacheService>();
+        services.AddSingleton<IBaseCacheService<PurchaseOrder>, PurchaseOrderCacheService>();
+        services.AddSingleton<IBaseCacheService<ConfirmedOrder>, ConfirmedOrderCacheService>();
+        services.AddSingleton<IBaseCacheService<UserDefinedField>, UserDefinedFieldCacheService>();
+        services.AddSingleton<IBaseCacheService<User>, UserCacheService>();
+        services.AddSingleton<IBaseCacheService<ExportProfile>, ExportProfileCacheService>();
 
         // --- External Services ---
         services.AddOptions();
