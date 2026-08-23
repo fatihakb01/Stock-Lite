@@ -20,35 +20,30 @@ namespace Infrastructure.Services.Redis
 
         public override async Task RemoveKeysAsync(Guid companyId, List<Guid>? ids, object? key, CancellationToken ct = default)
         {
-            Guid userId = ids != null ?  ids[0] : Guid.Empty;
+            Guid userId = ids?.FirstOrDefault() ?? Guid.Empty;
 
             switch (key)
             {
                 case null:
-                    await RemoveUserByIdAsync(companyId, UserKey.Users, ct);
-                    await RemoveUserByIdAsync(userId, UserKey.User, ct);
+                    await _cacheService.RemoveAsync(GetKey(companyId, UserKey.Users), ct);
+                    await _cacheService.RemoveAsync(GetKey(userId, UserKey.User), ct);
                     break;
 
                 case UserKey.Users:
-                    await RemoveUserByIdAsync(companyId, UserKey.Users, ct);
+                    await _cacheService.RemoveAsync(GetKey(companyId, UserKey.Users), ct);
                     break;
 
                 case UserKey.CurrentUser:
-                    await RemoveUserByIdAsync(userId, UserKey.CurrentUser, ct);
+                    await _cacheService.RemoveAsync(GetKey(userId, UserKey.CurrentUser), ct);
                     break;
 
                 case UserKey.User:
-                    await RemoveUserByIdAsync(userId, UserKey.User, ct);
+                    await _cacheService.RemoveAsync(GetKey(userId, UserKey.User), ct);
                     break;
 
                 default:
-                    throw new ArgumentException($"Unsupported key type: {key}", nameof(key));
+                    throw new InvalidOperationException($"Unsupported user key type: {key}");
             }
-        }
-
-        private async Task RemoveUserByIdAsync(Guid id, UserKey key, CancellationToken ct)
-        {
-            await _cacheService.RemoveAsync(GetKey(id, key), ct);
         }
     }
 }
