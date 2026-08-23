@@ -3,6 +3,7 @@ using Application.Entities.Core.Users.DTOs;
 using AutoMapper;
 using Domain.Entities.Core;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -20,6 +21,7 @@ public class EditUser
     public class Handler(
         IUserRepository userRepository,
         IRepository<User> repository,
+        IBaseCacheService<User> cacheService,
         IMapper mapper,
         IConfiguration config,
         ICurrentUserService currentUser
@@ -27,31 +29,27 @@ public class EditUser
     {
         public async Task<Result<UserDto>> Handle(Command request, CancellationToken cancellationToken)
         {
+            var user = await userRepository.GetByIdAsync(request.Id, cancellationToken);
+            if (user == null)
+                return Result<UserDto>.Failure("User not found.", 404);
+
             var userFromSameCompany = await repository.ExistsAsync(x =>
                 x.Id == request.Id.ToString() &&
                 x.CompanyId == currentUser.CompanyId,
                 cancellationToken
             );
-
             if (!userFromSameCompany)
                 return Result<UserDto>.Failure("Not allowed to edit user from another company", 400);
 
             var dto = request.EditUserDto;
-
-            var user = await userRepository.GetByIdAsync(request.Id, cancellationToken);
-            if (user == null)
-                return Result<UserDto>.Failure("User not found.", 404);
-
             bool containSpaces = string.IsNullOrWhiteSpace(dto.UserName)
                 || dto.UserName.Contains(' ')
                 || dto.UserName.Trim() != dto.UserName;
-
             if (containSpaces)
                 return Result<UserDto>.Failure("Username not allowed to contain spaces", 400);
 
             // Detect if email is changing
             bool emailChanged = !string.Equals(user.Email, dto.Email, StringComparison.OrdinalIgnoreCase);
-
             if (emailChanged)
             {
                 // Is new email already used by another user?
@@ -74,13 +72,12 @@ public class EditUser
             }
 
             mapper.Map(dto, user);
-
             var saved = await repository.SaveChangesAsync(cancellationToken);
             if (!saved)
                 return Result<UserDto>.Failure("Failed to update user", 400);
 
             var updatedDto = mapper.Map<UserDto>(user);
-
+            await cacheService.RemoveKeysAsync(updatedDto.CompanyId, [updatedDto.Id], null, cancellationToken);
             return Result<UserDto>.Success(updatedDto);
         }
     }

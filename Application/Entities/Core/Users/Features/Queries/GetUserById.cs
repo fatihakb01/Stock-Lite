@@ -2,7 +2,9 @@ using Application.Core;
 using Application.Entities.Core.Users.DTOs;
 using AutoMapper;
 using Domain.Entities.Core;
+using Domain.Enums.Keys;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 
@@ -18,27 +20,32 @@ public class GetUserById
     public class Handler(
         IUserRepository userRepository, 
         IRepository<User> repository,
+        IBaseCacheService<User> cacheService,
         ICurrentUserService currentUser,
         IMapper mapper
     ) : IRequestHandler<Query, Result<UserDto>>
     {
         public async Task<Result<UserDto>> Handle(Query request, CancellationToken ct)
         {
-            var userFromSameCompany = await repository.ExistsAsync(x =>
-                x.Id == request.UserId.ToString() &&
-                x.CompanyId == currentUser.CompanyId,
-                ct
-            );
-
-            if (!userFromSameCompany)
-                return Result<UserDto>.Failure("Not allowed to see user from another company", 400);
+            var cacheKey = cacheService.GetKey(request.UserId, UserKey.User);
+            var cached = await cacheService.GetAsync<UserDto>(cacheKey, ct);
+            if (cached != null)
+                return Result<UserDto>.Success(cached);
 
             var user = await userRepository.GetByIdAsync(request.UserId, ct);
             if (user == null)
                 return Result<UserDto>.Failure("User not found.", 404);
 
+            var userFromSameCompany = await repository.ExistsAsync(x =>
+                x.Id == request.UserId.ToString() &&
+                x.CompanyId == currentUser.CompanyId,
+                ct
+            );
+            if (!userFromSameCompany)
+                return Result<UserDto>.Failure("Not allowed to see user from another company", 400);
+
             var userDto = mapper.Map<UserDto>(user);
-            
+            await cacheService.SetAsync(cacheKey, userDto, TimeSpan.FromMinutes(5), ct);
             return Result<UserDto>.Success(userDto);
         }
     }

@@ -2,7 +2,9 @@ using Application.Core;
 using Application.Entities.Core.Users.DTOs;
 using AutoMapper;
 using Domain.Entities.Core;
+using Domain.Enums.Keys;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -17,7 +19,8 @@ public class RegisterUser
     }
 
     public class Handler(
-        IUserRepository userRepository, 
+        IUserRepository userRepository,
+        IBaseCacheService<User> cacheService,
         IMapper mapper, 
         IConfiguration config,
         ICurrentUserService currentUser
@@ -56,6 +59,7 @@ public class RegisterUser
 
             // Return DTO
             var userDto = mapper.Map<UserDto>(user);
+            await cacheService.RemoveKeysAsync(userDto.CompanyId, null, UserKey.Users, cancellationToken);
             return Result<UserDto>.Success(userDto);
         }
     }

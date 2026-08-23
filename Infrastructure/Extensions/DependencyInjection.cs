@@ -154,6 +154,7 @@ public static class DependencyInjection
         services.AddScoped<IBaseCacheService<PurchaseOrder>, PurchaseOrderCacheService>();
         services.AddScoped<IBaseCacheService<ConfirmedOrder>, ConfirmedOrderCacheService>();
         services.AddScoped<IBaseCacheService<UserDefinedField>, UserDefinedFieldCacheService>();
+        services.AddScoped<IBaseCacheService<User>, UserCacheService>();
 
         // --- External Services ---
         services.AddOptions();
