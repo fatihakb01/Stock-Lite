@@ -1,6 +1,8 @@
 ﻿using Application.Core;
 using Application.Entities.Derived.ProductKpis.DTOs;
+using Domain.Entities.Derived;
 using Domain.Enums;
+using Domain.Enums.Keys;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
@@ -14,14 +16,14 @@ namespace Application.Entities.Derived.ProductKpis.Features.Queries
 
         public class Handler(
             IProductKpiRepository repository,
-            ICacheService cacheService,
+            IBaseCacheService<ProductKpi> cacheService,
             ICurrentUserService currentUser
         ) : IRequestHandler<Query, Result<SchedulerStatusDto>>
         {
             public async Task<Result<SchedulerStatusDto>> Handle(Query request, CancellationToken ct)
             {
                 var dto = new SchedulerStatusDto { Status = JobExecutionStatus.Pending };
-                var cacheKey = $"productkpis-schedulerstatus:{currentUser.CompanyId}";
+                var cacheKey = cacheService.GetKey(currentUser.CompanyId, ProductKpiKey.SchedulerStatus);
                 var cached = await cacheService.GetAsync<SchedulerStatusDto>(cacheKey, ct);
                 if (cached != null)
                     return Result<SchedulerStatusDto>.Success(cached);
@@ -29,7 +31,6 @@ namespace Application.Entities.Derived.ProductKpis.Features.Queries
                 var schedulerStatus = await repository.GetSchedulerStatus(currentUser.CompanyId, ct);
                 dto.Status = schedulerStatus;
                 await cacheService.SetAsync(cacheKey, dto, TimeSpan.FromMinutes(5), ct);
-
                 return Result<SchedulerStatusDto>.Success(dto);
             }
         }

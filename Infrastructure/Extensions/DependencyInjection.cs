@@ -1,4 +1,5 @@
 using Domain.Entities.Core;
+using Domain.Entities.Derived;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Export;
 using Domain.Interfaces.Services.Redis;
@@ -156,6 +157,7 @@ public static class DependencyInjection
         services.AddSingleton<IBaseCacheService<UserDefinedField>, UserDefinedFieldCacheService>();
         services.AddSingleton<IBaseCacheService<User>, UserCacheService>();
         services.AddSingleton<IBaseCacheService<ExportProfile>, ExportProfileCacheService>();
+        services.AddSingleton<IBaseCacheService<ProductKpi>, ProductKpiCacheService>();
 
         // --- External Services ---
         services.AddOptions();

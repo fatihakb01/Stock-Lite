@@ -1,6 +1,8 @@
 using Application.Core;
 using Application.Entities.Derived.ProductKpis.DTOs;
 using AutoMapper;
+using Domain.Entities.Derived;
+using Domain.Enums.Keys;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
@@ -14,15 +16,14 @@ public class GetProductKpis
 
     public class Handler(
         IProductKpiRepository repository,
-        ICacheService cacheService,
+        IBaseCacheService<ProductKpi> cacheService,
         ICurrentUserService currentUser,
         IMapper mapper
     ) : IRequestHandler<Query, Result<ProductKpiDto>>
     {
         public async Task<Result<ProductKpiDto>> Handle(Query request, CancellationToken ct)
         {
-            var cacheKey = $"productkpis:{currentUser.CompanyId}";
-
+            var cacheKey = cacheService.GetKey(currentUser.CompanyId, ProductKpiKey.ProductKpis);
             var cached = await cacheService.GetAsync<ProductKpiDto>(cacheKey, ct);
             if (cached != null)
                 return Result<ProductKpiDto>.Success(cached);
@@ -32,9 +33,7 @@ public class GetProductKpis
                 return Result<ProductKpiDto>.Failure("ProductKpi not found", 404);
 
             var productKpiDto = mapper.Map<ProductKpiDto>(productKpi);
-
             await cacheService.SetAsync(cacheKey, productKpiDto, TimeSpan.FromMinutes(5), ct);
-
             return Result<ProductKpiDto>.Success(productKpiDto);
         }
     }
