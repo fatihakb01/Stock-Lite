@@ -2,7 +2,9 @@
 using Application.Entities.Core.ExportProfiles.DTOs;
 using AutoMapper;
 using Domain.Entities.Core;
+using Domain.Enums.Keys;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 
@@ -17,6 +19,7 @@ namespace Application.Entities.Core.ExportProfiles.Features.Commands
 
         public class Handler(
             IRepository<ExportProfile> repository,
+            IBaseCacheService<ExportProfile> cacheService,
             ICurrentUserService currentUser,
             IMapper mapper
         ) : IRequestHandler<Command, Result<ExportProfileDetailDto>>
@@ -24,7 +27,6 @@ namespace Application.Entities.Core.ExportProfiles.Features.Commands
             public async Task<Result<ExportProfileDetailDto>> Handle(Command request, CancellationToken ct)
             {
                 var dto = request.Dto;
-
                 var nameExist = await repository.ExistsAsync(ex => ex.Name == dto.Name, ct);
                 if (nameExist)
                     return Result<ExportProfileDetailDto>.Failure("Name must be unique", 400);
@@ -34,13 +36,12 @@ namespace Application.Entities.Core.ExportProfiles.Features.Commands
                 exportProfile.CompanyId = currentUser.CompanyId;
 
                 await repository.AddAsync(exportProfile,ct);
-
                 var result = await repository.SaveChangesAsync(ct);
                 if (!result)
                     return Result<ExportProfileDetailDto>.Failure("Failed to save ExportProfile", 400);
 
                 var createdExportProfile = mapper.Map<ExportProfileDetailDto>(exportProfile);
-
+                await cacheService.RemoveKeysAsync(exportProfile.CompanyId, null, ExportProfileKey.ExportProfiles, ct);
                 return Result<ExportProfileDetailDto>.Success(createdExportProfile);
             }
         }

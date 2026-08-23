@@ -1,6 +1,7 @@
 ﻿using Application.Core;
 using Domain.Entities.Core;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 
@@ -15,6 +16,7 @@ namespace Application.Entities.Core.ExportProfiles.Features.Commands
 
         public class Handler(
             IRepository<ExportProfile> repository,
+            IBaseCacheService<ExportProfile> cacheService,
             ICurrentUserService currentUser
         ) : IRequestHandler<Command, Result<Unit>>
         {
@@ -24,17 +26,15 @@ namespace Application.Entities.Core.ExportProfiles.Features.Commands
                     x.Id == request.Id && x.CompanyId == currentUser.CompanyId,
                     ct
                 );
-
                 if (exportProfile == null)
                     return Result<Unit>.Failure("ExportProfile not found", 404);
 
                 repository.Remove(exportProfile);
-
                 var result = await repository.SaveChangesAsync(ct);
-
                 if (!result)
                     return Result<Unit>.Failure("Failed to delete ExportProfile", 400);
 
+                await cacheService.RemoveKeysAsync(exportProfile.CompanyId, [request.Id], null, ct);
                 return Result<Unit>.Success(Unit.Value);
             }
         }
