@@ -16,11 +16,11 @@ public class PurchaseOrderController(IMediator mediator) : BaseApiController(med
         return HandleResult(await Mediator.Send(new GetPurchaseOrdersByProductId.Query { ProductId = productId }));
     }
 
-    [HttpGet]
-    public async Task<ActionResult<List<PurchaseOrderDto>>> GetPurchaseOrders()
-    {
-        return HandleResult(await Mediator.Send(new GetPurchaseOrders.Query { }));
-    }   
+    //[HttpGet]
+    //public async Task<ActionResult<List<PurchaseOrderDto>>> GetPurchaseOrders()
+    //{
+    //    return HandleResult(await Mediator.Send(new GetPurchaseOrders.Query { }));
+    //}   
 
     //[Authorize(Policy = "AdminOrSuperAdmin")]
     //[HttpPost]

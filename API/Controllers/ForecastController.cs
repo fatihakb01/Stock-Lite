@@ -20,15 +20,15 @@ public class ForecastController(IMediator mediator) : BaseApiController(mediator
         }));
     }
     
-    [Authorize(Policy = "AdminOrSuperAdmin")]
-    [HttpPost("{periodType?}")]
-    public async Task<ActionResult<Unit>> GenerateForecasts
-        (string? periodType, [FromBody] IEnumerable<Guid>? productIds)
-    {
-        return HandleResult(await Mediator.Send(new GenerateForecasts.Command
-        {
-            PeriodType = periodType,
-            ProductIds = productIds
-        }));
-    }
+    //[Authorize(Policy = "AdminOrSuperAdmin")]
+    //[HttpPost("{periodType?}")]
+    //public async Task<ActionResult<Unit>> GenerateForecasts
+    //    (string? periodType, [FromBody] IEnumerable<Guid>? productIds)
+    //{
+    //    return HandleResult(await Mediator.Send(new GenerateForecasts.Command
+    //    {
+    //        PeriodType = periodType,
+    //        ProductIds = productIds
+    //    }));
+    //}
 }

@@ -16,11 +16,11 @@ public class ConfirmedOrderController(IMediator mediator) : BaseApiController(me
         return HandleResult(await Mediator.Send(new GetConfirmedOrdersByProductId.Query { ProductId = productId }));
     }
 
-    [HttpGet]
-    public async Task<ActionResult<List<ConfirmedOrderDto>>> GetConfirmedOrders()
-    {
-        return HandleResult(await Mediator.Send(new GetConfirmedOrders.Query()));
-    }   
+    //[HttpGet]
+    //public async Task<ActionResult<List<ConfirmedOrderDto>>> GetConfirmedOrders()
+    //{
+    //    return HandleResult(await Mediator.Send(new GetConfirmedOrders.Query()));
+    //}   
 
     //[Authorize(Policy = "AdminOrSuperAdmin")]
     //[HttpPost]

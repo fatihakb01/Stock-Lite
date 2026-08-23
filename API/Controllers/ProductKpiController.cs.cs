@@ -23,10 +23,10 @@ public class ProductKpiController(IMediator mediator) : BaseApiController(mediat
         return HandleResult(await Mediator.Send(new GetSchedulerStatus.Query()));
     }
 
-    [Authorize(Policy = "SuperAdminOnly")]
-    [HttpPost]
-    public async Task<ActionResult<Unit>> UpdateProductKpis()
-    {
-        return HandleResult(await Mediator.Send(new UpdateProductKpis.Command()));
-    }
+    //[Authorize(Policy = "SuperAdminOnly")]
+    //[HttpPost]
+    //public async Task<ActionResult<Unit>> UpdateProductKpis()
+    //{
+    //    return HandleResult(await Mediator.Send(new UpdateProductKpis.Command()));
+    //}
 }

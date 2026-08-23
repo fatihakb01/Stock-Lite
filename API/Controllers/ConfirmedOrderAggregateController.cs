@@ -24,17 +24,17 @@ public class ConfirmedOrderAggregateController(IMediator mediator)
         }));
     }
 
-    [Authorize(Policy = "AdminOrSuperAdmin")]
-    [HttpPost("{periodType?}")]
-    public async Task<ActionResult<Unit>> UpdateConfirmedOrderAggregates(
-        string? periodType,
-        [FromBody] IEnumerable<Guid>? productIds
-    )
-    {
-        return HandleResult(await Mediator.Send(new UpdateConfirmedOrderAggregates.Command
-        {
-            PeriodType = periodType,
-            ProductIds = productIds
-        }));
-    }
+    //[Authorize(Policy = "AdminOrSuperAdmin")]
+    //[HttpPost("{periodType?}")]
+    //public async Task<ActionResult<Unit>> UpdateConfirmedOrderAggregates(
+    //    string? periodType,
+    //    [FromBody] IEnumerable<Guid>? productIds
+    //)
+    //{
+    //    return HandleResult(await Mediator.Send(new UpdateConfirmedOrderAggregates.Command
+    //    {
+    //        PeriodType = periodType,
+    //        ProductIds = productIds
+    //    }));
+    //}
 }

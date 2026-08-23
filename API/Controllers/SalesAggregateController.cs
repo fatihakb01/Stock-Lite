@@ -20,15 +20,15 @@ public class SalesAggregateController(IMediator mediator) : BaseApiController(me
         }));
     }
 
-    [Authorize(Policy = "AdminOrSuperAdmin")]
-    [HttpPost("{periodType?}")]
-    public async Task<ActionResult<Unit>> UpdateSalesAggregates
-        (string? periodType, [FromBody] IEnumerable<Guid>? productIds)
-    {
-        return HandleResult(await Mediator.Send(new UpdateSalesAggregates.Command
-        {
-            PeriodType = periodType,
-            ProductIds = productIds
-        }));
-    }
+    //[Authorize(Policy = "AdminOrSuperAdmin")]
+    //[HttpPost("{periodType?}")]
+    //public async Task<ActionResult<Unit>> UpdateSalesAggregates
+    //    (string? periodType, [FromBody] IEnumerable<Guid>? productIds)
+    //{
+    //    return HandleResult(await Mediator.Send(new UpdateSalesAggregates.Command
+    //    {
+    //        PeriodType = periodType,
+    //        ProductIds = productIds
+    //    }));
+    //}
 }

@@ -10,22 +10,22 @@ namespace API.Controllers;
 [Authorize]
 public class StockLevelController(IMediator mediator) : BaseApiController(mediator)
 {
-    [HttpGet("{productId}")]
-    public async Task<ActionResult<StockLevelDto>> GetStockLevel(Guid productId)
-    {
-        return HandleResult(await Mediator.Send(new GetStockLevel.Query
-        {
-            ProductId = productId
-        }));
-    }
+    //[HttpGet("{productId}")]
+    //public async Task<ActionResult<StockLevelDto>> GetStockLevel(Guid productId)
+    //{
+    //    return HandleResult(await Mediator.Send(new GetStockLevel.Query
+    //    {
+    //        ProductId = productId
+    //    }));
+    //}
 
-    [Authorize(Policy = "AdminOrSuperAdmin")]
-    [HttpPost]
-    public async Task<ActionResult<Unit>> UpdateStockLevels([FromBody] IEnumerable<Guid>? productIds)
-    {
-        return HandleResult(await Mediator.Send(new UpdateStockLevels.Command
-        {
-            ProductIds = productIds
-        }));
-    }
+    //[Authorize(Policy = "AdminOrSuperAdmin")]
+    //[HttpPost]
+    //public async Task<ActionResult<Unit>> UpdateStockLevels([FromBody] IEnumerable<Guid>? productIds)
+    //{
+    //    return HandleResult(await Mediator.Send(new UpdateStockLevels.Command
+    //    {
+    //        ProductIds = productIds
+    //    }));
+    //}
 }

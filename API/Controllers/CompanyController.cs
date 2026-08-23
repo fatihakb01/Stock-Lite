@@ -16,19 +16,19 @@ public class CompanyController(IMediator mediator) : BaseApiController(mediator)
         return HandleResult(await Mediator.Send(new GetCompany.Query()));
     }
 
-    [Authorize(Policy = "SuperAdminOnly")]
-    [HttpPost]
-    public async Task<ActionResult<CompanyDto>> CreateCompany([FromBody] CreateCompanyDto companyDto)
-    {
-        return HandleResult(await Mediator.Send(new CreateCompany.Command { CompanyDto = companyDto }));
-    }
+    //[Authorize(Policy = "SuperAdminOnly")]
+    //[HttpPost]
+    //public async Task<ActionResult<CompanyDto>> CreateCompany([FromBody] CreateCompanyDto companyDto)
+    //{
+    //    return HandleResult(await Mediator.Send(new CreateCompany.Command { CompanyDto = companyDto }));
+    //}
 
-    [Authorize(Policy = "SuperAdminOnly")]
-    [HttpPut]
-    public async Task<ActionResult<CompanyDto>> EditCompany([FromBody] EditCompanyDto companyDto)
-    {
-        return HandleResult(await Mediator.Send(new EditCompany.Command { CompanyDto = companyDto }));
-    }
+    //[Authorize(Policy = "SuperAdminOnly")]
+    //[HttpPut]
+    //public async Task<ActionResult<CompanyDto>> EditCompany([FromBody] EditCompanyDto companyDto)
+    //{
+    //    return HandleResult(await Mediator.Send(new EditCompany.Command { CompanyDto = companyDto }));
+    //}
     
     // [Authorize(Policy = "SuperAdminOnly")]
     // [HttpDelete]

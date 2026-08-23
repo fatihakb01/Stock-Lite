@@ -16,11 +16,11 @@ public class TransactionController(IMediator mediator) : BaseApiController(media
         return HandleResult(await Mediator.Send(new GetTransactionsByProductId.Query { ProductId = productId }));
     }  
 
-    [HttpGet]
-    public async Task<ActionResult<List<TransactionDto>>> GetTransactions()
-    {
-        return HandleResult(await Mediator.Send(new GetTransactions.Query()));
-    }
+    //[HttpGet]
+    //public async Task<ActionResult<List<TransactionDto>>> GetTransactions()
+    //{
+    //    return HandleResult(await Mediator.Send(new GetTransactions.Query()));
+    //}
 
     //[Authorize(Policy = "AdminOrSuperAdmin")]
     //[HttpPost]

@@ -19,13 +19,13 @@ public class PurchaseForecastController(IMediator mediator) : BaseApiController(
         }));
     }
 
-    [Authorize(Policy = "AdminOrSuperAdmin")]
-    [HttpPost]
-    public async Task<ActionResult<Unit>> UpdatePurchaseForecasts([FromBody] IEnumerable<Guid>? productIds)
-    {
-        return HandleResult(await Mediator.Send(new UpdatePurchaseForecasts.Command
-        {
-            ProductIds = productIds
-        }));
-    }
+    //[Authorize(Policy = "AdminOrSuperAdmin")]
+    //[HttpPost]
+    //public async Task<ActionResult<Unit>> UpdatePurchaseForecasts([FromBody] IEnumerable<Guid>? productIds)
+    //{
+    //    return HandleResult(await Mediator.Send(new UpdatePurchaseForecasts.Command
+    //    {
+    //        ProductIds = productIds
+    //    }));
+    //}
 }
