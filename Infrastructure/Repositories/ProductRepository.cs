@@ -32,6 +32,14 @@ public class ProductRepository(DataContext context)
         };
     }
 
+    public async Task<List<Guid>> GetProductIds(Guid companyId, CancellationToken ct)
+    {
+        return await _context.Products
+            .Where(p => p.CompanyId == companyId)
+            .Select(p => p.Id)
+            .ToListAsync(ct);
+    }
+
     private async Task<List<Product>> GetProducts(Guid companyId, CancellationToken ct)
     {
         return await _context.Products

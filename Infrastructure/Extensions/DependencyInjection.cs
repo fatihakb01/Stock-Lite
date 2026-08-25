@@ -158,6 +158,7 @@ public static class DependencyInjection
         services.AddSingleton<IBaseCacheService<User>, UserCacheService>();
         services.AddSingleton<IBaseCacheService<ExportProfile>, ExportProfileCacheService>();
         services.AddSingleton<IBaseCacheService<ProductKpi>, ProductKpiCacheService>();
+        services.AddSingleton<IBaseCacheService<Forecast>, ForecastCacheService>();
 
         // --- External Services ---
         services.AddOptions();
