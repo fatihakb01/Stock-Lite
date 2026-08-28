@@ -3,6 +3,7 @@ using Domain.Entities.Derived;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Export;
 using Domain.Interfaces.Services.Redis;
+using Domain.Interfaces.Services.Redis.Helper;
 using Domain.Interfaces.Services.Scheduler;
 using Domain.Interfaces.Services.Scheduler.Calculations;
 using Domain.Interfaces.Services.Scheduler.Imports;
@@ -11,6 +12,7 @@ using Infrastructure.Context;
 using Infrastructure.Repositories;
 using Infrastructure.Services.Export;
 using Infrastructure.Services.Redis;
+using Infrastructure.Services.Redis.Helper;
 using Infrastructure.Services.Scheduler;
 using Infrastructure.Services.Scheduler.Calculations;
 using Infrastructure.Services.Scheduler.Imports;
@@ -150,6 +152,7 @@ public static class DependencyInjection
 
         services.AddSingleton<ICacheService, CacheService>();
         services.AddSingleton<ISchedulerCacheService, SchedulerCacheService>();
+        services.AddSingleton<ICacheHelper, CacheHelper>();
         services.AddSingleton<IBaseCacheService<Product>, ProductCacheService>();
         services.AddSingleton<IBaseCacheService<Transaction>, TransactionCacheService>();
         services.AddSingleton<IBaseCacheService<PurchaseOrder>, PurchaseOrderCacheService>();

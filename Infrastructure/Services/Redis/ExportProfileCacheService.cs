@@ -1,20 +1,16 @@
 ﻿using Domain.Entities.Core;
 using Domain.Enums.Keys;
 using Domain.Interfaces.Services.Redis;
+using Domain.Interfaces.Services.Redis.Helper;
 
 namespace Infrastructure.Services.Redis
 {
-    public class ExportProfileCacheService(ICacheService cacheService)
+    public class ExportProfileCacheService(ICacheService cacheService, ICacheHelper cacheHelper)
         : BaseCacheService<ExportProfile>(cacheService), IBaseCacheService<ExportProfile>
     {
         public override string GetKey(Guid id, object key)
         {
-            return key switch
-            {
-                ExportProfileKey.ExportProfile => $"exportprofile:{id}",
-                ExportProfileKey.ExportProfiles => $"exportprofiles:{id}",
-                _ => throw new InvalidOperationException($"Unsupported export profile key type: {key}")
-            };
+            return cacheHelper.GetKey(id, key);
         }
 
         public override async Task RemoveKeysAsync(Guid companyId, List<Guid>? ids, object? key, CancellationToken ct = default)

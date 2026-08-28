@@ -112,7 +112,7 @@ namespace Infrastructure.Services.Redis
                 SchedulerKey.JobTaskRecentHistory => $"jobtasks:recent:history:{id}",
                 SchedulerKey.ScheduledJob => $"scheduledjob:{id}",
                 SchedulerKey.ScheduledJobHistory => $"scheduledjob:history:{id}",
-                SchedulerKey.SchedulerStatus => $"productkpis-schedulerstatus:{id}",
+                SchedulerKey.SchedulerStatus => $"schedulerstatus:{id}",
                 _ => throw new InvalidOperationException($"Unsupported scheduler key type: {schedulerKey}")
             };
         }

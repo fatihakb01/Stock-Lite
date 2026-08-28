@@ -1,20 +1,16 @@
 ﻿using Domain.Entities.Core;
 using Domain.Enums.Keys;
 using Domain.Interfaces.Services.Redis;
+using Domain.Interfaces.Services.Redis.Helper;
 
 namespace Infrastructure.Services.Redis
 {
-    public class PurchaseOrderCacheService(ICacheService cacheService)
+    public class PurchaseOrderCacheService(ICacheService cacheService, ICacheHelper cacheHelper)
         : BaseCacheService<PurchaseOrder>(cacheService), IBaseCacheService<PurchaseOrder>
     {
         public override string GetKey(Guid id, object key)
         {
-            return key switch
-            {
-                PurchaseOrderKey.PurchaseOrder => $"purchaseorder:{id}",
-                PurchaseOrderKey.PurchaseOrders => $"purchaseorders:{id}",
-                _ => throw new InvalidOperationException($"Unsupported purchase order key type: {key}")
-            };
+            return cacheHelper.GetKey(id, key);
         }
 
         public override async Task RemoveKeysAsync(Guid companyId, List<Guid>? ids, object? key, CancellationToken ct = default)

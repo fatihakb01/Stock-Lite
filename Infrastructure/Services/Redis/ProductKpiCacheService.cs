@@ -1,20 +1,16 @@
 ﻿using Domain.Entities.Derived;
 using Domain.Enums.Keys;
 using Domain.Interfaces.Services.Redis;
+using Domain.Interfaces.Services.Redis.Helper;
 
 namespace Infrastructure.Services.Redis
 {
-    public class ProductKpiCacheService(ICacheService cacheService)
+    public class ProductKpiCacheService(ICacheService cacheService, ICacheHelper cacheHelper)
         : BaseCacheService<ProductKpi>(cacheService), IBaseCacheService<ProductKpi>
     {
         public override string GetKey(Guid id, object key)
         {
-            return key switch
-            {
-                ProductKpiKey.ProductKpis => $"productkpis:{id}",
-                ProductKpiKey.SchedulerStatus => $"productkpis-schedulerstatus:{id}",
-                _ => throw new InvalidOperationException($"Unsupported product key type: {key}")
-            };
+            return cacheHelper.GetKey(id, key);
         }
 
         public override async Task RemoveKeysAsync(Guid companyId, List<Guid>? ids, object? key, CancellationToken ct = default)

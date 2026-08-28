@@ -1,21 +1,16 @@
 ﻿using Domain.Entities.Core;
 using Domain.Enums.Keys;
 using Domain.Interfaces.Services.Redis;
+using Domain.Interfaces.Services.Redis.Helper;
 
 namespace Infrastructure.Services.Redis
 {
-    public class UserCacheService(ICacheService cacheService)
+    public class UserCacheService(ICacheService cacheService, ICacheHelper cacheHelper)
         : BaseCacheService<User>(cacheService), IBaseCacheService<User>
     {
         public override string GetKey(Guid id, object key)
         {
-            return key switch
-            {
-                UserKey.User => $"user:{id}",
-                UserKey.CurrentUser => $"currentuser:{id}",
-                UserKey.Users => $"users:{id}",
-                _ => throw new InvalidOperationException($"Unsupported user key type: {key}")
-            };
+            return cacheHelper.GetKey(id, key);
         }
 
         public override async Task RemoveKeysAsync(Guid companyId, List<Guid>? ids, object? key, CancellationToken ct = default)
