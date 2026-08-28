@@ -35,13 +35,13 @@ namespace Infrastructure.Services.Redis.Helper
             if (ids == null || ids.Count == 0)
                 return;
 
-            var tasks = ids.Select(async productId => await cacheService.RemoveAsync(GetKey(productId, prefix), ct));
+            var tasks = ids.Select(productId => cacheService.RemoveAsync(GetKey(productId, prefix), ct));
             await Task.WhenAll(tasks);
         }
 
         private async Task RemoveKeysByIdsAsync(List<Guid> ids, object prefix, object suffix, CancellationToken ct)
         {
-            var tasks = ids.Select(async productId => await cacheService.RemoveAsync(GetKey(productId, prefix, suffix), ct));
+            var tasks = ids.Select(productId => cacheService.RemoveAsync(GetKey(productId, prefix, suffix), ct));
             await Task.WhenAll(tasks);
         }
     }

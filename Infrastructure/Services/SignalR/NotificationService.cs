@@ -12,7 +12,7 @@ namespace Infrastructure.Services.SignalR
 
         public async Task NotifyProductGroups(List<Guid> productIds, string method, CancellationToken ct)
         {
-            var tasks = productIds.Select(async productId => await NotifyProductGroup(productId, method, productId, ct));
+            var tasks = productIds.Select(productId => NotifyProductGroup(productId, method, productId, ct));
             await Task.WhenAll(tasks);
         }
 

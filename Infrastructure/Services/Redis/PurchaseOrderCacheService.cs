@@ -18,8 +18,8 @@ namespace Infrastructure.Services.Redis
             await _cacheService.RemoveAsync(GetKey(companyId, PurchaseOrderKey.PurchaseOrders), ct);
 
             List<Guid> productIds = ids ?? new List<Guid>();
-            var tasks = productIds.Select(async productId =>
-                await _cacheService.RemoveAsync(GetKey(productId, PurchaseOrderKey.PurchaseOrder), ct));
+            var tasks = productIds.Select(productId =>
+                _cacheService.RemoveAsync(GetKey(productId, PurchaseOrderKey.PurchaseOrder), ct));
             await Task.WhenAll(tasks);
         }
     }

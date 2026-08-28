@@ -16,8 +16,8 @@ namespace Infrastructure.Services.Redis
         public override async Task RemoveKeysAsync(Guid companyId, List<Guid>? ids, object? key, CancellationToken ct = default)
         {
             List<Guid> productIds = ids ?? new List<Guid>();
-            var tasks = productIds.Select(async productId =>
-                await _cacheService.RemoveAsync(GetKey(productId, UserDefinedFieldKey.UserDefinedField), ct));
+            var tasks = productIds.Select(productId =>
+                _cacheService.RemoveAsync(GetKey(productId, UserDefinedFieldKey.UserDefinedField), ct));
             await Task.WhenAll(tasks);
         }
     }

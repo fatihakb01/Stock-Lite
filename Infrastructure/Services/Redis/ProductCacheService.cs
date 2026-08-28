@@ -19,13 +19,13 @@ namespace Infrastructure.Services.Redis
             await _cacheService.RemoveAsync(GetKey(companyId, ProductKey.Products), ct);
 
             var filters = Enum.GetValues<ProductFilter>();
-            var tasks = filters.Select(async filter =>
-                await _cacheService.RemoveAsync(GetKey(companyId, ProductKey.Products) + ":" + filter, ct));
+            var tasks = filters.Select(filter =>
+                _cacheService.RemoveAsync(GetKey(companyId, ProductKey.Products) + ":" + filter, ct));
             await Task.WhenAll(tasks);
 
             List<Guid> productIds = ids ?? new List<Guid>();
-            var jobs = productIds.Select(async productId =>
-                await _cacheService.RemoveAsync(GetKey(productId, ProductKey.Product), ct));
+            var jobs = productIds.Select(productId =>
+                _cacheService.RemoveAsync(GetKey(productId, ProductKey.Product), ct));
             await Task.WhenAll(jobs);
         }
     }
