@@ -1,6 +1,7 @@
 using Domain.Entities.Core;
 using Domain.Entities.Helper;
 using Domain.Enums;
+using Domain.Enums.Keys;
 using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler.Imports;
 using Domain.Interfaces.Services.SignalR;
@@ -68,9 +69,9 @@ public class ProductImportHandler(
         // Remove product cache after import
         if (result.HasAffectedIds && result.AffectedIds.Count > 0)
         {
-            await _cacheService.RemoveKeysAsync(companyId, result.AffectedIds, ct);
-            await _companyNotificationService.NotifyProductsUpdated(companyId, ct);
-            await _productNotificationService.NotifyProductUpdated(result.AffectedIds, ct);
+            await _cacheService.RemoveKeysAsync(companyId, result.AffectedIds, null, ct);
+            await _companyNotificationService.NotifyUpdated(ProductKey.Products, companyId, null, ct);
+            await _productNotificationService.NotifyUpdated(ProductKey.Product, result.AffectedIds, null, ct);
         }
     }
 }

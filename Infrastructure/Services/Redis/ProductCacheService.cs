@@ -16,17 +16,31 @@ namespace Infrastructure.Services.Redis
 
         public override async Task RemoveKeysAsync(Guid companyId, List<Guid>? ids, object? key, CancellationToken ct = default)
         {
+            switch (key)
+            {
+                case null:
+                    await RemoveProductsAsync(companyId, ct);
+                    await cacheHelper.RemoveKeysByIdsAsync(ids, ProductKey.Product, ct);
+                    break;
+                case ProductKey.Product:
+                    await cacheHelper.RemoveKeysByIdsAsync(ids, key, ct);
+                    break;
+                case ProductKey.Products:
+                    await RemoveProductsAsync(companyId, ct);
+                    break;
+                default:
+                    throw new InvalidOperationException($"Unsupported product key type: {key}");
+            }
+        }
+
+        private async Task RemoveProductsAsync(Guid companyId, CancellationToken ct)
+        {
             await _cacheService.RemoveAsync(GetKey(companyId, ProductKey.Products), ct);
 
             var filters = Enum.GetValues<ProductFilter>();
             var tasks = filters.Select(filter =>
                 _cacheService.RemoveAsync(GetKey(companyId, ProductKey.Products) + ":" + filter, ct));
             await Task.WhenAll(tasks);
-
-            List<Guid> productIds = ids ?? new List<Guid>();
-            var jobs = productIds.Select(productId =>
-                _cacheService.RemoveAsync(GetKey(productId, ProductKey.Product), ct));
-            await Task.WhenAll(jobs);
         }
     }
 }

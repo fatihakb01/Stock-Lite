@@ -2,10 +2,6 @@
 {
     public interface IProductNotificationService
     {
-        Task NotifyProductUpdated(List<Guid> productIds, CancellationToken ct);
-        Task NotifyProductTransactionsUpdated(List<Guid> productIds, CancellationToken ct);
-        Task NotifyProductPurchaseOrdersUpdated(List<Guid> productIds, CancellationToken ct);
-        Task NotifyProductConfirmedOrdersUpdated(List<Guid> productIds, CancellationToken ct);
-        Task NotifyProductUserDefinedFieldsUpdated(List<Guid> productIds, CancellationToken ct);
+        Task NotifyUpdated(object prefix, List<Guid> productIds, object? o, CancellationToken ct);
     }
 }

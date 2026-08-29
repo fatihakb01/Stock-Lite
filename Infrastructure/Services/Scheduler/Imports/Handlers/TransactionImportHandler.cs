@@ -57,8 +57,8 @@ public class TransactionImportHandler(
         // Remove transaction cache after import
         if (result.HasAffectedIds && result.AffectedIds.Count > 0)
         {
-            await _cacheService.RemoveKeysAsync(companyId, result.AffectedIds, ct);
-            await _notificationService.NotifyProductTransactionsUpdated(result.AffectedIds, ct);
+            await _cacheService.RemoveKeysAsync(companyId, result.AffectedIds, null, ct);
+            await _notificationService.NotifyUpdated(TransactionKey.Transaction, result.AffectedIds, null, ct);
         }
     }
 }

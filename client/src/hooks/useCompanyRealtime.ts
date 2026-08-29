@@ -22,6 +22,19 @@ export function useCompanyRealtime() {
             }
         });
 
+        connection.on("ProductKpisUpdated", (companyId: string) => {
+            if (currentUser?.companyId === companyId) {
+                queryClient.invalidateQueries({ queryKey: ["productkpi", "home", companyId] });
+                queryClient.invalidateQueries({ queryKey: ["productkpi", "schedulerStatus", companyId] });
+            }
+        });
+
+        connection.on("SchedulerStatusUpdated", (companyId: string) => {
+            if (currentUser?.companyId === companyId) {
+                queryClient.invalidateQueries({ queryKey: ["productkpi", "schedulerStatus", companyId] });
+            }
+        });
+
         connection.on("JobTaskUpdated", (jobTaskId: string) => {
             queryClient.invalidateQueries({ queryKey: ["jobtask", jobTaskId] });
             queryClient.invalidateQueries({ queryKey: ["jobtasks", currentUser.companyId] });
@@ -32,12 +45,15 @@ export function useCompanyRealtime() {
             queryClient.invalidateQueries({ queryKey: ["jobtask", jobTaskId] });
             queryClient.invalidateQueries({ queryKey: ["jobtasks", currentUser.companyId] });
             queryClient.invalidateQueries({ queryKey: ["scheduledjob", scheduledJobId] });
+            queryClient.invalidateQueries({ queryKey: ["productkpi", "schedulerStatus", currentUser.companyId] });
         });
 
         startCompanyConnection(connection, currentUser.companyId);
 
         return () => {
             connection.off("ProductsUpdated");
+            connection.off("ProductKpisUpdated");
+            connection.off("SchedulerStatusUpdated");
             connection.off("JobTaskUpdated");
             connection.off("ScheduledJobUpdated");
             leaveCompanyGroup(connection, currentUser.companyId);

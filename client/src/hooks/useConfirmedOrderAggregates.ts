@@ -3,9 +3,9 @@ import { getConfirmedOrderAggregates } from "../api/confirmedOrderAggregatesApi"
 import type { ConfirmedOrderAggregate } from "../types/confirmedOrderAggregates/confirmedOrderAggregateTypes";
 
 export const useConfirmedOrderAggregates = (periodType: string | null, productId: string | null) => {
-  return useQuery<ConfirmedOrderAggregate[]>({
-    queryKey: ["confirmedorderaggregate", periodType, productId],
-    queryFn: () => getConfirmedOrderAggregates(periodType!, productId!),
-    enabled: !!(periodType && productId)
-  });
+    return useQuery<ConfirmedOrderAggregate[]>({
+        queryKey: ["confirmedorderaggregate", periodType, productId],
+        queryFn: () => getConfirmedOrderAggregates(periodType!, productId!),
+        enabled: !!(periodType && productId)
+    });
 };

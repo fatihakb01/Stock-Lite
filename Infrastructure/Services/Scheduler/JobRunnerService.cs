@@ -1,5 +1,6 @@
 using Domain.Entities.Core;
 using Domain.Enums;
+using Domain.Enums.Keys;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler;
@@ -62,6 +63,6 @@ public class JobRunnerService(
         job.Result = result;
         await scheduledJobRepo.SaveChangesAsync(ct);
         await cacheService.RemoveScheduledJobKeysAsync(job, ct);
-        await notifier.NotifyScheduledJobUpdated(job.JobTask.CompanyId, job, ct);
+        await notifier.NotifyUpdated(SchedulerKey.ScheduledJob, job.JobTask.CompanyId, job, ct);
     }
 }

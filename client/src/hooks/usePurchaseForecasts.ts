@@ -3,9 +3,9 @@ import type { PurchaseForecast } from "../types/purchaseForecasts/purchaseForeca
 import { getPurchaseForecasts } from "../api/purchaseForecastsApi";
 
 export const usePurchaseForecasts = (productId: string | null) => {
-  return useQuery<PurchaseForecast[]>({
-    queryKey: ["purchaseforecast", productId],
-    queryFn: () => getPurchaseForecasts(productId!),
-    enabled: !!productId
-  });
+    return useQuery<PurchaseForecast[]>({
+        queryKey: ["purchaseforecast", productId],
+        queryFn: () => getPurchaseForecasts(productId!),
+        enabled: !!productId
+    });
 };

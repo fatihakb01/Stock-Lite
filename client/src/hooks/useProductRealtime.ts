@@ -42,6 +42,30 @@ export function useProductRealtime(productId?: string | null) {
             }
         });
 
+        connection.on("ProductForecastUpdated", (updatedProductId: string, period: string) => {
+            if (productId === updatedProductId) {
+                queryClient.invalidateQueries({ queryKey: ["forecast", period, updatedProductId] });
+            }
+        });
+
+        connection.on("ProductSalesAggregateUpdated", (updatedProductId: string, period: string) => {
+            if (productId === updatedProductId) {
+                queryClient.invalidateQueries({ queryKey: ["salesaggregate", period, updatedProductId] });
+            }
+        });
+
+        connection.on("ProductConfirmedOrderAggregateUpdated", (updatedProductId: string, period: string) => {
+            if (productId === updatedProductId) {
+                queryClient.invalidateQueries({ queryKey: ["confirmedorderaggregate", period, updatedProductId] });
+            }
+        });
+
+        connection.on("ProductPurchaseForecastUpdated", (updatedProductId: string) => {
+            if (productId === updatedProductId) {
+                queryClient.invalidateQueries({ queryKey: ["purchaseforecast", updatedProductId] });
+            }
+        });
+
         startProductConnection(connection, productId);
 
         return () => {
@@ -50,6 +74,10 @@ export function useProductRealtime(productId?: string | null) {
             connection.off("ProductPurchaseOrdersUpdated");
             connection.off("ProductConfirmedOrdersUpdated");
             connection.off("ProductUserDefinedFieldsUpdated");
+            connection.off("ProductForecastUpdated");
+            connection.off("ProductSalesAggregateUpdated");
+            connection.off("ProductConfirmedOrderAggregateUpdated");
+            connection.off("ProductPurchaseForecastUpdated");
             leaveProductGroup(connection, productId);
         };
     }, [queryClient, productId]);

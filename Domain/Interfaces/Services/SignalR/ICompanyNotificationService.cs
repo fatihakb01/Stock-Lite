@@ -4,9 +4,7 @@ namespace Domain.Interfaces.Services.SignalR
 {
     public interface ICompanyNotificationService
     {
-        Task NotifyJobTaskUpdated(Guid companyId, Guid jobTaskId, CancellationToken ct);
-        Task NotifyScheduledJobUpdated(Guid companyId, ScheduledJob job, CancellationToken ct);
+        Task NotifyUpdated(object prefix, Guid companyId, object? o, CancellationToken ct = default);
         Task NotifySchedulerFinished(List<JobTask> jobTasks, CancellationToken ct);
-        Task NotifyProductsUpdated(Guid companyId, CancellationToken ct);
     }
 }
