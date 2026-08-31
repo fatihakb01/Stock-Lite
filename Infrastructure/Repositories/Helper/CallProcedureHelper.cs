@@ -45,7 +45,18 @@ namespace Infrastructure.Repositories.Helper
                 sql = $"EXEC {procName} {paramCompany}, {paramProductIds}, {paramPeriod}";
             }
 
-            await _context.Database.ExecuteSqlAsync(sql);
+            await using var transaction = await _context.Database.BeginTransactionAsync(CancellationToken.None);
+
+            try
+            {
+                await _context.Database.ExecuteSqlAsync(sql);
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new Exception($"Transaction failed to execute procedure {procName} for company {companyId}", ex);
+            }
         }
     }
 }
