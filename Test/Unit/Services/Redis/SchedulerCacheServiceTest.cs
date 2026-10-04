@@ -127,8 +127,8 @@ namespace Test.Unit.Services.Redis
         [InlineData(SchedulerKey.JobTaskRecentHistory, "jobtasks:recent:history:")]
         [InlineData(SchedulerKey.ScheduledJob, "scheduledjob:")]
         [InlineData(SchedulerKey.ScheduledJobHistory, "scheduledjob:history:")]
-        [InlineData(SchedulerKey.SchedulerStatus, "productkpis-schedulerstatus:")]
-        public void GetKey_WithValidSchedulerKey_ReturnsCorrectKeyFormat(SchedulerKey schedulerKey, string expectedPrefix)
+        [InlineData(ProductKpiKey.SchedulerStatus, "productkpis-schedulerstatus:")]
+        public void GetKey_WithValidSchedulerKey_ReturnsCorrectKeyFormat(object schedulerKey, string expectedPrefix)
         {
             // Arrange
             var id = Guid.NewGuid();

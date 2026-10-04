@@ -1,7 +1,9 @@
 using Application.Core;
 using Application.Entities.Core.ScheduledJobs.DTOs;
+using Domain.Enums.Keys;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Redis;
+using Domain.Interfaces.Services.SignalR;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 
@@ -17,6 +19,7 @@ public class ReorderScheduledJobs
     public class Handler(
         IScheduledJobRepository repository,
         ISchedulerCacheService cacheService,
+        ICompanyNotificationService notificationService,
         ICurrentUserService currentUserService
     ) : IRequestHandler<Command, Result<Unit>>
     {
@@ -38,7 +41,10 @@ public class ReorderScheduledJobs
             );
 
             if (scheduledJob != null)
+            {
                 await cacheService.RemoveScheduledJobKeysAsync(scheduledJob, ct, false);
+                await notificationService.NotifyUpdated(SchedulerKey.ScheduledJob, currentUserService.CompanyId, scheduledJob, ct);
+            }
 
             return Result<Unit>.Success(Unit.Value);
         }

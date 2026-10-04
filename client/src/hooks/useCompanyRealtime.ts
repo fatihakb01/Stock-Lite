@@ -24,28 +24,34 @@ export function useCompanyRealtime() {
 
         connection.on("ProductKpisUpdated", (companyId: string) => {
             if (currentUser?.companyId === companyId) {
-                queryClient.invalidateQueries({ queryKey: ["productkpi", "home", companyId] });
-                queryClient.invalidateQueries({ queryKey: ["productkpi", "schedulerStatus", companyId] });
+                queryClient.invalidateQueries({ queryKey: ["productkpis", companyId] });
+                queryClient.invalidateQueries({ queryKey: ["schedulerstatus", companyId] });
             }
         });
 
         connection.on("SchedulerStatusUpdated", (companyId: string) => {
             if (currentUser?.companyId === companyId) {
-                queryClient.invalidateQueries({ queryKey: ["productkpi", "schedulerStatus", companyId] });
+                queryClient.invalidateQueries({ queryKey: ["schedulerstatus", companyId] });
+            }
+        });
+
+        connection.on("JobTasksUpdated", (companyId: string) => {
+            if (currentUser?.companyId === companyId) {
+                queryClient.invalidateQueries({ queryKey: ["jobtasks", currentUser.companyId] });
             }
         });
 
         connection.on("JobTaskUpdated", (jobTaskId: string) => {
             queryClient.invalidateQueries({ queryKey: ["jobtask", jobTaskId] });
+            queryClient.invalidateQueries({ queryKey: [`jobtask:history:${jobTaskId}`] });
             queryClient.invalidateQueries({ queryKey: ["jobtasks", currentUser.companyId] });
-            queryClient.invalidateQueries({ queryKey: ["productkpi", "schedulerStatus", currentUser.companyId] });
+            queryClient.invalidateQueries({ queryKey: [`jobtasks:recent:history:${currentUser.companyId}`] });
+            queryClient.invalidateQueries({ queryKey: ["schedulerstatus", currentUser.companyId] });
         });
 
-        connection.on("ScheduledJobUpdated", (scheduledJobId: string, jobTaskId: string) => {
-            queryClient.invalidateQueries({ queryKey: ["jobtask", jobTaskId] });
-            queryClient.invalidateQueries({ queryKey: ["jobtasks", currentUser.companyId] });
+        connection.on("ScheduledJobUpdated", (scheduledJobId: string) => {
             queryClient.invalidateQueries({ queryKey: ["scheduledjob", scheduledJobId] });
-            queryClient.invalidateQueries({ queryKey: ["productkpi", "schedulerStatus", currentUser.companyId] });
+            queryClient.invalidateQueries({ queryKey: [`scheduledjob:history:${scheduledJobId}`] });
         });
 
         startCompanyConnection(connection, currentUser.companyId);
@@ -55,6 +61,7 @@ export function useCompanyRealtime() {
             connection.off("ProductKpisUpdated");
             connection.off("SchedulerStatusUpdated");
             connection.off("JobTaskUpdated");
+            connection.off("JobTasksUpdated");
             connection.off("ScheduledJobUpdated");
             leaveCompanyGroup(connection, currentUser.companyId);
         };

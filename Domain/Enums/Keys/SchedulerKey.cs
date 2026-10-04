@@ -7,7 +7,6 @@
         JobTaskHistory = 2,
         JobTaskRecentHistory = 3,
         ScheduledJob = 4,
-        ScheduledJobHistory = 5,
-        SchedulerStatus = 6
+        ScheduledJobHistory = 5
     }
 }

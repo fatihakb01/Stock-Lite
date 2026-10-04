@@ -63,7 +63,7 @@ namespace Infrastructure.Services.Redis
 
         public async Task RemoveSchedulerStatusKeyAsync(Guid companyId, CancellationToken ct)
         {
-            string key = GetKey(companyId, SchedulerKey.SchedulerStatus);
+            string key = GetKey(companyId, ProductKpiKey.SchedulerStatus);
             await _cacheService.RemoveAsync(key, ct);
         }
 
@@ -102,7 +102,7 @@ namespace Infrastructure.Services.Redis
             await _cacheService.RemoveAsync(historyKey, ct);
         }
 
-        public string GetKey(Guid id, SchedulerKey schedulerKey)
+        public string GetKey(Guid id, object schedulerKey)
         {
             return schedulerKey switch
             {
@@ -112,7 +112,7 @@ namespace Infrastructure.Services.Redis
                 SchedulerKey.JobTaskRecentHistory => $"jobtasks:recent:history:{id}",
                 SchedulerKey.ScheduledJob => $"scheduledjob:{id}",
                 SchedulerKey.ScheduledJobHistory => $"scheduledjob:history:{id}",
-                SchedulerKey.SchedulerStatus => $"schedulerstatus:{id}",
+                ProductKpiKey.SchedulerStatus => $"schedulerstatus:{id}",
                 _ => throw new InvalidOperationException($"Unsupported scheduler key type: {schedulerKey}")
             };
         }

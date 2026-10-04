@@ -1,6 +1,9 @@
 using Application.Core;
+using Domain.Entities.Core;
+using Domain.Enums.Keys;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Redis;
+using Domain.Interfaces.Services.SignalR;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 
@@ -16,6 +19,7 @@ public class DeleteScheduledJob
     public class Handler(
         IScheduledJobRepository repository,
         ISchedulerCacheService cacheService,
+        ICompanyNotificationService notificationService,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<Unit>>
     {
@@ -24,7 +28,8 @@ public class DeleteScheduledJob
             var scheduledJob = await repository.SingleOrDefaultAsync(x =>
                 x.Id == request.Id &&
                 x.JobTask.CompanyId == currentUser.CompanyId,
-                ct
+                ct,
+                x => x.JobTask
             );
 
             if (scheduledJob == null)
@@ -35,6 +40,7 @@ public class DeleteScheduledJob
                 return Result<Unit>.Failure("Failed to delete ScheduledJob", 400);
 
             await cacheService.RemoveScheduledJobKeysAsync(scheduledJob, ct);
+            await notificationService.NotifyUpdated(SchedulerKey.ScheduledJob, currentUser.CompanyId, scheduledJob, ct);
 
             return Result<Unit>.Success(Unit.Value);
         }

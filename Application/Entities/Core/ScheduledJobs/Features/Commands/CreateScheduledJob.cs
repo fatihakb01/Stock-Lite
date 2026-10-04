@@ -2,8 +2,10 @@ using Application.Core;
 using Application.Entities.Core.ScheduledJobs.DTOs;
 using AutoMapper;
 using Domain.Entities.Core;
+using Domain.Enums.Keys;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Redis;
+using Domain.Interfaces.Services.SignalR;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 
@@ -20,6 +22,7 @@ public class CreateScheduledJob
         IScheduledJobRepository repository,
         IJobTaskRepository jobTaskRepository,
         ISchedulerCacheService cacheService,
+        ICompanyNotificationService notificationService,
         ICurrentUserService currentUser,
         IMapper mapper
     ) : IRequestHandler<Command, Result<ScheduledJobDto>>
@@ -52,6 +55,7 @@ public class CreateScheduledJob
             var createdScheduledJob = mapper.Map<ScheduledJobDto>(scheduledJob);
 
             await cacheService.RemoveJobTaskKeyAsync(jobTask, ct);
+            await notificationService.NotifyUpdated(SchedulerKey.JobTask, currentUser.CompanyId, jobTask.Id, ct);
 
             return Result<ScheduledJobDto>.Success(createdScheduledJob);
         }

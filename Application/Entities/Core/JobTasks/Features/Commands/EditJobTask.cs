@@ -1,8 +1,10 @@
 using Application.Core;
 using Application.Entities.Core.JobTasks.DTOs;
 using AutoMapper;
+using Domain.Enums.Keys;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Redis;
+using Domain.Interfaces.Services.SignalR;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 
@@ -19,6 +21,7 @@ public class EditJobTask
     public class Handler(
         IJobTaskRepository repository,
         ISchedulerCacheService cacheService,
+        ICompanyNotificationService notificationService,
         IMapper mapper,
         ICurrentUserService currentUser
     ) : IRequestHandler<Command, Result<JobTaskDetailDto>>
@@ -46,6 +49,7 @@ public class EditJobTask
             var updatedJobTask = mapper.Map<JobTaskDetailDto>(jobTask);
 
             await cacheService.RemoveJobTaskKeysAsync(jobTask, ct);
+            await notificationService.NotifyUpdated(SchedulerKey.JobTask, currentUser.CompanyId, jobTask.Id, ct);
 
             return Result<JobTaskDetailDto>.Success(updatedJobTask);
         }

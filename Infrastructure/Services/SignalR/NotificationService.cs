@@ -5,9 +5,9 @@ namespace Infrastructure.Services.SignalR
 {
     public class NotificationService(IHubClients clients) : INotificationService
     {
-        public async Task NotifyCompanyGroup(Guid companyId, string method, object? arg1, object? arg2, CancellationToken ct)
+        public async Task NotifyCompanyGroup(Guid companyId, string method, object? arg1, CancellationToken ct)
         {
-            await NotifyGroup("company", companyId, method, arg1, arg2, ct);
+            await NotifyGroup("company", companyId, method, arg1, null, ct);
         }
 
         public async Task NotifyProductGroups(List<Guid> productIds, string method, object? arg2, CancellationToken ct)

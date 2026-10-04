@@ -10,6 +10,8 @@ namespace Infrastructure.Services.Scheduler;
 
 public class JobRunnerService(
     IScheduledJobRepository scheduledJobRepo,
+    IJobTaskRepository jobTaskRepo,
+    IProductKpiRepository productKpiRepository,
     IJobExecutionRepository executionRepo,
     IJobDispatcher dispatcher,
     ISchedulerCacheService cacheService,
@@ -19,7 +21,7 @@ public class JobRunnerService(
     public async Task<JobExecutionStatus> RunAsync(ScheduledJob job, JobTaskExecution jobTaskExecution, CancellationToken ct)
     {
         JobExecutionStatus result = JobExecutionStatus.Running;
-        await RefetchScheduledJob(job, result, ct);
+        await RefetchJobAndTaskResults(job, result, ct);
         
         var execution = new JobExecution
         {
@@ -51,18 +53,22 @@ public class JobRunnerService(
         }
         finally
         {
-            await RefetchScheduledJob(job, result, ct);
             execution.FinishedAt = DateTime.UtcNow;
             executionRepo.Update(execution);
             await executionRepo.SaveChangesAsync(ct);
+            await RefetchJobAndTaskResults(job, result, ct);
         }
     }
 
-    private async Task RefetchScheduledJob(ScheduledJob job, JobExecutionStatus result, CancellationToken ct)
+    private async Task RefetchJobAndTaskResults(ScheduledJob job, JobExecutionStatus result, CancellationToken ct)
     {
+        Guid companyId = job.JobTask.CompanyId;
         job.Result = result;
+        job.JobTask.Result = result;
         await scheduledJobRepo.SaveChangesAsync(ct);
+        await jobTaskRepo.SaveChangesAsync(ct);
+        await productKpiRepository.UpdateSchedulerStatus(companyId, ct);
         await cacheService.RemoveScheduledJobKeysAsync(job, ct);
-        await notifier.NotifyUpdated(SchedulerKey.ScheduledJob, job.JobTask.CompanyId, job, ct);
+        await notifier.NotifyUpdated(SchedulerKey.ScheduledJob, companyId, job, ct);
     }
 }

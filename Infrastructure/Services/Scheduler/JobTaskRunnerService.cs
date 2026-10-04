@@ -1,24 +1,18 @@
 using Domain.Entities.Core;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
-using Domain.Interfaces.Services.Redis;
 using Domain.Interfaces.Services.Scheduler;
-using Domain.Interfaces.Services.SignalR;
 
 namespace Infrastructure.Services.Scheduler;
 
 public class JobTaskRunnerService(
-    IJobTaskRepository jobTaskRepo,
     IJobTaskExecutionRepository executionRepo,
-    IJobTaskDispatcher dispatcher,
-    IProductKpiRepository productKpiRepository
+    IJobTaskDispatcher dispatcher
 ) : IJobTaskRunnerService
 {
 
     public async Task<JobExecutionStatus> RunAsync(JobTask jobTask, JobTriggerType triggerType, CancellationToken ct)
     {
-        await RefetchJobTask(jobTask, JobExecutionStatus.Running, ct);
-
         var execution = new JobTaskExecution
         {
             JobTaskId = jobTask.Id,
@@ -51,17 +45,9 @@ public class JobTaskRunnerService(
         }
         finally
         {
-            await RefetchJobTask(jobTask, jobTask.Result, ct);
             execution.FinishedAt = DateTime.UtcNow;
             executionRepo.Update(execution);
             await executionRepo.SaveChangesAsync(ct);
-            await productKpiRepository.UpdateSchedulerStatus(jobTask.CompanyId, ct);
         }
-    }
-
-    private async Task RefetchJobTask(JobTask task, JobExecutionStatus result, CancellationToken ct)
-    {
-        task.Result = result;
-        await jobTaskRepo.SaveChangesAsync(ct);
     }
 }

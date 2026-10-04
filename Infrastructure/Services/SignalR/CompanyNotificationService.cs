@@ -12,13 +12,16 @@ namespace Infrastructure.Services.SignalR
             switch (prefix)
             {
                 case ProductKey.Products:
-                    await notificationService.NotifyCompanyGroup(companyId, "ProductsUpdated", companyId, null, ct);
+                    await notificationService.NotifyCompanyGroup(companyId, "ProductsUpdated", companyId, ct);
                     break;
                 case ProductKpiKey.ProductKpis:
-                    await notificationService.NotifyCompanyGroup(companyId, "ProductKpisUpdated", companyId, null, ct);
+                    await notificationService.NotifyCompanyGroup(companyId, "ProductKpisUpdated", companyId, ct);
                     break;
                 case ProductKpiKey.SchedulerStatus:
-                    await notificationService.NotifyCompanyGroup(companyId, "SchedulerStatusUpdated", companyId, null, ct);
+                    await notificationService.NotifyCompanyGroup(companyId, "SchedulerStatusUpdated", companyId, ct);
+                    break;
+                case SchedulerKey.JobTasks:
+                    await notificationService.NotifyCompanyGroup(companyId, "JobTasksUpdated", companyId, ct);
                     break;
                 case SchedulerKey.JobTask:
                     Guid jobTaskId = o != null ? (Guid)o : Guid.Empty;
@@ -43,7 +46,7 @@ namespace Infrastructure.Services.SignalR
 
         private async Task NotifyJobTaskUpdated(Guid companyId, Guid jobTaskId, CancellationToken ct)
         {
-            await notificationService.NotifyCompanyGroup(companyId, "JobTaskUpdated", jobTaskId, null, ct);
+            await notificationService.NotifyCompanyGroup(companyId, "JobTaskUpdated", jobTaskId, ct);
         }
 
         private async Task NotifyScheduledJobUpdated(Guid companyId, ScheduledJob? job, CancellationToken ct)
@@ -52,7 +55,7 @@ namespace Infrastructure.Services.SignalR
                 return;
 
             Guid jobTaskId = job.JobTask != null ? job.JobTask.Id : Guid.Empty;
-            await notificationService.NotifyCompanyGroup(companyId, "ScheduledJobUpdated", job.Id, jobTaskId, ct);
+            await notificationService.NotifyCompanyGroup(companyId, "ScheduledJobUpdated", job.Id, ct);
             await NotifyJobTaskUpdated(companyId, jobTaskId, ct);
         }
     }

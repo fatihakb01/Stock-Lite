@@ -1,7 +1,8 @@
 ﻿using Application.Core;
-using Domain.Entities.Core;
+using Domain.Enums.Keys;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services.Redis;
+using Domain.Interfaces.Services.SignalR;
 using Domain.Interfaces.Services.Users;
 using MediatR;
 
@@ -17,6 +18,7 @@ namespace Application.Entities.Core.JobTasks.Features.Commands
         public class Handler(
             IJobTaskRepository jobTaskRepository,
             ISchedulerCacheService cacheService,
+            ICompanyNotificationService notificationService,
             IScheduledJobRepository scheduledJobRepository,
             ICurrentUserService currentUser
         ) : IRequestHandler<Command, Result<Unit>>
@@ -35,6 +37,7 @@ namespace Application.Entities.Core.JobTasks.Features.Commands
                 await jobTaskRepository.CleanJobTask(request.Id, ct);
                 await scheduledJobRepository.CleanScheduledJobs(request.Id, ct);
                 await cacheService.RemoveJobTaskKeysAsync(jobTask, ct, false);
+                await notificationService.NotifyUpdated(SchedulerKey.JobTask, currentUser.CompanyId, jobTask.Id, ct);
 
                 return Result<Unit>.Success(Unit.Value);
             }
