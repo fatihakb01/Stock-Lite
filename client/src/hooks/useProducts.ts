@@ -14,11 +14,9 @@ export const useProducts = (filter?: string) => {
 };
 
 export const useProduct = (id: string | null) => {
-    const { data: currentUser } = useCurrentUser();
-
     return useQuery<ProductDetail>({
         queryKey: ["product", id],
         queryFn: () => getProduct(id!),
-        enabled: !!id && !!currentUser?.companyId
+        enabled: !!id
     });
 };

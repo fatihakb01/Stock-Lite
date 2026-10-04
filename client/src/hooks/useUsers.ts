@@ -35,22 +35,24 @@ export const useLogin = () => {
 // REGISTER USER
 export const useRegisterUser = () => {
   const queryClient = useQueryClient();
+  const { data: currentUser } = useCurrentUser();
 
   return useMutation<User, Error, RegisterUserDto>({
     mutationFn: registerUser,
     onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["users"] }),
+      queryClient.invalidateQueries({ queryKey: ["users", currentUser?.companyId] }),
   });
 };
 
 // EDIT USER
 export const useEditUser = (id: string | null) => {
   const queryClient = useQueryClient();
+  const { data: currentUser } = useCurrentUser();
 
   return useMutation<User, Error, EditUserDto>({
     mutationFn: (data) => editUser(id!, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["users", currentUser?.companyId] });
       queryClient.invalidateQueries({ queryKey: ["user", id] });
     },
   });
@@ -59,11 +61,12 @@ export const useEditUser = (id: string | null) => {
 // DELETE USER
 export const useDeleteUser = (id: string | null) => {
   const queryClient = useQueryClient();
+  const { data: currentUser } = useCurrentUser();
 
   return useMutation<void>({
     mutationFn: () => deleteUser(id!),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
+        queryClient.invalidateQueries({ queryKey: ["users", currentUser?.companyId] });
     }
   });
 };
@@ -78,8 +81,9 @@ export const useCurrentUser = () => {
 
 // GET ALL USERS
 export const useUsers = () => {
+  const { data: currentUser } = useCurrentUser();  
   return useQuery<User[]>({
-    queryKey: ["users"],
+    queryKey: ["users", currentUser?.companyId],
     queryFn: () => getUsers()
   });
 };

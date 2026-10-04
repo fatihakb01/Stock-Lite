@@ -4,11 +4,9 @@ import { getConfirmedOrders } from "../api/confirmedOrdersApi";
 import { useCurrentUser } from "./useUsers";
 
 export const useConfirmedOrders = (productId: string | null) => {
-    const { data: currentUser } = useCurrentUser();
-
     return useQuery<ConfirmedOrder[]>({
         queryKey: ["confirmedorder", productId],
         queryFn: () => getConfirmedOrders(productId!),
-        enabled: !!productId && !!currentUser?.companyId
+        enabled: !!productId
     });
 };

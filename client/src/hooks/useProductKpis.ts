@@ -3,18 +3,20 @@ import { getProductKpi, getSchedulerStatus } from "../api/productKpisApi"
 import type { ProductKpi, SchedulerStatus } from "../types/productKpis/productKpiTypes"
 import { useCurrentUser } from "./useUsers"
 
-const { data: currentUser } = useCurrentUser();
-
 export const useProductKpi = () => {
+    const { data: currentUser } = useCurrentUser();
+
     return useQuery<ProductKpi>({
-        queryKey: ["productkpi", "home", currentUser?.companyId],
+        queryKey: ["productkpis", currentUser?.companyId],
         queryFn: () => getProductKpi()
     })
 }
 
 export const useSchedulerStatus = () => {
+    const { data: currentUser } = useCurrentUser();
+
     return useQuery<SchedulerStatus>({
-        queryKey: ["productkpi", "schedulerStatus", currentUser?.companyId],
+        queryKey: ["schedulerstatus", currentUser?.companyId],
         queryFn: () => getSchedulerStatus()
     })
 }
