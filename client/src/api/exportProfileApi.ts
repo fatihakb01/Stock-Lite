@@ -21,7 +21,7 @@ export const StreamExportProfile = async (id: string, fileType: string): Promise
         responseType: "blob"
     });
 
-    const blob = new Blob([res.data], { type: res.headers["content-type"] });
+    const blob = new Blob([res.data], { type: res.headers["content-type"]?.toString() });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
 

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CreateExportProfile, DeleteExportProfile, EditExportProfile, GetExportProfile, GetExportProfiles, RunExportProfile, StreamExportProfile } from "../api/exportProfileApi";
-import type { CreateExportProfileDto, EditExportProfileDto, ExportProfile, ExportProfileDetail, ExportResult } from "../types/exportProfiles/exportProfileTypes";
+import type { CreateExportProfileDto, EditExportProfileDto, ExportProfile, ExportProfileDetail } from "../types/exportProfiles/exportProfileTypes";
 
 export const useExportProfiles = () => {
     return useQuery<ExportProfile[]>({
